@@ -545,6 +545,115 @@ body.touch-controls-active #portraitChatOverlay {
 }
 </style>
 
+<style id="arena-fullscreen-capture">
+/* MODULE BLOCK: BROADCAST FULLSCREEN — preserve 16:9 and 9:16 without stretching. */
+.arena-monitor-fullscreen-actions {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 5px 5px;
+}
+.arena-monitor-fullscreen-actions button {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    min-height: 29px;
+    padding: 5px 9px;
+    border: 1px solid rgba(103, 232, 249, .4);
+    border-radius: 9px;
+    color: #d6faff;
+    background: rgba(15, 23, 42, .86);
+    font: 700 11px/1.1 Inter, sans-serif;
+    cursor: pointer;
+    transition: background .15s ease-out, border-color .15s ease-out;
+}
+#arenaFullscreenActions9 button { border-color: rgba(244, 114, 182, .5); color:#fce7f3; }
+.arena-monitor-fullscreen-actions button:hover,
+.arena-monitor-fullscreen-actions button:focus-visible { background: rgba(30, 41, 59, 1); border-color: #67e8f9; outline-offset: 2px; }
+.arena-fullscreen-exit-button { display: none; }
+#card-16x9:fullscreen, #card-9x16:fullscreen {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+    background: #000 !important;
+    box-shadow: none !important;
+}
+#card-16x9:fullscreen::backdrop, #card-9x16:fullscreen::backdrop { background: #000; }
+#card-16x9:fullscreen > :not(#viewport16x9),
+#card-9x16:fullscreen > :not(#viewport9x16) { display: none !important; }
+#card-16x9:fullscreen #viewport16x9 {
+    width: min(100vw, 177.777778dvh) !important;
+    height: min(100dvh, 56.25vw) !important;
+    aspect-ratio: 16 / 9 !important;
+}
+#card-9x16:fullscreen #viewport9x16 {
+    width: min(100vw, 56.25dvh) !important;
+    height: min(100dvh, 177.777778vw) !important;
+    aspect-ratio: 9 / 16 !important;
+}
+#card-16x9:fullscreen #viewport16x9,
+#card-9x16:fullscreen #viewport9x16 {
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    transition: none !important;
+    overflow: hidden !important;
+}
+#card-16x9:fullscreen .arena-fullscreen-exit-button,
+#card-9x16:fullscreen .arena-fullscreen-exit-button {
+    position: absolute;
+    z-index: 90;
+    top: max(9px, env(safe-area-inset-top));
+    right: max(9px, env(safe-area-inset-right));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    border: 1px solid rgba(255,255,255,.4);
+    background: rgba(2,6,23,.7);
+    color: #fff;
+    opacity: 0;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: opacity .15s ease-in;
+    touch-action: manipulation;
+}
+#card-16x9:fullscreen #viewport16x9:hover .arena-fullscreen-exit-button,
+#card-9x16:fullscreen #viewport9x16:hover .arena-fullscreen-exit-button,
+#card-16x9:fullscreen .arena-fullscreen-exit-button:focus-visible,
+#card-9x16:fullscreen .arena-fullscreen-exit-button:focus-visible { opacity: .93; }
+@media (hover: none), (pointer: coarse) {
+    #card-16x9:fullscreen .arena-fullscreen-exit-button,
+    #card-9x16:fullscreen .arena-fullscreen-exit-button { opacity: .65; }
+}
+@media (max-width: 520px) {
+    .arena-monitor-fullscreen-actions button { min-height: 34px; padding: 6px 10px; }
+}
+</style>
+
 </head>
 <body class="min-h-screen flex flex-col bg-[#06080f] text-slate-100">
 
@@ -669,9 +778,16 @@ body.touch-controls-active #portraitChatOverlay {
                         <span class="text-[9px] text-slate-400 font-semibold hidden sm:inline shrink-0 ml-2">960×540</span>
                     </div>
 
+                    <div id="arenaFullscreenActions16" class="arena-monitor-fullscreen-actions">
+                        <button type="button" id="btnFullscreen16" title="Pantalla completa 16:9" aria-label="Pantalla completa 16:9" aria-controls="card-16x9">
+                            <span aria-hidden="true">⛶</span><span class="arena-fullscreen-label">Pantalla completa</span>
+                        </button>
+                    </div>
+
                     <div id="viewport16x9" class="dual-monitor-16-9 relative rounded-2xl overflow-hidden border-2 border-cyan-500/60 shadow-[0_0_35px_rgba(0,243,255,0.14)] bg-slate-950 flex flex-col justify-between" style="width: 640px; height: 360px;">
                         <!-- 16:9 Canvas -->
                         <canvas id="canvas16x9" width="960" height="540" class="absolute inset-0 w-full h-full block z-0"></canvas>
+                        <button type="button" id="btnExitFullscreen16" class="arena-fullscreen-exit-button" title="Salir de pantalla completa" aria-label="Salir de pantalla completa"><span aria-hidden="true">⤡</span></button>
 
                         <!-- 16:9 TOP PERIMETER HUD -->
                         <div class="relative z-10 p-2 sm:p-2.5 flex flex-col gap-1.5 pointer-events-none">
@@ -880,9 +996,16 @@ body.touch-controls-active #portraitChatOverlay {
                         <span class="text-[8px] text-emerald-300 font-bold shrink-0">🎯 Auto-Zoom</span>
                     </div>
 
+                    <div id="arenaFullscreenActions9" class="arena-monitor-fullscreen-actions">
+                        <button type="button" id="btnFullscreen9" title="Pantalla completa 9:16" aria-label="Pantalla completa 9:16" aria-controls="card-9x16">
+                            <span aria-hidden="true">⛶</span><span class="arena-fullscreen-label">Pantalla completa</span>
+                        </button>
+                    </div>
+
                     <div id="viewport9x16" class="dual-monitor-9-16 relative rounded-3xl overflow-hidden border-2 border-pink-500/60 shadow-[0_0_35px_rgba(255,0,127,0.18)] bg-slate-950 flex flex-col justify-between" style="width: 203px; height: 360px;">
                         <!-- 9:16 Vertical Canvas (Driven by Smart Dynamic Tracking Camera) -->
                         <canvas id="canvas9x16" width="540" height="960" class="absolute inset-0 w-full h-full block z-0"></canvas>
+                        <button type="button" id="btnExitFullscreen9" class="arena-fullscreen-exit-button" title="Salir de pantalla completa" aria-label="Salir de pantalla completa"><span aria-hidden="true">⤡</span></button>
                         <!-- Touch controls are anchored to the portrait 9:16 stream viewport. -->
                         <div id="touchControlDock" class="touch-control-dock" role="group" aria-label="Controles táctiles flotantes">
                             <div id="touchJoystick" class="touch-move-pad" role="group" aria-label="Joystick virtual de movimiento">
@@ -2318,6 +2441,7 @@ body.touch-controls-active #portraitChatOverlay {
             refreshArenaLocalizedStatus();
             refreshArenaExtraControls();
             refreshPresentationLabels();
+            refreshArenaFullscreenLabels();
             syncChatDisclosureState();
             document.querySelectorAll('#killFeed16 [data-original-notice], #killFeed9 [data-original-notice]').forEach(badge => {
                 badge.textContent = localizeArenaNotice(badge.dataset.originalNotice);
@@ -2869,6 +2993,8 @@ body.touch-controls-active #portraitChatOverlay {
         window.addEventListener('keydown', (e) => {
             const activeTag = document.activeElement?.tagName;
             const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag) || document.activeElement?.isContentEditable;
+            // Esc exits native fullscreen; it must not open the pause menu on the same key press.
+            if (e.key === 'Escape' && document.fullscreenElement) return;
             if (!e.repeat && (e.key === 'Escape' || (e.key.toLowerCase() === 'p' && !isTyping))) {
                 e.preventDefault();
                 toggleSettingsModal();
@@ -7063,6 +7189,7 @@ body.touch-controls-active #portraitChatOverlay {
             setLanguage(preferredLanguage);
             toggleAutoChat(false);
             installTouchControls();
+            installArenaFullscreenControls();
             refreshStreamerControlLabels();
             updateRuleSpecificSettings();
             loadViewerProfiles();
@@ -7088,6 +7215,79 @@ body.touch-controls-active #portraitChatOverlay {
             }
 
             requestAnimationFrame(gameLoop);
+        }
+
+        // MODULE BLOCK: FULLSCREEN VIEW CONTROLS — browser-native fullscreen for each broadcast canvas.
+        const ARENA_FULLSCREEN_COPY = Object.freeze({
+            es: {enter:'Pantalla completa',exit:'Salir de pantalla completa'},
+            en: {enter:'Fullscreen',exit:'Exit fullscreen'},
+            fr: {enter:'Plein écran',exit:'Quitter le plein écran'},
+            de: {enter:'Vollbild',exit:'Vollbild verlassen'},
+            zh: {enter:'全屏',exit:'退出全屏'},
+            ja: {enter:'全画面',exit:'全画面を終了'},
+            pt: {enter:'Tela cheia',exit:'Sair da tela cheia'},
+            it: {enter:'Schermo intero',exit:'Esci da schermo intero'}
+        });
+
+        function refreshArenaFullscreenLabels() {
+            const labels = ARENA_FULLSCREEN_COPY[currentLanguage] || ARENA_FULLSCREEN_COPY.es;
+            [['16','16:9'],['9','9:16']].forEach(([suffix,ratio]) => {
+                const launch = document.getElementById(`btnFullscreen${suffix}`);
+                const exit = document.getElementById(`btnExitFullscreen${suffix}`);
+                if (launch) {
+                    launch.title = `${labels.enter} · ${ratio}`;
+                    launch.setAttribute('aria-label', `${labels.enter} ${ratio}`);
+                    const text = launch.querySelector('.arena-fullscreen-label');
+                    if (text) text.textContent = labels.enter;
+                }
+                if (exit) {
+                    exit.title = labels.exit;
+                    exit.setAttribute('aria-label', `${labels.exit} ${ratio}`);
+                }
+            });
+        }
+
+        async function toggleArenaFullscreen(view) {
+            const element = document.getElementById(view === '9:16' ? 'card-9x16' : 'card-16x9');
+            if (!element || !document.fullscreenEnabled || typeof element.requestFullscreen !== 'function') return false;
+            try {
+                if (document.fullscreenElement === element) {
+                    await document.exitFullscreen();
+                } else {
+                    if (document.fullscreenElement) await document.exitFullscreen();
+                    await element.requestFullscreen();
+                }
+                return true;
+            } catch (error) {
+                console.warn('Arena Live fullscreen could not be activated:', error);
+                return false;
+            }
+        }
+
+        function installArenaFullscreenControls() {
+            [['16','16:9'],['9','9:16']].forEach(([suffix,ratio]) => {
+                const launch = document.getElementById(`btnFullscreen${suffix}`);
+                const exit = document.getElementById(`btnExitFullscreen${suffix}`);
+                if (launch) {
+                    launch.disabled = !document.fullscreenEnabled;
+                    launch.addEventListener('click', () => { void toggleArenaFullscreen(ratio); });
+                }
+                if (exit) {
+                    // Prevent a touch on the exit control from triggering jump or melee gestures.
+                    ['pointerdown','pointerup','pointercancel'].forEach(type => {
+                        exit.addEventListener(type, event => event.stopPropagation());
+                    });
+                    exit.addEventListener('click', event => {
+                        event.stopPropagation();
+                        void toggleArenaFullscreen(ratio);
+                    });
+                }
+            });
+            document.addEventListener('fullscreenchange', () => {
+                requestAnimationFrame(fitDualMonitorsSideBySide);
+                updateTouchControlsVisibility();
+            });
+            refreshArenaFullscreenLabels();
         }
 
         // Use a named load listener instead of overwriting window.onload.
