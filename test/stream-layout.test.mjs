@@ -18,8 +18,8 @@ test('responsive preparation and manual switching', () => {
   assert.match(html, /function setArenaPreparationView\(nextFocus\)/);
 });
 test('fullscreen retains portrait on the right and fixed operator bands', () => {
-  assert.match(html, /grid-template-rows:42px minmax\(0,1fr\) 148px!important/);
-  assert.match(html, /translateX\(4px\)/);
+  assert.match(html, /grid-template-rows:42px minmax\(0,1fr\) var\(--arena-operator-footer-height,108px\)!important/);
+  assert.match(html, /translateX\(var\(--arena-vertical-nudge,4px\)\)/);
   assert.match(html, /function fitArenaDualOperatorMonitors\(\)/);
   assert.match(html, /moveArenaDualMonitorNode\('card-9x16', 'arenaDualUltrawideVerticalStage'\)/);
   assert.match(html, /id="arenaDualDrawerDisclosure"/);
