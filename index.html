@@ -7754,8 +7754,8 @@ body.touch-controls-active #portraitChatOverlay {
                 const leftRect = leftMount ? leftMount.getBoundingClientRect() : null;
                 const rightRect = rightMount ? rightMount.getBoundingClientRect() : null;
                 if (!leftRect || !rightRect) return;
-                const avail16W = Math.max(1, leftRect.width - 28);
-                const avail16H = Math.max(1, leftRect.height - 28);
+                const avail16W = Math.max(1, leftRect.width - 8);
+                const avail16H = Math.max(1, leftRect.height - 8);
                 const scale16 = Math.max(.5, Math.min(avail16W / 16, avail16H / 9));
                 const width16 = scale16 * 16;
                 const height16 = scale16 * 9;
