@@ -2,7 +2,7 @@
 
 ## Modo de transmisión dual definitivo (22/10/2026)
 
-**La emisión oficial en OBS utiliza Dual Full Screen**, no dos procesos de juego distintos. En preparación, el navegador muestra solo **16:9 en escritorio** o **9:16 en móvil**; el botón «Ver 9:16 / Ver 16:9» alterna sin reiniciar la partida. El botón **Dual · Pantalla completa** activa ambos lienzos sincronizados: horizontal grande a la izquierda, vertical en el extremo derecho (corrección visual de 4 px para ultrawide), barra LIVE de 42 px y cajón inferior de pruebas cerrado. Abrir el cajón no mueve ni reescala los lienzos que captura OBS. La tipografía vertical se adapta al número de jugadores.
+**La emisión oficial en OBS utiliza Dual Full Screen**, no dos procesos de juego distintos. En preparación, el navegador muestra solo **16:9 en escritorio** o **9:16 en móvil**; el botón «Ver 9:16 / Ver 16:9» alterna sin reiniciar la partida. El botón **Dual · Pantalla completa** activa ambos lienzos sincronizados: horizontal grande a la izquierda, vertical en el extremo derecho (corrección visual predeterminada de 10 px para ultrawide), barra LIVE de 34 px y cajón inferior de pruebas cerrado. Abrir el cajón no mueve ni reescala los lienzos que captura OBS. La tipografía vertical se adapta al número de jugadores.
 
 Controles en la barra: **Pausa, Lobby, Prota, Ajustes y Pruebas**. Esta rama mantiene su **HTML autónomo sin Node.js ni conexión a TikTok**. Consulta [decisiones de diseño](docs/DECISIONES-STREAM-DUAL-2026.md).
 
@@ -56,3 +56,7 @@ Actualmente utiliza dependencias de interfaz desde CDN, por lo que algunas tipog
 - Separar módulos gradualmente cuando el prototipo esté estabilizado.
 
 **Importante:** la rama `main` contiene la base actual; conviene desarrollar cambios posteriores en ramas y revisarlos antes de fusionarlos.
+
+## Afinado visual v0.1 para OBS
+
+En **Ajustes** aparece `Arena Live v0.1` y el nombre de la edición. La barra de vida del duelo **9:16** tiene ahora **14 px**; los nombres y porcentajes, **12 px**. En ultrawide, la barra LIVE superior ocupa **34 px** y el cajón inferior predeterminado **76 px**, con desplazamiento vertical inicial de **10 px**. Desde la calibración OBS puedes ajustar el desplazamiento entre **0–16 px** y el cajón entre **72–148 px** antes de fijar recortes. [Ver notas de la versión](docs/RELEASE-0.1-OBS.md).
