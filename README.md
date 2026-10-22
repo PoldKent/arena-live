@@ -69,3 +69,7 @@ npm start
 Abre `http://127.0.0.1:4173/`, prueba el comando con el botón **Probar comando** y conecta al LIVE público desde el panel **TikTok LIVE** cuando estés emitiendo. Consulta la [guía paso a paso](docs/TIKTOK-LIVE-MVP.md).
 
 El conector es no oficial, con dependencias de terceros. Esta integración requiere prueba real y revisión de licencias antes de distribuirse comercialmente.
+
+## Pantalla completa dual ultrawide (3440×1440)
+
+La pantalla **9:16 se muestra prioritariamente en el extremo derecho**; el juego **16:9** queda a la izquierda con los controles del LIVE encima y debajo. Se corrigió el problema por el que la pantalla vertical quedaba oculta. Compatible con escalado de Windows. [Guía de la corrección](docs/ULTRAWIDE-3440-FIX.md).
