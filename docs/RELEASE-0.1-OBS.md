@@ -1,25 +1,28 @@
-# Arena Live v0.1 — revisión de diseño OBS
+# Arena Live v0.1 — ajuste visual para OBS
 
 22 de octubre de 2026
 
-Esta es la versión pública **0.1** de la interfaz. La etiqueta está dentro de **Ajustes**, en el encabezado, y distingue la edición **main** o **TikTok**. El API `window.ArenaLive.version` devuelve `0.1.0`.
+**Dual Full Screen sigue siendo la vista de transmisión definitiva para OBS**, con una única partida y dos lienzos simultáneos. El juego independiente `main` no incorpora el puente de TikTok.
 
-## Cambios
+## Mejoras visuales
 
-- Desaparecen las insignias redundantes «Lobby 16:9 en Vivo» y «TikTok Live 9:16» del panel central de los dos juegos. Se mantienen las instrucciones de ingreso, los tiempos, las clases y las barras de combate.
-- El modo de emisión definitivo sigue siendo **Dual Full Screen**, una sola partida representada simultáneamente en los lienzos horizontal y vertical.
-- **Pantallas de Stream y Audio → Calibración para OBS** muestra la versión, la dimensión aparente de ambas vistas y controles para ajustar el margen lateral de la 9:16 y la altura de la banda inferior del operador.
-- Margen 9:16 hacia la derecha: **4 px** predeterminados, ajustable entre **0 y 16 px**.
-- Banda inferior: **108 px** predeterminados (antes 148), ajustable entre **84 y 148 px**. El menor espacio disponible da protagonismo al 16:9.
-- Abrir o cerrar las herramientas de prueba no modifica dimensiones de ninguno de los dos juegos. **Mover el control de calibración SÍ modifica la geometría intencionadamente**: primero calibra, después ajusta los recortes de OBS y evita cambiarla durante el directo.
-- Los ajustes de calibración se recuerdan en el navegador mediante `localStorage` (`arenaLiveObsCalibrationV01`). Pulsa Restablecer para recuperar 4 px y 108 px.
+- **Vida del duelo 9:16:** las barras pasan de 8 a **14 píxeles** de altura interna; los nombres y porcentajes se muestran a **12 px**; la energía usa carriles de **6 px**. El HUD horizontal conserva sus proporciones.
+- **Lobby sin duplicaciones:** se han retirado de ambas vistas las insignias «Lobby 16:9 en Vivo», «TikTok Live 9:16» y la etiqueta decorativa «16:9 LIVE». Se mantienen comandos, estado del combate e instrucciones necesarias.
+- **Versión visible en Ajustes:** el pie del menú indica **Arena Live v0.1 · main** o **Arena Live v0.1 · TikTok**. La API mantiene `window.ArenaLive.version === '0.1.0'`.
+- **16:9 con mayor superficie:** en ultrawide la barra superior pasa de 42 a **34 px**, mientras que el carril inferior predeterminado baja de 108 a **76 px** (más espacio libre para el juego).
+- **9:16 al extremo derecho:** desplazamiento por defecto de **10 px** (antes 4), modificable entre **0 y 16 px**.
+- **Calibración OBS:** la altura de herramientas puede regularse entre **72 y 148 px**, en pasos de 4. Se han migrado automáticamente los valores anteriores predeterminados (4 px / 108 px) a los nuevos (10 px / 76 px). Se respetan valores personalizados distintos.
 
-## Cómo comprobar la versión
+El menú de calibración está en **Ajustes → Pantallas de Stream y Audio → Calibración para OBS**. Los ajustes se conservan en el navegador; usa «Restablecer» para volver a los nuevos valores predeterminados.
 
-En Windows: detener con Ctrl+C, actualizar la rama apropiada en GitHub, ejecutar `npm.cmd start`, abrir `http://127.0.0.1:4173/?v=0.1` y refrescar con Ctrl+F5. Abrir Ajustes: debe decir **Arena Live v0.1 · TikTok**. En `main` dirá **Arena Live v0.1 · main**.
+## Seguridad de los recortes
 
-La vista previa de OBS puede estar escalada: un desplazamiento de **4 píxeles** en el navegador se ve como **~1,6 píxeles** si OBS muestra su lienzo al 39 %. Por ello puedes calibrar desde Ajustes antes de transmitir.
+Al abrir o cerrar el cajón inferior no se modifican las dimensiones ni las coordenadas de los juegos; la franja siempre está reservada. **Cambiar manualmente el desplazamiento lateral o la altura del cajón sí altera la geometría de forma deliberada.** Configura esos valores antes de fijar tus recortes en OBS.
 
-## Diferencias de integración
+## Actualización en Windows
 
-`main` sigue siendo un HTML autónomo sin servidor de TikTok. La rama TikTok conserva Node.js, el puente local y el historial de mensajes recibidos. El chat oficial de TikTok no se modifica desde la interfaz. Las reglas de combate y los 128 personajes quedan intactos.
+En la carpeta Git de la edición correspondiente ejecuta `git pull --ff-only`. Para TikTok, detén primero el servidor, vuelve a iniciarlo con `npm.cmd start` y recarga `http://127.0.0.1:4173/?v=0.1` mediante **Ctrl+F5**. En `main`, abre la página HTML actualizada.
+
+## Versionado futuro
+
+Esta es la versión **0.1**. El próximo conjunto acordado de cambios se documentará como **0.2**, y así sucesivamente. `main` y TikTok conservan la misma numeración de interfaz, pero sus integraciones son distintas.
