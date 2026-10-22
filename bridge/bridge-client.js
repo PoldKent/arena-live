@@ -26,6 +26,101 @@
   const buttonTest = panel.querySelector('#bridge-send-test');
   const inputTest = panel.querySelector('#bridge-test');
 
+  // Dedicated, read-only TikTok LIVE mirror. Rate limits affect gameplay, not this inbox.
+  // A 50,000-message memory guard protects long streams; export is available at any point.
+  const incoming = [];
+  const MAX_INCOMING_HISTORY = 50000;
+  const LIVE_WINDOW = 450;
+  const HISTORY_PAGE = 250;
+  let droppedHistory = 0;
+  let followLive = true;
+  let browseEnd = 0;
+  const inbox = document.getElementById('arenaTikTokChatFeed');
+  const countInbox = document.getElementById('arenaTikTokChatCount');
+  const statusInbox = document.getElementById('arenaTikTokChatStatus');
+  const buttonOlder = document.getElementById('arenaTikTokChatOlder');
+  const buttonLatest = document.getElementById('arenaTikTokChatLatest');
+  const buttonExport = document.getElementById('arenaTikTokChatExport');
+
+  function chatRow(entry) {
+    const line = document.createElement('div');
+    line.className = 'arena-tiktok-chat-line';
+    const when = document.createElement('time');
+    when.textContent = entry.when;
+    const name = document.createElement('strong');
+    name.textContent = entry.username;
+    const body = document.createElement('span');
+    body.textContent = entry.message;
+    line.append(when, name, body);
+    return line;
+  }
+  function updateInboxControls() {
+    if (!inbox) return;
+    const visible = inbox.querySelectorAll('.arena-tiktok-chat-line').length;
+    const total = incoming.length + droppedHistory;
+    countInbox.textContent = `${total.toLocaleString()} recibidos · ${visible} visibles${droppedHistory ? ` · ${droppedHistory} fuera de memoria` : ''}`;
+    buttonOlder.disabled = incoming.length === 0 || (followLive ? incoming.length <= LIVE_WINDOW : browseEnd <= HISTORY_PAGE);
+    buttonLatest.disabled = followLive;
+  }
+  function renderInbox(endIndex, follow = false) {
+    if (!inbox) return;
+    followLive = follow;
+    browseEnd = Math.max(0, Math.min(incoming.length, endIndex));
+    const start = Math.max(0, browseEnd - LIVE_WINDOW);
+    const fragment = document.createDocumentFragment();
+    incoming.slice(start, browseEnd).forEach(entry => fragment.appendChild(chatRow(entry)));
+    inbox.replaceChildren(fragment);
+    if (followLive) inbox.scrollTop = inbox.scrollHeight;
+    else inbox.scrollTop = 0;
+    updateInboxControls();
+  }
+  function recordIncomingChat(data) {
+    const entry = {
+      when: new Date().toLocaleTimeString(),
+      username: String(data.username).slice(0, 100),
+      message: String(data.message).slice(0, 500)
+    };
+    if (incoming.length >= MAX_INCOMING_HISTORY) {
+      incoming.shift(); droppedHistory += 1;
+      if (!followLive) browseEnd = Math.max(0, browseEnd - 1);
+    }
+    incoming.push(entry);
+    if (!inbox) return;
+    if (!followLive) { updateInboxControls(); return; }
+    const stick = inbox.scrollHeight - inbox.scrollTop - inbox.clientHeight < 55;
+    const placeholder = document.getElementById('arenaTikTokChatEmpty');
+    if (placeholder) placeholder.remove();
+    inbox.appendChild(chatRow(entry));
+    while (inbox.children.length > LIVE_WINDOW) inbox.removeChild(inbox.firstChild);
+    browseEnd = incoming.length;
+    if (stick) inbox.scrollTop = inbox.scrollHeight;
+    updateInboxControls();
+  }
+  buttonOlder?.addEventListener('click', () => {
+    const end = followLive ? Math.max(1, incoming.length - LIVE_WINDOW) : Math.max(1, browseEnd - HISTORY_PAGE);
+    renderInbox(end, false);
+  });
+  buttonLatest?.addEventListener('click', () => renderInbox(incoming.length, true));
+  buttonExport?.addEventListener('click', () => {
+    const header = `Arena Live · TikTok @${state.account.replace(/^@/, '')}\nMensajes recibidos en esta sesión: ${incoming.length + droppedHistory}\n` +
+      (droppedHistory ? `Primeros ${droppedHistory} mensajes ya no están en memoria.\n` : '');
+    const data = header + incoming.map(({when,username,message}) => `[${when}] ${username}: ${message.replace(/[\r\n]+/g, ' ')}`).join('\n');
+    const url = URL.createObjectURL(new Blob([data], {type:'text/plain;charset=utf-8'}));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `arena-live-tiktok-${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.txt`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  });
+  function updateLiveChatStatus() {
+    if (!statusInbox) return;
+    const states = {disconnected:'Desconectado',connecting:'Conectando…',connected:'LIVE conectado',error:'Error LIVE'};
+    statusInbox.textContent = state.connected && state.controller ? states[state.phase] || states.disconnected : 'Sin recepción';
+    statusInbox.style.color = state.phase === 'connected' && state.controller ? '#4ade80' : '#facc15';
+  }
+  updateInboxControls();
+  updateLiveChatStatus();
+
   function refresh(message = '') {
     const titles = { disconnected: 'LIVE desconectado', connecting: 'Conectando con TikTok…', connected: 'LIVE conectado', error: 'Error de conexión' };
     const duplicate = state.connected && state.statusReceived && !state.controller;
@@ -35,6 +130,7 @@
     buttonTest.disabled = duplicate || !state.connected || !state.statusReceived;
     for (const b of [buttonConnect, buttonDisconnect, buttonTest]) b.style.opacity = b.disabled ? '.4' : '1';
     count.textContent = `Mensajes recibidos: ${state.received}`;
+    updateLiveChatStatus();
   }
   async function post(path, data = {}) {
     const response = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
@@ -70,11 +166,13 @@
         refresh(data.lastError ? `${data.phase}: ${data.lastError}` : '');
       } else if (data.type === 'chat' && state.controller && data.platformKey === 'tiktok') {
         if (typeof data.message !== 'string' || typeof data.username !== 'string') return;
+        // Show EVERY event delivered by the bridge, even if gameplay later rate-limits it.
+        recordIncomingChat(data);
+        state.received += 1;
         if (window.ArenaLive?.sendChat) {
           window.ArenaLive.sendChat({ username: data.username, platformKey: 'tiktok', message: data.message });
-          state.received += 1;
-          refresh();
         }
+        refresh();
       }
     });
     socket.addEventListener('close', () => {
