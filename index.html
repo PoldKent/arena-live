@@ -773,6 +773,26 @@ body.touch-controls-active #portraitChatOverlay {
 }
 </style>
 
+
+<style id="arena-visual-polish-v01">
+/* Arena Live v0.1: duelo vertical legible y controles compactos fuera de la imagen. */
+#viewport9x16 #hud1v1Bars9 {padding:9px 10px!important;border-radius:14px!important;border-color:rgba(251,191,36,.62)!important;box-shadow:0 5px 20px rgba(0,0,0,.28)}
+#viewport9x16 #hud1v1Bars9 .grid-cols-11 {gap:7px!important}
+#viewport9x16 #p1Bar1v1_9,#viewport9x16 #p2Bar1v1_9 {height:100%!important}
+#viewport9x16 #hud1v1Bars9 div:has(> #p1Bar1v1_9),#viewport9x16 #hud1v1Bars9 div:has(> #p2Bar1v1_9) {height:14px!important;border:1px solid rgba(148,163,184,.44)!important;background:#0b1425!important}
+#viewport9x16 #p1Name1v1_9,#viewport9x16 #p2Name1v1_9 {font-size:12px!important;line-height:17px!important;font-weight:800!important}
+#viewport9x16 #p1HpText1v1_9,#viewport9x16 #p2HpText1v1_9 {font-size:12px!important;line-height:17px!important;font-weight:800!important}
+#viewport9x16 #hud1v1Bars9 div:has(> #p1Energy1v1_9),#viewport9x16 #hud1v1Bars9 div:has(> #p2Energy1v1_9) {height:6px!important}
+#viewport9x16 #p1EnergyText1v1_9,#viewport9x16 #p2EnergyText1v1_9 {font-size:9px!important;line-height:12px!important}
+/* El carril inferior reservado permanece constante al abrir/cerrar el cajón. */
+#broadcastStageSection:fullscreen.arena-dual-ultrawide > #arenaDualOperatorDock {grid-template-rows:34px minmax(0,1fr) var(--arena-operator-footer-height,76px)!important;row-gap:5px!important}
+#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualTopCluster {height:34px!important;min-height:34px!important}
+#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualBottomCluster {height:var(--arena-operator-footer-height,76px)!important;max-height:var(--arena-operator-footer-height,76px)!important;min-height:0!important}
+#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualCenterStageMount {padding:2px!important;margin:0!important}
+#broadcastStageSection:fullscreen.arena-dual-ultrawide .arena-dual-dock-top {padding:0 5px!important;min-width:0!important}
+#broadcastStageSection:fullscreen.arena-dual-ultrawide .arena-dual-dock-quick button,#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualOperatorDock .arena-stream-top-action {padding:4px 7px!important;min-height:25px!important;font-size:10px!important}
+</style>
+
 </head>
 <body class="min-h-screen flex flex-col bg-[#06080f] text-slate-100">
 
@@ -1629,12 +1649,12 @@ body.touch-controls-active #portraitChatOverlay {
                         </div>
                         <p class="text-[10px] text-slate-400" id="arenaObsCalibrationHint">Ajusta esto antes de emitir; los recortes de OBS deben configurarse después. Abrir las herramientas no modificará las dimensiones.</p>
                         <label class="flex flex-col gap-1 text-[11px] text-slate-300" for="arenaObsVerticalOffset">
-                            <span id="arenaObsVerticalOffsetLabel">Desplazamiento vertical hacia la derecha: <output id="arenaObsVerticalOffsetValue">4 px</output></span>
-                            <input type="range" id="arenaObsVerticalOffset" min="0" max="16" step="1" value="4" oninput="setArenaObsCalibration('offset',this.value)" class="w-full accent-pink-400" />
+                            <span id="arenaObsVerticalOffsetLabel">Desplazamiento vertical hacia la derecha: <output id="arenaObsVerticalOffsetValue">10 px</output></span>
+                            <input type="range" id="arenaObsVerticalOffset" min="0" max="16" step="1" value="10" oninput="setArenaObsCalibration('offset',this.value)" class="w-full accent-pink-400" />
                         </label>
                         <label class="flex flex-col gap-1 text-[11px] text-slate-300" for="arenaObsFooterHeight">
-                            <span id="arenaObsFooterHeightLabel">Espacio inferior para herramientas: <output id="arenaObsFooterHeightValue">108 px</output></span>
-                            <input type="range" id="arenaObsFooterHeight" min="84" max="148" step="4" value="108" oninput="setArenaObsCalibration('footer',this.value)" class="w-full accent-cyan-400" />
+                            <span id="arenaObsFooterHeightLabel">Espacio inferior para herramientas: <output id="arenaObsFooterHeightValue">76 px</output></span>
+                            <input type="range" id="arenaObsFooterHeight" min="72" max="148" step="4" value="76" oninput="setArenaObsCalibration('footer',this.value)" class="w-full accent-cyan-400" />
                         </label>
                         <output id="arenaObsGeometrySummary" class="text-[10px] leading-relaxed text-slate-400" aria-live="polite">Abre Dual Full Screen para consultar las dimensiones efectivas de ambas vistas.</output>
                     </section>
@@ -1700,6 +1720,7 @@ body.touch-controls-active #portraitChatOverlay {
 
             <!-- Modal Footer -->
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+                <div id="arenaVersionInfo" role="note" class="shrink-0 rounded-lg border border-cyan-500/30 bg-cyan-950/25 px-2.5 py-1 text-cyan-200 font-bold">Arena Live v0.1 <span class="font-normal text-slate-400">· main</span></div>
                 <div>
                     💡 <strong class="text-slate-200">Atajo rápido:</strong> Pulsa <kbd class="px-1.5 py-0.5 bg-slate-800 text-cyan-300 rounded">ESC</kbd> o <kbd class="px-1.5 py-0.5 bg-slate-800 text-cyan-300 rounded">P</kbd> en cualquier momento para abrir o cerrar este menú.
                 </div>
@@ -7537,7 +7558,7 @@ body.touch-controls-active #portraitChatOverlay {
         const ARENA_RELEASE_VERSION = '0.1';
         const ARENA_RELEASE_EDITION = 'main';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
-        const ARENA_OBS_DEFAULTS = Object.freeze({offset:4, footer:108});
+        const ARENA_OBS_DEFAULTS = Object.freeze({offset:10, footer:76});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
         const ARENA_OBS_COPY = Object.freeze({
           es:['Calibración para OBS','Restablecer','Ajusta antes de emitir; los recortes se configuran después. Abrir el cajón no cambiará el tamaño del juego.','Mover 9:16 a la derecha','Altura del cajón inferior','Abre Dual Full Screen para comprobar tamaños.','Pantallas','Preparación'],
@@ -7551,8 +7572,8 @@ body.touch-controls-active #portraitChatOverlay {
         });
         function clampArenaObsCalibration(key, value) {
           const parsed = Number(value);
-          if (key === 'offset') return Math.max(0,Math.min(16,Number.isFinite(parsed)?Math.round(parsed):4));
-          if (key === 'footer') return Math.max(84,Math.min(148,4*Math.round((Number.isFinite(parsed)?parsed:108)/4)));
+          if (key === 'offset') return Math.max(0,Math.min(16,Number.isFinite(parsed)?Math.round(parsed):10));
+          if (key === 'footer') return Math.max(72,Math.min(148,4*Math.round((Number.isFinite(parsed)?parsed:76)/4)));
           return null;
         }
         function loadArenaObsCalibration() {
@@ -7560,7 +7581,11 @@ body.touch-controls-active #portraitChatOverlay {
             const raw = localStorage.getItem(ARENA_OBS_CALIBRATION_KEY);
             const values = JSON.parse(raw || '{}');
             if (values && typeof values === 'object') {
-              for(const key of ['offset','footer']) arenaObsCalibration[key] = clampArenaObsCalibration(key,values[key] ?? ARENA_OBS_DEFAULTS[key]);
+              if (values.offset === 4 && values.footer === 108) {
+                arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
+              } else {
+                for(const key of ['offset','footer']) arenaObsCalibration[key] = clampArenaObsCalibration(key,values[key] ?? ARENA_OBS_DEFAULTS[key]);
+              }
             }
           } catch(_) { /* default calibration when storage is unavailable */ }
           applyArenaObsCalibration(false);
