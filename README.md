@@ -10,6 +10,10 @@ Prototipo de juego interactivo para transmisiones en vivo. Los espectadores pued
 
 > **Estado:** prototipo local. Los eventos del simulador no equivalen a una conexión real con TikTok, YouTube, Facebook u otras plataformas; una integración en producción requerirá autenticación, recepción de eventos y validación en un servidor.
 
+## Pantalla completa dual (TikTok)
+
+Abre Arena Live mediante `npm.cmd start` en Windows, entra en `http://127.0.0.1:4173` y pulsa **Dual · Pantalla completa + controles**. Aparecerán ambos juegos y, a la derecha, herramientas del directo y una bandeja de mensajes **recibidos** de TikTok. El panel no escribe en el chat público de TikTok ni está destinado a capturar la imagen limpia del juego. Consulta [la guía de la consola dual](docs/DUAL-OPERADOR-TIKTOK.md).
+
 ## Características actuales
 
 - Aplicación monolítica: HTML, CSS y JavaScript en un solo archivo.
