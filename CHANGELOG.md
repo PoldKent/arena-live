@@ -1,5 +1,17 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-22 — Emisión dual definitiva y preparación adaptativa
+
+- **Dual Full Screen** reservado como composición principal de OBS con dos lienzos de una sola partida.
+- Preparación: solo 16:9 en escritorio y solo 9:16 en móvil, con botón para alternar sin reiniciar.
+- En ultrawide, 9:16 fija al extremo derecho (ajuste visual +4 px) y 16:9 maximizada a la izquierda.
+- Barra LIVE compacta y cajón inferior de herramientas, cerrado inicialmente. El cajón no cambia los recortes del juego.
+- Controles: Pausa, Lobby, Prota, Ajustes, Pruebas; conexión y chat real únicamente en la rama TikTok.
+- Tipografía de etiquetas del formato vertical adaptada a la cantidad de luchadores.
+- Documento de decisiones cerrado y pruebas de regresión de interfaz y geometría.
+- Sin cambios en reglas de combate, clases ni límite de 128 luchadores.
+
+
 ## 2026-10-21 — Base inicial en GitHub
 
 - Se incorpora `index.html`, el prototipo monolítico de Arena Live.
