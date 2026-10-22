@@ -545,6 +545,7 @@ body.touch-controls-active #portraitChatOverlay {
 }
 </style>
 
+
 <style id="arena-fullscreen-capture">
 /* MODULE BLOCK: BROADCAST FULLSCREEN — preserve 16:9 and 9:16 without stretching. */
 .arena-monitor-fullscreen-actions {
@@ -796,7 +797,7 @@ body.touch-controls-active #portraitChatOverlay {
                                     <span id="hudModeIcon16" class="text-sm">⚡</span>
                                     <div>
                                         <div id="hudModeTitle16" class="font-display text-[10px] sm:text-xs font-bold text-cyan-300 tracking-wide uppercase">
-                                            SMASH FFA • PLATAFORMAS
+                                            Smash
                                         </div>
                                         <div class="hud-player-metric text-[10px] text-slate-300 flex items-center gap-2">
                                             <span><i class="fa-solid fa-users text-cyan-400 mr-1"></i><strong id="hudFighterCount16">0</strong> Activos</span>
@@ -1020,7 +1021,8 @@ body.touch-controls-active #portraitChatOverlay {
                                     <span id="hudModeIcon9" class="text-xs">⚡</span>
                                     <div>
                                         <div id="hudModeTitle9" class="font-display text-[9px] font-bold text-pink-300 uppercase leading-tight">
-                                            SMASH FFA                                        </div>
+                                            Smash
+                                        </div>
                                         <div class="hud-player-metric text-[9px] text-slate-300">
                                             <strong id="hudFighterCount9">0</strong> Jug.
                                             <span id="hudCoopBadge9" class="hidden text-amber-300 font-bold">+COOP</span>
@@ -1228,10 +1230,11 @@ body.touch-controls-active #portraitChatOverlay {
                         <button type="button" onclick="eliminateOneRivalForTest()" class="rounded-lg border border-rose-500/40 bg-rose-950/50 px-2 py-2 font-bold text-rose-200">💥 K.O.</button>
                         <button type="button" onclick="simulateFallenRejoinForTest()" class="rounded-lg border border-emerald-500/40 bg-emerald-950/50 px-2 py-2 font-bold text-emerald-200">🔄 Reingreso</button>
                     </div>
-                    <div class="grid grid-cols-3 gap-1.5">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                         <button type="button" onclick="applyPlayerCountPreset(2)" class="rounded-lg border border-amber-500/40 bg-amber-950/50 px-1.5 py-2 font-bold text-amber-200">🥊 2 · 1v1</button>
                         <button type="button" onclick="applyPlayerCountPreset(4)" class="rounded-lg border border-cyan-500/40 bg-cyan-950/50 px-1.5 py-2 font-bold text-cyan-200">⚡ 4 · Smash</button>
                         <button type="button" onclick="applyPlayerCountPreset(9)" class="rounded-lg border border-purple-500/40 bg-purple-950/50 px-1.5 py-2 font-bold text-purple-200">🏟️ 9 · Iso</button>
+                        <button type="button" onclick="applyPlayerCountPreset(128)" class="rounded-lg border border-purple-500/40 bg-purple-950/50 px-1.5 py-2 font-bold text-purple-200" title="Generar 128 personajes distintos con su clase asignada">🏟️ 128 · Arena</button>
                     </div>
                     <div id="advancedTimerTestGroup" class="hidden">
                         <div class="text-[10px] font-extrabold uppercase tracking-wider text-sky-300 pt-1">🧪 Prueba de reloj</div>
@@ -1919,7 +1922,8 @@ body.touch-controls-active #portraitChatOverlay {
             ['El streamer puede unirse desde el lobby o durante el combate, con cualquier regla.','The streamer can join from the lobby or during combat under any rule.','Le streamer peut rejoindre depuis le lobby ou pendant le combat, quelle que soit la règle.','Der Streamer kann unabhängig von der Regel aus der Lobby oder während des Kampfes beitreten.','无论采用哪种规则，主播都可以从大厅或战斗中加入。','ルールに関係なく、配信者はロビーまたは戦闘中に参加できます。'],
             ['The streamer joined the arena.','The streamer joined the arena.','Le streamer a rejoint l’arène.','Der Streamer ist der Arena beigetreten.','主播已加入竞技场。','配信者がアリーナに参加しました。'],
             ['The streamer rejoined the arena.','The streamer rejoined the arena.','Le streamer est revenu dans l’arène.','Der Streamer ist in die Arena zurückgekehrt.','主播已重新加入竞技场。','配信者がアリーナに再参加しました。'],
-            ['Guerrero','Warrior','Guerrier','Krieger','战士','戦士'],            ['Guerrero','Warrior','Guerrier','Krieger','战士','戦士'],
+            ['Guerrero','Warrior','Guerrier','Krieger','战士','戦士'],
+            ['Guerrero','Warrior','Guerrier','Krieger','战士','戦士'],
             ['Shinobi','Shinobi','Shinobi','Shinobi','忍者','忍者'],
             ['Titan','Titan','Titan','Titan','巨人','巨人'],
             ['Rayo','Lightning','Foudre','Blitz','闪电','稲妻'],
@@ -2742,7 +2746,7 @@ body.touch-controls-active #portraitChatOverlay {
         let activeMode = '1v1';  // Initial state; evaluateArenaMode selects by alive-player count.
         let rejoinRuleMode = 'free'; // Default: free-to-join; alternatives are '3_lives' and 'timed'.
         let MAX_OPPORTUNITIES = 1; // Smash-style lives are separate from HP; the default is one life.
-        let totalParticipants = 0; // Tracks total viewers joined including Co-op merges (scales 2 to 64+)
+        let totalParticipants = 0; // Actual number of registered fighter bodies, capped at 128.
         let gamePace = 1.0;        // Standard-speed gameplay selected by the streamer.
         let slowMoFactor = 1.0;    // Drops to 0.22 during final K.O. sequence
         let koSequenceActive = false;
@@ -2788,8 +2792,8 @@ body.touch-controls-active #portraitChatOverlay {
         const VIEWER_PROFILES_STORAGE_KEY = 'arenaLiveViewerProfiles';
         const MAX_SAVED_VIEWER_PROFILES = 256;
         const FALLBACK_ARENA_BOTS = new Set(['@darkninja_tt', '@gokulatam99', '@arenabot']);
-        // At 16 live fighter bodies, newcomers join one shared co-op character.
-        const MAX_INDIVIDUAL_FIGHTERS = 128; // Individual fighters for 64+ participants; safety ceiling protects browser.
+        // Strict shared limit for live spectators, streamer and simulator NPCs together.
+        const MAX_INDIVIDUAL_FIGHTERS = 128;
         let coopGroupFighterId = null;
         const coopMemberKeys = new Set();
         let particles = [];
@@ -2819,7 +2823,8 @@ body.touch-controls-active #portraitChatOverlay {
                 '&': '&amp;',
                 '<': '&lt;',
                 '>': '&gt;',
-                '"': '&quot;',                "'": '&#39;'
+                '"': '&quot;',
+                "'": '&#39;'
             })[char]);
         }
 
@@ -2956,20 +2961,75 @@ body.touch-controls-active #portraitChatOverlay {
             facebook: { name: 'Facebook', icon: '🔵', color: '#93c5fd', badgeBg: '#1e3a8a' }
         };
 
-        const BOT_NAMES = [
-            '@DarkNinja_TT', '@GokuLatam99', '@SakuraChan_TV', '@ElProaso_YT',
-            '@KiraStream', '@Vegeta777_Fan', '@LuffyGear5', '@ShadowKick',
-            '@TacosDeCanasta', '@SamuraiCyber', '@PikaFlash', '@GojoSatoru_MX',
-            '@ZoroPerdido', '@CobraKai_Live', '@TitanColosal', '@NekoValkyrie'
-        ];
+        // MODULE BLOCK: CURATED SIMULATOR ROSTER (128 unique names, class-themed).
+        // Each name belongs to one class. Real TikTok usernames retain their own identity.
+        const BOT_NAMES_BY_CLASS = Object.freeze({
+            // Guerrero: 26 luchadores de prueba
+            kame: Object.freeze([
+                '@GokuLatam99', '@ElProaso_YT', '@Vegeta777_Fan', '@LuffyGear5',
+                '@CobraKai_Live', '@SaiyanDelSur', '@PunoDeAcero', '@DragonFeroz',
+                '@LuchadorSolar', '@ReyDelCombo', '@GuerreroAndino', '@EspadaBrava',
+                '@CapitanKame', '@CampeonDelRing', '@FuriaLatina', '@MaestroDelPuno',
+                '@SuperGuerreroX', '@RivalLegendario', '@TigreDeAcero', '@HeroeDeBarrio',
+                '@ForjaDelValor', '@BrazoDeFuego', '@GuerreroNebular', '@ElUltimoSaiyan',
+                '@RugeDragon', '@ArenaChampion'
+            ]),
+            // Shinobi: 26 luchadores de prueba
+            ninja: Object.freeze([
+                '@DarkNinja_TT', '@SakuraChan_TV', '@ShadowKick', '@SamuraiCyber',
+                '@ZoroPerdido', '@ShurikenRojo', '@KunoichiLuna', '@NinjaDeMedianoche',
+                '@SombraFugaz', '@RasenViento', '@KatanaOscura', '@ShinobiAndino',
+                '@LoboSilencioso', '@PasoFantasma', '@KunaiDePlata', '@RoninNocturno',
+                '@NieblaNinja', '@AsDelDojo', '@SelloSecreto', '@TormentaKunai',
+                '@HojaInvisible', '@DagaVeloz', '@MascaraNegra', '@NinjaSinRastro',
+                '@SilencioRasen', '@FiloSombra'
+            ]),
+            // Titan: 25 luchadores de prueba
+            titan: Object.freeze([
+                '@TitanColosal', '@TacosDeCanasta', '@ColosoGranito', '@MurallaAndina',
+                '@MontanaViva', '@RocaImparable', '@GolemDeHierro', '@TitanDePiedra',
+                '@PunoColosal', '@GiganteDelNorte', '@EscudoRocoso', '@PesoPesadoX',
+                '@OgroDeArena', '@FortalezaViva', '@MartilloTitan', '@ReyDeLaRoca',
+                '@GranTerremoto', '@MonolitoAzul', '@HierroInfinito', '@GuardianColosal',
+                '@BestiaDeGranito', '@RocaEterna', '@TortugaGigante', '@TitanDeLosAndes',
+                '@BloqueIndestructible'
+            ]),
+            // Rayo: 26 luchadores de prueba
+            trueno: Object.freeze([
+                '@PikaFlash', '@RayoDoradito', '@VoltioAzul', '@RelampagoX',
+                '@ChispaVeloz', '@TormentaVolt', '@TruenoDelSur', '@PikaCentella',
+                '@ElectroLoco', '@VoltajeMaximo', '@RayoNeon', '@ZeusDeBarrio',
+                '@FulgorElectrico', '@ImpactoVolt', '@ChispaAndina', '@LuzRelampago',
+                '@RayoOscuro', '@FuerzaElectrica', '@SparkLatino', '@ArcoElectrico',
+                '@MegaVoltio', '@CentellaNocturna', '@CorrienteViva', '@NubeDeTrueno',
+                '@RayoDePlata', '@NeonTempestad'
+            ]),
+            // Espiritu: 25 luchadores de prueba
+            esmeralda: Object.freeze([
+                '@KiraStream', '@GojoSatoru_MX', '@NekoValkyrie', '@EspirituBosque',
+                '@GuardianaLunar', '@FlorEsmeralda', '@HadaDelViento', '@AuraCelestial',
+                '@AlmaVerde', '@BosqueSagrado', '@NekoMistico', '@HechizoDeLuna',
+                '@JadeEterno', '@OrquideaMagica', '@EcoDelBosque', '@BrujaEsmeralda',
+                '@RaizAncestral', '@LuzDeJade', '@SaviaVital', '@GuardianDelRoble',
+                '@ManaDeCristal', '@SusurroVerde', '@DriadaNocturna', '@EspirituAurora',
+                '@EnredaderaZen'
+            ]),
+        });
+        // Interleave classes so even a small test preset gets varied abilities.
+        const BOT_ROSTER = Object.freeze(Array.from({length: 26}, (_, rank) =>
+            Object.entries(BOT_NAMES_BY_CLASS).flatMap(([classKey, names]) =>
+                names[rank] ? [Object.freeze({name: names[rank], classKey})] : []
+            )
+        ).flat());
+        const BOT_NAMES = Object.freeze(BOT_ROSTER.map(entry => entry.name));
+        const BOT_PROFILE_BY_HANDLE = new Map(BOT_ROSTER.map(entry => [entry.name.toLocaleLowerCase(), entry]));
+        if (BOT_ROSTER.length !== 128 || new Set(BOT_NAMES.map(name => name.toLocaleLowerCase())).size !== 128) {
+            throw new Error('Arena Live: la plantilla de prueba debe contener 128 nombres únicos.');
+        }
 
         function isBuiltInSpectatorBot(username) {
             const normalized = String(username ?? '').trim().toLocaleLowerCase();
-            if (FALLBACK_ARENA_BOTS.has(normalized)) return true;
-            return BOT_NAMES.some(botName => {
-                const baseName = botName.toLocaleLowerCase();
-                return normalized === baseName || normalized.startsWith(`${baseName}_`);
-            });
+            return FALLBACK_ARENA_BOTS.has(normalized) || BOT_PROFILE_BY_HANDLE.has(normalized);
         }
 
         // MODULE BLOCK E: INPUT + MANUAL CONTROLS (future js/input.js).
@@ -3373,6 +3433,7 @@ body.touch-controls-active #portraitChatOverlay {
             fighter.jumpsLeft = 0;
             fighter.recoveryJumpUsed = true;
             fighter.edgeRecoveryPending = false;
+            fighter.fallDrop = 0; // Airborne again after leaving the abyss lip.
             fighter.z = Math.max(2, fighter.z);
             fighter.vz = 8.2;
             // Strong return impulse without teleporting the fighter to safety.
@@ -3460,6 +3521,18 @@ body.touch-controls-active #portraitChatOverlay {
         function addOrBoostFighter(username, platformKey = 'tiktok', isStreamer = false, preferredClassKey = null, silentBanner = false) {
             if (!isStreamer) username = normalizeChatUsername(username);
             platformKey = Object.prototype.hasOwnProperty.call(PLATFORMS, platformKey) ? platformKey : 'tiktok';
+            const alreadyRegistered = fighters.some(f => f.platformKey === platformKey
+                && f.name.toLocaleLowerCase() === String(username).toLocaleLowerCase());
+            // Strict 128-body limit includes the streamer and eliminated roster slots:
+            // an existing identity may return; nobody new silently powers up another body.
+            if (!alreadyRegistered && fighters.length >= MAX_INDIVIDUAL_FIGHTERS) {
+                if (!silentBanner) appendChatMessage('@ArenaSystem', platformKey,
+                    `⛔ Arena completa (${MAX_INDIVIDUAL_FIGHTERS}/${MAX_INDIVIDUAL_FIGHTERS}). Inténtalo en la próxima ronda.`, 'normal');
+                return null;
+            }
+            if (!preferredClassKey && !isStreamer) {
+                preferredClassKey = BOT_PROFILE_BY_HANDLE.get(username.toLocaleLowerCase())?.classKey || null;
+            }
             // Viewer profile remembers class/identity across rounds. Explicit class choices replace it.
             let profile = null;
             if (!isStreamer) {
@@ -3573,33 +3646,7 @@ body.touch-controls-active #portraitChatOverlay {
                 return existing;
             }
 
-            // Keep at most 16 individual audience physics bodies. Every further viewer joins one shared group fighter.
-            const activeCount = fighters.filter(f => !f.eliminated).length;
-            if (activeCount >= MAX_INDIVIDUAL_FIGHTERS && !isStreamer) {
-                let host = getCoopGroupFighter();
-                if (!host) {
-                    const candidates = fighters.filter(f => !f.isStreamer && !f.eliminated);
-                    host = candidates[0] || fighters.find(f => !f.eliminated) || null;
-                    if (host) coopGroupFighterId = host.id;
-                }
-                if (host) {
-                    coopMemberKeys.add(incomingIdentityKey);
-                    host.coopCount += 1;
-                    totalParticipants += 1;
-                    host.maxHp += 30;
-                    if (!host.eliminated) host.hp = Math.min(host.maxHp, host.hp + 50);
-                    host.energy = Math.min(100, host.energy + 40);
-                    host.baseDamage += 2;
-                    document.getElementById('hudCoopBadge16')?.classList.remove('hidden');
-                    document.getElementById('hudCoopBadge9')?.classList.remove('hidden');
-                    spawnFloatingText(host.x, host.y - 45, `🤝 CO-OP x${host.coopCount} (${username})`, '#ffbe0b', 15);
-                    addKillFeed(`🤝 ${username} se une al personaje grupal ${getFighterDisplayName(host)}`);
-                    updateHudFighterCards();
-                    evaluateArenaMode(silentBanner);
-                    return host;
-                }
-            }
-
+            // Hard cap already validated above; never merge overflow into a stronger fighter.
             // Below the cap, the sender gets their own fighter with their remembered/selected class.
             const f = new Fighter(username, platformKey, isStreamer, preferredClassKey);
             fighters.push(f);
@@ -3621,6 +3668,16 @@ body.touch-controls-active #portraitChatOverlay {
             return f;
         }
 
+        function positionFighterOnIsometricArena(fighter, index, count, maxRadius = 0.82) {
+            // Golden-angle spiral spreads all 128 possible fighters across the arena ellipse.
+            const angle = index * (Math.PI * (3 - Math.sqrt(5)));
+            const radial = Math.sqrt((index + 0.5) / Math.max(1, count));
+            fighter.x = WORLD_W * 0.5 + Math.cos(angle) * WORLD_W * 0.44 * maxRadius * radial;
+            fighter.y = WORLD_H * 0.56 + Math.sin(angle) * WORLD_H * 0.30 * maxRadius * radial;
+            fighter.z = 0;
+            fighter.facing = fighter.x <= WORLD_W * 0.5 ? 1 : -1;
+        }
+
         function arrangeFightersForCurrentState(newFighter = null) {
             const groundY = WORLD_H * 0.79;
 
@@ -3629,11 +3686,7 @@ body.touch-controls-active #portraitChatOverlay {
                 fighters.forEach((f, idx) => {
                     if (activeMode === 'iso' && count >= 9) {
                         // Arrange in a 2.5D elliptical coliseum formation in Lobby when >= 9 players
-                        const angle = (idx / count) * Math.PI * 2;
-                        f.x = WORLD_W * 0.5 + Math.cos(angle) * (WORLD_W * 0.30);
-                        f.y = WORLD_H * 0.58 + Math.sin(angle) * (WORLD_H * 0.18);
-                        f.z = 0;
-                        f.facing = f.x <= WORLD_W * 0.5 ? 1 : -1;
+                        positionFighterOnIsometricArena(f, idx, count);
                     } else {
                         const slotPct = count === 1 ? 0.5 : 0.15 + (idx / Math.max(1, count - 1)) * 0.70;
                         f.x = WORLD_W * slotPct;
@@ -3645,26 +3698,31 @@ body.touch-controls-active #portraitChatOverlay {
                     f.vy = 0;
                 });
             } else if (newFighter) {
-                newFighter.x = WORLD_W * (0.18 + Math.random() * 0.64);
-                newFighter.y = activeMode === 'iso' ? WORLD_H * (0.38 + Math.random() * 0.38) : groundY - 60;
+                if (activeMode === 'iso') {
+                    // Safe randomized spawn inside the circular floor, never beyond its rim.
+                    const angle = Math.random() * Math.PI * 2;
+                    const r = Math.sqrt(Math.random()) * 0.72;
+                    newFighter.x = WORLD_W * 0.5 + Math.cos(angle) * WORLD_W * 0.44 * r;
+                    newFighter.y = WORLD_H * 0.56 + Math.sin(angle) * WORLD_H * 0.30 * r;
+                } else {
+                    newFighter.x = WORLD_W * (0.18 + Math.random() * 0.64);
+                    newFighter.y = groundY - 60;
+                }
             }
         }
 
         // Instant Scenario Preset Helper to Test Automatic 1v1 (2), Smash (5), Iso (11), or Co-op (20)
         function applyPlayerCountPreset(targetCount) {
+            // Simulator presets use curated names and can never create a 129th body.
+            targetCount = Math.max(0, Math.min(MAX_INDIVIDUAL_FIGHTERS, Math.trunc(Number(targetCount) || 0)));
             fighters = [];
             totalParticipants = 0;
             document.getElementById('hudCoopBadge16').classList.add('hidden');
             document.getElementById('hudCoopBadge9').classList.add('hidden');
 
             const platforms = ['tiktok', 'twitch', 'youtube', 'kick', 'facebook'];
-            const classes = ['kame', 'ninja', 'trueno', 'titan', 'esmeralda'];
-
-            for (let i = 0; i < targetCount; i++) {
-                const botName = BOT_NAMES[i % BOT_NAMES.length] + (i >= BOT_NAMES.length ? `_${i + 1}` : '');
-                const pKey = platforms[i % platforms.length];
-                const cKey = classes[i % classes.length];
-                addOrBoostFighter(botName, pKey, false, cKey, true);
+            for (const [index, bot] of BOT_ROSTER.slice(0, targetCount).entries()) {
+                addOrBoostFighter(bot.name, platforms[index % platforms.length], false, bot.classKey, true);
             }
 
             if (gameState === 'COMBAT') {
@@ -3678,8 +3736,7 @@ body.touch-controls-active #portraitChatOverlay {
                         f.y = groundY - f.radius;
                         f.facing = idx === 0 ? 1 : -1;
                     } else if (activeMode === 'iso') {
-                        f.x = WORLD_W * (0.18 + Math.random() * 0.64);
-                        f.y = WORLD_H * (0.36 + (idx % 5) * 0.09);
+                        positionFighterOnIsometricArena(f, idx, fighters.length);
                     } else {
                         const spread = 0.22 + (idx / Math.max(1, fighters.length - 1)) * 0.56;
                         f.x = WORLD_W * spread;
@@ -3720,7 +3777,8 @@ body.touch-controls-active #portraitChatOverlay {
 
         // Test helper: simulates !jugar for a fallen player and validates life limits.
         function simulateFallenRejoinForTest() {
-            if (gameState === 'LOBBY') {                startCombatFromLobby();
+            if (gameState === 'LOBBY') {
+                startCombatFromLobby();
             }
             // Prefer a fallen fighter who can return; otherwise demonstrate the blocked re-entry state.
             const fallenWithLives = fighters.filter(f => f.eliminated && !f.permanentlyOut);
@@ -3904,8 +3962,7 @@ body.touch-controls-active #portraitChatOverlay {
                     f.y = groundY - f.radius;
                     f.facing = idx === 0 ? 1 : -1;
                 } else if (activeMode === 'iso') {
-                    f.x = WORLD_W * (0.2 + Math.random() * 0.6);
-                    f.y = WORLD_H * (0.36 + (idx % 5) * 0.09);
+                    positionFighterOnIsometricArena(f, idx, fighters.length);
                 } else {
                     const spread = 0.22 + (idx / Math.max(1, fighters.length - 1)) * 0.56;
                     f.x = WORLD_W * spread;
@@ -4090,20 +4147,20 @@ body.touch-controls-active #portraitChatOverlay {
             if (activeMode === '1v1') {
                 b1v1.className = 'px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold transition-all bg-amber-500 text-slate-950 shadow-md shadow-amber-500/30 flex items-center gap-1';
                 modeIcon = '🥊';
-                modeTitle16 = '1 VS 1 • DUELO FINAL (DOBLE SALTO)';
-                modeTitle9 = '1 VS 1 FINAL';
+                modeTitle16 = 'Final';
+                modeTitle9 = 'Final';
                 stageExplain = `Modo Automático (${countForMode} Vivos): <strong class="text-amber-300">🥊 Duelo Final 1 vs 1 + Doble Salto</strong>`;
             } else if (activeMode === 'smash') {
                 bSmash.className = 'px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold transition-all bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/30 flex items-center gap-1';
                 modeIcon = '⚡';
-                modeTitle16 = 'SMASH PLATAFORMAS (8-3 VIVOS • 2x SALTO)';
-                modeTitle9 = 'SMASH (8-3)';
+                modeTitle16 = 'Smash';
+                modeTitle9 = 'Smash';
                 stageExplain = `Modo Automático (${countForMode} Vivos): <strong class="text-cyan-300">⚡ Smash Plataformas + Doble Salto (Cae a 1v1 en 2 vivos)</strong>`;
             } else {
                 bIso.className = 'px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold transition-all bg-purple-500 text-white shadow-md shadow-purple-500/30 flex items-center gap-1';
                 modeIcon = '🏟️';
-                modeTitle16 = 'ARENA ISOMÉTRICA 2.5D (9+ VIVOS)';
-                modeTitle9 = 'ARENA ISO (9+)';
+                modeTitle16 = 'Arena';
+                modeTitle9 = 'Arena';
                 stageExplain = `Modo Automático (${countForMode} Vivos): <strong class="text-purple-300">🏟️ Arena Isométrica 2.5D (Al quedar 8 vivos cambia a Smash)</strong>`;
             }
 
@@ -4111,11 +4168,11 @@ body.touch-controls-active #portraitChatOverlay {
 
             // Update Both 16:9 and 9:16 Perimeter HUDs
             document.getElementById('hudModeIcon16').textContent = modeIcon;
-            document.getElementById('hudModeTitle16').textContent = gameState === 'LOBBY' ? `LOBBY • ${modeTitle16}` : modeTitle16;
+            document.getElementById('hudModeTitle16').textContent = modeTitle16;
             document.getElementById('lobbyDetectedMode16').textContent = `${modeIcon} ${modeTitle16}`;
 
             document.getElementById('hudModeIcon9').textContent = modeIcon;
-            document.getElementById('hudModeTitle9').textContent = gameState === 'LOBBY' ? `LOBBY • ${modeTitle9}` : modeTitle9;
+            document.getElementById('hudModeTitle9').textContent = modeTitle9;
             document.getElementById('lobbyDetectedMode9').textContent = `${modeIcon} ${modeTitle9}`;
 
             const aliveCount = aliveFighters.length;
@@ -4619,7 +4676,8 @@ body.touch-controls-active #portraitChatOverlay {
                     addKillFeed(`🚫 ${getFighterDisplayName(victim, true)} ${runtimeCopy('livesOut')} (${runtimeCopy('eliminated')})`, 'ko');
                     appendChatMessage(
                         '@SistemaArena',
-                        victim.platformKey,                        `🚫 ${getFighterDisplayName(victim, true)} agotó sus ${MAX_OPPORTUNITIES} vidas. ¡Eliminado hasta la siguiente partida!`,
+                        victim.platformKey,
+                        `🚫 ${getFighterDisplayName(victim, true)} agotó sus ${MAX_OPPORTUNITIES} vidas. ¡Eliminado hasta la siguiente partida!`,
                         'gift'
                     );
                 } else {
@@ -4851,7 +4909,12 @@ body.touch-controls-active #portraitChatOverlay {
                         f.y += f.vy * dt * 0.35;
                         f.vx *= Math.pow(0.96, dt);
                         f.vy *= Math.pow(0.96, dt);
-                        if (f.ringOutTimer <= 0) handleFighterKO(f, f.lastAttacker);
+                        if (f.ringOutTimer <= 0) {
+                            f.ringOutTimer = 0;
+                            appendChatMessage('@ArenaSystem', f.platformKey,
+                                `💥 ${getFighterDisplayName(f)} cayó al abismo.`, 'normal');
+                            handleFighterKO(f, f.lastAttacker);
+                        }
                         return;
                     }
                     if (f.knockbackTimer > 0) {
@@ -4935,12 +4998,22 @@ body.touch-controls-active #portraitChatOverlay {
                         && rimDistance <= SPECTATOR_RECOVERY_DISTANCE + SPECTATOR_RECOVERY.isometricExtraFallMargin;
                     const returningFromRescue = !f.isStreamer && f.recoveryJumpUsed && f.z > 0
                         && rimDistance <= SPECTATOR_RECOVERY_DISTANCE + SPECTATOR_RECOVERY.isometricExtraFallMargin;
+                    if (radiusFromCenter > 1.015 && launchGrace && !returningFromRescue) {
+                        f.fallDrop = Math.min(54, rimDistance * 0.42);
+                    } else if (radiusFromCenter <= 1 && f.ringOutTimer <= 0) {
+                        f.fallDrop = 0;
+                    }
                     if (radiusFromCenter > 1.015 && !launchGrace && !returningFromRescue) {
+                        // The circular floor has no invisible wall: off-rim fighters visibly
+                        // sink into the abyss before being eliminated, even without damage.
+                        f.ringOutTimer = 30;
+                        f.fallDrop = Math.max(f.fallDrop, 3);
+                        f.castingSkill = null;
+                        f.z = 0;
+                        f.vz = 0;
+                        f.knockbackTimer = 0;
                         addActiveEffect({ type: 'ringOutPillar', x: Math.max(40, Math.min(W - 40, f.x)), y: f.y, color: f.color, timer: 32, maxTimer: 32 });
-                        screenShake = Math.max(screenShake, 12);
-                        spawnFloatingText(f.x, f.y - 28, '💥', '#fb7185', 15);
-                        addKillFeed(`💥 ${getFighterDisplayName(f)} cayó fuera de la arena (KO)`);
-                        handleFighterKO(f, f.lastAttacker);
+                        screenShake = Math.max(screenShake, 9);
                         return;
                     } else if (radiusFromCenter <= 0.76 && f.z <= 0 && f.recoveryJumpUsed) {
                         // A safe landing completes this single recovery attempt.
@@ -5285,6 +5358,15 @@ body.touch-controls-active #portraitChatOverlay {
                 const ry = H * 0.30;
 
                 targetCtx.save();
+                // Surrounding dark void and rim shadow make the drop readable on both crops.
+                targetCtx.save();
+                targetCtx.beginPath();
+                targetCtx.ellipse(cx, cy + 15, rx + 20, ry + 20, 0, 0, Math.PI * 2);
+                targetCtx.fillStyle = '#030511';
+                targetCtx.shadowColor = 'rgba(0,0,0,0.9)';
+                targetCtx.shadowBlur = 30;
+                targetCtx.fill();
+                targetCtx.restore();
                 targetCtx.beginPath();
                 targetCtx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
                 targetCtx.fillStyle = '#0f172a';
@@ -5448,10 +5530,11 @@ body.touch-controls-active #portraitChatOverlay {
                 targetCtx.fill();
                 targetCtx.stroke();
                 targetCtx.restore();
-            } else {
+            } else if (f.fallDrop <= 0) {
+                // A fighter falling off the isometric floor no longer casts a floor shadow.
                 targetCtx.fillStyle = 'rgba(0, 0, 0, 0.45)';
                 targetCtx.beginPath();
-                targetCtx.ellipse(f.x, f.y + r * 0.85 + (f.fallDrop || 0) * 0.25, r * 0.9, r * 0.32, 0, 0, Math.PI * 2);
+                targetCtx.ellipse(f.x, f.y + r * 0.85, r * 0.9, r * 0.32, 0, 0, Math.PI * 2);
                 targetCtx.fill();
             }
 
@@ -5518,7 +5601,8 @@ body.touch-controls-active #portraitChatOverlay {
                 targetCtx.beginPath();
                 const startAngle = f.facing === 1 ? -0.9 : Math.PI - 0.9;
                 const endAngle = f.facing === 1 ? 0.9 : Math.PI + 0.9;
-                targetCtx.arc(drawX + f.facing * 8, drawY, r * 1.65, startAngle, endAngle);                targetCtx.stroke();
+                targetCtx.arc(drawX + f.facing * 8, drawY, r * 1.65, startAngle, endAngle);
+                targetCtx.stroke();
             }
 
             if (f.immunityTimer > 0) {
@@ -6249,16 +6333,15 @@ body.touch-controls-active #portraitChatOverlay {
         }
 
         function triggerQuickJoin() {
-            const platforms = ['tiktok', 'twitch', 'youtube', 'kick'];
-            const pKey = platforms[Math.floor(Math.random() * platforms.length)];
-            const unusedNames = BOT_NAMES.filter(n => !fighters.some(f => f.name === n && !f.eliminated));
-            const name = unusedNames.length > 0
-                ? unusedNames[Math.floor(Math.random() * unusedNames.length)]
-                : `@Viewer_${Math.floor(100 + Math.random() * 899)}`;
-
-            const joinCmds = gameState === 'LOBBY' ? ['!jugar', '!guerrero', '!shinobi', '!titan', '!rayo', '!espiritu'] : ['!jugar'];
-            const chosenCmd = joinCmds[Math.floor(Math.random() * joinCmds.length)];
-            processChatCommand(name, pKey, chosenCmd, null, true);
+            if (fighters.length >= MAX_INDIVIDUAL_FIGHTERS) {
+                appendChatMessage('@ArenaSystem', 'tiktok', `⛔ Arena completa (${MAX_INDIVIDUAL_FIGHTERS}).`, 'normal');
+                return null;
+            }
+            const unused = BOT_ROSTER.filter(bot => !fighters.some(f => f.name.toLocaleLowerCase() === bot.name.toLocaleLowerCase()));
+            if (!unused.length) return null;
+            const bot = unused[Math.floor(Math.random() * unused.length)];
+            // Each test identity uses its assigned class regardless of join timing.
+            return addOrBoostFighter(bot.name, 'tiktok', false, bot.classKey, true);
         }
 
         function triggerBatchJoin(count = 4) {
@@ -6417,7 +6500,8 @@ body.touch-controls-active #portraitChatOverlay {
             } else if (eventType === 'bits') {
                 f.specialAmplifyTimer = Math.max(f.specialAmplifyTimer, frames);
                 f.energy = Math.min(100, f.energy + Math.round(45 * scale));
-                value = '+50% · 10 s'; symbol = '💜'; color = '#c084fc';            } else if (eventType === 'donation') {
+                value = '+50% · 10 s'; symbol = '💜'; color = '#c084fc';
+            } else if (eventType === 'donation') {
                 f.healthRegenerationTimer = Math.max(f.healthRegenerationTimer, Math.round(frames * scale));
                 value = '10 s'; symbol = '💚'; color = '#4ade80';
             } else if (eventType === 'superchat') {
@@ -6513,7 +6597,7 @@ body.touch-controls-active #portraitChatOverlay {
                     if (!item || typeof item.name !== 'string' || !item.name.trim()) continue;
                     const platformKey = Object.prototype.hasOwnProperty.call(PLATFORMS, item.platformKey) ? item.platformKey : 'tiktok';
                     const name = normalizeChatUsername(item.name);
-                    if (FALLBACK_ARENA_BOTS.has(name.toLocaleLowerCase())) continue;
+                    if (isBuiltInSpectatorBot(name)) continue;
                     const archetypeKey = isValidArchetypeKey(item.archetypeKey)
                         ? item.archetypeKey
                         : ARCHETYPES[Math.floor(Math.random() * ARCHETYPES.length)].key;
@@ -6530,7 +6614,7 @@ body.touch-controls-active #portraitChatOverlay {
         function rememberViewerProfile(username, platformKey = 'tiktok', classKey = null, replaceClass = false) {
             const name = normalizeChatUsername(username);
             const platform = Object.prototype.hasOwnProperty.call(PLATFORMS, platformKey) ? platformKey : 'tiktok';
-            if (FALLBACK_ARENA_BOTS.has(name.toLocaleLowerCase())) return null;
+            if (isBuiltInSpectatorBot(name)) return null;
             const key = viewerIdentityKey(name, platform);
             const previous = viewerProfiles.get(key);
             const validRequestedClass = isValidArchetypeKey(classKey) ? classKey : null;
@@ -7217,6 +7301,7 @@ body.touch-controls-active #portraitChatOverlay {
             requestAnimationFrame(gameLoop);
         }
 
+
         // MODULE BLOCK: FULLSCREEN VIEW CONTROLS — browser-native fullscreen for each broadcast canvas.
         const ARENA_FULLSCREEN_COPY = Object.freeze({
             es: {enter:'Pantalla completa',exit:'Salir de pantalla completa'},
@@ -7313,10 +7398,15 @@ body.touch-controls-active #portraitChatOverlay {
                     koSequenceActive,
                     activeFighters: alive.length,
                     fighterBodies: fighters.length,
+                    maxFighters: MAX_INDIVIDUAL_FIGHTERS,
+                    botRosterSize: BOT_ROSTER.length,
                     totalParticipants,
                     autoAudienceEnabled: autoChatEnabled,
                     language: currentLanguage
                 });
+            },
+            getBotRoster() {
+                return BOT_ROSTER.map(entry => Object.freeze({name: entry.name, classKey: entry.classKey}));
             },
             getFighters() {
                 return fighters.map(fighter => Object.freeze({
