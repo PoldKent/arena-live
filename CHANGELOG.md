@@ -1,10 +1,19 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-22 — Pulido visual de Arena Live v0.1
+
+- Barras de vida del duelo **9:16** aumentadas a **14 px**, nombres y porcentajes a **12 px**, energía a **6 px**.
+- **Arena Live v0.1** y la edición identificadas en el pie de **Ajustes**.
+- Los rótulos redundantes de lobby ya retirados permanecen ausentes en ambas pantallas.
+- En Dual Full Screen ultrawide, barra superior **34 px**, franja inferior **76 px** y ajuste horizontal 9:16 predeterminado **+10 px**.
+- Calibración de OBS entre **0–16 px** horizontal y **72–148 px** inferior; migración de valores previos por defecto, sin alterar valores personalizados distintos.
+- El cajón continúa sin cambiar tamaño ni posición de los lienzos al abrirse o cerrarse.
+
 ## 2026-10-22 — Arena Live v0.1 · OBS
 
 - Versión visible en Ajustes (`Arena Live v0.1 · main`) y API `window.ArenaLive.version = '0.1.0'`.
 - Rótulos redundantes del lobby 16:9/9:16 eliminados.
-- Calibración OBS de margen vertical (0–16 px) y franja inferior (84–148 px; 108 por defecto).
+- Calibración OBS del margen vertical (0–16 px) y franja inferior (72–148 px; 76 por defecto).
 - Más espacio para 16:9; geometría estable al abrir/cerrar herramientas.
 - Edición autónoma, sin puente de TikTok.
 
