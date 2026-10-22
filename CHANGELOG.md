@@ -1,5 +1,14 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-22 — Arena Live v0.1 · OBS
+
+- Versión visible en Ajustes (`Arena Live v0.1 · main`) y API `window.ArenaLive.version = '0.1.0'`.
+- Rótulos redundantes del lobby 16:9/9:16 eliminados.
+- Calibración OBS de margen vertical (0–16 px) y franja inferior (84–148 px; 108 por defecto).
+- Más espacio para 16:9; geometría estable al abrir/cerrar herramientas.
+- Edición autónoma, sin puente de TikTok.
+
+
 ## 2026-10-22 — Emisión dual definitiva y preparación adaptativa
 
 - **Dual Full Screen** reservado como composición principal de OBS con dos lienzos de una sola partida.
