@@ -897,8 +897,7 @@ body.touch-controls-active #portraitChatOverlay {
                                     <span id="hudModeIcon9" class="text-xs">⚡</span>
                                     <div>
                                         <div id="hudModeTitle9" class="font-display text-[9px] font-bold text-pink-300 uppercase leading-tight">
-                                            SMASH FFA
-                                        </div>
+                                            SMASH FFA                                        </div>
                                         <div class="hud-player-metric text-[9px] text-slate-300">
                                             <strong id="hudFighterCount9">0</strong> Jug.
                                             <span id="hudCoopBadge9" class="hidden text-amber-300 font-bold">+COOP</span>
@@ -1797,8 +1796,7 @@ body.touch-controls-active #portraitChatOverlay {
             ['El streamer puede unirse desde el lobby o durante el combate, con cualquier regla.','The streamer can join from the lobby or during combat under any rule.','Le streamer peut rejoindre depuis le lobby ou pendant le combat, quelle que soit la règle.','Der Streamer kann unabhängig von der Regel aus der Lobby oder während des Kampfes beitreten.','无论采用哪种规则，主播都可以从大厅或战斗中加入。','ルールに関係なく、配信者はロビーまたは戦闘中に参加できます。'],
             ['The streamer joined the arena.','The streamer joined the arena.','Le streamer a rejoint l’arène.','Der Streamer ist der Arena beigetreten.','主播已加入竞技场。','配信者がアリーナに参加しました。'],
             ['The streamer rejoined the arena.','The streamer rejoined the arena.','Le streamer est revenu dans l’arène.','Der Streamer ist in die Arena zurückgekehrt.','主播已重新加入竞技场。','配信者がアリーナに再参加しました。'],
-            ['Guerrero','Warrior','Guerrier','Krieger','战士','戦士'],
-            ['Guerrero','Warrior','Guerrier','Krieger','战士','戦士'],
+            ['Guerrero','Warrior','Guerrier','Krieger','战士','戦士'],            ['Guerrero','Warrior','Guerrier','Krieger','战士','戦士'],
             ['Shinobi','Shinobi','Shinobi','Shinobi','忍者','忍者'],
             ['Titan','Titan','Titan','Titan','巨人','巨人'],
             ['Rayo','Lightning','Foudre','Blitz','闪电','稲妻'],
@@ -2697,8 +2695,7 @@ body.touch-controls-active #portraitChatOverlay {
                 '&': '&amp;',
                 '<': '&lt;',
                 '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;'
+                '"': '&quot;',                "'": '&#39;'
             })[char]);
         }
 
@@ -3597,8 +3594,7 @@ body.touch-controls-active #portraitChatOverlay {
 
         // Test helper: simulates !jugar for a fallen player and validates life limits.
         function simulateFallenRejoinForTest() {
-            if (gameState === 'LOBBY') {
-                startCombatFromLobby();
+            if (gameState === 'LOBBY') {                startCombatFromLobby();
             }
             // Prefer a fallen fighter who can return; otherwise demonstrate the blocked re-entry state.
             const fallenWithLives = fighters.filter(f => f.eliminated && !f.permanentlyOut);
@@ -4497,8 +4493,7 @@ body.touch-controls-active #portraitChatOverlay {
                     addKillFeed(`🚫 ${getFighterDisplayName(victim, true)} ${runtimeCopy('livesOut')} (${runtimeCopy('eliminated')})`, 'ko');
                     appendChatMessage(
                         '@SistemaArena',
-                        victim.platformKey,
-                        `🚫 ${getFighterDisplayName(victim, true)} agotó sus ${MAX_OPPORTUNITIES} vidas. ¡Eliminado hasta la siguiente partida!`,
+                        victim.platformKey,                        `🚫 ${getFighterDisplayName(victim, true)} agotó sus ${MAX_OPPORTUNITIES} vidas. ¡Eliminado hasta la siguiente partida!`,
                         'gift'
                     );
                 } else {
@@ -5397,8 +5392,7 @@ body.touch-controls-active #portraitChatOverlay {
                 targetCtx.beginPath();
                 const startAngle = f.facing === 1 ? -0.9 : Math.PI - 0.9;
                 const endAngle = f.facing === 1 ? 0.9 : Math.PI + 0.9;
-                targetCtx.arc(drawX + f.facing * 8, drawY, r * 1.65, startAngle, endAngle);
-                targetCtx.stroke();
+                targetCtx.arc(drawX + f.facing * 8, drawY, r * 1.65, startAngle, endAngle);                targetCtx.stroke();
             }
 
             if (f.immunityTimer > 0) {
@@ -6297,8 +6291,7 @@ body.touch-controls-active #portraitChatOverlay {
             } else if (eventType === 'bits') {
                 f.specialAmplifyTimer = Math.max(f.specialAmplifyTimer, frames);
                 f.energy = Math.min(100, f.energy + Math.round(45 * scale));
-                value = '+50% · 10 s'; symbol = '💜'; color = '#c084fc';
-            } else if (eventType === 'donation') {
+                value = '+50% · 10 s'; symbol = '💜'; color = '#c084fc';            } else if (eventType === 'donation') {
                 f.healthRegenerationTimer = Math.max(f.healthRegenerationTimer, Math.round(frames * scale));
                 value = '10 s'; symbol = '💚'; color = '#4ade80';
             } else if (eventType === 'superchat') {
