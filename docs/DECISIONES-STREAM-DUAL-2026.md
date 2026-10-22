@@ -12,7 +12,7 @@ Fecha: 22 de octubre de 2026
 |---|---|---|
 | 1 | Preparación en escritorio | Vista 16:9 únicamente; botón **Ver 9:16** para alternar sin reiniciar la partida. |
 | 2 | Preparación en móvil | Vista 9:16 únicamente; botón **Ver 16:9** para alternar. |
-| 3 | Streaming dual | 16:9 maximizada a la izquierda; 9:16 reservada en el extremo derecho, con corrección fina de 4 píxeles en monitores ultrawide. |
+| 3 | Streaming dual | 16:9 maximizada a la izquierda; 9:16 reservada en el extremo derecho, con corrección fina de 10 píxeles predeterminados en monitores ultrawide. |
 | 4 | Controles LIVE | Barra compacta superior con botones esenciales, sin cubrir el lienzo de juego. |
 | 5 | Herramientas de prueba | Cajón inferior plegado de forma predeterminada; se conserva el panel existente sin duplicar lógica. |
 | 6 | Captura estable | Mientras el modo dual esté activo, abrir/cerrar herramientas **no cambia tamaños ni posiciones de los lienzos**, para preservar los recortes de OBS. |
@@ -44,3 +44,7 @@ Fecha: 22 de octubre de 2026
 - Tamaños y coordenadas de ambos lienzos iguales antes y después de abrir/cerrar el cajón.
 - Los controles de Pausa/Lobby/Prota/Ajustes/Pruebas son clicables.
 - En TikTok el botón de conexión usa el puente local, el chat recibido está en su cajón y el botón de exportación sigue disponible.
+
+## Pulido de OBS en v0.1
+
+El HUD de duelo en **9:16** usa barras de vida de **14 px** y nombres/porcentajes de **12 px**. En ultrawide, la barra superior mide **34 px** y el espacio inferior inicia en **76 px**, en vez de 108 px. La corrección derecha 9:16 inicia en **10 px**; ambos valores son configurables desde Ajustes. El pie de Ajustes identifica **Arena Live v0.1** y la edición.
