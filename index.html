@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live — Prototipo Interactivo para Streams</title>
+    <title>Arena Live v0.1 — TikTok LIVE</title>
     <!--
       ARENA LIVE · MONOLITHIC DELIVERY
       All application code intentionally stays in this HTML file.
@@ -745,7 +745,7 @@ body.touch-controls-active #portraitChatOverlay {
 #broadcastStageSection:fullscreen #chatSimulatorSidebar #mobileChatExpand {display:none !important;}
 #broadcastStageSection:fullscreen #chatSimulatorSidebar #chatFeedFrame {height:150px !important; max-height:150px !important; min-height:100px !important;}
 #broadcastStageSection:fullscreen #chatSimulatorSidebar #chatFeed {height:100% !important; overflow-y:auto !important;}
-#broadcastStageSection:fullscreen #settingsPauseModal {z-index:100 !important;}
+#broadcastStageSection:fullscreen #settingsPauseModal {position:fixed !important;inset:0 !important;z-index:100 !important;}
 #broadcastStageSection:fullscreen #settingsPauseModal.hidden {display:none !important;}
 #arenaDualUltrawideVerticalStage, #arenaDualCenterStageMount {display:none;}
 #arenaDualTopCluster, #arenaDualBottomCluster {display:flex; flex-direction:column; min-height:0;}
@@ -867,11 +867,11 @@ body.touch-controls-active #portraitChatOverlay {
 #broadcastStageSection:fullscreen:not(.arena-dual-ultrawide) #arenaDualBottomCluster {height:calc(100% - 50px);min-height:140px}
 #broadcastStageSection:fullscreen:not(.arena-dual-ultrawide) #arenaDualOperatorDock .arena-dual-dock-quick {flex-wrap:wrap}
 /* Ultrawide: el lateral 9:16 permanece en el extremo derecho; las herramientas ocupan bandas fijas arriba y abajo del 16:9. */
-#broadcastStageSection:fullscreen.arena-dual-ultrawide > #arenaDualOperatorDock {grid-template-rows:42px minmax(0,1fr) 148px!important;row-gap:7px!important}
+#broadcastStageSection:fullscreen.arena-dual-ultrawide > #arenaDualOperatorDock {grid-template-rows:42px minmax(0,1fr) var(--arena-operator-footer-height,108px)!important;row-gap:7px!important}
 #broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualTopCluster {grid-row:1;flex-direction:row!important;justify-content:space-between;align-items:center;height:42px!important}
 #broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualCenterStageMount {grid-row:2;margin:0!important;padding:7px!important}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualBottomCluster {grid-row:3;display:flex!important;flex-direction:column!important;grid-template-columns:none!important;grid-template-rows:none!important;height:148px!important;min-height:0!important;max-height:148px!important;box-sizing:border-box!important;gap:0!important;border:0!important;box-shadow:none!important;background:#0b1423!important}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualUltrawideVerticalStage {transform:translateX(4px);margin-right:-4px;}
+#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualBottomCluster {grid-row:3;display:flex!important;flex-direction:column!important;grid-template-columns:none!important;grid-template-rows:none!important;height:var(--arena-operator-footer-height,108px)!important;min-height:0!important;max-height:var(--arena-operator-footer-height,108px)!important;box-sizing:border-box!important;gap:0!important;border:0!important;box-shadow:none!important;background:#0b1423!important}
+#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualUltrawideVerticalStage {transform:translateX(var(--arena-vertical-nudge,4px));margin-right:calc(-1 * var(--arena-vertical-nudge,4px));}
 #broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualDrawerContents #arenaDualTikTokChat {height:180px!important;min-height:140px!important;margin:4px}
 #broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualDrawerContents #arenaDualToolsDisclosure {margin:4px}
 /* Captura limpia: los marcos externos y botones flotantes no entran en los lienzos. */
@@ -1103,9 +1103,6 @@ body.touch-controls-active #portraitChatOverlay {
                         <!-- 16:9 LOBBY OVERLAY -->
                         <div id="lobbyOverlay16" class="relative z-20 my-auto mx-auto w-[92%] max-w-xl flex flex-col items-center justify-between gap-2 pointer-events-auto">
                             <div class="w-full hud-glass rounded-2xl p-3 border-2 border-cyan-400/60 glow-cyan text-center shadow-2xl">
-                                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 text-[9px] font-extrabold uppercase tracking-widest mb-0.5">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span> Lobby 16:9 en Vivo
-                                </div>
                                 <h2 class="font-display font-black text-sm sm:text-lg text-white tracking-wide">
                                     ¡ESCRIBE <span class="text-cyan-300 underline">!jugar</span> EN EL CHAT PARA ENTRAR!
                                 </h2>
@@ -1199,7 +1196,6 @@ body.touch-controls-active #portraitChatOverlay {
                         <div class="relative z-10 p-1 flex flex-col gap-0.5 pointer-events-none">
                             <div id="hudFighterCards16" class="flex items-end gap-1 max-h-9 overflow-hidden justify-end"></div>
                             <div class="hud-glass rounded-lg py-0.5 px-2 border border-cyan-500/30 overflow-hidden flex items-center gap-2">
-                                <span class="px-1.5 py-0.2 rounded bg-gradient-to-r from-pink-600 to-purple-600 text-[9px] font-extrabold uppercase shrink-0">16:9 LIVE</span>
                                 <div class="overflow-hidden whitespace-nowrap w-full text-[10px] font-semibold text-slate-200">
                                     <div class="animate-ticker gap-8">
                                         <span>💬 <strong class="text-cyan-300">!jugar</strong> entrar</span>
@@ -1310,9 +1306,6 @@ body.touch-controls-active #portraitChatOverlay {
                         <!-- 9:16 VERTICAL LOBBY OVERLAY -->
                         <div id="lobbyOverlay9" class="relative z-20 my-auto mx-auto w-[92%] flex flex-col items-center gap-1.5 pointer-events-auto">
                             <div class="w-full hud-glass rounded-2xl p-2.5 border-2 border-pink-500/60 glow-pink text-center shadow-2xl">
-                                <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-pink-500/20 border border-pink-400/40 text-pink-300 text-[8px] font-extrabold uppercase">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-pink-400 animate-ping"></span> TikTok Live 9:16
-                                </div>
                                 <h3 class="font-display font-black text-xs text-white mt-0.5">
                                     ¡COMENTA <span class="text-cyan-300">!jugar</span>!
                                 </h3>
@@ -1597,6 +1590,7 @@ body.touch-controls-active #portraitChatOverlay {
                             <h2 class="font-display font-black text-base sm:text-lg text-white tracking-wide">
                                 <span data-menu-key="title">Pausa y ajustes de partida</span>
                             </h2>
+                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.1 · TikTok</span>
                             <span id="settingsModeBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400/40">
                                 ⏸️ JUEGO EN PAUSA
                             </span>
@@ -1766,6 +1760,23 @@ body.touch-controls-active #portraitChatOverlay {
                         </div>
                     </div>
 
+                    <!-- Ajustes de calibración específicos del operador. No modifica la lógica de la partida. -->
+                    <section id="arenaObsCalibrationPanel" data-no-translate class="rounded-xl border border-cyan-800/50 bg-slate-950/70 p-3 flex flex-col gap-2" aria-label="Calibración OBS">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <strong class="text-[11px] text-cyan-200" id="arenaObsCalibrationTitle">📐 Calibración para OBS · v0.1</strong>
+                            <button type="button" id="arenaObsResetCalibration" onclick="resetArenaObsCalibration()" class="rounded-md px-2 py-1 border border-slate-700 bg-slate-900 text-slate-200 text-[10px]">Restablecer</button>
+                        </div>
+                        <p class="text-[10px] text-slate-400" id="arenaObsCalibrationHint">Ajusta esto antes de emitir; los recortes de OBS deben configurarse después. Abrir las herramientas no modificará las dimensiones.</p>
+                        <label class="flex flex-col gap-1 text-[11px] text-slate-300" for="arenaObsVerticalOffset">
+                            <span id="arenaObsVerticalOffsetLabel">Desplazamiento vertical hacia la derecha: <output id="arenaObsVerticalOffsetValue">4 px</output></span>
+                            <input type="range" id="arenaObsVerticalOffset" min="0" max="16" step="1" value="4" oninput="setArenaObsCalibration('offset',this.value)" class="w-full accent-pink-400" />
+                        </label>
+                        <label class="flex flex-col gap-1 text-[11px] text-slate-300" for="arenaObsFooterHeight">
+                            <span id="arenaObsFooterHeightLabel">Espacio inferior para herramientas: <output id="arenaObsFooterHeightValue">108 px</output></span>
+                            <input type="range" id="arenaObsFooterHeight" min="84" max="148" step="4" value="108" oninput="setArenaObsCalibration('footer',this.value)" class="w-full accent-cyan-400" />
+                        </label>
+                        <output id="arenaObsGeometrySummary" class="text-[10px] leading-relaxed text-slate-400" aria-live="polite">Abre Dual Full Screen para consultar las dimensiones efectivas de ambas vistas.</output>
+                    </section>
                     <label class="block text-xs text-slate-300 border-t border-slate-800/80 pt-3" for="hudOpacityRange">
                         <span data-ui-label="hudOpacity">Opacidad del HUD</span>: <output id="hudOpacityValue">85 %</output>
                         <input id="hudOpacityRange" type="range" min="35" max="100" value="85" step="5" oninput="setArenaHudOpacity(this.value)" class="w-full accent-cyan-400 mt-2" aria-label="Opacidad del HUD">
@@ -2957,6 +2968,7 @@ body.touch-controls-active #portraitChatOverlay {
                 settingsAccessMode = 'pause';
             }
             syncSettingsModalState();
+            if(shouldOpen)requestAnimationFrame(updateArenaObsGeometrySummary);
         }
 
         function openLiveSettings() {
@@ -2964,6 +2976,7 @@ body.touch-controls-active #portraitChatOverlay {
             settingsAccessMode = 'live';
             isGamePaused = false;
             syncSettingsModalState();
+            requestAnimationFrame(updateArenaObsGeometrySummary);
         }
 
         function pauseWithSettingsOpen() {
@@ -7574,6 +7587,7 @@ body.touch-controls-active #portraitChatOverlay {
             installTouchControls();
             installArenaFullscreenControls();
             installArenaDualOperatorControls();
+            loadArenaObsCalibration();
             installArenaPreparationSwitch();
             refreshStreamerControlLabels();
             updateRuleSpecificSettings();
@@ -7750,7 +7764,86 @@ body.touch-controls-active #portraitChatOverlay {
         const arenaDualMonitorMovedNodes = [];
         let arenaDualUltrawideActive = false;
 
+        // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
+        const ARENA_RELEASE_VERSION = '0.1';
+        const ARENA_RELEASE_EDITION = 'tiktok';
+        const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
+        const ARENA_OBS_DEFAULTS = Object.freeze({offset:4, footer:108});
+        let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
+        const ARENA_OBS_COPY = Object.freeze({
+          es:['Calibración para OBS','Restablecer','Ajusta antes de emitir; los recortes se configuran después. Abrir el cajón no cambiará el tamaño del juego.','Mover 9:16 a la derecha','Altura del cajón inferior','Abre Dual Full Screen para comprobar tamaños.','Pantallas','Preparación'],
+          en:['OBS calibration','Reset','Adjust before going live, then configure OBS crops. Opening the drawer will not resize the game.','Move 9:16 to the right','Bottom drawer height','Enter Dual Full Screen to check dimensions.','Displays','Preparation'],
+          fr:['Calibrage OBS','Réinitialiser','Réglez avant le direct; configurez ensuite les recadrages OBS. Le tiroir ne modifie pas le jeu.','Déplacer 9:16 vers la droite','Hauteur du tiroir','Ouvrez le double plein écran pour vérifier.','Écrans','Préparation'],
+          de:['OBS-Kalibrierung','Zurücksetzen','Vor der Übertragung einstellen; danach OBS-Ausschnitt konfigurieren. Die Schublade ändert keine Bildgrößen.','9:16 nach rechts verschieben','Höhe der unteren Leiste','Dual-Vollbild für die Maße öffnen.','Ansichten','Vorbereitung'],
+          zh:['OBS 校准','重置','直播前调整，然后配置 OBS 裁剪；打开抽屉不会改变游戏画面尺寸。','9:16 右移','底部工具栏高度','进入双屏全屏以查看尺寸。','画面','准备'],
+          ja:['OBS キャリブレーション','リセット','配信前に調整し、OBS の切り抜きを設定。ドロワーを開いても画面サイズは変わりません。','9:16 を右へ移動','下部ドロワーの高さ','デュアル全画面で寸法を確認。','画面','準備'],
+          pt:['Calibração OBS','Redefinir','Ajuste antes da live e depois configure o recorte OBS. Abrir o painel não altera o jogo.','Mover 9:16 à direita','Altura do painel inferior','Abra o dual em tela cheia para conferir tamanhos.','Telas','Preparação'],
+          it:['Calibrazione OBS','Ripristina','Regola prima della diretta, poi imposta i ritagli OBS. Il cassetto non ridimensiona il gioco.','Sposta 9:16 a destra','Altezza pannello inferiore','Apri il duale a schermo intero per controllare.','Schermi','Preparazione']
+        });
+        function clampArenaObsCalibration(key, value) {
+          const parsed = Number(value);
+          if (key === 'offset') return Math.max(0,Math.min(16,Number.isFinite(parsed)?Math.round(parsed):4));
+          if (key === 'footer') return Math.max(84,Math.min(148,4*Math.round((Number.isFinite(parsed)?parsed:108)/4)));
+          return null;
+        }
+        function loadArenaObsCalibration() {
+          try {
+            const raw = localStorage.getItem(ARENA_OBS_CALIBRATION_KEY);
+            const values = JSON.parse(raw || '{}');
+            if (values && typeof values === 'object') {
+              for(const key of ['offset','footer']) arenaObsCalibration[key] = clampArenaObsCalibration(key,values[key] ?? ARENA_OBS_DEFAULTS[key]);
+            }
+          } catch(_) { /* default calibration when storage is unavailable */ }
+          applyArenaObsCalibration(false);
+        }
+        function setArenaObsCalibration(key, value) {
+          if (!Object.hasOwn(ARENA_OBS_DEFAULTS,key)) return;
+          arenaObsCalibration[key] = clampArenaObsCalibration(key,value);
+          applyArenaObsCalibration(true);
+        }
+        function resetArenaObsCalibration() {
+          arenaObsCalibration={...ARENA_OBS_DEFAULTS};
+          applyArenaObsCalibration(true);
+        }
+        function applyArenaObsCalibration(remember) {
+          const stage=document.getElementById('broadcastStageSection');
+          if(stage){
+            stage.style.setProperty('--arena-vertical-nudge', `${arenaObsCalibration.offset}px`);
+            stage.style.setProperty('--arena-operator-footer-height', `${arenaObsCalibration.footer}px`);
+          }
+          for(const [key,id,output] of [['offset','arenaObsVerticalOffset','arenaObsVerticalOffsetValue'],['footer','arenaObsFooterHeight','arenaObsFooterHeightValue']]) {
+            const slider=document.getElementById(id); if(slider)slider.value=arenaObsCalibration[key];
+            const label=document.getElementById(output); if(label)label.textContent=`${arenaObsCalibration[key]} px`;
+          }
+          if(remember)try{localStorage.setItem(ARENA_OBS_CALIBRATION_KEY,JSON.stringify(arenaObsCalibration));}catch(_){}
+          if(document.fullscreenElement===stage){
+            // Force grid-track resolution before measuring; explicit calibration may resize OBS captures.
+            document.getElementById('arenaDualCenterStageMount')?.getBoundingClientRect();
+            fitArenaDualOperatorMonitors();
+            updateArenaObsGeometrySummary();
+            requestAnimationFrame(()=>{fitArenaDualOperatorMonitors();updateArenaObsGeometrySummary();});
+          } else updateArenaObsGeometrySummary();
+        }
+        function updateArenaObsGeometrySummary() {
+          const el=document.getElementById('arenaObsGeometrySummary');if(!el)return;
+          const copy=ARENA_OBS_COPY[currentLanguage]||ARENA_OBS_COPY.es;
+          const stage=document.getElementById('broadcastStageSection');
+          if(document.fullscreenElement!==stage){el.textContent=copy[5];return;}
+          const dims=id=>{const r=document.getElementById(id)?.getBoundingClientRect();return r?`${Math.round(r.width)}×${Math.round(r.height)}`:'—';};
+          el.textContent=`${copy[6]}: ${dims('viewport16x9')} (16:9) · ${dims('viewport9x16')} (9:16) · +${arenaObsCalibration.offset}px`;
+        }
+        function refreshArenaObsCalibrationLabels() {
+          const c=ARENA_OBS_COPY[currentLanguage]||ARENA_OBS_COPY.es;
+          const translated={arenaObsCalibrationTitle:`📐 ${c[0]} · v${ARENA_RELEASE_VERSION}`,arenaObsResetCalibration:c[1],arenaObsCalibrationHint:c[2]};
+          for(const [id,value] of Object.entries(translated)){const element=document.getElementById(id);if(element)element.textContent=value;}
+          const n=document.getElementById('arenaObsVerticalOffsetLabel');
+          if(n){n.firstChild.textContent=c[3]+': ';}
+          const h=document.getElementById('arenaObsFooterHeightLabel');
+          if(h){h.firstChild.textContent=c[4]+': ';}
+          updateArenaObsGeometrySummary();
+        }
         function refreshArenaDualOperatorLabels() {
+            refreshArenaObsCalibrationLabels();
             const c = ARENA_DUAL_OPERATOR_COPY[currentLanguage] || ARENA_DUAL_OPERATOR_COPY.es;
             const names = {
                 arenaDualFullscreenEntryLabel:c[0], arenaDualDockTitle:c[1], arenaDualDockHint:c[2],
@@ -7967,7 +8060,8 @@ body.touch-controls-active #portraitChatOverlay {
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.2.0-prototype',
+            version: '0.1.0',
+            edition: 'tiktok',
             getState() {
                 const alive = fighters.filter(fighter => !fighter.eliminated);
                 return Object.freeze({
