@@ -50,3 +50,18 @@ Actualmente utiliza dependencias de interfaz desde CDN, por lo que algunas tipog
 - Separar módulos gradualmente cuando el prototipo esté estabilizado.
 
 **Importante:** la rama `main` contiene la base actual; conviene desarrollar cambios posteriores en ramas y revisarlos antes de fusionarlos.
+
+## Primer puente de chat TikTok LIVE (rama de prueba)
+
+La rama `feature/tiktok-live-chat-mvp` incorpora un servicio Node.js local para el primer experimento con el chat de **@polkent.live**. Todavía **no** integra eventos de regalos, no ofrece salidas OBS independientes ni sustituye al HTML monolítico.
+
+En Windows, con Node.js 20+ instalado:
+
+```powershell
+npm install
+npm start
+```
+
+Abre `http://127.0.0.1:4173/`, prueba el comando con el botón **Probar comando** y conecta al LIVE público desde el panel **TikTok LIVE** cuando estés emitiendo. Consulta la [guía paso a paso](docs/TIKTOK-LIVE-MVP.md).
+
+El conector es no oficial, con dependencias de terceros. Esta integración requiere prueba real y revisión de licencias antes de distribuirse comercialmente.
