@@ -14,7 +14,8 @@
     <input id="bridge-test" maxlength="160" value="!guerrero" aria-label="Mensaje de prueba" style="background:#121d2c;color:white;border:1px solid #64748b;border-radius:5px;padding:5px;min-width:105px" />
     <button type="button" id="bridge-send-test">Probar comando</button>
     <small id="bridge-count" style="color:#a7b8c9">Mensajes recibidos: 0</small>`;
-  const place = document.getElementById('audienceSimulatorPanel') || document.querySelector('main') || document.body;
+  const place = document.getElementById('arenaBridgeMount') || document.getElementById('audienceSimulatorPanel') || document.querySelector('main') || document.body;
+  document.getElementById('arenaBridgeUnavailable')?.remove();
   place.prepend(panel);
   panel.querySelectorAll('button').forEach(b => {
     b.style.cssText = 'background:#164e63;color:#effcff;padding:6px 9px;border:1px solid #0891b2;border-radius:6px;cursor:pointer;font:600 12px system-ui,sans-serif';
@@ -44,7 +45,7 @@
 
   function chatRow(entry) {
     const line = document.createElement('div');
-    line.className = 'arena-tiktok-chat-line';
+    line.className = 'arena-tiktok-chat-line' + (/^\s*!/.test(entry.message) ? ' is-command' : '');
     const when = document.createElement('time');
     when.textContent = entry.when;
     const name = document.createElement('strong');
@@ -86,14 +87,14 @@
     }
     incoming.push(entry);
     if (!inbox) return;
-    if (!followLive) { updateInboxControls(); return; }
-    const stick = inbox.scrollHeight - inbox.scrollTop - inbox.clientHeight < 55;
+    // New arrivals always return to live, as selected in the workspace survey.
+    if (!followLive) { renderInbox(incoming.length, true); return; }
     const placeholder = document.getElementById('arenaTikTokChatEmpty');
     if (placeholder) placeholder.remove();
     inbox.appendChild(chatRow(entry));
     while (inbox.children.length > LIVE_WINDOW) inbox.removeChild(inbox.firstChild);
     browseEnd = incoming.length;
-    if (stick) inbox.scrollTop = inbox.scrollHeight;
+    inbox.scrollTop = inbox.scrollHeight;
     updateInboxControls();
   }
   buttonOlder?.addEventListener('click', () => {

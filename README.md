@@ -1,10 +1,10 @@
-# Arena Live · v0.2
+# Arena Live · v0.3
 
-Juego interactivo para transmisiones en vivo, con una sola partida y vistas sincronizadas 16:9 y 9:16. Esta rama incorpora el puente local de chat de TikTok LIVE para @polkent.live.
+Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Esta rama incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
 ## Instalar y arrancar en Windows
 
-Requiere Git y Node.js 20 o superior. Clona la edición TikTok:
+Requiere Git y Node.js 20 o superior:
 
 ```powershell
 git clone --branch feature/tiktok-live-chat-mvp https://github.com/PoldKent/arena-live.git Arena_Live_GitHub
@@ -13,67 +13,71 @@ npm.cmd install
 npm.cmd start
 ```
 
-Abre **http://127.0.0.1:4173/** y mantén abierta la consola. El servidor comienza con TikTok desconectado. El botón **📡 TikTok** conecta o desconecta según el estado real del puente.
+Abre **http://127.0.0.1:4173/** y conserva abierta la consola. TikTok comienza desconectado; **📡 TikTok** conecta o desconecta según el estado real del puente.
 
-Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only`, después `npm.cmd install` y `npm.cmd start`. Si Git señala cambios locales, consérvalos antes de actualizar. Comprueba `git log -1 --oneline`, recarga con **Ctrl+F5** y consulta **v0.2** en Ajustes.
+Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only`, `npm.cmd install` y `npm.cmd start`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.3** en Ajustes.
 
-## Barra del operador
+## Inicio / Pruebas
 
-La misma barra horizontal se utiliza en preparación y en **🎥 Modo Stream**. Los botones tienen icono, nombre corto y explicación al pasar el cursor. Incluye:
+El juego ocupa el centro. A la izquierda están los chats con pestañas **TikTok** y **Chat de pruebas y comandos**. A la derecha están los paneles de objetivo, escenarios, interacciones sociales, jugadores, poderes, simulación y puente TikTok. Solo el grupo de interacciones sociales comienza desplegado; los chats también están visibles.
 
-- **Modo Stream:** composición dual en pantalla completa, con 16:9 a la izquierda y 9:16 a la derecha.
-- **Vista / Pantalla:** alternar la vista de preparación y abrir una vista individual en pantalla completa.
-- **Pausa, Lobby, Revancha y Prota:** accesos directos a la partida y a la participación del streamer.
-- **Clase, Audio, TikTok, Herramientas, Chat y Ajustes:** accesos del operador.
+- **Mover:** arrastra el asa **⠿** de un panel. Suelta sobre una columna, sobre otro panel para ordenarlo o sobre el área central para dejarlo flotante. Durante el arrastre aparece una zona inferior donde acoplarlo.
+- **Acoplar con teclado:** usa el selector junto al asa: izquierda, derecha, abajo o flotante.
+- **Redimensionar:** arrastra el borde entre columnas, la esquina inferior del contenido desplegado o la esquina de un panel flotante. Los separadores también admiten las flechas del teclado.
+- **Plegar:** pulsa el título; puedes dejar abiertas varias secciones.
+- **Objetivo:** elige un jugador para consultar nombre, clase, vida y energía antes de probar poderes o apoyos.
+- **Escenarios:** selecciona 1v1, Smash, Arena o 128 personajes y pulsa **Cargar**. Elegir la opción por sí sola no cambia la partida.
 
-En pantallas estrechas la barra se desplaza horizontalmente. **Prota** significa participar como jugador; **Modo Stream** es la composición para emitir.
+**🧪 Pruebas** ofrece accesos a las categorías. Las herramientas siguen en sus paneles al usarlas. Las distribuciones se guardan automáticamente en este navegador, por separado para Inicio/Pruebas y Stream. Puedes restablecer la distribución desde Ajustes o Pruebas, conservando la partida y la calibración OBS.
 
-## Menús y ajustes
+## Barra, pausa y ajustes
 
-**Ajustes pausa la partida al abrirse y la reanuda al cerrarse.** Todas las opciones comparten el mismo menú: Partida, Prota y combate, Pantallas y OBS, Audio e idioma, y Audiencia y chat.
+La barra horizontal empieza por **Vista, Pantalla, Pruebas y Ajustes**. Incluye **Modo Stream, Chat, Prota, Clase, Audio, TikTok, Pausa, Revancha y Lobby**, con iconos, nombres cortos y ayuda al pasar el cursor.
 
-Los menús se ocultan **después de cada acción**: pulsar un botón, elegir un valor, marcar una casilla o terminar de mover un deslizador. También se cierran con Esc o clic fuera. Los campos de texto permiten terminar de escribir antes de enviar. Ocultar un menú conserva el historial, la selección del objetivo y sus valores.
+**Prota** permite participar como jugador. **Modo Stream** abre la composición de emisión. Vista alterna la preparación entre 16:9 y 9:16; Pantalla abre una captura individual en pantalla completa.
 
-La etiqueta **Opacidad de la información del juego** explica el porcentaje: afecta a textos y barras de ambas vistas; **100 % = totalmente visible**.
+**Ajustes siempre pausa al abrir y reanuda al cerrar**, incluso si habías pausado manualmente. Sus opciones están en secciones plegables del mismo menú. En Inicio/Pruebas se aplican inmediatamente y el menú permanece abierto hasta cerrarlo. En Stream se oculta al confirmar cada acción. Un deslizador se confirma al terminar el gesto, no en cada movimiento.
 
-## OBS
+**Opacidad de la información del juego** afecta a textos y barras de ambas vistas; **100 % = totalmente visible**. Tiene una explicación visible y ayuda al pasar el cursor.
 
-**Modo Stream** conserva una sola simulación y dos regiones de captura. Los menús de herramientas y chat ocupan la franja reservada del operador; abrirlos o cerrarlos mantiene las dimensiones y posiciones de los juegos.
+## Modo Stream y OBS
 
-Se mantienen la calibración existente y sus valores guardados: desplazamiento lateral **0–16 px** (10 px por defecto) y franja inferior **72–148 px** (76 px por defecto). Los cambios deliberados de calibración deben realizarse antes de fijar los recortes de OBS.
+Stream conserva una sola simulación, 16:9 grande a la izquierda y 9:16 al extremo derecho. Herramientas y chats se abren en una columna reservada al extremo izquierdo, fuera de los juegos. El chat no queda abierto permanentemente. Cada acción oculta el panel; las pestañas y los títulos plegables permiten navegar antes de actuar.
 
-## Chat de TikTok y pruebas
+La columna puede ajustar su ancho. La barra superior oculta sus botones hasta acercar el cursor y también se muestra con el foco del teclado; conserva su espacio. Abrir/cerrar paneles o mostrar/ocultar la barra **no mueve ni reescala las capturas**. Los dispositivos táctiles mantienen accesible la barra.
 
-En **🧰 Herramientas** se encuentra **Probar comando**, para comprobar el recorrido local con `!guerrero`. Para una prueba real, inicia un LIVE público y pulsa **📡 TikTok**. El chat recibido se consulta en **💬 Chat**, con historial y exportación TXT.
+Se conservan la calibración y su clave de almacenamiento: desplazamiento **0–16 px** (10 por defecto) y espacio inferior **72–148 px** (76 por defecto). La nueva columna forma parte de la composición v0.3: comprueba los recortes de OBS una vez al actualizar y después de cambiar deliberadamente ancho o calibración. Usa una sola instancia del juego para ambas capturas.
 
-El conector es no oficial. La conexión con un LIVE real requiere verificación en una emisión activa; las pruebas locales o simuladas no la sustituyen. La integración recibe texto; los regalos, likes y otros eventos sociales de las herramientas son simulaciones.
+## Chats y TikTok
 
-## Controles y desarrollo
+Los comandos se distinguen de los mensajes normales. Los mensajes nuevos vuelven automáticamente al más reciente, aunque estés leyendo anteriores. El historial recibido de TikTok conserva navegación y exportación TXT; ocultar el panel no borra mensajes ni cambia su recepción.
 
-WASD mueve a Prota, Espacio salta, E golpea y R activa su especial. En móvil se conserva el joystick y los gestos. Esc / P abre o cierra Pausa/Ajustes cuando no hay un menú que cerrar primero. Esc cierra primero las opciones abiertas y conserva Modo Stream.
+**Pruebas → TikTok LIVE → Probar comando** comprueba el recorrido local con `!guerrero`. El formulario del chat de pruebas es local: no publica respuestas en TikTok.
 
-El juego permanece en `index.html`; el puente usa `ws` y `tiktok-live-connector`, escucha solo en 127.0.0.1 y no pide contraseñas de TikTok.
+El conector de TikTok es no oficial. Una conexión real necesita un LIVE público activo y un comentario desde otra cuenta; sigue pendiente su validación durante una emisión real. La integración recibe texto. Regalos, likes y otros eventos sociales de las herramientas son simulaciones.
+
+## Móvil y controles
+
+En móvil se prioriza 9:16 y una barra inferior con **Prota, Pausa, Saltar, Golpe, Poder y Menú**. Menú permite acceder a todas las opciones, chats y herramientas compactas. Se conservan joystick y gestos; las acciones de combate se habilitan al participar con control manual.
+
+En escritorio: **WASD** mueve a Prota, **Espacio** salta, **E** golpea y **R** activa su especial. **Esc / P** abre o cierra Pausa/Ajustes cuando no estás escribiendo. Esc cierra primero el panel abierto y conserva Stream o la captura individual en pantalla completa.
+
+## Desarrollo y verificación
+
+El juego permanece en `index.html`. El puente usa `ws` y `tiktok-live-connector`, escucha solo en 127.0.0.1 y no pide contraseñas.
 
 ```powershell
 npm.cmd test
-```
-
-Para la regresión de menús en Chromium (dependencia de desarrollo):
-
-```powershell
 npx.cmd playwright install chromium
 npm.cmd run test:browser
 ```
 
-Esta prueba arranca y cierra su propio servidor local; simula las respuestas de conexión a TikTok.
+Las pruebas del navegador arrancan y cierran su servidor local y simulan las respuestas de TikTok. Cubren paneles, persistencia, escenarios, chats, pausa, capturas, idiomas y controles móviles; no conectan con una emisión real.
 
-## Documentación
-
-- [Notas de v0.2 y decisiones de la encuesta](docs/RELEASE-0.2-OPERADOR.md).
-- [Operación de la composición dual](docs/DUAL-OPERADOR-TIKTOK.md).
-- [Conexión inicial con TikTok LIVE y limitaciones](docs/TIKTOK-LIVE-MVP.md).
+- [Decisiones de la reconstrucción v0.3](docs/RELEASE-0.3-INTERFAZ.md).
+- [Guía de operación y OBS](docs/DUAL-OPERADOR-TIKTOK.md).
+- [Puente TikTok y limitaciones](docs/TIKTOK-LIVE-MVP.md).
 - [Registro de cambios](CHANGELOG.md).
-- [Calibración y ajustes visuales de v0.1](docs/RELEASE-0.1-OBS.md).
+- Historial: [v0.2](docs/RELEASE-0.2-OPERADOR.md), [v0.1](docs/RELEASE-0.1-OBS.md).
 
-La rama `main` conserva la edición HTML independiente. La edición con servidor y TikTok se mantiene en `feature/tiktok-live-chat-mvp`.
-
+`main` conserva la edición HTML independiente. La edición con servidor y TikTok está en `feature/tiktok-live-chat-mvp`.

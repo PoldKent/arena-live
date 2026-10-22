@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.2 — TikTok LIVE</title>
+    <title>Arena Live v0.3 — TikTok LIVE</title>
     <!--
       ARENA LIVE · MONOLITHIC DELIVERY
       All application code intentionally stays in this HTML file.
@@ -62,33 +62,6 @@
         .settings-live-copy { display: none; }
         .settings-pause-action { display: none; }
         #settingsPauseModal.settings-live-mode .settings-pause-action { display: inline-flex; }
-        @media (min-width: 1280px) {
-            html, body { min-height: 100%; height: auto; }
-            body { min-height: 100dvh; height: auto; overflow-x: hidden; overflow-y: auto; }
-            header { flex-shrink: 0; }
-            body > main { min-height: auto; height: auto; flex: 0 0 auto; }
-            #broadcastStageSection, #audienceSimulatorPanel, #chatSimulatorSidebar { min-height: 0; height: auto; }
-            #chatFeedFrame { height: min(40dvh, 420px); max-height: min(40dvh, 420px); min-height: 180px; flex: 0 1 auto; }
-            #chatFeed { height: 100%; max-height: none; min-height: 0; flex: 1 1 auto; }
-        }
-        @media (max-width: 1279px) {
-            #chatFeedFrame { max-height: min(38dvh, 360px); height: min(38dvh, 360px); min-height: 160px; }
-        }
-        /* Panoramic desktop: game screens stay left, live chat dock stays on the right. */
-        @media (min-width: 1440px) and (min-aspect-ratio: 6/5) {
-            body > main {
-                display: grid !important;
-                grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
-                grid-template-rows: auto auto;
-                align-items: start;
-                column-gap: 12px;
-                row-gap: 12px;
-            }
-            #broadcastStageSection { grid-column: 1; grid-row: 1; width: 100%; min-width: 0; }
-            #chatSimulatorSidebar { grid-column: 2; grid-row: 1; width: 100%; min-width: 0; position: sticky; top: 12px; max-height: calc(100dvh - 24px); }
-            #chatFeedFrame { height: min(52dvh, 560px); max-height: min(52dvh, 560px); min-height: 220px; flex: 1 1 auto; }
-            #audienceSimulatorPanel { grid-column: 1 / -1; grid-row: 2; width: 100%; }
-        }
         .font-display {
             font-family: 'Orbitron', sans-serif;
         }
@@ -655,237 +628,8 @@ body.touch-controls-active #portraitChatOverlay {
 }
 </style>
 
-<style id="arena-dual-operator-style">
-/* Fullscreen operator layout: TWO clean game canvases + separate tools/chat rail. */
-#arenaDualFullscreenEntry { position:relative; z-index:12; display:flex; justify-content:flex-end; padding:2px 6px 6px; }
-#btnFullscreenDual { display:inline-flex; align-items:center; gap:7px; border:1px solid rgba(52,211,153,.52); color:#d1fae5; background:rgba(6,78,59,.35); border-radius:9px; padding:7px 12px; font:700 11px/1.2 Inter,system-ui,sans-serif; cursor:pointer; }
-#btnFullscreenDual:hover, #btnFullscreenDual:focus-visible { background:rgba(6,95,70,.7); border-color:#34d399; }
-#arenaDualOperatorDock { display:none; }
-#broadcastStageSection:fullscreen {
-    position:fixed !important; inset:0 !important;
-    width:100vw !important; height:100vh !important; height:100dvh !important;
-    max-width:none !important; max-height:none !important;
-    min-width:0 !important; min-height:0 !important;
-    padding:clamp(6px, .75vw, 14px) !important; margin:0 !important;
-    box-sizing:border-box !important; border:0 !important; border-radius:0 !important;
-    box-shadow:none !important; overflow:hidden !important;
-    display:grid !important;
-    grid-template-columns:minmax(0,1fr) clamp(300px,26vw,410px) !important;
-    grid-template-rows:minmax(0,1fr) !important;
-    gap:clamp(6px,.75vw,14px) !important;
-    background:#050912 !important; isolation:isolate;
-}
-#broadcastStageSection:fullscreen::backdrop {background:#050912;}
-#broadcastStageSection:fullscreen > :not(#dualMonitorsGrid):not(#arenaDualOperatorDock):not(#settingsPauseModal):not(#arenaDualUltrawideVerticalStage) {display:none !important;}
-#broadcastStageSection:fullscreen > #dualMonitorsGrid {
-    grid-column:1; grid-row:1; display:flex !important;
-    flex-direction:row !important; flex-wrap:nowrap !important;
-    align-items:center !important; justify-content:center !important;
-    flex:0 1 auto !important; margin:0 !important; padding:0 !important;
-    width:100% !important; height:100% !important; min-width:0 !important; min-height:0 !important;
-    gap:clamp(6px,.75vw,14px) !important; overflow:hidden !important;
-}
-#broadcastStageSection:fullscreen #card-16x9,
-#broadcastStageSection:fullscreen #card-9x16 {
-    display:flex !important; flex-direction:column !important;
-    align-items:center !important; justify-content:center !important;
-    flex:0 0 auto !important; min-width:0 !important; min-height:0 !important;
-    max-width:100% !important; max-height:100% !important;
-    overflow:visible !important;
-}
-#broadcastStageSection:fullscreen #card-16x9 > :not(#viewport16x9),
-#broadcastStageSection:fullscreen #card-9x16 > :not(#viewport9x16) {display:none !important;}
-#broadcastStageSection:fullscreen #viewport16x9,
-#broadcastStageSection:fullscreen #viewport9x16 {
-    flex:none !important; max-width:100% !important; max-height:100% !important;
-    margin:0 !important; border:0 !important; border-radius:5px !important;
-    box-shadow:none !important; transition:none !important; overflow:hidden !important;
-}
-#broadcastStageSection:fullscreen #arenaDualOperatorDock {
-    grid-column:2; grid-row:1; display:flex !important; flex-direction:column;
-    min-width:0; min-height:0; height:100%; overflow:hidden;
-    color:#e2e8f0; background:#0b1220; border:1px solid #314157;
-    border-radius:12px; z-index:40; box-shadow:0 0 26px #0008;
-}
-#arenaDualOperatorDock button {touch-action:manipulation;}
-.arena-dual-dock-top { flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; gap:6px; background:#121e31; border-bottom:1px solid #293b50; padding:9px; }
-.arena-dual-dock-top strong {display:block; font:800 12px/1.25 system-ui,sans-serif;}
-.arena-dual-dock-top small {display:block; font:500 10px/1.3 system-ui,sans-serif; color:#9fb1ca;}
-.arena-dual-dock-top button {background:#26374e; border:1px solid #55657a; color:#f8fafc; border-radius:7px; padding:6px 9px; font-size:11px; font-weight:700; cursor:pointer;}
-.arena-dual-dock-quick {flex:0 0 auto; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:5px; padding:7px; background:#0f1828;}
-.arena-dual-dock-quick button {min-width:0; padding:8px 4px; background:#173047; border:1px solid #345671; color:#ddf4ff; border-radius:7px; font:700 10px/1.2 system-ui,sans-serif; cursor:pointer;}
-.arena-dual-dock-quick button:hover {background:#24506c;}
-#arenaDualBridgeMount {flex:0 0 auto; max-height:148px; overflow-y:auto; overflow-x:hidden; padding:0 8px;}
-#arenaDualBridgeMount:empty {display:none;}
-#broadcastStageSection:fullscreen #arena-live-bridge-panel {min-width:0 !important; margin:4px 0 !important; padding:7px !important; font-size:11px !important; gap:5px !important;}
-#broadcastStageSection:fullscreen #arena-live-bridge-panel input {max-width:135px; min-width:65px !important; flex:1 1 90px;}
-#arenaDualTikTokChat {flex:1 1 40%; display:flex; flex-direction:column; min-height:148px; min-width:0; margin:4px 8px 6px; border:1px solid #334155; border-radius:9px; overflow:hidden; background:#070e19;}
-#arenaDualTikTokChatHeader {display:flex; align-items:center; justify-content:space-between; gap:6px; flex:0 0 auto; background:#122238; padding:7px 9px; border-bottom:1px solid #334155;}
-#arenaDualTikTokChatHeader strong {font:800 11px/1.2 system-ui,sans-serif; color:#e4f5ff;}
-#arenaTikTokChatStatus {font:650 10px/1.2 system-ui,sans-serif; color:#facc15;}
-#arenaTikTokChatFeed {overflow:auto; flex:1 1 auto; min-height:0; padding:8px; display:flex; flex-direction:column; gap:4px; scrollbar-width:thin; overscroll-behavior:contain; user-select:text;}
-.arena-tiktok-chat-line {flex:0 0 auto; display:block; padding:5px 6px; border-bottom:1px solid #182637; font:500 11px/1.4 system-ui,sans-serif; white-space:normal; overflow-wrap:anywhere;}
-.arena-tiktok-chat-line strong {color:#5eead4; margin-right:5px;}
-.arena-tiktok-chat-line time {color:#8b9aaa; font-size:9px; margin-right:5px;}
-.arena-tiktok-chat-line span {color:#e2e8f0;}
-#arenaTikTokChatEmpty {font:500 11px/1.5 system-ui,sans-serif; color:#94a3b8; text-align:center; padding:12px;}
-.arena-tiktok-chat-footer {flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:5px; border-top:1px solid #304057; padding:6px; font:500 10px/1.3 system-ui,sans-serif; color:#a8bbd1;}
-.arena-tiktok-chat-footer button {font:700 10px/1.2 system-ui,sans-serif; padding:5px 7px; border:1px solid #3c647d; background:#132e40; color:#bfecff; border-radius:6px; cursor:pointer;}
-.arena-tiktok-chat-footer button:disabled {opacity:.45; cursor:default;}
-#arenaDualToolsDisclosure, #arenaDualGeneralDisclosure {display:block; flex:0 0 auto; min-height:0; margin:0 8px 6px; border:1px solid #304258; border-radius:8px; background:#0c1526; overflow:hidden;}
-#arenaDualToolsDisclosure > summary, #arenaDualGeneralDisclosure > summary {padding:8px 10px; color:#cbe7fa; background:#142136; font:800 11px/1.2 system-ui,sans-serif; cursor:pointer; list-style:disclosure-closed;}
-#arenaDualToolsDisclosure[open] > summary, #arenaDualGeneralDisclosure[open] > summary {list-style:disclosure-open;}
-#arenaDualToolsMount {height:clamp(110px,26dvh,270px); overflow-y:auto; overscroll-behavior:contain;}
-#arenaDualGeneralMount {height:clamp(125px,28dvh,300px); overflow-y:auto; overscroll-behavior:contain;}
-#broadcastStageSection:fullscreen #audienceSimulatorPanel {display:flex !important; width:100% !important; min-width:0 !important; height:auto !important; max-height:none !important; overflow:visible !important; border:0 !important; border-radius:0 !important;}
-#broadcastStageSection:fullscreen #audienceSimulatorPanel .grid-cols-5 {grid-template-columns:repeat(5,minmax(0,1fr));}
-#broadcastStageSection:fullscreen #audienceSimulatorPanel .sm\\:grid-cols-4 {grid-template-columns:repeat(2,minmax(0,1fr));}
-#broadcastStageSection:fullscreen #chatSimulatorSidebar {display:flex !important; width:100% !important; min-height:0 !important; height:auto !important; max-height:none !important; border:0 !important; border-radius:0 !important; position:static !important;}
-#broadcastStageSection:fullscreen #chatSimulatorSidebar #arenaChatContents {display:block !important;}
-#broadcastStageSection:fullscreen #chatSimulatorSidebar #mobileChatExpand {display:none !important;}
-#broadcastStageSection:fullscreen #chatSimulatorSidebar #chatFeedFrame {height:150px !important; max-height:150px !important; min-height:100px !important;}
-#broadcastStageSection:fullscreen #chatSimulatorSidebar #chatFeed {height:100% !important; overflow-y:auto !important;}
-#broadcastStageSection:fullscreen #settingsPauseModal {position:fixed !important;inset:0 !important;z-index:100 !important;}
-#broadcastStageSection:fullscreen #settingsPauseModal.hidden {display:none !important;}
-#arenaDualUltrawideVerticalStage, #arenaDualCenterStageMount {display:none;}
-#arenaDualTopCluster, #arenaDualBottomCluster {display:flex; flex-direction:column; min-height:0;}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide {
-    grid-template-columns:minmax(0,1fr) min(56.25dvh,23.5vw) !important;
-    grid-template-rows:minmax(0,1fr) !important;
-    gap:clamp(10px,1vw,18px) !important;
-}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide > :not(#arenaDualOperatorDock):not(#arenaDualUltrawideVerticalStage):not(#settingsPauseModal) {display:none !important;}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide > #arenaDualOperatorDock {
-    grid-column:1; grid-row:1; display:grid !important;
-    grid-template-rows:auto minmax(0,1fr) auto; align-items:stretch;
-    min-width:0; min-height:0; height:100%; overflow:hidden;
-    border:0; background:transparent; box-shadow:none; border-radius:0; padding:0;
-}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide > #arenaDualUltrawideVerticalStage {
-    grid-column:2; grid-row:1; display:flex !important; align-items:center; justify-content:flex-end;
-    min-width:0; min-height:0; height:100%; overflow:visible !important;
-    visibility:visible !important; opacity:1 !important; z-index:20;
-    background:#050912;
-}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide > #arenaDualUltrawideVerticalStage:empty {display:none !important;}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualTopCluster,
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualBottomCluster {
-    min-width:0; min-height:0; border:1px solid #304258; border-radius:12px;
-    background:#0b1220; overflow:hidden; box-shadow:0 10px 24px rgba(0,0,0,.28);
-}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualCenterStageMount {
-    display:flex !important; align-items:center; justify-content:center;
-    min-width:0; min-height:0; padding:clamp(10px,.9vw,16px);
-    margin:clamp(8px,.8vw,14px) 0;
-    border:1px solid #304258; border-radius:14px; background:#060d17;
-    box-shadow:0 14px 34px rgba(0,0,0,.34);
-}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualCenterStageMount > #card-16x9,
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualUltrawideVerticalStage > #card-9x16 {
-    display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important;
-    flex:0 0 auto !important; min-width:0 !important; min-height:0 !important;
-    max-width:100% !important; max-height:100% !important;
-}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualCenterStageMount > #card-16x9 > :not(#viewport16x9),
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualUltrawideVerticalStage > #card-9x16 > :not(#viewport9x16) {display:none !important;}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualBottomCluster {
-    display:grid !important; grid-template-columns:minmax(0,1.65fr) minmax(240px,1fr);
-    grid-template-rows:minmax(0,1fr) auto; min-height:220px; max-height:280px;
-    gap:0; align-items:stretch;
-}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualTopCluster {
-    max-height:188px; overflow:auto;
-}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualTikTokChat {
-    grid-column:1; grid-row:1 / 3; min-height:0 !important;
-    margin:8px; flex:1 1 auto;
-}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualToolsDisclosure {
-    grid-column:2; grid-row:1; overflow:auto; margin:8px 8px 4px 0;
-}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualGeneralDisclosure {
-    grid-column:2; grid-row:2; margin:0 8px 8px 0;
-}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualToolsDisclosure,
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualGeneralDisclosure {margin:0 8px 8px;}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualToolsMount {height:clamp(100px,13dvh,185px);}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualGeneralMount {height:clamp(112px,15dvh,190px);}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualBridgeMount {max-height:170px; padding:0 8px 8px;}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arena-live-bridge-panel {margin:8px 0 0 !important;}
-@media (max-width:900px), (orientation:portrait) {
- #broadcastStageSection:fullscreen {grid-template-columns:minmax(0,1fr) !important; grid-template-rows:minmax(0,58%) minmax(0,42%) !important;}
- #broadcastStageSection:fullscreen > #dualMonitorsGrid {grid-column:1; grid-row:1;}
- #broadcastStageSection:fullscreen #arenaDualOperatorDock {grid-column:1; grid-row:2;}
- #broadcastStageSection:fullscreen > #dualMonitorsGrid.mobile-dual-stacked {flex-direction:column !important; flex-wrap:nowrap !important; justify-content:center !important; gap:6px !important;}
- #arenaDualOperatorDock {border-radius:8px;}
- #arenaDualToolsMount {height:170px;}
- #arenaDualTikTokChat {min-height:125px;}
-}
-@media (max-height:530px) and (min-width:901px) {
- #arenaDualToolsMount {height:100px;}
- #arenaDualTikTokChat {min-height:80px;}
-}
-</style>
-
-<style id="arena-stream-layout-2026">
-/* Layout acordado: preparación con una vista y emisión dual no invasiva. */
-#btnViewDual[data-stream-only="true"] {display:none!important}
-#arenaPrepViewSwitch {display:flex;justify-content:flex-end;gap:8px;position:relative;z-index:12;padding:3px 7px 5px}
-#arenaPrepSwitchBtn {background:#0e2940;color:#a5f3fc;border:1px solid #1d819a;border-radius:8px;padding:7px 12px;font:750 12px/1.2 system-ui,sans-serif;cursor:pointer;}
-#arenaPrepSwitchBtn:hover,#arenaPrepSwitchBtn:focus-visible {background:#17415c}
-#broadcastStageSection:fullscreen #arenaPrepViewSwitch {display:none!important}
-/* Fullscreen 16:9/9:16 viewports retain their own intrinsic aspect ratio. */
-#arenaDualOperatorDock .arena-stream-top-action {border:1px solid #315268;background:#102438;color:#d5edf9;border-radius:7px;padding:6px 10px;white-space:nowrap;font:700 11px/1.2 system-ui,sans-serif;cursor:pointer}
-#arenaDualOperatorDock .arena-stream-top-action:hover,#arenaDualOperatorDock .arena-stream-top-action:focus-visible {background:#22516a}
-#arenaDualOperatorDock #arenaDualTopCluster {min-width:0;min-height:0}
-#arenaDualOperatorDock #arenaDualBottomCluster {min-width:0;min-height:0}
-#arenaDualDrawerDisclosure {display:block;flex:1 1 auto;box-sizing:border-box;width:100%;height:100%;min-width:0;min-height:0;background:#0b1423;border:1px solid #28435a;border-radius:9px;overflow:hidden}
-#arenaDualDrawerDisclosure > summary {cursor:pointer;display:flex;align-items:center;gap:10px;min-height:32px;padding:6px 12px;color:#b7e9fc;background:#122338;font:750 11px/1.3 system-ui,sans-serif;list-style:none}
-#arenaDualDrawerDisclosure > summary::-webkit-details-marker{display:none}
-#arenaDualDrawerDisclosure > summary::before{content:'▸';color:#38bdf8}
-#arenaDualDrawerDisclosure[open] > summary::before{content:'▾'}
-#arenaDualDrawerContents {height:calc(100% - 33px);min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:5px 4px;scrollbar-width:thin}
-#arenaDualDrawerContents > details {background:#0b1526;border:1px solid #2b415a;border-radius:8px;margin:4px 4px 7px;overflow:hidden}
-#arenaDualDrawerContents > details > summary {padding:8px 9px;cursor:pointer;color:#bce6f7;font:750 11px/1.2 system-ui,sans-serif}
-#arenaDualDrawerContents > details[open] > summary {background:#13283d}
-#arenaDualDrawerContents #arenaDualToolsMount {height:118px!important;overflow:auto!important}
-#arenaDualDrawerContents #arenaDualGeneralMount {height:126px!important;overflow:auto!important}
-#arenaDualDrawerContents #arenaDualTikTokChat {margin:4px;min-height:135px;height:180px;flex:0 0 auto}
-#arenaDualDrawerContents #arenaDualBridgeMount {max-height:115px;overflow:auto}
-#arenaDualOperatorDock .arena-dual-dock-quick {display:flex;flex-wrap:nowrap;gap:5px;padding:4px 6px;align-items:center;flex:1 1 auto;background:transparent}
-#arenaDualOperatorDock .arena-dual-dock-quick button {flex:0 0 auto;padding:7px 9px;font-size:11px;white-space:nowrap;min-height:29px}
-#arenaDualOperatorDock .arena-dual-dock-top {background:transparent;border:0;padding:0 6px;gap:8px;align-items:center;min-width:145px}
-#arenaDualOperatorDock .arena-dual-dock-top strong {font-size:11px}
-#arenaDualOperatorDock .arena-dual-dock-top small {display:none}
-#arenaDualOperatorDock #btnExitFullscreenDual {font-size:11px;padding:5px 8px;white-space:nowrap}
-#arenaDualOperatorDock #arenaDualTopCluster {display:flex;align-items:center;justify-content:space-between;gap:4px;background:#0d1a2b;border:1px solid #254059;border-radius:9px;height:42px;box-sizing:border-box;overflow:hidden}
-#arenaDualOperatorDock #arenaDualBottomCluster {height:148px;overflow:hidden}
-#arenaDualOperatorDock #arenaDualBridgeMount:empty {display:none}
-/* Fullscreen compacto general, geometría de juegos estable con cajón abierto/cerrado. */
-#broadcastStageSection:fullscreen:not(.arena-dual-ultrawide) > #arenaDualOperatorDock {overflow:hidden}
-#broadcastStageSection:fullscreen:not(.arena-dual-ultrawide) #arenaDualTopCluster {height:auto;min-height:42px;flex-wrap:wrap}
-#broadcastStageSection:fullscreen:not(.arena-dual-ultrawide) #arenaDualBottomCluster {height:calc(100% - 50px);min-height:140px}
-#broadcastStageSection:fullscreen:not(.arena-dual-ultrawide) #arenaDualOperatorDock .arena-dual-dock-quick {flex-wrap:wrap}
-/* Ultrawide: el lateral 9:16 permanece en el extremo derecho; las herramientas ocupan bandas fijas arriba y abajo del 16:9. */
-#broadcastStageSection:fullscreen.arena-dual-ultrawide > #arenaDualOperatorDock {grid-template-rows:42px minmax(0,1fr) var(--arena-operator-footer-height,108px)!important;row-gap:7px!important}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualTopCluster {grid-row:1;flex-direction:row!important;justify-content:space-between;align-items:center;height:42px!important}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualCenterStageMount {grid-row:2;margin:0!important;padding:7px!important}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualBottomCluster {grid-row:3;display:flex!important;flex-direction:column!important;grid-template-columns:none!important;grid-template-rows:none!important;height:var(--arena-operator-footer-height,108px)!important;min-height:0!important;max-height:var(--arena-operator-footer-height,108px)!important;box-sizing:border-box!important;gap:0!important;border:0!important;box-shadow:none!important;background:#0b1423!important}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualUltrawideVerticalStage {transform:translateX(var(--arena-vertical-nudge,4px));margin-right:calc(-1 * var(--arena-vertical-nudge,4px));}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualDrawerContents #arenaDualTikTokChat {height:180px!important;min-height:140px!important;margin:4px}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualDrawerContents #arenaDualToolsDisclosure {margin:4px}
-/* Captura limpia: los marcos externos y botones flotantes no entran en los lienzos. */
-#broadcastStageSection:fullscreen #arenaDualOperatorDock {pointer-events:auto}
-@media(max-width:1100px){
- #arenaDualOperatorDock #arenaDualTopCluster {height:auto;min-height:42px;flex-wrap:wrap}
- #arenaDualOperatorDock .arena-dual-dock-top {min-width:0}
- #arenaDualOperatorDock .arena-dual-dock-quick {flex-wrap:wrap}
-}
-</style>
-
-
 <style id="arena-visual-polish-v01">
-/* Arena Live v0.2: duelo vertical legible y controles compactos fuera de la imagen. */
+/* Arena Live v0.3: duelo vertical legible y controles compactos fuera de la imagen. */
 #viewport9x16 #hud1v1Bars9 {padding:9px 10px!important;border-radius:14px!important;border-color:rgba(251,191,36,.62)!important;box-shadow:0 5px 20px rgba(0,0,0,.28)}
 #viewport9x16 #hud1v1Bars9 .grid-cols-11 {gap:7px!important}
 #viewport9x16 #p1Bar1v1_9,#viewport9x16 #p2Bar1v1_9 {height:100%!important}
@@ -894,72 +638,200 @@ body.touch-controls-active #portraitChatOverlay {
 #viewport9x16 #p1HpText1v1_9,#viewport9x16 #p2HpText1v1_9 {font-size:12px!important;line-height:17px!important;font-weight:800!important}
 #viewport9x16 #hud1v1Bars9 div:has(> #p1Energy1v1_9),#viewport9x16 #hud1v1Bars9 div:has(> #p2Energy1v1_9) {height:6px!important}
 #viewport9x16 #p1EnergyText1v1_9,#viewport9x16 #p2EnergyText1v1_9 {font-size:9px!important;line-height:12px!important}
-/* El carril inferior reservado permanece constante al abrir/cerrar el cajón. */
-#broadcastStageSection:fullscreen.arena-dual-ultrawide > #arenaDualOperatorDock {grid-template-rows:34px minmax(0,1fr) var(--arena-operator-footer-height,76px)!important;row-gap:5px!important}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualTopCluster {height:34px!important;min-height:34px!important}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualBottomCluster {height:var(--arena-operator-footer-height,76px)!important;max-height:var(--arena-operator-footer-height,76px)!important;min-height:0!important}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualCenterStageMount {padding:2px!important;margin:0!important}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide .arena-dual-dock-top {padding:0 5px!important;min-width:0!important}
-#broadcastStageSection:fullscreen.arena-dual-ultrawide .arena-dual-dock-quick button,#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualOperatorDock .arena-stream-top-action {padding:4px 7px!important;min-height:25px!important;font-size:10px!important}
 </style>
 
 
-<style id="arena-operator-v02">
-/* v0.2 controls stay in operator bands; opening menus never changes video geometry. */
-#arenaTopBarInner {max-width:none;gap:8px}
-body > main {display:flex!important;flex-direction:column!important;max-width:none!important;width:100%;box-sizing:border-box}
-#arenaHeaderActions.arena-operator-toolbar {display:flex!important;flex-wrap:nowrap!important;align-items:center;gap:4px;width:100%;min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:thin;padding:3px;box-sizing:border-box}
-#arenaHeaderActions.arena-operator-toolbar button,#arenaOperatorPopover button,.arena-settings-resume {flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:30px;padding:5px 8px!important;white-space:nowrap;border:1px solid #334c64;border-radius:7px;background:#112438;color:#d9edf7;font:650 11px/1.2 Inter,system-ui,sans-serif;cursor:pointer}
-#arenaHeaderActions.arena-operator-toolbar button:hover,#arenaOperatorPopover button:hover {background:#23465e}
-#arenaHeaderActions.arena-operator-toolbar button:focus-visible,#arenaOperatorPopover :focus-visible {outline:2px solid #67e8f9;outline-offset:1px}
-#arenaHeaderActions.arena-operator-toolbar button[aria-pressed="true"],#arenaHeaderActions.arena-operator-toolbar button[aria-expanded="true"] {border-color:#38bdf8;background:#123c52;color:#a5f3fc}
-#arenaHeaderActions.arena-operator-toolbar #btnFullscreenDual {border-color:#34856d;color:#bcf5d8}
-#arenaHeaderActions.arena-operator-toolbar button:disabled,#arenaOperatorPopover button:disabled {opacity:.48;cursor:default}
-.arena-toolbar-separator {height:18px;width:1px;background:#334155;flex:0 0 auto;margin:0 2px}
+<style id="arena-workspace-v03">
+/* MODULE BLOCK: v0.3 operator workspaces. Games keep their original canvases and HUD. */
+:root {--arena-left-width:260px;--arena-right-width:300px;--arena-stream-width:260px;--arena-line:#29313e;--arena-surface:#111720;--arena-muted:#97a3b5}
+html,body {height:100%;min-height:100%;overflow:hidden!important;background:#090d13}
+body>header {position:relative!important;flex:none;padding:7px 10px!important;background:#111720!important;backdrop-filter:none!important;border-color:var(--arena-line)!important}
+#arenaTopBarInner {max-width:none!important;gap:5px!important}
+.arena-brand-block {width:100%;min-height:25px}
+.arena-brand-block>div:first-child {display:none}
+.arena-brand-meta {width:100%;gap:12px!important}
+.arena-brand-meta h1 {font:750 12px/1.2 Inter,system-ui!important;letter-spacing:1px;color:#e5eaf1!important;background:none!important}
+#arenaTopStats {margin-left:auto!important;background:none!important;border:0!important;font-size:10px}
+#arenaTopBarInner>div:not(.arena-brand-block) {display:none!important}
+#arenaHeaderActions.arena-operator-toolbar {display:flex!important;flex-wrap:nowrap!important;gap:4px;align-items:center;width:100%;min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:thin;padding:2px;box-sizing:border-box}
+#arenaHeaderActions button,.arena-work-panel button,#arenaOperatorPopover button,.arena-settings-resume {display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:29px;padding:5px 8px!important;border:1px solid #333e4c;border-radius:5px;background:#1b2430;color:#dfe6ee;font:600 11px/1.3 Inter,system-ui,sans-serif;cursor:pointer;box-shadow:none!important}
+#arenaHeaderActions button {flex:0 0 auto;white-space:nowrap}
+#arenaHeaderActions button:hover,.arena-work-panel button:hover,#arenaOperatorPopover button:hover {background:#2b3746}
+#arenaHeaderActions button[aria-pressed="true"],#arenaHeaderActions button[aria-expanded="true"] {border-color:#7395b7;background:#273c4e}
+#arenaHeaderActions button:disabled,.arena-work-panel button:disabled,#arenaOperatorPopover button:disabled {opacity:.45;cursor:default}
+#arenaHeaderActions #btnFullscreenDual {border-color:#4c756b;color:#c1e4d6}
+.arena-toolbar-separator {height:16px;flex:0 0 1px;background:#394250;margin:0 3px}
+:where(.arena-work-panel,#arenaOperatorPopover,#settingsPauseModal) :focus-visible,#arenaHeaderActions :focus-visible,.arena-dock-resizer:focus-visible {outline:2px solid #8ebddd;outline-offset:2px}
 #streamerJoinLabel {max-width:none!important}
-#arenaStreamToolbarMount {width:100%;min-width:0}
-#arenaDualOperatorDock #arenaDualTopCluster {overflow:visible}
-#arenaDualOperatorDock #arenaDualBottomCluster {position:relative;overflow:hidden}
-#arenaPreparationOperatorRail {height:110px;min-height:110px;border:1px solid #26394d;border-radius:9px;background:#0b1423}
-#arenaOperatorPopover {position:fixed;z-index:110;box-sizing:border-box;border:1px solid #41647d;border-radius:8px;background:#0d1b2c;color:#dbeafe;padding:6px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;box-shadow:0 2px 12px #0006}
-#arenaOperatorPopover[hidden],#arenaOperatorPopover [hidden] {display:none!important}
-#arenaOperatorPopover > [data-operator-panel] {min-height:0}
-.arena-operator-menu-row {display:flex;align-items:center;flex-wrap:wrap;gap:8px}
-#arenaOperatorPopover select,#arenaOperatorPopover input {font-size:11px;min-height:28px}
-#arenaDualToolsMount #audienceSimulatorPanel {display:flex!important;flex-direction:row!important;align-items:flex-start;gap:6px;width:max-content!important;height:auto!important;border:0;overflow:visible;padding:0}
-#arenaDualToolsMount #audienceSimulatorPanel > div:has(h2) {display:none}
-#arenaDualToolsMount #audienceSimulatorPanel > div.p-3 {display:flex;flex-direction:row;align-items:flex-start;padding:0;gap:6px}
-#arenaDualToolsMount #audienceSimulatorPanel > div.p-3 > * {flex:0 0 auto;min-width:180px;max-width:none}
-#arenaDualToolsMount #audienceSimulatorPanel > #arena-live-bridge-panel {flex-direction:row;flex-wrap:nowrap!important;align-items:center;width:max-content;max-width:none;min-height:50px}
-#arenaDualToolsMount .arena-test-groups {display:flex;width:max-content;gap:6px}
-#arenaDualToolsMount .arena-test-group {width:max-content;flex:0 0 auto;padding:4px}
-#arenaDualToolsMount .arena-test-group > .grid,#arenaDualToolsMount .arena-skill-buttons {display:flex!important;flex-wrap:nowrap;gap:4px}
-#arenaDualToolsMount #advancedAudienceLab {min-width:280px}
-#arenaDualToolsMount .arena-test-group button {min-height:26px}
-#arenaDualToolsMount .arena-skill-buttons button {min-height:28px;padding:3px 6px}
-#arenaDualToolsMount #quickSkillTargetStatus,#arenaDualToolsMount .arena-chat-shortcut {display:none}
-#arenaOperatorPopover #arena-live-bridge-panel {margin:0 0 4px!important;padding:5px!important;border-radius:6px!important;gap:5px!important}
-.arena-operator-chat-grid {display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:580px}
-#arenaOperatorPopover #arenaDualTikTokChat {margin:0;height:auto;min-height:100px}
-#arenaOperatorPopover #chatSimulatorSidebar {display:flex!important;position:static!important;width:100%!important;height:auto!important;min-height:0!important;border:0}
-#arenaOperatorPopover #chatSimulatorSidebar #arenaChatContents {display:block!important}
-#arenaOperatorPopover #mobileChatExpand {display:none!important}
-#arenaOperatorPopover #chatFeedFrame {height:110px!important;min-height:60px!important}
-#arenaOperatorPopover .arena-skill-buttons button [data-command-label] {display:block;font-size:10px}
-#settingsPauseModal {z-index:120;pointer-events:auto}
+body>main#arenaWorkspace {display:grid!important;grid-template-columns:var(--arena-left-width) minmax(0,1fr) var(--arena-right-width);grid-template-rows:minmax(0,1fr) auto;gap:8px!important;position:relative;width:100%;max-width:none!important;min-height:0!important;height:0!important;flex:1 1 0!important;overflow:hidden!important;padding:8px!important;box-sizing:border-box}
+.arena-dock {position:relative;display:flex;flex-direction:column;gap:6px;min-width:0;min-height:0;overflow:auto;scrollbar-width:thin;padding:0 2px 8px}
+#arenaDockLeft {grid-column:1;grid-row:1/3}
+#arenaDockRight {grid-column:3;grid-row:1/3}
+#arenaDockBottom {grid-column:2;grid-row:2;max-height:34dvh;flex-direction:row;align-items:flex-start;min-height:0;padding:0}
+#arenaDockBottom:empty {display:none}
+body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;border:1px dashed #7896b5;border-radius:6px}
+#arenaDockBottom>.arena-work-panel {flex:1 0 230px;max-width:480px}
+#arenaDockBottom>#arenaPanelChat[open] {height:300px;max-height:34dvh}
+#arenaDockFloat {position:absolute;inset:0;pointer-events:none;z-index:80;overflow:hidden}
+#arenaWorkspace>#broadcastStageSection:not(:fullscreen) {grid-column:2;grid-row:1;display:flex!important;min-height:0!important;height:100%!important;max-height:100%;padding:6px!important;border:1px solid #232d3a;background:#0a0f17;border-radius:7px;overflow:hidden!important;justify-content:center}
+#broadcastStageSection>#dualMonitorsGrid {height:100%;min-height:0;align-items:center;justify-content:center;padding:0!important;gap:0}
+#broadcastStageSection:not(:fullscreen) #card-16x9,#broadcastStageSection:not(:fullscreen) #card-9x16 {margin:0!important;padding:0!important;max-width:100%;min-width:0}
+#broadcastStageSection:not(:fullscreen) #card-16x9:not(:fullscreen)>:not(#viewport16x9):not(#settingsPauseModal),#broadcastStageSection:not(:fullscreen) #card-9x16:not(:fullscreen)>:not(#viewport9x16):not(#settingsPauseModal) {display:none!important}
+#viewport16x9,#viewport9x16 {transition:none!important;flex:none!important}
+#arenaDockLeft:empty::after,#arenaDockRight:empty::after {content:'Arrastra un panel aquí';padding:15px 8px;text-align:center;color:#657388;font-size:11px;border:1px dashed #303c4b;border-radius:6px}
+.arena-dock.is-drop-target {background:#182b3b;outline:1px dashed #9bc5dc;outline-offset:-2px}
+.arena-dock-resizer {position:absolute;z-index:85;top:8px;bottom:8px;width:8px;cursor:col-resize;touch-action:none}
+#arenaLeftResizer {left:calc(var(--arena-left-width) + 7px)}
+#arenaRightResizer {right:calc(var(--arena-right-width) + 7px)}
+.arena-dock-resizer:hover,.arena-dock-resizer:focus-visible {background:#7c9bbd55}
+.arena-work-panel {position:relative;display:block;flex:none;margin:0;width:100%;min-width:0;border:1px solid var(--arena-line);border-radius:7px;background:var(--arena-surface);color:#dce3ee;overflow:hidden}
+.arena-work-panel>summary {display:flex;align-items:center;gap:5px;min-height:31px;padding:4px 7px;background:#171e29;cursor:pointer;list-style:none;font:650 11px/1.3 Inter,system-ui,sans-serif;user-select:none}
+.arena-work-panel>summary::-webkit-details-marker {display:none}
+.arena-work-panel>summary::before {content:'▸';color:#8b9aaf}
+.arena-work-panel[open]>summary::before {content:'▾'}
+.arena-panel-title {flex:1;min-width:0}
+.arena-panel-drag {font-size:14px!important;min-height:22px!important;padding:0 3px!important;cursor:grab!important;background:transparent!important;border:0!important;touch-action:none}
+.arena-panel-dock {width:24px!important;min-width:24px!important;padding:2px!important;min-height:22px!important;background:#202a38;border:1px solid #3a4656;border-radius:4px;color:#c9d4e3;font-size:10px}
+.arena-panel-body {padding:9px;min-width:0;min-height:52px;max-height:68dvh;overflow:auto;resize:vertical;box-sizing:border-box;font:500 11px/1.45 Inter,system-ui,sans-serif;scrollbar-width:thin}
+.arena-panel-body>*+* {margin-top:7px}
+.arena-work-panel input:not([type=checkbox]):not([type=range]),.arena-work-panel select:not(.arena-panel-dock) {width:100%;min-width:0;min-height:29px;background:#0b111a;border:1px solid #364252;border-radius:5px;color:#d4deeb;padding:5px;font-size:11px}
+.arena-work-panel label {color:#acbacb;font-size:10px}
+.arena-work-panel small {color:var(--arena-muted);font-size:10px}
+.arena-button-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.arena-button-grid button {min-width:0;text-align:left;justify-content:flex-start;white-space:normal}
+.arena-work-panel h4 {color:#9baabd;font-size:10px;font-weight:600;margin:9px 0 4px}
+.arena-work-panel h4:first-child {margin-top:0}
+.arena-skill-buttons {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px}
+.arena-skill-buttons button {flex-direction:row!important}
+.arena-work-panel .arena-skill-buttons button [data-command-label] {display:block;width:auto!important;max-width:none;white-space:normal;font-size:10px}
+.arena-work-panel[data-dock="float"] {position:absolute;pointer-events:auto;resize:both;overflow:auto;min-width:220px;min-height:35px;max-width:calc(100% - 12px);max-height:calc(100% - 12px);box-shadow:0 8px 30px #0008}
+.arena-work-panel[data-dock="float"][open]>.arena-panel-body {max-height:none;height:calc(100% - 34px);resize:none}
+#arenaPanelDragGhost {position:fixed;z-index:300;padding:8px 12px;border:1px solid #8cb0cb;border-radius:5px;background:#202e3f;color:#fff;font:600 12px system-ui;pointer-events:none}
+#arenaPanelTarget [data-target-name] {display:block;color:#e6edf6;font-size:13px;font-weight:700}
+#arenaTargetState {color:#a7c7b9;font-variant-numeric:tabular-nums}
+#audienceSimulatorPanel {display:contents!important}
+#arenaPanelChat {flex:1;min-height:0;display:flex;flex-direction:column}
+.arena-dock>#arenaPanelChat[open],#arenaStreamPanelHost>#arenaPanelChat[open] {height:100%;flex:none}
+#arenaPanelChat:not([open]) {flex:none}
+#arenaPanelChat>.arena-panel-body {position:absolute;inset:39px 0 0;height:auto;flex:1;min-height:260px;max-height:none;padding:0;resize:none;display:flex;flex-direction:column;overflow:hidden}
+#arenaPanelChat:not([open])>.arena-panel-body {display:none}
+#arenaChatTabs {display:flex;flex:none;padding:5px;gap:3px;border-bottom:1px solid var(--arena-line)}
+#arenaChatTabs button {flex:1;font-size:10px;padding:5px!important}
+#arenaChatTabs button[aria-selected="true"] {border-color:#6b8eac;background:#283c50;color:#e2effb}
+.arena-chat-tabpanel {flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+#arenaDualTikTokChat {display:flex;flex-direction:column;margin:0;min-width:0;min-height:0;flex:1;overflow:hidden;background:#0c111a;border:0;border-radius:0}
+#arenaDualTikTokChatHeader {display:flex;flex-wrap:wrap;gap:4px;align-items:center;justify-content:space-between;font-size:10px;padding:8px;border-bottom:1px solid var(--arena-line);background:#111a26}
+#arenaTikTokChatFeed {flex:1;min-height:0;overflow:auto;padding:7px;user-select:text;scrollbar-width:thin;overscroll-behavior:contain}
+.arena-tiktok-chat-line {padding:6px;border-bottom:1px solid #212b39;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+.arena-tiktok-chat-line time {font-size:9px;color:#8190a4;margin-right:5px}
+.arena-tiktok-chat-line strong {color:#b2d4db;margin-right:5px}
+.arena-tiktok-chat-line.is-command,#chatFeed>[data-chat-kind="command"] {border-left:3px solid #79aabd;background:#1a2d3a!important}
+#arenaTikTokChatEmpty {padding:18px 8px;color:#8b9bb0;font-size:11px;text-align:center}
+.arena-tiktok-chat-footer {display:flex;flex-wrap:wrap;gap:4px;padding:6px;border-top:1px solid var(--arena-line);font-size:9px;color:#99aabe}
+#arenaTikTokChatCount {width:100%}
+#chatSimulatorSidebar {display:flex!important;flex-direction:column;position:static!important;width:100%!important;height:100%!important;min-height:0!important;max-height:none!important;border:0!important;border-radius:0!important;overflow:hidden;box-shadow:none!important}
+#arenaMobileChatHeader,#mobileChatExpand {display:none!important}
+#chatSimulatorSidebar #arenaChatContents {display:flex!important;flex-direction:column;flex:1;min-height:0}
+#arenaChatContents #chatFeedFrame {height:0!important;min-height:80px!important;max-height:none!important;flex:1}
+#arenaChatContents #chatFeed {height:100%;max-height:none!important;min-height:0!important;padding:7px!important;font-size:11px}
+#chatForm {flex:none;padding:7px!important;gap:5px!important;background:#131b27!important}
+#chatForm>div:first-child,#chatForm .truncate {display:none}
+#chatForm>div:nth-child(2) {display:grid;grid-template-columns:1fr 1fr;gap:4px}
+#chatForm #chatUsernameInput {width:100%}
+#chatForm input,#chatForm select {font-size:10px!important}
+#chatForm label {font-size:9px!important}
+#arena-live-bridge-panel {background:transparent!important;border:0!important;border-radius:0!important;display:flex!important;flex-direction:column;align-items:stretch!important;gap:7px!important;padding:0!important;margin:0!important;font-size:11px!important}
+#arena-live-bridge-panel>* {max-width:100%;min-width:0!important}
+#arena-live-bridge-panel button {font-size:11px!important;background:#1b2939!important;border-color:#34475d!important}
+#arenaDualOperatorDock,#arenaDualUltrawideVerticalStage,#arenaStreamLeftColumn {display:none}
+#arenaOperatorPopover {position:fixed;z-index:115;box-sizing:border-box;width:280px;max-width:calc(100vw - 16px);max-height:calc(100dvh - 100px);padding:9px;border:1px solid #4a5a6f;border-radius:7px;background:#151e2a;color:#e1e7ef;overflow:auto;overscroll-behavior:contain;box-shadow:0 6px 30px #0008;font-size:11px}
+[hidden],#arenaOperatorPopover[hidden],#arenaOperatorPopover [hidden],.arena-work-panel [hidden] {display:none!important}
+.arena-operator-menu-row {display:flex;flex-wrap:wrap;align-items:center;gap:7px}
+#arenaOperatorPopover select {padding:7px;background:#0b1420;border:1px solid #3c526a;border-radius:5px;max-width:100%;color:#deebf8}
+#arenaToolsNavigator {display:grid;grid-template-columns:1fr;gap:5px}
+#arenaToolsNavigator button {justify-content:flex-start}
+#arenaMobilePanelHost,#arenaHeaderActions>#arenaMobileMoreBtn,#arenaHeaderActions>#arenaMobileJump,#arenaHeaderActions>#arenaMobileAttack,#arenaHeaderActions>#arenaMobilePower {display:none}
+#settingsPauseModal {z-index:125;pointer-events:auto;background:#03070dbc;backdrop-filter:blur(2px)}
 #settingsPauseModal.hidden {display:none!important}
-.arena-settings-resume {background:#0e624d;color:#d1fae5;border-color:#34d399}
-#settingsPauseModal .arena-settings-resume {padding:8px 12px!important}
-#settingsPanelsScroll h3 {display:flex;align-items:center;gap:5px}
+#settingsPauseModal>div {border:1px solid #414e5f!important;border-radius:10px!important;box-shadow:0 15px 70px #0008!important;max-width:760px;max-height:92dvh}
+#settingsPauseModal>div>div:first-child {padding:12px!important}
+#settingsPauseModal>div>div:first-child .w-10 {display:none}
+#settingsPauseModal #arenaSettingsTitle {font:700 14px Inter,system-ui}
+#settingsGeneralPanel {display:flex;flex-direction:column;gap:7px}
+#settingsPanelsScroll {padding:10px!important}
+.arena-settings-section {border:1px solid #303c4d;border-radius:7px;background:#121c2a;overflow:hidden}
+.arena-settings-section>summary {padding:11px;cursor:pointer;color:#dae3ef;font:650 12px Inter,system-ui}
+.arena-settings-section>summary h3 {display:inline;font:inherit!important;color:inherit!important;letter-spacing:0!important;text-transform:none!important}
+.arena-settings-section>.arena-settings-content {padding:4px 11px 12px;display:flex;flex-direction:column;gap:11px}
 #settingsPauseModal #btnViewDual {display:flex!important}
-#settingsPauseModal .arena-option-hint {display:none!important}
+#settingsPauseModal .arena-option-hint {display:none}
+#settingsPauseModal button {box-shadow:none!important}
+#settingsPauseModal .arena-settings-resume {background:#284b43;border-color:#5a8b7b;color:#d4e9e1;white-space:nowrap}
+#arenaWorkspaceReset {width:100%;justify-content:flex-start}
+/* Stream reserves its left operator column and top/footer tracks. Menus never move captures. */
+#broadcastStageSection:fullscreen {position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;display:grid!important;grid-template-columns:var(--arena-stream-width,260px) minmax(0,1fr) min(56.25dvh,23.5vw)!important;grid-template-rows:minmax(0,1fr)!important;gap:8px!important;padding:8px!important;margin:0!important;border:0!important;border-radius:0!important;background:#070c13!important;overflow:hidden!important}
+#broadcastStageSection:fullscreen::backdrop {background:#070c13}
+#broadcastStageSection:fullscreen>:not(#arenaDualOperatorDock):not(#arenaDualUltrawideVerticalStage):not(#arenaStreamLeftColumn) {display:none!important}
+#broadcastStageSection:fullscreen>#arenaDualOperatorDock {display:grid!important;grid-column:2;grid-row:1;grid-template-rows:34px minmax(0,1fr) var(--arena-operator-footer-height,76px)!important;gap:5px;min-width:0;min-height:0;height:100%;background:transparent;border:0;overflow:hidden}
+#broadcastStageSection:fullscreen #arenaDualTopCluster {position:relative;min-width:0;height:34px;overflow:visible;border-bottom:1px solid #26303e;background:#101722}
+#arenaStreamToolbarMount {width:100%;height:34px;opacity:0;pointer-events:none;transition:opacity .12s}
+#arenaDualTopCluster:hover #arenaStreamToolbarMount,#arenaDualTopCluster:focus-within #arenaStreamToolbarMount,#arenaDualTopCluster.arena-toolbar-awake #arenaStreamToolbarMount {opacity:1;pointer-events:auto}
+#arenaDualTopCluster::before {content:'•••';position:absolute;left:10px;top:7px;color:#526178;font-size:13px;pointer-events:none}
+#arenaDualTopCluster:hover::before,#arenaDualTopCluster:focus-within::before {opacity:0}
+#broadcastStageSection:fullscreen #arenaHeaderActions button {min-height:27px;padding:3px 6px!important;font-size:10px}
+#broadcastStageSection:fullscreen #arenaDualCenterStageMount {display:flex;align-items:center;justify-content:center;min-height:0;min-width:0;overflow:hidden;padding:2px}
+#broadcastStageSection:fullscreen #arenaDualBottomCluster {min-width:0;min-height:0;height:var(--arena-operator-footer-height,76px);border-top:1px solid #202b3a;background:#0a111b}
+#broadcastStageSection:fullscreen #arenaDualUltrawideVerticalStage {display:flex!important;grid-column:3;grid-row:1;align-items:center;justify-content:flex-end;min-width:0;min-height:0;overflow:visible;transform:translateX(var(--arena-vertical-nudge,10px));padding-right:18px;box-sizing:border-box}
+#broadcastStageSection:fullscreen #card-16x9,#broadcastStageSection:fullscreen #card-9x16 {display:flex!important;align-items:center;justify-content:center;flex:none;min-width:0;min-height:0;margin:0!important;padding:0!important}
+#broadcastStageSection:fullscreen #card-16x9>:not(#viewport16x9),#broadcastStageSection:fullscreen #card-9x16>:not(#viewport9x16) {display:none!important}
+#broadcastStageSection:fullscreen #viewport16x9,#broadcastStageSection:fullscreen #viewport9x16 {border:0!important;border-radius:3px!important;box-shadow:none!important;overflow:hidden!important;max-width:none!important;max-height:none!important;margin:0!important}
+#broadcastStageSection:fullscreen #arenaStreamLeftColumn {display:flex!important;grid-column:1;grid-row:1;min-height:0;min-width:0;position:relative;flex-direction:column;border:1px solid #293545;border-radius:7px;background:#0e1622;overflow:visible;z-index:90}
+#arenaStreamLeftHeader {height:33px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:5px 8px;font:650 11px Inter,system-ui;color:#95a7bd;border-bottom:1px solid #283344}
+#arenaStreamClose {font-size:16px;padding:0 6px;border:0;background:transparent;color:#b8c8d9}
+#arenaStreamPanelHost {flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:6px;padding:5px}
+#arenaStreamPanelHost>.arena-work-panel {flex:none}
+#arenaStreamPanelHost>#arenaPanelChat {flex:1}
+#arenaStreamPanelHost .arena-panel-dock,#arenaStreamPanelHost .arena-panel-drag {display:none}
+#arenaStreamResizer {position:absolute;top:0;bottom:0;right:-8px;width:9px;cursor:col-resize;touch-action:none}
+#arenaStreamResizer:hover {background:#7398b955}
+#arenaStreamLeftColumn>#arenaOperatorPopover {position:absolute!important;left:0!important;top:34px!important;width:100%!important;max-width:100%;max-height:calc(100% - 34px);box-shadow:none}
+#arenaStreamLeftColumn>#settingsPauseModal {position:absolute!important;inset:0!important;padding:0!important;background:#101925;backdrop-filter:none!important}
+#arenaStreamLeftColumn>#settingsPauseModal>div {width:100%;height:100%;max-height:100%;border:0!important;border-radius:7px!important;box-shadow:none!important}
+#arenaStreamLeftColumn #settingsPauseModal .grid {grid-template-columns:1fr!important}
+#arenaStreamLeftColumn #settingsPauseModal>div>div:first-child {padding:9px!important;gap:5px;align-items:flex-start}
+#arenaStreamLeftColumn #settingsPauseModal #arenaSettingsVersion,#arenaStreamLeftColumn #settingsPauseModal #settingsModeBadge,#arenaStreamLeftColumn #settingsPauseModal #arenaSettingsDescription {display:none}
+#arenaStreamLeftColumn .arena-settings-resume {font-size:10px;padding:5px!important}
+#arenaStreamLeftColumn #settingsPauseModal>div>div:last-child {padding:8px!important;font-size:9px}
+#arenaStreamPanelHost>.arena-work-panel[data-dock="float"] {position:static;resize:none;width:100%!important;max-width:none;max-height:none;height:auto!important;box-shadow:none}
+@media (hover:none) {#arenaStreamToolbarMount {opacity:1;pointer-events:auto}}
+@media (max-width:1100px) and (min-width:768px) {:root {--arena-left-width:220px;--arena-right-width:240px}}
 @media (max-width:767px) {
- #arenaHeaderActions.arena-operator-toolbar button {min-height:40px;font-size:12px}
- #arenaPreparationOperatorRail {height:144px;min-height:144px}
- #settingsPauseModal > div {max-height:94dvh}
+ body>header {height:31px;padding:4px 7px!important}
+ .arena-brand-block {min-height:22px}
+ .arena-brand-meta {gap:7px!important}
+ .arena-brand-meta h1 {font-size:10px!important}
+ #arenaTopStats {display:none!important}
+ #headerStateBadge {font-size:8px;padding:2px 5px!important}
+ body>main#arenaWorkspace {display:flex!important;padding:2px 2px calc(49px + env(safe-area-inset-bottom))!important;gap:0!important}
+ #arenaWorkspace>#broadcastStageSection:not(:fullscreen) {border:0;border-radius:0;padding:0!important;width:100%;height:100%!important}
+ #arenaDockLeft,#arenaDockRight,#arenaDockBottom,#arenaDockFloat,#arenaLeftResizer,#arenaRightResizer {display:none!important}
+ #arenaHeaderActions.arena-operator-toolbar {position:fixed;bottom:0;left:0;right:0;z-index:110;height:calc(48px + env(safe-area-inset-bottom));padding:4px 5px calc(4px + env(safe-area-inset-bottom));background:#111a27;border-top:1px solid #39485b;gap:3px;overflow-x:auto;backdrop-filter:none}
+ #arenaHeaderActions>button,#arenaHeaderActions>.arena-toolbar-separator {display:none!important}
+ #arenaHeaderActions>button.arena-mobile-essential,#arenaHeaderActions>#arenaMobileMoreBtn,#arenaHeaderActions>#arenaMobileJump,#arenaHeaderActions>#arenaMobileAttack,#arenaHeaderActions>#arenaMobilePower {display:inline-flex!important;flex:1 0 auto;min-height:36px;padding:4px 5px!important;font-size:10px}
+ #arenaOperatorPopover {left:5px!important;top:auto!important;bottom:calc(53px + env(safe-area-inset-bottom));width:calc(100vw - 10px)!important;max-width:none;max-height:70dvh}
+ #arenaToolsNavigator {display:none}
+ #arenaMobilePanelHost {display:flex;flex-direction:column;gap:5px}
+ #arenaMobilePanelHost .arena-panel-dock,#arenaMobilePanelHost .arena-panel-drag {display:none}
+ #arenaMobilePanelHost #arenaPanelChat {min-height:50dvh}
+ .arena-panel-body {max-height:48dvh;resize:none}
+ #settingsPauseModal {padding:5px!important}
+ #settingsPauseModal>div {max-height:93dvh}
+ #settingsPauseModal .grid {grid-template-columns:1fr!important}
+ #settingsPauseModal .arena-settings-content .grid-cols-3 {grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ #broadcastStageSection:fullscreen {grid-template-columns:120px minmax(0,1fr) min(28vw,28dvh)!important;gap:3px!important;padding:3px!important}
 }
-/* Preserve the calibrated 34px / 76px ultrawide tracks, including while menus are open. */
-#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaHeaderActions button {min-height:26px;padding:3px 7px!important;font-size:10px}
+@media (prefers-reduced-motion:reduce) {#arenaStreamToolbarMount {transition:none}}
+
 </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#06080f] text-slate-100">
@@ -967,7 +839,7 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
     <!-- ==================== CLEAN MINIMALIST TOP STREAM BAR ==================== -->
     <header class="w-full bg-[#0b0f1c]/95 border-b border-slate-800/80 px-3 py-2 sticky top-0 z-[70] backdrop-blur-md">
         <div id="arenaTopBarInner" class="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-2">
-            
+
             <!-- Brand Title & Live Phase Pill -->
             <div class="arena-brand-block flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500 via-blue-600 to-purple-700 flex items-center justify-center shadow-lg shadow-cyan-500/20 border border-cyan-400/40">
@@ -1015,34 +887,18 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
                 </span>
             </div>
 
-            <!-- v0.2: one horizontal toolbar for preparation and stream mode. -->
-            <nav id="arenaHeaderActions" class="arena-operator-toolbar" aria-label="Controles de Arena Live" data-no-translate>
-                <button type="button" id="btnFullscreenDual" aria-controls="broadcastStageSection"><span id="arenaDualFullscreenEntryLabel">🎥 Modo Stream</span></button>
-                <button type="button" id="arenaViewMenuBtn" data-operator-menu="view" aria-expanded="false" aria-controls="arenaOperatorPopover">🖥 Vista</button>
-                <button type="button" id="arenaFullscreenMenuBtn" data-operator-menu="screen" aria-expanded="false" aria-controls="arenaOperatorPopover">⛶ Pantalla</button>
-                <span class="arena-toolbar-separator" aria-hidden="true"></span>
-                <button type="button" id="arenaDualPauseBtn" aria-pressed="false">⏸ Pausa</button>
-                <button type="button" id="arenaDualLobbyBtn">🚪 Lobby</button>
-                <button type="button" id="arenaDualRematchBtn">🔄 Revancha</button>
-                <button type="button" id="btnStreamerJoin" onclick="joinAsStreamer()" aria-describedby="streamerJoinStatus"><span aria-hidden="true">👑</span> <span id="streamerJoinLabel">Prota</span></button>
-                <button type="button" id="btnProtaClassMenu" data-operator-menu="class" aria-expanded="false" aria-controls="arenaOperatorPopover">🎭 Clase</button>
-                <span id="streamerJoinStatus" class="sr-only" aria-live="polite">Prota puede unirse en cualquier modo.</span>
-                <span class="arena-toolbar-separator" aria-hidden="true"></span>
-                <button type="button" id="btnQuickSound" onclick="toggleSound()" aria-pressed="true"><span id="quickSoundIcon" aria-hidden="true">🔊</span> <span id="arenaQuickSoundLabel">Audio</span></button>
-                <button type="button" id="arenaDualTikTokConnectBtn" aria-pressed="false" disabled>📡 TikTok</button>
-                <button type="button" id="arenaDualTestsToggle" data-operator-menu="tools" aria-expanded="false" aria-controls="arenaOperatorPopover">🧰 Herramientas</button>
-                <button type="button" id="arenaDualChatToggleBtn" data-operator-menu="chat" aria-expanded="false" aria-controls="arenaOperatorPopover">💬 Chat</button>
-                <button type="button" id="arenaDualSettingsBtn" aria-controls="settingsPauseModal" aria-expanded="false">⚙ Ajustes</button>
-            </nav>
+            <!-- Shared actions; preparation, Stream and mobile place them in their own workspace. -->
+<nav id="arenaHeaderActions" class="arena-operator-toolbar" aria-label="Controles de Arena Live" data-no-translate><button type="button" id="arenaViewMenuBtn" data-operator-menu="view" aria-expanded="false" aria-controls="arenaOperatorPopover">🖥 Vista</button><button type="button" id="arenaFullscreenMenuBtn" data-operator-menu="screen" aria-expanded="false" aria-controls="arenaOperatorPopover">⛶ Pantalla</button><button type="button" id="arenaDualTestsToggle" data-operator-menu="tools" aria-expanded="false" aria-controls="arenaOperatorPopover">🧰 Herramientas</button><button type="button" id="arenaDualSettingsBtn" aria-controls="settingsPauseModal" aria-expanded="false">⚙ Ajustes</button><span class="arena-toolbar-separator" aria-hidden="true"></span><button type="button" id="btnFullscreenDual" aria-controls="broadcastStageSection"><span id="arenaDualFullscreenEntryLabel">🎥 Modo Stream</span></button><button type="button" id="arenaDualChatToggleBtn" data-operator-menu="chat" aria-expanded="false" aria-controls="arenaOperatorPopover">💬 Chat</button><span class="arena-toolbar-separator" aria-hidden="true"></span><button class="arena-mobile-essential" type="button" id="btnStreamerJoin" onclick="joinAsStreamer()" aria-describedby="streamerJoinStatus"><span aria-hidden="true">👑</span> <span id="streamerJoinLabel">Prota</span></button><button type="button" id="btnProtaClassMenu" data-operator-menu="class" aria-expanded="false" aria-controls="arenaOperatorPopover">🎭 Clase</button><button type="button" id="btnQuickSound" onclick="toggleSound()" aria-pressed="true"><span id="quickSoundIcon" aria-hidden="true">🔊</span> <span id="arenaQuickSoundLabel">Audio</span></button><button type="button" id="arenaDualTikTokConnectBtn" aria-pressed="false" disabled>📡 TikTok</button><button class="arena-mobile-essential" type="button" id="arenaDualPauseBtn" aria-pressed="false">⏸ Pausa</button><button type="button" id="arenaDualRematchBtn">🔄 Revancha</button><button type="button" id="arenaDualLobbyBtn">🚪 Lobby</button><span id="streamerJoinStatus" class="sr-only" aria-live="polite">Prota puede unirse en cualquier modo.</span><button type="button" id="arenaMobileJump" data-workspace-copy="jump" data-emoji="↑" onclick="triggerManualJump()" title="↑ Saltar">↑ Saltar</button><button type="button" id="arenaMobileAttack" data-workspace-copy="hit" data-emoji="⚔" onclick="arenaMobileMelee()" title="⚔ Golpe">⚔ Golpe</button><button type="button" id="arenaMobilePower" data-workspace-copy="power" data-emoji="⚡" onclick="triggerProtagonistSpecialAttack()" title="⚡ Poder">⚡ Poder</button><button type="button" id="arenaMobileMoreBtn" data-operator-menu="mobile" aria-expanded="false" aria-controls="arenaOperatorPopover">☰ Menú</button></nav>
         </div>
     </header>
 
     <!-- ==================== MAIN WORKSPACE: DUAL SIMULTANEOUS MONITORS + MULTI-CHAT SIMULATOR ==================== -->
-    <main class="flex-1 max-w-[1920px] w-full mx-auto p-2 sm:p-3 flex flex-col items-stretch justify-start gap-3 overflow-visible">
+    <main id="arenaWorkspace" class="flex-1 max-w-[1920px] w-full mx-auto p-2 sm:p-3 flex flex-col items-stretch justify-start gap-3 overflow-visible">
 
+<aside id="arenaDockLeft" class="arena-dock" data-dock-zone="left" aria-label="Paneles izquierdos"></aside><aside id="arenaDockRight" class="arena-dock" data-dock-zone="right" aria-label="Paneles derechos"></aside><aside id="arenaDockBottom" class="arena-dock" data-dock-zone="bottom" aria-label="Paneles inferiores"></aside><div id="arenaDockFloat" aria-label="Paneles flotantes"></div><div id="arenaLeftResizer" class="arena-dock-resizer" role="separator" tabindex="0" aria-label="Ancho de columna izquierda" aria-orientation="vertical" aria-valuemin="200" aria-valuemax="500" aria-valuenow="260"></div><div id="arenaRightResizer" class="arena-dock-resizer" role="separator" tabindex="0" aria-label="Ancho de columna derecha" aria-orientation="vertical" aria-valuemin="200" aria-valuemax="500" aria-valuenow="300"></div>
         <!-- LEFT/CENTER: SIMULTANEOUS DUAL-BROADCAST STAGE (LEFT: 16:9 HORIZONTAL | RIGHT: 9:16 VERTICAL) -->
         <section id="broadcastStageSection" class="w-full min-w-0 shrink-0 flex flex-col justify-between bg-[#090d18] rounded-2xl border border-slate-800/90 p-2 sm:p-3 relative overflow-hidden shadow-2xl gap-1.5">
-            
+
             <!-- Subtle Background Grid Accent -->
             <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#38bdf8 1px, transparent 1px); background-size: 24px 24px;"></div>
 
@@ -1404,10 +1260,10 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
 
             </div>
 
-            <div id="arenaDualUltrawideVerticalStage" aria-hidden="true"></div>
+            <aside id="arenaStreamLeftColumn" aria-label="Herramientas de Stream"><div id="arenaStreamLeftHeader"><span id="arenaStreamLeftTitle">Operador</span><button type="button" id="arenaStreamClose" title="Ocultar herramientas" aria-label="Ocultar herramientas">×</button></div><div id="arenaStreamPanelHost" hidden></div><div id="arenaStreamResizer" role="separator" tabindex="0" aria-label="Ancho de herramientas de Stream" aria-orientation="vertical" aria-valuemin="200" aria-valuemax="500" aria-valuenow="260"></div></aside><div id="arenaDualUltrawideVerticalStage"></div>
             <aside id="arenaDualOperatorDock" aria-label="Control del directo" data-no-translate>
                 <div id="arenaDualTopCluster"><div id="arenaStreamToolbarMount"></div></div>
-                <div id="arenaDualCenterStageMount" aria-hidden="true"></div>
+                <div id="arenaDualCenterStageMount"></div>
                 <div id="arenaDualBottomCluster"><div id="arenaStreamMenuRail" aria-label="Opciones del operador"></div></div>
             </aside>
         </section>
@@ -1415,47 +1271,19 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
 
 
         <!-- AUDIENCE SIMULATOR: now independent and below both game views -->
-        <section id="audienceSimulatorPanel" class="w-full shrink-0 bg-[#0b101e] rounded-2xl border border-slate-800/90 flex flex-col overflow-hidden shadow-xl gap-0">
-            <!-- Sidebar Header & Auto-Audience Toggle -->
-            <div class="p-3 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-comments text-cyan-400"></i>
-                    <div>
-                        <h2 class="text-xs font-extrabold tracking-wide text-white" data-ui-label="testTools">Herramientas de Prueba</h2>
-                        <p class="text-[10px] text-slate-400" data-ui-label="testSubtitle">Espectador · Comandos · Interacciones · Opciones</p>
-                    </div>
-                </div>
-
-                <!-- Auto-Audience Simulator Switch -->
-                <button id="btnAutoChat" onclick="toggleAutoChat()" class="px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition-all">
-                    <span id="autoChatDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
-                    <span id="autoChatLabel">Auto-Audiencia: OFF</span>
-                </button>
-            </div>
-
-            <!-- Target Fighter Selector & Quick Event Panel -->
-            <div class="p-3 bg-slate-950/60 border-b border-slate-800/80 flex flex-col gap-2.5">
-                <div class="flex flex-wrap items-center gap-2">
-                    <label for="targetFighterSelect" class="text-[10px] font-extrabold tracking-wider text-cyan-300" data-ui-label="playerTarget">🎯 Jugador objetivo</label>
-                    <select id="targetFighterSelect" aria-label="Personaje al que apoyar" title="Las habilidades escritas y los eventos sociales afectan al personaje elegido; !jugar y selección de clase usan tu @" class="min-w-0 flex-1 bg-slate-950 border border-cyan-700 rounded-lg px-2 py-1.5 text-xs font-semibold text-cyan-200 focus:outline-none focus:border-cyan-500">
+<div id="audienceSimulatorPanel"><details id="arenaPanelTarget" class="arena-work-panel" data-dock="right" >
+ <summary><span class="arena-panel-title" data-workspace-copy="target" data-emoji="🎯">🎯 target</span><button type="button" class="arena-panel-drag" data-operator-keep-open aria-label="Mover panel" title="Arrastrar panel">⠿</button><select class="arena-panel-dock" aria-label="Acoplar panel" data-operator-keep-open><option value="left">Izquierda</option><option value="right" selected>Derecha</option><option value="bottom">Abajo</option><option value="float">Flotante</option></select></summary>
+ <div class="arena-panel-body"><label for="targetFighterSelect" data-workspace-copy="target">Jugador objetivo</label><select id="targetFighterSelect" aria-label="Personaje al que apoyar" title="Las habilidades escritas y los eventos sociales afectan al personaje elegido; !jugar y selección de clase usan tu @" class="min-w-0 flex-1 bg-slate-950 border border-cyan-700 rounded-lg px-2 py-1.5 text-xs font-semibold text-cyan-200 focus:outline-none focus:border-cyan-500">
                         <option value="random">🎲 Apoyar aleatorio</option>
-                    </select>
-                </div>
-                
-<section class="arena-test-group" data-event-group="testPlayer"><h4 class="arena-test-group-title" data-ui-label="testPlayer">Jugador</h4><div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5"><button onclick="triggerQuickJoin()" class="min-h-[36px] px-1.5 py-1 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-[10px] leading-tight text-center flex items-center justify-center gap-1 shadow-md shadow-cyan-950/50 active:scale-95 transition-all">
-                        <i class="fa-solid fa-user-plus"></i>
-                        <span>+ Unir / Reingresar</span>
-                    </button><button onclick="simulateFallenRejoinForTest()" class="min-h-[36px] px-1.5 py-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-[10px] leading-tight text-center flex items-center justify-center gap-1 shadow-md shadow-emerald-950/50 active:scale-95 transition-all" title="Simula que un jugador caído escribe !jugar para gastar una vida o muestra el bloqueo al agotarlas">
-                        <i class="fa-solid fa-rotate-right"></i>
-                        <span>Reingresar Jugador</span>
-                    </button></div></section>                <!-- Chat messages and commands share the same input in Live Chat. -->
-                <div class="arena-chat-shortcut"><button type="button" onclick="openArenaChatComposer()" class="rounded-lg bg-slate-800/80 border border-cyan-500/30 text-cyan-200 px-3 py-2 text-xs font-bold" title="Abrir chat para escribir mensaje o comando"><i class="fa-solid fa-comment-dots"></i> <span data-ui-label="commandEntry">Mensaje / Comando</span></button></div>
-                <!-- CATEGORY: SKILL COMMANDS -->
-                <div>
-                    <div class="text-[10px] font-extrabold uppercase tracking-wider text-violet-300 mb-1">⌨️ Comandos</div>
-                    <div id="quickSkillTargetStatus" class="text-[10px] text-amber-200 mb-1" aria-live="polite">Selecciona un luchador activo para ver qué poderes de clase tiene.</div>
-                    <div class="text-[10px] text-slate-400 mb-1">Cada jugador controla su clase. Los comandos se envían desde el chat y las pruebas pueden dirigirse al jugador seleccionado.</div>
-                    <div class="grid grid-cols-5 gap-1 arena-skill-buttons">                        <button onclick="triggerQuickSkill('!kame')" class="px-1 py-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 text-[10px] font-bold flex flex-col items-center gap-0.5 active:scale-95 transition-all" title="Guerrero · Ataque especial · Se aplica al espectador seleccionado compatible"><span>☄️</span><span class="truncate w-full text-center" data-command-label="!kame">Kame</span></button>
+                    </select><strong id="arenaTargetName" data-target-name>Aleatorio</strong><div id="arenaTargetClass">—</div><div id="arenaTargetState" role="status">—</div><small id="quickSkillTargetStatus">Elige un jugador.</small></div></details><details id="arenaPanelScenarios" class="arena-work-panel" data-dock="right" >
+ <summary><span class="arena-panel-title" data-workspace-copy="scenario" data-emoji="🧪">🧪 scenario</span><button type="button" class="arena-panel-drag" data-operator-keep-open aria-label="Mover panel" title="Arrastrar panel">⠿</button><select class="arena-panel-dock" aria-label="Acoplar panel" data-operator-keep-open><option value="left">Izquierda</option><option value="right" selected>Derecha</option><option value="bottom">Abajo</option><option value="float">Flotante</option></select></summary>
+ <div class="arena-panel-body"><label for="arenaScenarioSelect" data-workspace-copy="scenario">Escenario de prueba</label><select id="arenaScenarioSelect" data-operator-keep-open title="Selecciona el escenario y pulsa Cargar para sustituir los jugadores de prueba"><option value="2">🥊 1v1 · 2</option><option value="4">⚡ Smash · 4</option><option value="9">🏟️ Arena · 9</option><option value="128">🏟️ Arena · 128</option></select><button type="button" id="arenaLoadScenario" data-workspace-copy="load" title="Cargar los jugadores del escenario elegido">Cargar</button></div></details><details id="arenaPanelSocial" class="arena-work-panel" data-dock="right" open>
+ <summary><span class="arena-panel-title" data-workspace-copy="social" data-emoji="❤️">❤️ social</span><button type="button" class="arena-panel-drag" data-operator-keep-open aria-label="Mover panel" title="Arrastrar panel">⠿</button><select class="arena-panel-dock" aria-label="Acoplar panel" data-operator-keep-open><option value="left">Izquierda</option><option value="right" selected>Derecha</option><option value="bottom">Abajo</option><option value="float">Flotante</option></select></summary>
+ <div class="arena-panel-body"><h4>Interacción</h4><div class="arena-button-grid"><button type="button" onclick="triggerSocialEvent('taps', null, 10)" title="Ráfaga de 10 taps: aumenta el empuje">❤️ Taps</button><button type="button" onclick="triggerSocialEvent('likes')" title="Aumenta daño y velocidad">♥ Me gusta</button></div><h4>Fidelidad</h4><div class="arena-button-grid"><button type="button" onclick="triggerSocialEvent('follow')" title="Recupera energía">➕ Seguir</button><button type="button" onclick="triggerSocialEvent('subscribe')" title="Activa un escudo">⭐ Suscripción</button></div><h4>Compartir</h4><div class="arena-button-grid"><button type="button" onclick="triggerSocialEvent('share')" title="Recupera vida y concede inmunidad durante 10 segundos">🔄 Compartir</button></div><h4>Apoyos</h4><div class="arena-button-grid"><button type="button" onclick="triggerSocialEvent('gift')" title="Activa Berserk">💎 Regalo</button><button type="button" onclick="triggerSocialEvent('bits')" title="Lanza un especial">💜 Bits</button><button type="button" onclick="triggerSocialEvent('donation')" title="Regeneración">💸 Donación</button><button type="button" onclick="triggerSocialEvent('superchat')" title="Onda de impacto">💬 Super Chat</button><button type="button" onclick="triggerSocialEvent('star')" title="Golpe crítico">🌟 Estrella</button><button type="button" onclick="triggerSocialEvent('stars')" title="Impacto">🌠 Estrellas</button></div></div></details><details id="arenaPanelPlayers" class="arena-work-panel" data-dock="right" >
+ <summary><span class="arena-panel-title" data-workspace-copy="players" data-emoji="👥">👥 players</span><button type="button" class="arena-panel-drag" data-operator-keep-open aria-label="Mover panel" title="Arrastrar panel">⠿</button><select class="arena-panel-dock" aria-label="Acoplar panel" data-operator-keep-open><option value="left">Izquierda</option><option value="right" selected>Derecha</option><option value="bottom">Abajo</option><option value="float">Flotante</option></select></summary>
+ <div class="arena-panel-body"><div class="arena-button-grid"><button type="button" onclick="triggerQuickJoin()" title="Simular !jugar de un espectador">➕ Unir / reingresar</button><button type="button" onclick="simulateFallenRejoinForTest()" title="Simular !jugar de un jugador caído">🔄 Reingreso</button><button type="button" onclick="triggerBatchJoin(4)" title="👥 +4">👥 +4</button><button type="button" onclick="triggerBatchJoin(8)" title="👥 +8">👥 +8</button><button type="button" onclick="eliminateOneRivalForTest()" title="Eliminar un rival de prueba">💥 K.O.</button><button type="button" onclick="openArenaChatComposer()" title="💬 Comando">💬 Comando</button></div></div></details><details id="arenaPanelPowers" class="arena-work-panel" data-dock="right" >
+ <summary><span class="arena-panel-title" data-workspace-copy="powers" data-emoji="⚡">⚡ powers</span><button type="button" class="arena-panel-drag" data-operator-keep-open aria-label="Mover panel" title="Arrastrar panel">⠿</button><select class="arena-panel-dock" aria-label="Acoplar panel" data-operator-keep-open><option value="left">Izquierda</option><option value="right" selected>Derecha</option><option value="bottom">Abajo</option><option value="float">Flotante</option></select></summary>
+ <div class="arena-panel-body"><div class="arena-skill-buttons">                        <button onclick="triggerQuickSkill('!kame')" class="px-1 py-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 text-[10px] font-bold flex flex-col items-center gap-0.5 active:scale-95 transition-all" title="Guerrero · Ataque especial · Se aplica al espectador seleccionado compatible"><span>☄️</span><span class="truncate w-full text-center" data-command-label="!kame">Kame</span></button>
                         <button onclick="triggerQuickSkill('!rasen')" class="px-1 py-1.5 rounded-lg bg-purple-950/80 hover:bg-purple-900 border border-purple-500/40 text-purple-300 text-[10px] font-bold flex flex-col items-center gap-0.5 active:scale-95 transition-all" title="Shinobi · Ataque especial · Se aplica al espectador seleccionado de clase Shinobi"><span>🌀</span><span class="truncate w-full text-center" data-command-label="!rasen">Rasen</span></button>
                         <button onclick="triggerQuickSkill('!trueno')" class="px-1 py-1.5 rounded-lg bg-amber-950/80 hover:bg-amber-900 border border-amber-500/40 text-amber-300 text-[10px] font-bold flex flex-col items-center gap-0.5 active:scale-95 transition-all" title="Rayo · Ataque especial · Se aplica al espectador seleccionado de clase Rayo"><span>⚡</span><span class="truncate w-full text-center" data-command-label="!trueno">Trueno</span></button>
                         <button onclick="triggerQuickSkill('!enred')" class="px-1 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 text-[10px] font-bold flex flex-col items-center gap-0.5 active:scale-95 transition-all" title="Espíritu · Ataque especial · Se aplica al espectador seleccionado de clase Espíritu"><span>🌿</span><span class="truncate w-full text-center" data-command-label="!enred">Enred</span></button>
@@ -1465,75 +1293,35 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
 
 
 
-                    </div>
-                </div>
-                <!-- Two public actions: commands and interactions; grouped by meaning, not platform. -->
-                <div class="arena-test-groups"><section class="arena-test-group" data-event-group="interaction"><h4 class="arena-test-group-title" data-ui-label="interaction">Interacción</h4><div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5"><button onclick="triggerSocialEvent('taps', null, 10)" class="min-h-[36px] px-1.5 py-1 rounded-lg bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold text-[10px] leading-tight text-center flex items-center justify-center gap-1 shadow-md shadow-pink-950/50 active:scale-95 transition-all">
-                        <i class="fa-solid fa-heart"></i>
-                        <span>Ráfaga Taps (+Empuje)</span>
-                    </button><button onclick="triggerSocialEvent('likes')" class="min-h-[36px] rounded-lg border border-pink-500/40 bg-pink-950/40 px-1.5 py-1 text-[10px] leading-tight font-bold text-pink-200 text-center flex items-center justify-center">❤️ Me gusta (+Daño/Velocidad)</button></div></section><section class="arena-test-group" data-event-group="loyalty"><h4 class="arena-test-group-title" data-ui-label="loyalty">Fidelidad</h4><div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5"><button onclick="triggerSocialEvent('follow')" class="min-h-[36px] rounded-lg border border-pink-500/40 bg-pink-950/40 px-1.5 py-1 text-[10px] leading-tight font-bold text-pink-200 text-center flex items-center justify-center">➕ Seguir · Energía</button><button onclick="triggerSocialEvent('subscribe')" class="min-h-[36px] rounded-lg border border-violet-500/40 bg-violet-950/40 px-1.5 py-1 text-[10px] leading-tight font-bold text-violet-200 text-center flex items-center justify-center">⭐ Suscripción · Escudo</button></div></section><section class="arena-test-group" data-event-group="sharing"><h4 class="arena-test-group-title" data-ui-label="sharing">Compartir</h4><div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5"><button onclick="triggerSocialEvent('share')" class="min-h-[36px] rounded-lg border border-sky-500/40 bg-sky-950/50 px-1.5 py-1 text-[10px] leading-tight font-bold text-sky-200 text-center flex items-center justify-center">🔄 Compartir (+Vida/Inmunidad 10s)</button></div></section><section class="arena-test-group" data-event-group="support"><h4 class="arena-test-group-title" data-ui-label="support">Apoyos</h4><div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5"><button onclick="triggerSocialEvent('gift')" class="min-h-[36px] px-1.5 py-1 rounded-lg bg-gradient-to-r from-amber-500 via-orange-500 to-pink-600 hover:brightness-110 text-slate-950 font-black text-[10px] leading-tight text-center flex items-center justify-center gap-1 shadow-lg shadow-amber-500/20 active:scale-95 transition-all">
-                        <i class="fa-solid fa-gem"></i><span>Regalo / Berserk 💎</span>
-                    </button><button onclick="triggerSocialEvent('bits')" class="min-h-[36px] rounded-lg border border-violet-500/40 bg-violet-950/40 px-1.5 py-1 text-[10px] leading-tight font-bold text-violet-200 text-center flex items-center justify-center">💜 Bits · Especial</button><button onclick="triggerSocialEvent('donation')" class="min-h-[36px] rounded-lg border border-amber-500/40 bg-amber-950/40 px-1.5 py-1 text-[10px] leading-tight font-bold text-amber-200 text-center flex items-center justify-center">💸 Donación · Regeneración</button><button onclick="triggerSocialEvent('superchat')" class="min-h-[36px] rounded-lg border border-amber-500/40 bg-amber-950/40 px-1.5 py-1 text-[10px] leading-tight font-bold text-amber-200 text-center flex items-center justify-center">💬 Super Chat · Onda</button><button onclick="triggerSocialEvent('star')" class="min-h-[36px] rounded-lg border border-sky-500/40 bg-sky-950/40 px-1.5 py-1 text-[10px] leading-tight font-bold text-sky-200 text-center flex items-center justify-center">🌟 Estrella · Crítico</button><button onclick="triggerSocialEvent('stars')" class="min-h-[36px] rounded-lg border border-sky-500/40 bg-sky-950/40 px-1.5 py-1 text-[10px] leading-tight font-bold text-sky-200 text-center flex items-center justify-center">🌠 Estrellas · Impacto</button></div></section></div>
-            </div>
-
-            <!-- Expanded on-demand test bench: events keep running while the game remains active. -->
-            <details id="advancedAudienceLab" class="mx-2 mt-2 mb-1 rounded-xl border border-purple-500/30 bg-purple-950/20 text-xs">
-                <summary class="cursor-pointer list-none select-none px-3 py-2 font-extrabold text-purple-200 flex items-center justify-between gap-2">
-                    <span>🧪 Más pruebas en vivo</span><span class="text-[10px] text-purple-300">Eventos · jugadores · reloj</span>
-                </summary>
-                <div class="px-2.5 pb-2.5 flex flex-col gap-2">
-                    <div class="rounded-lg border border-amber-500/35 bg-amber-950/25 p-2 flex items-center justify-between gap-2">
-                        <div class="min-w-0">
-                            <div class="font-extrabold text-amber-200">⚔️ Ataque automático</div>
-                            <div id="autoAttackStatusLive" class="text-[10px] text-slate-400">Los espectadores luchan solos. Solo saltan para salvarse.</div>
-                        </div>
-                        <button id="autoAttackToggleLive" type="button" aria-pressed="true" onclick="toggleAutoAttackLive()" class="shrink-0 rounded-lg border border-amber-500/50 bg-amber-900/60 px-3 py-2 font-extrabold text-amber-100">⚔️ Ataque ON</button>
-                    </div>
-                    <div class="text-[10px] text-slate-400">Con Ataque OFF, los espectadores quedan inmóviles: no se mueven, saltan ni atacan automáticamente. El protagonista del streamer mantiene sus controles.</div>
-                    <div class="text-[10px] font-extrabold uppercase tracking-wider text-cyan-300">👥 Jugadores y reingresos</div>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                        <button type="button" onclick="triggerBatchJoin(4)" class="rounded-lg border border-cyan-500/40 bg-cyan-950/60 px-2 py-2 font-bold text-cyan-200">👥 +4</button>
-                        <button type="button" onclick="triggerBatchJoin(8)" class="rounded-lg border border-cyan-500/40 bg-cyan-950/60 px-2 py-2 font-bold text-cyan-200">👥 +8</button>
-                        <button type="button" onclick="eliminateOneRivalForTest()" class="rounded-lg border border-rose-500/40 bg-rose-950/50 px-2 py-2 font-bold text-rose-200">💥 K.O.</button>
-                        <button type="button" onclick="simulateFallenRejoinForTest()" class="rounded-lg border border-emerald-500/40 bg-emerald-950/50 px-2 py-2 font-bold text-emerald-200">🔄 Reingreso</button>
-                    </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                        <button type="button" onclick="applyPlayerCountPreset(2)" class="rounded-lg border border-amber-500/40 bg-amber-950/50 px-1.5 py-2 font-bold text-amber-200">🥊 2 · 1v1</button>
-                        <button type="button" onclick="applyPlayerCountPreset(4)" class="rounded-lg border border-cyan-500/40 bg-cyan-950/50 px-1.5 py-2 font-bold text-cyan-200">⚡ 4 · Smash</button>
-                        <button type="button" onclick="applyPlayerCountPreset(9)" class="rounded-lg border border-purple-500/40 bg-purple-950/50 px-1.5 py-2 font-bold text-purple-200">🏟️ 9 · Iso</button>
-                        <button type="button" onclick="applyPlayerCountPreset(128)" class="rounded-lg border border-purple-500/40 bg-purple-950/50 px-1.5 py-2 font-bold text-purple-200" title="Generar 128 personajes distintos con su clase asignada">🏟️ 128 · Arena</button>
-                    </div>
-                    <div id="advancedTimerTestGroup" class="hidden">
-                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-sky-300 pt-1">🧪 Prueba de reloj</div>
-                        <div class="grid grid-cols-1 gap-1.5">
-                            <button id="advancedFastForwardTimerButton" type="button" onclick="fastForwardMatchTimer(15)" class="rounded-lg border border-indigo-500/40 bg-indigo-950/50 px-1.5 py-2 text-[10px] font-bold text-indigo-200">⏩ Adelantar 15 s</button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 border-t border-purple-500/20 pt-2">
-                        <label class="flex flex-col gap-1 text-[10px] font-semibold text-slate-300">🤝 Ritmo de autoaudiencia
-                            <select id="autoAudienceRateLive" onchange="setAutoAudienceRate(this.value)" class="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1.5 text-xs text-cyan-200">
+                    </div></div></details><details id="arenaPanelSimulation" class="arena-work-panel" data-dock="right" >
+ <summary><span class="arena-panel-title" data-workspace-copy="simulation" data-emoji="🤖">🤖 simulation</span><button type="button" class="arena-panel-drag" data-operator-keep-open aria-label="Mover panel" title="Arrastrar panel">⠿</button><select class="arena-panel-dock" aria-label="Acoplar panel" data-operator-keep-open><option value="left">Izquierda</option><option value="right" selected>Derecha</option><option value="bottom">Abajo</option><option value="float">Flotante</option></select></summary>
+ <div class="arena-panel-body"><button id="btnAutoChat" onclick="toggleAutoChat()" class="px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition-all">
+                    <span id="autoChatDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+                    <span id="autoChatLabel">Auto-Audiencia: OFF</span>
+                </button><div><small id="autoAttackStatusLive">Los espectadores luchan solos.</small><button id="autoAttackToggleLive" type="button" aria-pressed="true" onclick="toggleAutoAttackLive()" class="shrink-0 rounded-lg border border-amber-500/50 bg-amber-900/60 px-3 py-2 font-extrabold text-amber-100">⚔️ Ataque ON</button></div><label for="autoAudienceRateLive">🤖 Ritmo de autoaudiencia</label><select id="autoAudienceRateLive" onchange="setAutoAudienceRate(this.value)" class="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1.5 text-xs text-cyan-200">
                                 <option value="0.5">Lento · 0.5×</option><option value="1" selected>Normal · 1×</option><option value="2">Rápido · 2×</option><option value="4">Caos · 4×</option>
-                            </select>
-                        </label>
-                        <label class="flex flex-col gap-1 text-[10px] font-semibold text-slate-300">⚡ Potencia de eventos
-                            <select id="socialBoostLive" onchange="setSocialBoostMultiplier(this.value)" class="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1.5 text-xs text-amber-200">
+                            </select><label for="socialBoostLive">⚡ Potencia de interacciones</label><select id="socialBoostLive" onchange="setSocialBoostMultiplier(this.value)" class="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1.5 text-xs text-amber-200">
                                 <option value="0.5">Suave · 0.5×</option><option value="1" selected>Normal · 1×</option><option value="1.5">Fuerte · 1.5×</option><option value="2">Épico · 2×</option><option value="3">Máximo · 3×</option>
-                            </select>
-                        </label>
-                    </div>
-                </div>
-            </details>
-
-
-        </section>
-
+                            </select><div id="advancedTimerTestGroup" class="hidden"><button type="button" id="advancedFastForwardTimerButton" onclick="fastForwardMatchTimer(15)" title="⏩ Adelantar 15 s">⏩ Adelantar 15 s</button></div></div></details><details id="arenaPanelBridge" class="arena-work-panel" data-dock="right" >
+ <summary><span class="arena-panel-title" data-workspace-copy="TikTok LIVE" data-emoji="📡">📡 TikTok LIVE</span><button type="button" class="arena-panel-drag" data-operator-keep-open aria-label="Mover panel" title="Arrastrar panel">⠿</button><select class="arena-panel-dock" aria-label="Acoplar panel" data-operator-keep-open><option value="left">Izquierda</option><option value="right" selected>Derecha</option><option value="bottom">Abajo</option><option value="float">Flotante</option></select></summary>
+ <div class="arena-panel-body"><div id="arenaBridgeMount"><small id="arenaBridgeUnavailable">Inicia con npm.cmd start para conectar TikTok LIVE.</small></div></div></details></div>
         <!-- LIVE CHAT: its feed and manual command input are separate from audience test controls -->
-        <aside id="chatSimulatorSidebar" class="w-full shrink-0 bg-[#0b101e] rounded-2xl border border-slate-800/90 flex flex-col overflow-hidden shadow-2xl transition-all duration-200">
+<details id="arenaPanelChat" class="arena-work-panel" data-dock="right" open>
+ <summary><span class="arena-panel-title" data-workspace-copy="chats" data-emoji="💬">💬 Chats</span><button type="button" class="arena-panel-drag" data-operator-keep-open aria-label="Mover panel" title="Arrastrar panel">⠿</button><select class="arena-panel-dock" aria-label="Acoplar panel" data-operator-keep-open><option value="left">Izquierda</option><option value="right" selected>Derecha</option><option value="bottom">Abajo</option><option value="float">Flotante</option></select></summary>
+ <div class="arena-panel-body"><div id="arenaChatTabs" role="tablist" aria-label="Chats"><button type="button" id="arenaChatTabTikTok" role="tab" data-chat-tab="tiktok" aria-selected="true" aria-controls="arenaChatTikTokPanel" data-operator-keep-open>🎵 TikTok</button><button type="button" id="arenaChatTabLocal" role="tab" data-chat-tab="local" aria-selected="false" aria-controls="arenaChatLocalPanel" data-operator-keep-open data-workspace-copy="localChat">Chat de pruebas y comandos</button></div><div id="arenaChatTikTokPanel" class="arena-chat-tabpanel" role="tabpanel" aria-labelledby="arenaChatTabTikTok" data-chat-tabpanel="tiktok"><section id="arenaDualTikTokChat" aria-label="Mensajes recibidos de TikTok">
+                                    <header id="arenaDualTikTokChatHeader"><strong id="arenaDualTikTokChatTitle">Chat TikTok · recibido</strong><span id="arenaTikTokChatStatus">Desconectado</span></header>
+                                    <div id="arenaTikTokChatFeed" role="log" aria-label="Mensajes recibidos" aria-live="off"><div id="arenaTikTokChatEmpty">Los mensajes recibidos aparecerán aquí.</div></div>
+                                    <footer class="arena-tiktok-chat-footer"><span id="arenaTikTokChatCount">0 mensajes</span>
+                                        <button type="button" id="arenaTikTokChatOlder" disabled>◀ Anteriores</button>
+                                        <button type="button" id="arenaTikTokChatLatest" disabled>↓ Directo</button>
+                                        <button type="button" id="arenaTikTokChatExport">↓ TXT</button>
+                                    </footer>
+                                </section></div><div id="arenaChatLocalPanel" class="arena-chat-tabpanel" role="tabpanel" aria-labelledby="arenaChatTabLocal" data-chat-tabpanel="local" hidden>        <aside id="chatSimulatorSidebar" class="w-full shrink-0 bg-[#0b101e] rounded-2xl border border-slate-800/90 flex flex-col overflow-hidden shadow-2xl transition-all duration-200">
             <!-- Chat separado del simulador de audiencia -->
             <div id="arenaMobileChatHeader" class="p-3 bg-slate-900/90 border-b border-slate-800 flex items-center gap-2">
                 <i class="fa-solid fa-comments text-cyan-400"></i>
                 <div>
-                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-white">Chat en Vivo</h2>
+                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-white">Chat de pruebas y comandos</h2>
                     <p class="text-[10px] text-slate-400" data-ui-label="liveChatSub">Mensajes y comandos</p>
                 </div>
                 <button type="button" id="mobileChatExpand" onclick="toggleChatSidebar()" aria-expanded="false" aria-controls="arenaChatContents" class="ml-auto rounded-lg border border-cyan-500/40 text-cyan-200 px-3 py-1.5 text-xs font-bold"><i class="fa-solid fa-chevron-down"></i> <span data-ui-label="expand">Abrir</span></button>
@@ -1572,7 +1360,7 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
             </div><!-- arenaChatContents -->
         </aside>
 
-        <div id="arenaPreparationOperatorRail" aria-label="Opciones del operador"></div>
+</div></div></details>
         <div id="arenaOperatorPopover" hidden role="dialog" aria-modal="false" aria-label="Opciones del operador" data-no-translate>
             <div data-operator-panel="view" hidden class="arena-operator-menu-row">
                 <button type="button" id="arenaPrepSwitchBtn" aria-pressed="true">🖥 16:9</button>
@@ -1585,30 +1373,18 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
             </div>
             <div data-operator-panel="class" hidden class="arena-operator-menu-row">
                 <label for="protagonistClassSelect" id="arenaClassMenuLabel">🎭 Clase de Prota</label>
-                <select id="protagonistClassSelect" class="w-full px-2 py-2 rounded-lg bg-slate-950 border border-amber-400/40 text-xs text-amber-100" title="Clase de Prota">
+                <select id="protagonistClassSelect" class="w-full px-2 py-2 rounded-lg bg-slate-950 border border-amber-400/40 text-xs text-amber-100" title="Selecciona la clase con la que entrará Prota">
                                 <option value="kame">☄️ Guerrero</option><option value="ninja">🥷 Shinobi</option><option value="trueno">⚡ Rayo</option><option value="esmeralda">🌿 Espíritu</option><option value="titan">🗿 Titán</option>
                             </select>
             </div>
-            <div data-operator-panel="tools" hidden id="arenaDualToolsMount"></div>
-            <div data-operator-panel="chat" hidden class="arena-operator-chat-grid">
-                <section id="arenaDualTikTokChat" aria-label="Mensajes recibidos de TikTok">
-                                    <header id="arenaDualTikTokChatHeader"><strong id="arenaDualTikTokChatTitle">Chat TikTok · recibido</strong><span id="arenaTikTokChatStatus">Desconectado</span></header>
-                                    <div id="arenaTikTokChatFeed" role="log" aria-label="Mensajes recibidos" aria-live="off"><div id="arenaTikTokChatEmpty">Los mensajes recibidos aparecerán aquí.</div></div>
-                                    <footer class="arena-tiktok-chat-footer"><span id="arenaTikTokChatCount">0 mensajes</span>
-                                        <button type="button" id="arenaTikTokChatOlder" disabled>◀ Anteriores</button>
-                                        <button type="button" id="arenaTikTokChatLatest" disabled>↓ Directo</button>
-                                        <button type="button" id="arenaTikTokChatExport">↓ TXT</button>
-                                    </footer>
-                                </section>
-                <div id="arenaDualGeneralMount"></div>
-            </div>
+<div data-operator-panel="tools" hidden id="arenaDualToolsMount"><div id="arenaToolsNavigator"><button type="button" data-workspace-reveal="arenaPanelTarget" data-workspace-copy="target" data-emoji="🎯">🎯 target</button><button type="button" data-workspace-reveal="arenaPanelScenarios" data-workspace-copy="scenario" data-emoji="🧪">🧪 scenario</button><button type="button" data-workspace-reveal="arenaPanelSocial" data-workspace-copy="social" data-emoji="❤️">❤️ social</button><button type="button" data-workspace-reveal="arenaPanelPlayers" data-workspace-copy="players" data-emoji="👥">👥 players</button><button type="button" data-workspace-reveal="arenaPanelPowers" data-workspace-copy="powers" data-emoji="⚡">⚡ powers</button><button type="button" data-workspace-reveal="arenaPanelSimulation" data-workspace-copy="simulation" data-emoji="🤖">🤖 simulation</button><button type="button" data-workspace-reveal="arenaPanelBridge" data-workspace-copy="TikTok LIVE" data-emoji="📡">📡 TikTok LIVE</button><button type="button" onclick="resetArenaWorkspaceLayout()" title="Restablece solo la distribución del modo actual; conserva la partida y calibración OBS">↺ Restablecer distribución</button></div><div id="arenaMobilePanelHost"></div></div><div data-operator-panel="mobile" hidden class="arena-operator-menu-row"><button type="button" data-forward-control="arenaViewMenuBtn" data-operator-keep-open>🖥 Vista</button><button type="button" data-forward-control="arenaFullscreenMenuBtn" data-operator-keep-open>⛶ Pantalla</button><button type="button" data-forward-control="arenaDualTestsToggle" data-operator-keep-open>🧪 Pruebas</button><button type="button" data-forward-control="arenaDualSettingsBtn" data-operator-keep-open>⚙ Ajustes</button><button type="button" data-forward-control="arenaDualChatToggleBtn" data-operator-keep-open>💬 Chat</button><button type="button" data-forward-control="btnProtaClassMenu" data-operator-keep-open>🎭 Clase</button><button type="button" data-forward-control="btnQuickSound" data-operator-keep-open>🔊 Audio</button><button type="button" data-forward-control="arenaDualTikTokConnectBtn" data-operator-keep-open>📡 TikTok</button><button type="button" data-forward-control="arenaDualRematchBtn" data-operator-keep-open>🔄 Revancha</button><button type="button" data-forward-control="arenaDualLobbyBtn" data-operator-keep-open>🚪 Lobby</button><button type="button" data-forward-control="btnFullscreenDual" data-operator-keep-open>🎥 Modo Stream</button></div>
         </div>
     </main>
 
         <!-- ==================== GAMEPLAY SETTINGS (LIVE QUICK CONTROLS REMAIN VISIBLE) ==================== -->
     <div id="settingsPauseModal" role="dialog" aria-modal="true" aria-labelledby="arenaSettingsTitle" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 select-none">
         <div class="w-full max-w-4xl bg-[#0b101e] border-2 border-cyan-500/50 rounded-3xl shadow-[0_0_60px_rgba(0,243,255,0.18)] overflow-hidden flex flex-col max-h-[92vh] pointer-events-auto">
-            
+
             <!-- Modal Header -->
             <div class="px-5 py-4 bg-slate-900/95 border-b border-slate-800 flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
@@ -1620,12 +1396,12 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
                             <h2 class="font-display font-black text-base sm:text-lg text-white tracking-wide">
                                 <span id="arenaSettingsTitle" data-operator-label="settingsTitle">Pausa y ajustes</span>
                             </h2>
-                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.2 · TikTok</span>
+                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.3 · TikTok</span>
                             <span id="settingsModeBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400/40">
                                 ⏸️ JUEGO EN PAUSA
                             </span>
                         </div>
-                        <p id="settingsModeDescription" class="text-xs text-slate-400" data-operator-label="pauseHint">La partida se reanuda al cerrar o completar una acción.</p>
+                        <p id="settingsModeDescription" class="text-xs text-slate-400" data-operator-label="pauseHint">Los cambios se aplican al instante. Cierra Ajustes para reanudar.</p>
                     </div>
                 </div>
 
@@ -1703,10 +1479,10 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
                     <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
                         <span class="text-[11px] font-semibold text-slate-300">Gestión de Sala:</span>
                         <div class="flex items-center gap-1.5">
-                            <button onclick="openLobby(false); toggleSettingsModal(false);" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-500/50 text-xs font-bold text-cyan-300 transition-all flex items-center gap-1.5">
+                            <button onclick="openLobby(false);" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-cyan-950 border border-slate-700 hover:border-cyan-500/50 text-xs font-bold text-cyan-300 transition-all flex items-center gap-1.5">
                                 <i class="fa-solid fa-door-open"></i> Volver al Lobby
                             </button>
-                            <button onclick="rematchSamePlayers(); toggleSettingsModal(false);" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-amber-950 border border-slate-700 hover:border-amber-500/50 text-xs font-bold text-amber-300 transition-all flex items-center gap-1.5">
+                            <button onclick="rematchSamePlayers();" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-amber-950 border border-slate-700 hover:border-amber-500/50 text-xs font-bold text-amber-300 transition-all flex items-center gap-1.5">
                                 <i class="fa-solid fa-rotate-right"></i> Reiniciar Pelea
                             </button>
                         </div>
@@ -1778,7 +1554,7 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
                     <!-- Ajustes de calibración específicos del operador. No modifica la lógica de la partida. -->
                     <section id="arenaObsCalibrationPanel" data-no-translate class="rounded-xl border border-cyan-800/50 bg-slate-950/70 p-3 flex flex-col gap-2" aria-label="Calibración OBS">
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <strong class="text-[11px] text-cyan-200" id="arenaObsCalibrationTitle">📐 Calibración para OBS · v0.2</strong>
+                            <strong class="text-[11px] text-cyan-200" id="arenaObsCalibrationTitle">📐 Calibración para OBS · v0.3</strong>
                             <button type="button" id="arenaObsResetCalibration" onclick="resetArenaObsCalibration()" class="rounded-md px-2 py-1 border border-slate-700 bg-slate-900 text-slate-200 text-[10px]">Restablecer</button>
                         </div>
                         <p class="text-[10px] text-slate-400" id="arenaObsCalibrationHint">Ajusta esto antes de emitir; los recortes de OBS deben configurarse después. Abrir las herramientas no modificará las dimensiones.</p>
@@ -1794,7 +1570,7 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
                     </section>
                     <label class="block text-xs text-slate-300 border-t border-slate-800/80 pt-3" for="hudOpacityRange">
                         <span data-operator-label="opacity">Opacidad de la información del juego</span>: <output id="hudOpacityValue">85 %</output>
-                        <input id="hudOpacityRange" type="range" min="35" max="100" value="85" step="5" oninput="setArenaHudOpacity(this.value)" class="w-full accent-cyan-400 mt-2" aria-label="Opacidad de la información del juego" aria-describedby="arenaHudOpacityHelp">
+                        <input id="hudOpacityRange" type="range" min="35" max="100" value="85" step="5" oninput="setArenaHudOpacity(this.value)" class="w-full accent-cyan-400 mt-2" aria-label="Opacidad de la información del juego" aria-describedby="arenaHudOpacityHelp" title="Opacidad de textos y barras del juego en ambas vistas; 100 % es totalmente visible">
                         <small id="arenaHudOpacityHelp" class="block text-[10px] text-slate-400" data-operator-label="opacityHelp">Afecta a textos y barras de ambas vistas. 100 % = totalmente visible.</small>
                     </label>
                 </div>
@@ -1856,11 +1632,16 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
                     </div>
                 </div>
 
+                <div class="bg-slate-900/75 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
+                    <h3 class="font-bold text-xs" data-workspace-copy="panels" data-emoji="🧩">🧩 Paneles</h3>
+                    <p class="text-[11px] text-slate-400" data-workspace-copy="layoutHint">La distribución de este modo se guarda automáticamente.</p>
+                    <button type="button" id="arenaWorkspaceReset" onclick="resetArenaWorkspaceLayout()" data-workspace-copy="reset" title="Restablece solo la distribución de este modo; conserva la partida y la calibración OBS">Restablecer distribución</button>
+                </div>
             </div>
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo">Arena Live v0.2 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo">Arena Live v0.3 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
@@ -2677,7 +2458,7 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
                 if (map) node.textContent = map[currentLanguage] || map.es;
             });
         }
-        document.getElementById('audienceSimulatorPanel')?.addEventListener('click', event => {
+        document.addEventListener('click', event => {
             const skill = event.target.closest('.arena-skill-buttons button');
             if (!skill) return;
             document.querySelectorAll('.arena-skill-buttons button.is-selected').forEach(button => button.classList.remove('is-selected'));
@@ -2690,6 +2471,7 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
         }
         function openArenaChatComposer() {
             toggleArenaOperatorPopover('chat', document.getElementById('arenaDualChatToggleBtn'), true);
+            selectArenaChatTab('local');
             document.getElementById('chatMessageInput')?.focus({preventScroll:true});
         }
         function syncChatDisclosureState() {
@@ -6168,7 +5950,7 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
 
             const stageRect = stageGrid.getBoundingClientRect();
             const availW = Math.max(180, stageRect.width - 12);
-            const viewportMaxH = Math.max(240, Math.min(window.innerHeight - 150, 760));
+            const viewportMaxH = Math.max(80, stageRect.height - 8);
             const portraitViewport = !!(window.matchMedia && window.matchMedia('(orientation: portrait)').matches);
             const compactDual = monitorFocus === 'dual' && (
                 window.innerWidth < 760 || availW < 480 || (portraitViewport && window.innerWidth < 1100)
@@ -6209,13 +5991,13 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
             } else if (monitorFocus === '16:9') {
                 wrap16.classList.remove('hidden');
                 wrap9.classList.add('hidden');
-                const targetH = Math.max(160, Math.min(viewportMaxH + 40, availW / (16 / 9)));
+                const targetH = Math.max(40, Math.min(viewportMaxH, availW / (16 / 9)));
                 vp16.style.width = `${Math.floor(targetH * (16 / 9))}px`;
                 vp16.style.height = `${Math.floor(targetH)}px`;
             } else if (monitorFocus === '9:16') {
                 wrap16.classList.add('hidden');
                 wrap9.classList.remove('hidden');
-                const targetH = Math.max(220, Math.min(viewportMaxH + 70, availW / (9 / 16)));
+                const targetH = Math.max(40, Math.min(viewportMaxH, availW / (9 / 16)));
                 vp9.style.width = `${Math.floor(targetH * (9 / 16))}px`;
                 vp9.style.height = `${Math.floor(targetH)}px`;
             }
@@ -6362,7 +6144,14 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
             const wasActive = document.body.classList.contains('touch-controls-active');
             document.body.classList.toggle('touch-controls-active', active);
             document.body.classList.toggle('touch-device', isTouchDevice());
+            const canAct=streamerManualControl&&gameState==='COMBAT'&&aliveProtagonist&&!isGamePaused&&!isSettingsOpen;
+            for(const id of ['arenaMobileJump','arenaMobileAttack','arenaMobilePower']){const button=document.getElementById(id);if(button)button.disabled=!canAct;}
             if (wasActive && !active) document.dispatchEvent(new Event('arena-touch-disable'));
+        }
+
+        function arenaMobileMelee() {
+            if(isGamePaused||isSettingsOpen||gameState!=='COMBAT'||!streamerManualControl)return;
+            const protagonist=fighters.find(f=>f.isStreamer&&!f.eliminated);if(protagonist)performMeleeAttack(protagonist);
         }
 
         function triggerManualJump() {
@@ -6561,6 +6350,7 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
         function updateQuickSkillTargetStatus() {
             const status = document.getElementById('quickSkillTargetStatus');
             if (!status) return;
+            if(document.getElementById('targetFighterSelect')?.value==='random'){status.textContent=arenaWorkspaceText('randomHint');return;}
             const target = getSelectedTargetFighter();
             if (!target) { status.textContent = '⚠️ No hay luchadores activos. Usa !jugar o únete como streamer para crear uno.'; return; }
             const classKey = target.archetypeKey || target.classKey || '';
@@ -7256,7 +7046,7 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
         function appendChatMessage(username, platformKey, message, styleType = 'normal') {
             const feed = document.getElementById('chatFeed');
             if (!feed) return;
-            const shouldStickToBottom = (feed.scrollHeight - feed.scrollTop - feed.clientHeight) < 48;
+            // The operator chose automatic follow even when reading older messages.
             const plat = PLATFORMS[platformKey] || PLATFORMS.tiktok;
 
             const item = document.createElement('div');
@@ -7269,6 +7059,7 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
             // Never translate user handles, spectator speech or typed commands as prose.
             // System messages retain their Spanish source so locale switches are reversible.
             item.setAttribute('data-no-translate', '');
+            item.dataset.chatKind = styleType;
             const isSystemMessage = /^@(?:arenasystem|sistemaarena)$/i.test(username);
             const displayedMessage = isSystemMessage ? localizeText(message, currentLanguage) : message;
             item.innerHTML = `
@@ -7288,7 +7079,7 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
             while (feed.children.length > chatRetention) {
                 feed.removeChild(feed.firstChild);
             }
-            if (shouldStickToBottom) feed.scrollTop = feed.scrollHeight;
+            feed.scrollTop = feed.scrollHeight;
         }
 
         function localizeArenaNotice(source, language = currentLanguage) {
@@ -7687,20 +7478,20 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.2';
+        const ARENA_RELEASE_VERSION = '0.3';
         const ARENA_RELEASE_EDITION = 'tiktok';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:10, footer:76});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
         const ARENA_OBS_COPY = Object.freeze({
-          es:['Calibración para OBS','Restablecer','Ajusta antes de emitir; los recortes se configuran después. Abrir el cajón no cambiará el tamaño del juego.','Mover 9:16 a la derecha','Altura del cajón inferior','Abre Modo Stream para comprobar tamaños.','Pantallas','Preparación'],
-          en:['OBS calibration','Reset','Adjust before going live, then configure OBS crops. Opening the drawer will not resize the game.','Move 9:16 to the right','Bottom drawer height','Enter Stream Mode to check dimensions.','Displays','Preparation'],
-          fr:['Calibrage OBS','Réinitialiser','Réglez avant le direct; configurez ensuite les recadrages OBS. Le tiroir ne modifie pas le jeu.','Déplacer 9:16 vers la droite','Hauteur du tiroir','Ouvrez le double plein écran pour vérifier.','Écrans','Préparation'],
-          de:['OBS-Kalibrierung','Zurücksetzen','Vor der Übertragung einstellen; danach OBS-Ausschnitt konfigurieren. Die Schublade ändert keine Bildgrößen.','9:16 nach rechts verschieben','Höhe der unteren Leiste','Dual-Vollbild für die Maße öffnen.','Ansichten','Vorbereitung'],
-          zh:['OBS 校准','重置','直播前调整，然后配置 OBS 裁剪；打开抽屉不会改变游戏画面尺寸。','9:16 右移','底部工具栏高度','进入双屏全屏以查看尺寸。','画面','准备'],
-          ja:['OBS キャリブレーション','リセット','配信前に調整し、OBS の切り抜きを設定。ドロワーを開いても画面サイズは変わりません。','9:16 を右へ移動','下部ドロワーの高さ','デュアル全画面で寸法を確認。','画面','準備'],
-          pt:['Calibração OBS','Redefinir','Ajuste antes da live e depois configure o recorte OBS. Abrir o painel não altera o jogo.','Mover 9:16 à direita','Altura do painel inferior','Abra o dual em tela cheia para conferir tamanhos.','Telas','Preparação'],
-          it:['Calibrazione OBS','Ripristina','Regola prima della diretta, poi imposta i ritagli OBS. Il cassetto non ridimensiona il gioco.','Sposta 9:16 a destra','Altezza pannello inferiore','Apri il duale a schermo intero per controllare.','Schermi','Preparazione']
+          es:['Calibración para OBS','Restablecer','Ajusta antes de emitir; los recortes se configuran después. Abrir los paneles no cambiará el tamaño del juego.','Mover 9:16 a la derecha','Espacio inferior de 16:9','Abre Modo Stream para comprobar tamaños.','Pantallas','Preparación'],
+          en:['OBS calibration','Reset','Adjust before going live, then configure OBS crops. Opening panels will not resize the game.','Move 9:16 to the right','16:9 bottom space','Enter Stream Mode to check dimensions.','Displays','Preparation'],
+          fr:['Calibrage OBS','Réinitialiser','Réglez avant le direct; configurez ensuite les recadrages OBS. Ouvrir les panneaux ne redimensionne pas le jeu.','Déplacer 9:16 vers la droite','Espace inférieur 16:9','Ouvrez le double plein écran pour vérifier.','Écrans','Préparation'],
+          de:['OBS-Kalibrierung','Zurücksetzen','Vor der Übertragung einstellen; danach OBS-Ausschnitt konfigurieren. Die Panels ändern keine Bildgrößen.','9:16 nach rechts verschieben','Unterer Abstand 16:9','Dual-Vollbild für die Maße öffnen.','Ansichten','Vorbereitung'],
+          zh:['OBS 校准','重置','直播前调整，然后配置 OBS 裁剪；打开面板不会改变游戏画面尺寸。','9:16 右移','16:9 底部空间','进入双屏全屏以查看尺寸。','画面','准备'],
+          ja:['OBS キャリブレーション','リセット','配信前に調整し、OBS の切り抜きを設定。パネルを開いても画面サイズは変わりません。','9:16 を右へ移動','16:9 下部スペース','デュアル全画面で寸法を確認。','画面','準備'],
+          pt:['Calibração OBS','Redefinir','Ajuste antes da live e depois configure o recorte OBS. Abrir os painéis não altera o tamanho do jogo.','Mover 9:16 à direita','Espaço inferior de 16:9','Abra o dual em tela cheia para conferir tamanhos.','Telas','Preparação'],
+          it:['Calibrazione OBS','Ripristina','Regola prima della diretta, poi imposta i ritagli OBS. Aprire i pannelli non ridimensiona il gioco.','Sposta 9:16 a destra','Spazio inferiore 16:9','Apri il duale a schermo intero per controllare.','Schermi','Preparazione']
         });
         function clampArenaObsCalibration(key, value) {
           const parsed = Number(value);
@@ -7833,31 +7624,23 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
             return document.fullscreenElement === stage && window.innerWidth >= 1600 && window.innerHeight >= 680 && (window.innerWidth / Math.max(1, window.innerHeight)) >= 2.18;
         }
         function syncArenaDualUltrawideStructure() {
-            const stage = document.getElementById('broadcastStageSection');
-            const useUltrawide = shouldUseArenaDualUltrawide();
-            if (!stage) return false;
-            stage.classList.toggle('arena-dual-ultrawide', useUltrawide);
-            if (useUltrawide) {
-                moveArenaDualMonitorNode('card-16x9', 'arenaDualCenterStageMount');
-                moveArenaDualMonitorNode('card-9x16', 'arenaDualUltrawideVerticalStage');
-                arenaDualUltrawideActive = true;
-                return true;
-            }
-            if (arenaDualUltrawideActive || arenaDualMonitorMovedNodes.length) restoreArenaDualMonitorNodes();
-            return false;
+            const stage=document.getElementById('broadcastStageSection');
+            if(document.fullscreenElement!==stage)return false;
+            stage.classList.toggle('arena-dual-ultrawide',shouldUseArenaDualUltrawide());
+            moveArenaDualMonitorNode('card-16x9', 'arenaDualCenterStageMount');
+            moveArenaDualMonitorNode('card-9x16', 'arenaDualUltrawideVerticalStage');
+            arenaDualUltrawideActive=true;return true;
         }
+
         function mountArenaDualTools() {
-            // Reuse the same toolbar and menus; never duplicate a game or controller.
-            closeArenaOperatorPopover(false);
+            closeArenaOperatorPopover(false);saveArenaWorkspace();
             moveArenaDualNode('arenaHeaderActions','arenaStreamToolbarMount');
-            moveArenaDualNode('arenaOperatorPopover','arenaDualBottomCluster');
-            moveArenaDualNode('settingsPauseModal','broadcastStageSection');
-            const chat = document.getElementById('chatSimulatorSidebar');
-            if (chat) chat.classList.remove('hidden');
-            arenaDualWasFullscreen = true;
-            syncArenaDualUltrawideStructure();
-            refreshArenaDualOperatorLabels();
+            moveArenaDualNode('arenaOperatorPopover','arenaStreamLeftColumn');
+            moveArenaDualNode('settingsPauseModal','arenaStreamLeftColumn');
+            arenaDualWasFullscreen=true;arenaWorkspace.activeStream=null;
+            applyArenaWorkspaceLayout('stream');syncArenaDualUltrawideStructure();refreshArenaDualOperatorLabels();
         }
+
         function unmountArenaDualTools() {
             restoreArenaDualMonitorNodes();
             for (let i = arenaDualMovedNodes.length - 1; i >= 0; i--) {
@@ -7866,7 +7649,10 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
                 marker.remove();
             }
             arenaDualMovedNodes.length = 0;
+            saveArenaWorkspace();
             arenaDualWasFullscreen = false;
+            arenaWorkspace.activeStream=null;
+            applyArenaWorkspaceLayout('preparation');
             const stage = document.getElementById('broadcastStageSection');
             if (stage) stage.classList.remove('arena-dual-ultrawide');
             closeArenaOperatorPopover(false);
@@ -7894,7 +7680,7 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
                 const scale16 = Math.max(.5, Math.min(avail16W / 16, avail16H / 9));
                 const width16 = scale16 * 16;
                 const height16 = scale16 * 9;
-                const avail9W = Math.max(1, rightRect.width - 2);
+                const avail9W = Math.max(1, rightRect.width - 20);
                 const avail9H = Math.max(1, rightRect.height - 2);
                 const scale9 = Math.max(.5, Math.min(avail9W / 9, avail9H / 16));
                 const width9 = scale9 * 9;
@@ -7980,16 +7766,16 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
         }
 
 
-        // MODULE BLOCK: v0.2 shared operator toolbar and dismiss-on-action menus.
+        // MODULE BLOCK: v0.3 shared operator toolbar and dismiss-on-action menus.
         const ARENA_OPERATOR_COPY = Object.freeze({
-            es:['Modo Stream','Salir de Stream','Vista','Pantalla','Herramientas','Chat','Ajustes','Audio','Silenciado','Clase','Pausa y ajustes','La partida se reanuda al cerrar o completar una acción.','🎮 Partida','👑 Prota y combate','🖥 Pantallas y OBS','👥 Audiencia y chat','🔊 Audio e idioma','🌐 Idioma','Opacidad de la información del juego','Afecta a textos y barras de ambas vistas. 100 % = totalmente visible.','Vista de preparación','Conectar TikTok','Desconectar TikTok','Puente local no disponible'],
-            en:['Stream Mode','Exit Stream','View','Screen','Tools','Chat','Settings','Audio','Muted','Class','Pause and settings','The game resumes when you close or complete an action.','🎮 Match','👑 MC and combat','🖥 Displays and OBS','👥 Audience and chat','🔊 Audio and language','🌐 Language','Game information opacity','Affects text and bars in both views. 100% = fully visible.','Preparation view','Connect TikTok','Disconnect TikTok','Local bridge unavailable'],
-            fr:['Mode Stream','Quitter Stream','Vue','Écran','Outils','Chat','Réglages','Audio','Muet','Classe','Pause et réglages','La partie reprend à la fermeture ou après une action.','🎮 Partie','👑 MC et combat','🖥 Écrans et OBS','👥 Public et chat','🔊 Audio et langue','🌐 Langue','Opacité des informations de jeu','Textes et barres des deux vues. 100 % = totalement visible.','Vue de préparation','Connecter TikTok','Déconnecter TikTok','Pont local indisponible'],
-            de:['Stream-Modus','Stream beenden','Ansicht','Vollbild','Werkzeuge','Chat','Einstellungen','Audio','Stumm','Klasse','Pause und Einstellungen','Nach dem Schließen oder einer Aktion läuft das Spiel weiter.','🎮 Spiel','👑 MC und Kampf','🖥 Ansichten und OBS','👥 Publikum und Chat','🔊 Audio und Sprache','🌐 Sprache','Deckkraft der Spielinformationen','Text und Balken beider Ansichten. 100 % = vollständig sichtbar.','Vorbereitungsansicht','TikTok verbinden','TikTok trennen','Lokale Brücke nicht verfügbar'],
+            es:['Modo Stream','Salir de Stream','Vista','Pantalla','Herramientas','Chat','Ajustes','Audio','Silenciado','Clase','Pausa y ajustes','Los cambios se aplican al instante. Cierra Ajustes para reanudar.','🎮 Partida','👑 Prota y combate','🖥 Pantallas y OBS','👥 Audiencia y chat','🔊 Audio e idioma','🌐 Idioma','Opacidad de la información del juego','Afecta a textos y barras de ambas vistas. 100 % = totalmente visible.','Vista de preparación','Conectar TikTok','Desconectar TikTok','Puente local no disponible'],
+            en:['Stream Mode','Exit Stream','View','Screen','Tools','Chat','Settings','Audio','Muted','Class','Pause and settings','Changes apply immediately. Close Settings to resume.','🎮 Match','👑 MC and combat','🖥 Displays and OBS','👥 Audience and chat','🔊 Audio and language','🌐 Language','Game information opacity','Affects text and bars in both views. 100% = fully visible.','Preparation view','Connect TikTok','Disconnect TikTok','Local bridge unavailable'],
+            fr:['Mode Stream','Quitter Stream','Vue','Écran','Outils','Chat','Réglages','Audio','Muet','Classe','Pause et réglages','Les changements sont immédiats. Fermez les réglages pour reprendre.','🎮 Partie','👑 MC et combat','🖥 Écrans et OBS','👥 Public et chat','🔊 Audio et langue','🌐 Langue','Opacité des informations de jeu','Textes et barres des deux vues. 100 % = totalement visible.','Vue de préparation','Connecter TikTok','Déconnecter TikTok','Pont local indisponible'],
+            de:['Stream-Modus','Stream beenden','Ansicht','Vollbild','Werkzeuge','Chat','Einstellungen','Audio','Stumm','Klasse','Pause und Einstellungen','Änderungen gelten sofort. Einstellungen schließen, um fortzufahren.','🎮 Spiel','👑 MC und Kampf','🖥 Ansichten und OBS','👥 Publikum und Chat','🔊 Audio und Sprache','🌐 Sprache','Deckkraft der Spielinformationen','Text und Balken beider Ansichten. 100 % = vollständig sichtbar.','Vorbereitungsansicht','TikTok verbinden','TikTok trennen','Lokale Brücke nicht verfügbar'],
             zh:['直播模式','退出直播模式','视图','全屏','工具','聊天','设置','声音','静音','职业','暂停与设置','关闭菜单或完成操作后继续游戏。','🎮 对局','👑 主角与战斗','🖥 画面与 OBS','👥 观众与聊天','🔊 声音与语言','🌐 语言','游戏信息不透明度','影响两个视图中的文字和状态条。100% 表示完全可见。','准备视图','连接 TikTok','断开 TikTok','本地桥接不可用'],
-            ja:['配信モード','配信を終了','表示','全画面','ツール','チャット','設定','音声','消音','クラス','一時停止と設定','閉じるか操作を完了するとゲームを再開します。','🎮 対戦','👑 主人公と戦闘','🖥 画面と OBS','👥 視聴者とチャット','🔊 音声と言語','🌐 言語','ゲーム情報の不透明度','両画面の文字とバーに適用。100% で完全に表示。','準備画面','TikTok に接続','TikTok を切断','ローカル接続が利用できません'],
-            pt:['Modo Stream','Sair do Stream','Vista','Tela','Ferramentas','Chat','Ajustes','Áudio','Silenciado','Classe','Pausa e ajustes','A partida continua ao fechar ou concluir uma ação.','🎮 Partida','👑 Prota e combate','🖥 Telas e OBS','👥 Público e chat','🔊 Áudio e idioma','🌐 Idioma','Opacidade das informações do jogo','Afeta textos e barras das duas vistas. 100% = totalmente visível.','Vista de preparação','Conectar TikTok','Desconectar TikTok','Ponte local indisponível'],
-            it:['Modalità Stream','Esci da Stream','Vista','Schermo','Strumenti','Chat','Impostazioni','Audio','Muto','Classe','Pausa e impostazioni','La partita riprende alla chiusura o dopo un’azione.','🎮 Partita','👑 Prota e combattimento','🖥 Schermi e OBS','👥 Pubblico e chat','🔊 Audio e lingua','🌐 Lingua','Opacità delle informazioni di gioco','Testi e barre di entrambe le viste. 100% = del tutto visibile.','Vista di preparazione','Connetti TikTok','Disconnetti TikTok','Ponte locale non disponibile']
+            ja:['配信モード','配信を終了','表示','全画面','ツール','チャット','設定','音声','消音','クラス','一時停止と設定','変更はすぐに反映されます。設定を閉じると再開します。','🎮 対戦','👑 主人公と戦闘','🖥 画面と OBS','👥 視聴者とチャット','🔊 音声と言語','🌐 言語','ゲーム情報の不透明度','両画面の文字とバーに適用。100% で完全に表示。','準備画面','TikTok に接続','TikTok を切断','ローカル接続が利用できません'],
+            pt:['Modo Stream','Sair do Stream','Vista','Tela','Ferramentas','Chat','Ajustes','Áudio','Silenciado','Classe','Pausa e ajustes','As alterações são imediatas. Feche os ajustes para continuar.','🎮 Partida','👑 Prota e combate','🖥 Telas e OBS','👥 Público e chat','🔊 Áudio e idioma','🌐 Idioma','Opacidade das informações do jogo','Afeta textos e barras das duas vistas. 100% = totalmente visível.','Vista de preparação','Conectar TikTok','Desconectar TikTok','Ponte local indisponível'],
+            it:['Modalità Stream','Esci da Stream','Vista','Schermo','Strumenti','Chat','Impostazioni','Audio','Muto','Classe','Pausa e impostazioni','Le modifiche sono immediate. Chiudi le impostazioni per riprendere.','🎮 Partita','👑 Prota e combattimento','🖥 Schermi e OBS','👥 Pubblico e chat','🔊 Audio e lingua','🌐 Lingua','Opacità delle informazioni di gioco','Testi e barre di entrambe le viste. 100% = del tutto visibile.','Vista di preparazione','Connetti TikTok','Disconnetti TikTok','Ponte locale non disponibile']
         });
         const ARENA_OPERATOR_KEYS = ['stream','exitStream','view','screen','tools','chat','settings','audio','muted','class','settingsTitle','pauseHint','match','pace','displays','audience','audioLanguage','language','opacity','opacityHelp','preparation','connect','disconnect','unavailable'];
         let arenaOperatorOpenMenu = null;
@@ -8071,6 +7857,7 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
                 arenaDualSettingsBtn:`${arenaOperatorText('settings')} · ${runtimeCopy('paused')}`
             };
             for(const [id,title] of Object.entries(hints)){const button=document.getElementById(id);if(button)button.title=title;}
+            refreshArenaWorkspaceLabels();
             const view = document.getElementById('arenaViewMenuBtn');
             if (view) {view.disabled=dual;view.title=dual ? `16:9 + 9:16 · ${arenaOperatorText('stream')}` : `${arenaOperatorText('view')} · ${monitorFocus}`;}
             const tiktok = document.getElementById('arenaDualTikTokConnectBtn');
@@ -8083,88 +7870,341 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
                 tiktok.title = `${arenaOperatorText(disconnect ? 'disconnect' : 'connect')} · ${state.message || arenaOperatorText('unavailable')}`;
                 tiktok.setAttribute('aria-label',tiktok.title);
             }
+            document.querySelectorAll('[data-forward-control]').forEach(button=>{const source=document.getElementById(button.dataset.forwardControl);if(source){button.textContent=source.textContent.trim();button.disabled=source.disabled;button.title=source.title;}});
         }
         window.addEventListener('arena-bridge-status', event => {
             arenaOperatorBridgeState = {...event.detail};
             refreshArenaOperatorToolbar();
         });
         function positionArenaOperatorPopover() {
-            const popover = document.getElementById('arenaOperatorPopover');
-            if (!popover || popover.hidden) return;
-            const dual = document.fullscreenElement === document.getElementById('broadcastStageSection');
-            const rail = document.getElementById(dual ? 'arenaDualBottomCluster' : 'arenaPreparationOperatorRail');
-            const rect = rail?.getBoundingClientRect();
-            if (!rect) return;
-            Object.assign(popover.style,{left:`${rect.left+2}px`,top:`${rect.top+2}px`,width:`${Math.max(1,rect.width-4)}px`,height:`${Math.max(1,rect.height-4)}px`});
+            const popover=document.getElementById('arenaOperatorPopover');
+            if(!popover || popover.hidden || arenaIsMobileWorkspace())return;
+            if(arenaWorkspace.mode==='stream'){Object.assign(popover.style,{left:'0px',top:'34px',width:'100%',height:'auto'});return;}
+            const rect=arenaOperatorReturnFocus?.getBoundingClientRect();if(!rect)return;
+            Object.assign(popover.style,{left:`${Math.max(8,Math.min(innerWidth-288,rect.left))}px`,top:`${rect.bottom+6}px`,width:'280px',height:'auto'});
         }
+
         function closeArenaOperatorPopover(restoreFocus = true) {
-            const popover = document.getElementById('arenaOperatorPopover');
-            const wasOpen = !!popover && !popover.hidden;
-            if (popover) popover.hidden=true;
+            const popover=document.getElementById('arenaOperatorPopover');
+            const wasOpen=!!popover&&!popover.hidden||!!arenaWorkspace.activeStream;
+            if(popover)popover.hidden=true;
             arenaOperatorOpenMenu=null;
+            if(arenaWorkspace.ready && arenaWorkspace.mode==='stream'){arenaWorkspace.activeStream=null;filterArenaStreamPanels();}
             document.querySelectorAll('[data-operator-menu]').forEach(button=>button.setAttribute('aria-expanded','false'));
             if(wasOpen && restoreFocus)arenaOperatorReturnFocus?.focus({preventScroll:true});
         }
-        function toggleArenaOperatorPopover(name, trigger, force = false) {
-            const popover = document.getElementById('arenaOperatorPopover');
-            if (!popover) return;
-            if (!force && arenaOperatorOpenMenu === name) {closeArenaOperatorPopover();return;}
-            if (isSettingsOpen) toggleSettingsModal(false);
-            closeArenaOperatorPopover(false);
-            arenaOperatorReturnFocus=trigger;
-            arenaOperatorOpenMenu=name;
+
+        function toggleArenaOperatorPopover(name,trigger,force=false) {
+            if((name==='tools'||name==='chat')&&(arenaWorkspace.mode==='stream'||arenaWorkspace.mobile||name==='chat')){
+                if(!force&&arenaWorkspace.activeStream===name){closeArenaOperatorPopover();return;}
+                showArenaWorkspacePanels(name,trigger);return;
+            }
+            const popover=document.getElementById('arenaOperatorPopover');if(!popover)return;
+            if(!force&&arenaOperatorOpenMenu===name){closeArenaOperatorPopover();return;}
+            if(isSettingsOpen)toggleSettingsModal(false);
+            closeArenaOperatorPopover(false);arenaOperatorReturnFocus=trigger;arenaOperatorOpenMenu=name;
             popover.querySelectorAll('[data-operator-panel]').forEach(panel=>panel.hidden=panel.dataset.operatorPanel!==name);
-            popover.hidden=false;
-            trigger?.setAttribute('aria-expanded','true');
-            const dual = document.fullscreenElement === document.getElementById('broadcastStageSection');
-            if(!dual)document.getElementById('arenaPreparationOperatorRail')?.scrollIntoView({block:'nearest',behavior:'instant'});
-            positionArenaOperatorPopover();
-            const first = popover.querySelector(`[data-operator-panel="${name}"] button:not(:disabled),[data-operator-panel="${name}"] select:not(:disabled),[data-operator-panel="${name}"] input:not(:disabled)`);
-            first?.focus({preventScroll:true});
+            popover.hidden=false;trigger?.setAttribute('aria-expanded','true');positionArenaOperatorPopover();
+            popover.querySelector(`[data-operator-panel="${name}"] button:not(:disabled),[data-operator-panel="${name}"] select:not(:disabled)`)?.focus({preventScroll:true});
         }
+
         function arenaLaunchStreamFromSettings() {
             toggleSettingsModal(false);
             document.getElementById('btnFullscreenDual')?.click();
         }
-        function finishArenaOperatorAction() {
-            closeArenaOperatorPopover();
-            if (isSettingsOpen) toggleSettingsModal(false);
+        // MODULE BLOCK: operator workspace, docking and independent layout persistence.
+        const ARENA_WORKSPACE_KEYS = Object.freeze({preparation:'arenaLiveWorkspaceV03:preparation',stream:'arenaLiveWorkspaceV03:stream'});
+        const arenaWorkspace = {mode:'preparation',ready:false,restoring:false,mobile:false,layouts:{},panels:[],activeStream:null,saveTimer:0,fitFrame:0};
+        function arenaIsMobileWorkspace() {return window.matchMedia('(max-width:767px)').matches;}
+        function arenaDefaultWorkspace(mode) {
+            return {version:3,leftWidth:mode==='stream'?260:260,rightWidth:300,chatTab:'tiktok',panels:Object.fromEntries(['Chat','Target','Scenarios','Social','Players','Powers','Simulation','Bridge'].map((name,index)=>['arenaPanel'+name,{dock:name==='Chat'?'left':'right',order:index,open:name==='Social'||name==='Chat',x:40,y:40,width:300,height:0,bodyHeight:0}])),settings:{}};
+        }
+        function readArenaWorkspace(mode) {
+            const defaults=arenaDefaultWorkspace(mode);
+            try {
+                const saved=JSON.parse(localStorage.getItem(ARENA_WORKSPACE_KEYS[mode])||'null');
+                if(!saved || saved.version!==3)return defaults;
+                for(const key of ['leftWidth','rightWidth'])if(Number.isFinite(saved[key]))defaults[key]=Math.max(200,Math.min(500,saved[key]));
+                if(['tiktok','local'].includes(saved.chatTab))defaults.chatTab=saved.chatTab;
+                for(const [id,entry] of Object.entries(defaults.panels)){
+                    const value=saved.panels?.[id];if(!value || typeof value!=='object')continue;
+                    if(['left','right','bottom','float'].includes(value.dock))entry.dock=value.dock;
+                    if(typeof value.open==='boolean')entry.open=value.open;
+                    for(const key of ['order','x','y','width','height','bodyHeight'])if(Number.isFinite(value[key]))entry[key]=Math.max(0,Math.min(4000,value[key]));
+                }
+                if(saved.settings&&typeof saved.settings==='object')defaults.settings=saved.settings;
+            }catch(_){}
+            return defaults;
+        }
+        function saveArenaWorkspace() {
+            if(!arenaWorkspace.ready || arenaWorkspace.restoring || arenaWorkspace.mobile)return;
+            const layout=arenaWorkspace.layouts[arenaWorkspace.mode];
+            for(const panel of arenaWorkspace.panels){
+                const entry=layout.panels[panel.id];if(!entry)continue;
+                entry.open=panel.open;
+                if(arenaWorkspace.mode==='preparation'){
+                    entry.dock=panel.dataset.dock||entry.dock;
+                    entry.order=[...panel.parentElement.children].filter(node=>node.classList.contains('arena-work-panel')).indexOf(panel);
+                    if(entry.dock==='float'){
+                        for(const [key,prop] of [['x','left'],['y','top'],['width','width'],['height','height']])if(key!=='height'||panel.open)entry[key]=parseFloat(panel.style[prop])||entry[key];
+                    }
+                }
+                const body=panel.querySelector('.arena-panel-body');
+                if(body?.style.height)entry.bodyHeight=parseFloat(body.style.height)||0;
+            }
+            try{localStorage.setItem(ARENA_WORKSPACE_KEYS[arenaWorkspace.mode],JSON.stringify(layout));}catch(_){}
+        }
+        function scheduleArenaWorkspaceSave(){clearTimeout(arenaWorkspace.saveTimer);arenaWorkspace.saveTimer=setTimeout(saveArenaWorkspace,150);}
+        function refitArenaWorkspace(){cancelAnimationFrame(arenaWorkspace.fitFrame);arenaWorkspace.fitFrame=requestAnimationFrame(()=>{fitDualMonitorsSideBySide();updateArenaObsGeometrySummary();});}
+        function applyArenaWorkspaceLayout(mode=arenaWorkspace.mode) {
+            arenaWorkspace.restoring=true;
+            arenaWorkspace.mode=mode;
+            arenaWorkspace.mobile=arenaIsMobileWorkspace();
+            const layout=arenaWorkspace.layouts[mode];
+            for(const [id,key] of [['arenaLeftResizer','leftWidth'],['arenaRightResizer','rightWidth'],['arenaStreamResizer','leftWidth']])document.getElementById(id)?.setAttribute('aria-valuenow',String(layout[key]));
+            document.documentElement.style.setProperty('--arena-left-width',`${layout.leftWidth}px`);
+            document.documentElement.style.setProperty('--arena-right-width',`${layout.rightWidth}px`);
+            document.getElementById('broadcastStageSection').style.setProperty('--arena-stream-width',`${layout.leftWidth}px`);
+            const ordered=[...arenaWorkspace.panels].sort((a,b)=>(layout.panels[a.id].order-layout.panels[b.id].order));
+            for(const panel of ordered){
+                const entry=layout.panels[panel.id];
+                const dock=entry.dock;
+                const target=mode==='stream'?document.getElementById('arenaStreamPanelHost'):(arenaWorkspace.mobile?document.getElementById('arenaMobilePanelHost'):document.getElementById('arenaDock'+dock[0].toUpperCase()+dock.slice(1)));
+                target?.appendChild(panel);
+                panel.dataset.dock=dock;
+                panel.open=entry.open;
+                panel.hidden=false;
+                panel.style.cssText='';
+                if(dock==='float' && mode==='preparation' && !arenaWorkspace.mobile){
+                    const bounds=document.getElementById('arenaWorkspace').getBoundingClientRect();
+                    const width=Math.min(Math.max(220,entry.width),Math.max(220,bounds.width-16));
+                    const height=entry.open?Math.max(100,Math.min(entry.height||300,bounds.height-16)):35;
+                    Object.assign(panel.style,{left:`${Math.max(0,Math.min(entry.x,bounds.width-width-8))}px`,top:`${Math.max(0,Math.min(entry.y,bounds.height-height-8))}px`,width:`${width}px`,height:`${height}px`});
+                }
+                const body=panel.querySelector('.arena-panel-body');
+                if(body)body.style.height=entry.bodyHeight?`${Math.max(52,Math.min(entry.bodyHeight,innerHeight*.68))}px`:'';
+                const select=panel.querySelector('.arena-panel-dock');if(select)select.value=dock;
+            }
+            selectArenaChatTab(layout.chatTab,false);
+            document.querySelectorAll('.arena-settings-section').forEach((section,index)=>section.open=typeof layout.settings[index]==='boolean'?layout.settings[index]:index===0);
+            if(mode==='stream')filterArenaStreamPanels();
+            requestAnimationFrame(()=>{arenaWorkspace.restoring=false;refitArenaWorkspace();});
+        }
+        function resetArenaWorkspaceLayout() {
+            arenaWorkspace.layouts[arenaWorkspace.mode]=arenaDefaultWorkspace(arenaWorkspace.mode);
+            applyArenaWorkspaceLayout();
+            try{localStorage.removeItem(ARENA_WORKSPACE_KEYS[arenaWorkspace.mode]);}catch(_){}
+        }
+        function selectArenaChatTab(name,remember=true) {
+            if(!['tiktok','local'].includes(name))return;
+            if(arenaWorkspace.layouts[arenaWorkspace.mode])arenaWorkspace.layouts[arenaWorkspace.mode].chatTab=name;
+            for(const button of document.querySelectorAll('[data-chat-tab]')){
+                const active=button.dataset.chatTab===name;
+                button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;
+            }
+            for(const panel of document.querySelectorAll('[data-chat-tabpanel]'))panel.hidden=panel.dataset.chatTabpanel!==name;
+            const feed=document.getElementById(name==='local'?'chatFeed':'arenaTikTokChatFeed');
+            if(feed)feed.scrollTop=feed.scrollHeight;
+            if(remember)scheduleArenaWorkspaceSave();
+        }
+        function filterArenaStreamPanels() {
+            const active=arenaWorkspace.activeStream;
+            document.getElementById('arenaStreamPanelHost').hidden=!active;
+            for(const panel of arenaWorkspace.panels)panel.hidden=active==='chat'?panel.id!=='arenaPanelChat':active==='tools'?panel.id==='arenaPanelChat':true;
+            document.getElementById('arenaStreamLeftTitle').textContent=active==='chat'?'💬 Chats':active==='tools'?`🧪 ${arenaWorkspaceText('tests')}`:'Operador';
+        }
+        function showArenaWorkspacePanels(name,trigger) {
+            closeArenaOperatorPopover(false);
+            if(isSettingsOpen)toggleSettingsModal(false);
+            arenaOperatorReturnFocus=trigger;
+            if(arenaWorkspace.mode==='stream'){
+                arenaWorkspace.activeStream=name;filterArenaStreamPanels();
+                trigger?.setAttribute('aria-expanded','true');
+            }else if(arenaWorkspace.mobile){
+                arenaOperatorOpenMenu='tools';
+                const popover=document.getElementById('arenaOperatorPopover');
+                popover.querySelectorAll('[data-operator-panel]').forEach(panel=>panel.hidden=panel.dataset.operatorPanel!=='tools');
+                for(const panel of arenaWorkspace.panels)panel.hidden=name==='chat'?panel.id!=='arenaPanelChat':panel.id==='arenaPanelChat';
+                popover.hidden=false;positionArenaOperatorPopover();
+            }else if(name==='chat'){
+                const panel=document.getElementById('arenaPanelChat');panel.open=true;
+                panel.scrollIntoView({block:'nearest'});panel.querySelector('[aria-selected="true"]')?.focus({preventScroll:true});
+            }
+        }
+        function revealArenaWorkspacePanel(id) {
+            closeArenaOperatorPopover(false);
+            const panel=document.getElementById(id);if(!panel)return;
+            panel.open=true;panel.scrollIntoView({block:'nearest'});
+            panel.querySelector('summary')?.focus({preventScroll:true});scheduleArenaWorkspaceSave();refitArenaWorkspace();
+        }
+        function dockArenaWorkspacePanel(panel,dock,before=null,point=null) {
+            if(arenaWorkspace.mode!=='preparation'||arenaWorkspace.mobile)return;
+            saveArenaWorkspace();
+            const entry=arenaWorkspace.layouts.preparation.panels[panel.id];
+            entry.dock=dock;panel.dataset.dock=dock;
+            const target=document.getElementById('arenaDock'+dock[0].toUpperCase()+dock.slice(1));
+            if(before&&before!==panel&&before.parentElement===target)target.insertBefore(panel,before);else target.appendChild(panel);
+            panel.style.cssText='';
+            if(dock==='float'){
+                const bounds=document.getElementById('arenaWorkspace').getBoundingClientRect();
+                entry.x=Math.max(0,Math.min(point?.x??entry.x,bounds.width-240));entry.y=Math.max(0,Math.min(point?.y??entry.y,bounds.height-80));
+                Object.assign(panel.style,{left:`${entry.x}px`,top:`${entry.y}px`,width:`${Math.max(240,entry.width)}px`,height:panel.open?`${entry.height||300}px`:'35px'});
+            }
+            panel.querySelector('.arena-panel-dock').value=dock;
+            saveArenaWorkspace();refitArenaWorkspace();
+        }
+        function installArenaPanelDrag(panel) {
+            const handle=panel.querySelector('.arena-panel-drag');
+            handle.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();});
+            handle.addEventListener('pointerdown',event=>{
+                if(event.button!==0||arenaWorkspace.mode!=='preparation'||arenaWorkspace.mobile)return;
+                event.preventDefault();event.stopPropagation();
+                const origin={x:event.clientX,y:event.clientY};
+                let ghost=null,drop=null,before=null;
+                handle.setPointerCapture(event.pointerId);
+                const move=e=>{
+                    if(!ghost && Math.hypot(e.clientX-origin.x,e.clientY-origin.y)<6)return;
+                    if(!ghost){document.body.classList.add('arena-panel-dragging');ghost=document.createElement('div');ghost.id='arenaPanelDragGhost';ghost.textContent=panel.querySelector('.arena-panel-title').textContent;document.body.appendChild(ghost);}
+                    ghost.style.left=`${e.clientX+12}px`;ghost.style.top=`${e.clientY+12}px`;
+                    document.querySelectorAll('.is-drop-target').forEach(node=>node.classList.remove('is-drop-target'));
+                    const hit=document.elementFromPoint(e.clientX,e.clientY);
+                    drop=hit?.closest('[data-dock-zone]');
+                    before=hit?.closest('.arena-work-panel');
+                    drop?.classList.add('is-drop-target');
+                };
+                const end=e=>{
+                    handle.removeEventListener('pointermove',move);handle.removeEventListener('pointerup',end);handle.removeEventListener('pointercancel',cancel);
+                    if(ghost){
+                        const bounds=document.getElementById('arenaWorkspace').getBoundingClientRect();
+                        dockArenaWorkspacePanel(panel,drop?.dataset.dockZone||'float',before,{x:e.clientX-bounds.left-30,y:e.clientY-bounds.top-12});
+                        ghost.remove();document.body.classList.remove('arena-panel-dragging');
+                    }
+                    document.querySelectorAll('.is-drop-target').forEach(node=>node.classList.remove('is-drop-target'));
+                };
+                const cancel=()=>{handle.removeEventListener('pointermove',move);handle.removeEventListener('pointerup',end);handle.removeEventListener('pointercancel',cancel);ghost?.remove();document.body.classList.remove('arena-panel-dragging');document.querySelectorAll('.is-drop-target').forEach(node=>node.classList.remove('is-drop-target'));};
+                handle.addEventListener('pointermove',move);handle.addEventListener('pointerup',end);handle.addEventListener('pointercancel',cancel);
+            });
+        }
+        function installArenaDockResizer(id,key) {
+            const handle=document.getElementById(id);
+            const set=value=>{
+                const max=Math.max(200,Math.min(500,innerWidth-(arenaWorkspace.mode==='stream'?700:650)));
+                const width=Math.max(200,Math.min(max,value));
+                arenaWorkspace.layouts[arenaWorkspace.mode][key]=width;
+                document.documentElement.style.setProperty(key==='rightWidth'?'--arena-right-width':'--arena-left-width',`${width}px`);
+                document.getElementById('broadcastStageSection').style.setProperty('--arena-stream-width',`${arenaWorkspace.layouts[arenaWorkspace.mode].leftWidth}px`);
+                handle.setAttribute('aria-valuenow',String(Math.round(width)));refitArenaWorkspace();scheduleArenaWorkspaceSave();
+            };
+            handle.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight'].includes(event.key))return;event.preventDefault();event.stopPropagation();set(arenaWorkspace.layouts[arenaWorkspace.mode][key]+(event.key==='ArrowRight'?12:-12)*(key==='rightWidth'?-1:1));});
+            handle.addEventListener('pointerdown',event=>{
+                event.preventDefault();const x=event.clientX,width=arenaWorkspace.layouts[arenaWorkspace.mode][key];handle.setPointerCapture(event.pointerId);
+                const move=e=>set(width+(e.clientX-x)*(key==='rightWidth'?-1:1));
+                const end=()=>{handle.removeEventListener('pointermove',move);handle.removeEventListener('pointerup',end);handle.removeEventListener('pointercancel',end);saveArenaWorkspace();};
+                handle.addEventListener('pointermove',move);handle.addEventListener('pointerup',end);handle.addEventListener('pointercancel',end);
+            });
+        }
+        const ARENA_WORKSPACE_WORDS={
+            es:['Pruebas','Chat de pruebas y comandos','Escenario de prueba','Cargar','Jugador objetivo','Interacciones sociales','Jugadores','Poderes de clase','Simulación','Mover panel','Acoplar panel','Izquierda','Derecha','Abajo','Flotante','Restablecer distribución','Menú','Saltar','Golpe','Poder','Aleatorio','Sin participantes',"Paneles","La distribución de este modo se guarda automáticamente.","Chats","Cada acción elige un jugador activo al azar."],
+            en:['Tests','Test chat and commands','Test scenario','Load','Target player','Social interactions','Players','Class powers','Simulation','Move panel','Dock panel','Left','Right','Bottom','Floating','Reset layout','Menu','Jump','Hit','Power','Random','No participants',"Panels","The layout for this mode is saved automatically.","Chats","Each action chooses a random active player."],
+            fr:['Tests','Chat de test et commandes','Scénario de test','Charger','Joueur ciblé','Interactions sociales','Joueurs','Pouvoirs de classe','Simulation','Déplacer le panneau','Ancrer le panneau','Gauche','Droite','Bas','Flottant','Réinitialiser la disposition','Menu','Sauter','Frappe','Pouvoir','Aléatoire','Aucun participant',"Panneaux","La disposition de ce mode est enregistrée automatiquement.","Chats","Chaque action choisit un joueur actif au hasard."],
+            de:['Tests','Testchat und Befehle','Testszenario','Laden','Zielspieler','Soziale Interaktionen','Spieler','Klassenkräfte','Simulation','Panel bewegen','Panel andocken','Links','Rechts','Unten','Frei','Layout zurücksetzen','Menü','Sprung','Schlag','Kraft','Zufällig','Keine Teilnehmer',"Panels","Das Layout dieses Modus wird automatisch gespeichert.","Chats","Jede Aktion wählt einen zufälligen aktiven Spieler."],
+            zh:['测试','测试聊天与指令','测试场景','加载','目标玩家','社交互动','玩家','职业技能','模拟','移动面板','停靠面板','左侧','右侧','底部','浮动','重置布局','菜单','跳跃','攻击','技能','随机','暂无玩家',"面板","此模式的布局会自动保存。","聊天","每次操作随机选择一名活跃玩家。"],
+            ja:['テスト','テストチャットとコマンド','テストシナリオ','読込','対象プレイヤー','交流イベント','プレイヤー','クラス能力','シミュレーション','パネル移動','パネル配置','左','右','下','フロート','レイアウトをリセット','メニュー','ジャンプ','攻撃','能力','ランダム','参加者なし',"パネル","このモードの配置は自動保存されます。","チャット","操作ごとに参加中のプレイヤーをランダムに選びます。"],
+            pt:['Testes','Chat de testes e comandos','Cenário de teste','Carregar','Jogador alvo','Interações sociais','Jogadores','Poderes de classe','Simulação','Mover painel','Acoplar painel','Esquerda','Direita','Abaixo','Flutuante','Redefinir disposição','Menu','Pular','Golpe','Poder','Aleatório','Sem participantes',"Painéis","A disposição deste modo é salva automaticamente.","Chats","Cada ação escolhe um jogador ativo aleatório."],
+            it:['Test','Chat di test e comandi','Scenario di test','Carica','Giocatore bersaglio','Interazioni sociali','Giocatori','Poteri di classe','Simulazione','Sposta pannello','Ancora pannello','Sinistra','Destra','Sotto','Libero','Ripristina disposizione','Menu','Salto','Colpo','Potere','Casuale','Nessun partecipante',"Pannelli","La disposizione di questa modalità viene salvata automaticamente.","Chat","Ogni azione sceglie un giocatore attivo casuale."]
+        };
+        const ARENA_WORKSPACE_WORD_KEYS=['tests','localChat','scenario','load','target','social','players','powers','simulation','move','dock','left','right','bottom','float','reset','menu','jump','hit','power','random','empty','panels','layoutHint','chats','randomHint'];
+        function arenaWorkspaceText(key){return (ARENA_WORKSPACE_WORDS[currentLanguage]||ARENA_WORKSPACE_WORDS.es)[ARENA_WORKSPACE_WORD_KEYS.indexOf(key)]||key;}
+        function refreshArenaWorkspaceLabels(){
+            document.querySelectorAll('[data-workspace-copy]').forEach(node=>{node.textContent=(node.dataset.emoji?node.dataset.emoji+' ':'')+arenaWorkspaceText(node.dataset.workspaceCopy);});
+            document.querySelectorAll('.arena-panel-drag').forEach(node=>{node.title=arenaWorkspaceText('move');node.setAttribute('aria-label',node.title);});
+            document.querySelectorAll('.arena-panel-dock').forEach(node=>{node.title=arenaWorkspaceText('dock');node.setAttribute('aria-label',node.title);for(const option of node.options)option.textContent=arenaWorkspaceText(option.value);});
+            const target=document.getElementById('arenaDualTestsToggle');if(target)target.textContent=`🧪 ${arenaWorkspaceText('tests')}`;
+            refreshArenaTargetPanel();
+            if(document.getElementById('targetFighterSelect')?.value==='random')updateQuickSkillTargetStatus();
+        }
+        function refreshArenaTargetPanel(){
+            const select=document.getElementById('targetFighterSelect');
+            const target=select?.value==='random'?null:fighters.find(f=>String(f.id)===select?.value);
+            document.getElementById('arenaTargetName').textContent=target?getFighterDisplayName(target):arenaWorkspaceText(select?.value==='random'?'random':'empty');
+            document.getElementById('arenaTargetClass').textContent=target?getFighterClassTitle(target):'—';
+            document.getElementById('arenaTargetState').textContent=target?`${target.eliminated?'K.O.':'●'} · ${Math.max(0,Math.ceil(target.hp))}/${Math.ceil(target.maxHp)} HP · ${Math.floor(target.energy)} ⚡`:'—';
+        }
+        function installArenaWorkspace(){
+            arenaWorkspace.layouts.preparation=readArenaWorkspace('preparation');arenaWorkspace.layouts.stream=readArenaWorkspace('stream');
+            arenaWorkspace.panels=[...document.querySelectorAll('.arena-work-panel')];
+            arenaWorkspace.panels.forEach(panel=>{
+                installArenaPanelDrag(panel);
+                panel.querySelector('.arena-panel-dock').addEventListener('click',e=>e.stopPropagation());
+                panel.querySelector('.arena-panel-dock').addEventListener('change',e=>{e.stopPropagation();dockArenaWorkspacePanel(panel,e.target.value);});
+                panel.addEventListener('toggle',()=>{if(panel.dataset.dock==='float' && arenaWorkspace.mode==='preparation'&&!arenaWorkspace.mobile)panel.style.height=panel.open?`${arenaWorkspace.layouts.preparation.panels[panel.id].height||300}px`:'35px';scheduleArenaWorkspaceSave();refitArenaWorkspace();});
+                new ResizeObserver(scheduleArenaWorkspaceSave).observe(panel);
+            });
+            document.querySelectorAll('[data-chat-tab]').forEach(button=>{
+                button.addEventListener('click',()=>selectArenaChatTab(button.dataset.chatTab));
+                button.addEventListener('keydown',event=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();event.stopPropagation();const name=event.key==='Home'?'tiktok':event.key==='End'?'local':button.dataset.chatTab==='local'?'tiktok':'local';selectArenaChatTab(name);document.querySelector(`[data-chat-tab="${name}"]`).focus();}});
+            });
+            document.querySelectorAll('[data-workspace-reveal]').forEach(button=>button.addEventListener('click',()=>revealArenaWorkspacePanel(button.dataset.workspaceReveal)));
+            document.getElementById('arenaLoadScenario').addEventListener('click',()=>applyPlayerCountPreset(Number(document.getElementById('arenaScenarioSelect').value)));
+            const settings=document.getElementById('settingsGeneralPanel');
+            [...settings.children].forEach((card,index)=>{
+                const h=card.querySelector('h3');if(!h)return;
+                const section=document.createElement('details');section.className='arena-settings-section';section.open=index===0;
+                const heading=card.firstElementChild;
+                const summary=document.createElement('summary');summary.appendChild(h);
+                const body=document.createElement('div');body.className='arena-settings-content';
+                if(heading!==h && !heading.querySelector('input,select,button'))heading.remove();
+                body.append(...card.childNodes);section.append(summary,body);card.replaceWith(section);
+                section.addEventListener('toggle',()=>{if(arenaWorkspace.restoring)return;arenaWorkspace.layouts[arenaWorkspace.mode].settings[index]=section.open;scheduleArenaWorkspaceSave();});
+            });
+            for(const args of [['arenaLeftResizer','leftWidth'],['arenaRightResizer','rightWidth'],['arenaStreamResizer','leftWidth']])installArenaDockResizer(...args);
+            document.getElementById('arenaStreamClose').addEventListener('click',()=>{closeArenaOperatorPopover();if(isSettingsOpen)toggleSettingsModal(false);});
+            const stage=document.getElementById('broadcastStageSection');
+            new ResizeObserver(refitArenaWorkspace).observe(document.getElementById('arenaWorkspace'));
+            new ResizeObserver(refitArenaWorkspace).observe(document.getElementById('arenaDockBottom'));
+            window.addEventListener('resize',()=>{if(arenaWorkspace.mobile!==arenaIsMobileWorkspace()){saveArenaWorkspace();applyArenaWorkspaceLayout();}else {if(arenaWorkspace.mode==='preparation'&&!arenaWorkspace.mobile){const bounds=document.getElementById('arenaWorkspace').getBoundingClientRect();for(const panel of arenaWorkspace.panels.filter(p=>p.dataset.dock==='float')){const r=panel.getBoundingClientRect();panel.style.left=`${Math.max(0,Math.min(parseFloat(panel.style.left)||0,bounds.width-r.width))}px`;panel.style.top=`${Math.max(0,Math.min(parseFloat(panel.style.top)||0,bounds.height-r.height))}px`;}scheduleArenaWorkspaceSave();}refitArenaWorkspace();}});
+            window.addEventListener('pagehide',saveArenaWorkspace);
+            document.getElementById('targetFighterSelect').addEventListener('change',refreshArenaTargetPanel);
+            setInterval(()=>{if(document.getElementById('arenaPanelTarget').open)refreshArenaTargetPanel();},300);
+            const top=document.getElementById('arenaDualTopCluster');
+            stage.addEventListener('pointermove',event=>top.classList.toggle('arena-toolbar-awake',event.clientY<50));
+            stage.addEventListener('pointerleave',()=>top.classList.remove('arena-toolbar-awake'));
+            arenaWorkspace.ready=true;applyArenaWorkspaceLayout();refreshArenaWorkspaceLabels();
         }
         function installArenaOperatorToolbar() {
-            // Keep original controls, listeners, chat history and selected targets intact.
-            const tools=document.getElementById('audienceSimulatorPanel');
-            const chat=document.getElementById('chatSimulatorSidebar');
-            if(tools)document.getElementById('arenaDualToolsMount')?.appendChild(tools);
-            if(chat){document.getElementById('arenaDualGeneralMount')?.appendChild(chat);chat.classList.remove('hidden');}
+            installArenaWorkspace();
             document.querySelectorAll('[data-operator-menu]').forEach(button=>button.addEventListener('click',()=>toggleArenaOperatorPopover(button.dataset.operatorMenu,button)));
             document.getElementById('arenaExitFullscreenBtn')?.addEventListener('click',()=>{if(document.fullscreenElement)void document.exitFullscreen();});
             document.getElementById('arenaDualTikTokConnectBtn')?.addEventListener('click',()=>{
                 const disconnect=['connected','connecting'].includes(arenaOperatorBridgeState.phase);
-                document.getElementById(disconnect ? 'bridge-disconnect' : 'bridge-connect')?.click();
+                document.getElementById(disconnect?'bridge-disconnect':'bridge-connect')?.click();
             });
+            document.querySelectorAll('[data-forward-control]').forEach(button=>button.addEventListener('click',()=>{closeArenaOperatorPopover(false);document.getElementById(button.dataset.forwardControl)?.click();}));
             document.addEventListener('pointerdown',event=>{
-                if(!event.target.closest('#arenaOperatorPopover,[data-operator-menu]'))closeArenaOperatorPopover(false);
+                if(!event.target.closest('#arenaOperatorPopover,#arenaStreamLeftColumn,[data-operator-menu]'))closeArenaOperatorPopover(false);
                 if(event.target.id==='settingsPauseModal')toggleSettingsModal(false);
             });
-            const inSurface = target => target.closest('#arenaOperatorPopover,#settingsPauseModal');
             document.addEventListener('click',event=>{
                 const button=event.target.closest('button');
-                if(button && inSurface(button) && !button.disabled && !button.hasAttribute('data-operator-keep-open'))finishArenaOperatorAction();
+                if(!button || button.disabled || button.matches('[data-operator-keep-open],.arena-panel-drag,[data-chat-tab]'))return;
+                if(button.closest('#settingsPauseModal')){if(arenaWorkspace.mode==='stream')toggleSettingsModal(false);}
+                else if(button.closest('#arenaStreamPanelHost,#arenaOperatorPopover'))closeArenaOperatorPopover();
             });
             document.addEventListener('change',event=>{
-                if(inSurface(event.target) && event.target.matches('select,input[type="range"],input[type="checkbox"]'))finishArenaOperatorAction();
+                if(event.target.matches('[data-operator-keep-open],.arena-panel-dock'))return;
+                if(event.target.closest('#settingsPauseModal')){if(arenaWorkspace.mode==='stream')toggleSettingsModal(false);}
+                else if(event.target.closest('#arenaStreamPanelHost,#arenaOperatorPopover'))closeArenaOperatorPopover();
             });
-            document.addEventListener('submit',event=>{if(inSurface(event.target))finishArenaOperatorAction();});
+            document.addEventListener('submit',event=>{if(event.target.closest('#arenaStreamPanelHost,#arenaOperatorPopover'))closeArenaOperatorPopover();});
             document.addEventListener('keydown',event=>{
                 const popover=document.getElementById('arenaOperatorPopover');
-                const surface=isSettingsOpen ? document.getElementById('settingsPauseModal') : (popover && !popover.hidden ? popover : null);
+                const surface=isSettingsOpen?document.getElementById('settingsPauseModal'):!popover.hidden?popover:arenaWorkspace.activeStream?document.getElementById('arenaStreamPanelHost'):null;
                 if(!surface)return;
-                if(event.key==='Escape') {event.preventDefault();event.stopImmediatePropagation();finishArenaOperatorAction();return;}
-                if(event.key==='Tab') {
+                if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();if(isSettingsOpen)toggleSettingsModal(false);else closeArenaOperatorPopover();return;}
+                if(event.key==='Tab' && (isSettingsOpen||!popover.hidden)){
                     const controls=[...surface.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),summary,[tabindex="0"]')].filter(node=>node.getClientRects().length);
                     const first=controls[0],last=controls.at(-1);
-                    if(event.shiftKey && document.activeElement===first){event.preventDefault();last?.focus();}
-                    else if(!event.shiftKey && document.activeElement===last){event.preventDefault();first?.focus();}
+                    if(event.shiftKey && document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey && document.activeElement===last){event.preventDefault();first?.focus();}
                 }
             },true);
             window.addEventListener('resize',positionArenaOperatorPopover);
@@ -8184,7 +8224,7 @@ body > main {display:flex!important;flex-direction:column!important;max-width:no
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.2.0',
+            version: '0.3.0',
             edition: 'tiktok',
             getState() {
                 const alive = fighters.filter(fighter => !fighter.eliminated);

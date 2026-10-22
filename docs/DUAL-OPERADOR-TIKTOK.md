@@ -1,36 +1,43 @@
-# Operador de Arena Live · v0.2 · TikTok
+# Operador de Arena Live · v0.3 · TikTok
 
-## Preparación y emisión
+## Preparar y jugar
 
-En escritorio se prepara la vista 16:9; en móvil, la 9:16. **🖥 Vista** cambia entre ambas. **⛶ Pantalla** permite abrir una vista individual a pantalla completa.
+En escritorio, Inicio/Pruebas presenta 16:9 en el centro, chats con pestañas a la izquierda y paneles plegables a la derecha. En móvil inicia en 9:16 con una barra inferior de acciones. Vista cambia el formato; Pantalla permite una captura individual en pantalla completa.
 
-**🎥 Modo Stream** abre la composición dual de OBS con una sola partida, horizontal a la izquierda y vertical a la derecha. La misma barra del operador pasa a la parte superior. El botón cambia a **Salir de Stream** para volver a la preparación anterior.
+Arrastra el asa ⠿ para mover, ordenar o acoplar paneles. El selector junto al asa ofrece las mismas zonas con teclado. Los bordes de columnas y las esquinas de los paneles desplegados permiten redimensionar. La distribución se recuerda en este navegador. Ajustes → Paneles permite restablecerla.
 
-## Barra y menús
+Las pruebas siguen disponibles en Inicio: objetivo con nombre/clase/estado, selector de escenario con Cargar, los once eventos sociales, entradas y reingresos, cinco poderes, audiencia/ataques automáticos, multiplicadores y prueba de reloj para rondas con tiempo. Las secciones permanecen abiertas al actuar.
 
-Pausa, Lobby, Revancha, Prota, Audio y TikTok están disponibles directamente. Herramientas, Chat, Vista, Pantalla y Clase despliegan sus opciones. Ajustes contiene también Modo Stream y todas las opciones de audiencia, sin una pestaña Streamer separada.
+## Emitir
 
-Abrir Ajustes pausa el juego. Cerrar o confirmar una acción lo reanuda. Cada acción de los menús cierra su panel; Esc y clic fuera también los cierran. Un deslizador se confirma al terminar el gesto. Los campos de texto permanecen abiertos mientras escribes.
+Modo Stream, disponible en la barra y dentro de Ajustes → Pantallas y OBS, abre dos vistas de **la misma partida**. La barra pasa a la parte superior del área horizontal y oculta sus botones al retirar el cursor; su espacio permanece reservado. Foco de teclado y dispositivos táctiles mantienen el acceso.
 
-La franja del operador conserva su espacio al ocultar los menús. En ultrawide, herramientas y chat se muestran dentro de la franja inferior calibrada: abrirlos no mueve ni reescala los juegos. En una pantalla estrecha, desplaza horizontalmente la barra para alcanzar todos los accesos.
+Las herramientas y chats se abren en la columna del extremo izquierdo; el chat no permanece desplegado al entrar. Cada acción los oculta. Para pasar de chat a herramientas, usa la barra. Las pestañas y los títulos plegables son navegación y no cierran el panel. El selector de escenario deja elegir antes de pulsar Cargar.
+
+El borde derecho de la columna ajusta su ancho; las flechas del teclado también funcionan al enfocar el separador. Stream guarda ese ancho, las secciones abiertas y la pestaña de chat por separado de Inicio/Pruebas. La emisión mantiene los paneles dentro de su columna para que no cubran los juegos; la colocación libre pertenece a Inicio/Pruebas.
+
+## Pausa y ajustes
+
+Pausa es un acceso directo. Ajustes pausa siempre al abrirse y reanuda siempre al cerrarse, aunque la partida estuviera pausada de antemano. Todas las opciones comparten un menú con secciones plegables, incluido Modo Stream.
+
+En Inicio/Pruebas puedes realizar varios cambios sin cerrar. En Stream, Ajustes se muestra dentro de la columna izquierda y se oculta al confirmar una acción. Al arrastrar un deslizador aplica el valor en vivo y cierra al soltarlo. Esc cierra primero el panel abierto y conserva la pantalla completa.
 
 ## Conexión y chat
 
-El servidor arranca sin conectarse a TikTok. **📡 TikTok** está deshabilitado si el puente no está disponible y usa el estado del puente para conectar o desconectar. El estado detallado se consulta con la ayuda del botón y en Herramientas.
+El servidor inicia desconectado. TikTok muestra el estado real del puente y su disponibilidad. El detalle y Probar comando se encuentran en el panel TikTok LIVE. Solo la ventana controladora recibe comentarios para el juego.
 
-**💬 Chat** muestra el historial recibido de TikTok y el chat manual de pruebas. Recibidos, anteriores, volver al directo y exportar TXT conservan el historial cuando el panel se oculta. Los comentarios se reciben aunque el panel esté cerrado; únicamente la ventana controladora los entrega al juego.
+Las pestañas separan **TikTok recibido** y **Chat de pruebas y comandos**. Este último es local y no responde en TikTok. Los comandos tienen un acento visual propio. Cada llegada nueva vuelve al último mensaje, incluso después de consultar anteriores. Se conservan historial de hasta 50.000 recibidos por sesión, navegación y exportación TXT; ocultar el panel no interrumpe la recepción.
 
-El chat de TikTok es de lectura; el formulario manual sirve para el simulador local. No publica respuestas en el LIVE.
+## OBS
 
-## OBS y calibración
+16:9 ocupa el área horizontal restante; 9:16 queda a la derecha. La columna izquierda y los espacios superior/inferior permanecen reservados: abrir/cerrar herramientas o mostrar/ocultar botones no cambia los rectángulos de captura.
 
-Configura el desplazamiento de 9:16 y la altura inferior desde **Ajustes → Pantallas y OBS**. Se conservan los valores guardados de v0.1. Ajusta antes de fijar tus recortes de OBS. Cada deslizador cierra Ajustes al confirmar, de acuerdo con la encuesta.
+La calibración conserva `arenaLiveObsCalibrationV01`, sus valores personalizados y los límites de v0.1: desplazamiento 0–16 px, espacio inferior 72–148 px. Valores predeterminados: +10 y 76 px. Restablecer distribución no restablece esa calibración.
 
-Usa una composición de una sola instancia; dos fuentes que carguen el juego por separado producirían partidas distintas.
+Comprueba los recortes al pasar a la nueva composición v0.3 y después de cambiar ancho o calibración deliberadamente. Usa una única instancia del juego: dos cargas independientes producirían partidas distintas.
 
-## Alcance de las pruebas
+## Verificación
 
-El botón Probar comando comprueba el recorrido local sin emitir. Una conexión real necesita el LIVE público activo y un comentario desde otra cuenta. Las pruebas simuladas no verifican la recepción ni latencia reales del proveedor.
+Las regresiones comprueban geometría estable en 1720×720 y 3440×1440, restauración de paneles, pausa, chats, escenarios y móvil 390×844. No acreditan conexión ni latencia real de TikTok; esa validación necesita un LIVE activo y un comentario desde otra cuenta.
 
-Consulta [v0.2 y decisiones confirmadas](RELEASE-0.2-OPERADOR.md) y [la guía de TikTok LIVE](TIKTOK-LIVE-MVP.md).
-
+Consulta [las 25 decisiones de v0.3](RELEASE-0.3-INTERFAZ.md) y [la guía de TikTok LIVE](TIKTOK-LIVE-MVP.md).

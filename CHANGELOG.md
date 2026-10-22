@@ -1,5 +1,17 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-22 — Arena Live v0.3 · espacios de trabajo reconstruidos
+
+- Inicio/Pruebas con juego central, chats con pestañas a la izquierda y paneles de prueba persistentes; solo sociales desplegados por defecto.
+- Paneles movibles, redimensionables, acoplables y flotantes; restauración independiente de Inicio y Stream.
+- Objetivo con nombre, clase y estado; selector de escenario con Cargar, incluidos 128 personajes.
+- Stream abre herramientas/chats en la columna izquierda y los oculta al actuar; barra superior autoocultable sin cambiar las capturas.
+- Ajustes por secciones plegables: en Inicio permanece abierto al cambiar valores; al cerrarlo siempre reanuda.
+- Comandos diferenciados y seguimiento automático del mensaje más reciente en ambos chats.
+- Móvil orientado a jugar: barra inferior de acciones, herramientas bajo Menú, joystick y gestos conservados.
+- Conservada la calibración OBS y sus valores; comprobar recortes una vez para la nueva composición con columna izquierda.
+- Versiones visibles/API/paquete 0.3/0.3.0; 21 pruebas de contrato y 23 verificaciones de navegador.
+
 ## 2026-10-22 — Arena Live v0.2 · barra y menús del operador
 
 - Barra horizontal única en preparación y Modo Stream, con iconos, leyendas cortas y estados.
