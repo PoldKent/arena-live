@@ -2,7 +2,7 @@
 
 ## Modo de transmisión dual definitivo (22/10/2026)
 
-**Dual Full Screen permanece como vista definitiva para OBS**, con una sola partida y dos lienzos sincronizados. En preparación, 16:9 aparece sola en escritorio y 9:16 sola en móvil, con botón para alternar. En fullscreen: la **9:16 está al extremo derecho**, la **16:9 se maximiza a la izquierda**, la barra LIVE ocupa 42 px y un cajón de herramientas inferior está **cerrado por defecto**. Abrirlo no mueve las dos regiones de captura de OBS. Los nombres en vertical crecen o se compactan según el número de luchadores.
+**Dual Full Screen permanece como vista definitiva para OBS**, con una sola partida y dos lienzos sincronizados. En preparación, 16:9 aparece sola en escritorio y 9:16 sola en móvil, con botón para alternar. En fullscreen: la **9:16 está al extremo derecho**, la **16:9 se maximiza a la izquierda**, la barra LIVE ocupa 34 px y un cajón de herramientas inferior está **cerrado por defecto**. Abrirlo no mueve las dos regiones de captura de OBS. Los nombres en vertical crecen o se compactan según el número de luchadores.
 
 La barra conserva **Pausa, Lobby, Prota, Ajustes, Pruebas, Conectar TikTok y Chat**. El cajón integra el puente local de `@polkent.live`, herramientas y la bandeja plegable de mensajes **recibidos** (historial/exportación). No se envían mensajes al chat público de TikTok y el conector no oficial no garantiza recibir cada comentario. Consulta [decisiones de diseño](docs/DECISIONES-STREAM-DUAL-2026.md).
 
@@ -83,3 +83,7 @@ La pantalla **9:16 se muestra prioritariamente en el extremo derecho**; el juego
 ## Arena Live v0.1 · calibración OBS
 
 Dentro de **Ajustes** aparece `Arena Live v0.1 · TikTok`. En **Pantallas → Calibración para OBS** ajusta el margen de la 9:16 y el espacio inferior del operador **antes de configurar tus recortes de OBS**. Las etiquetas repetidas del lobby fueron retiradas. [Notas de versión](docs/RELEASE-0.1-OBS.md).
+
+## Afinado visual v0.1 para OBS
+
+En **Ajustes** aparece `Arena Live v0.1` y el nombre de la edición. La barra de vida del duelo **9:16** tiene ahora **14 px**; los nombres y porcentajes, **12 px**. En ultrawide, la barra LIVE superior ocupa **34 px** y el cajón inferior predeterminado **76 px**, con desplazamiento vertical inicial de **10 px**. Desde la calibración OBS puedes ajustar el desplazamiento entre **0–16 px** y el cajón entre **72–148 px** antes de fijar recortes. [Ver notas de la versión](docs/RELEASE-0.1-OBS.md).
