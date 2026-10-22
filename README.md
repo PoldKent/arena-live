@@ -1,89 +1,79 @@
-# Arena Live
+# Arena Live · v0.2
 
-## Modo de transmisión dual definitivo (22/10/2026)
+Juego interactivo para transmisiones en vivo, con una sola partida y vistas sincronizadas 16:9 y 9:16. Esta rama incorpora el puente local de chat de TikTok LIVE para @polkent.live.
 
-**Dual Full Screen permanece como vista definitiva para OBS**, con una sola partida y dos lienzos sincronizados. En preparación, 16:9 aparece sola en escritorio y 9:16 sola en móvil, con botón para alternar. En fullscreen: la **9:16 está al extremo derecho**, la **16:9 se maximiza a la izquierda**, la barra LIVE ocupa 34 px y un cajón de herramientas inferior está **cerrado por defecto**. Abrirlo no mueve las dos regiones de captura de OBS. Los nombres en vertical crecen o se compactan según el número de luchadores.
+## Instalar y arrancar en Windows
 
-La barra conserva **Pausa, Lobby, Prota, Ajustes, Pruebas, Conectar TikTok y Chat**. El cajón integra el puente local de `@polkent.live`, herramientas y la bandeja plegable de mensajes **recibidos** (historial/exportación). No se envían mensajes al chat público de TikTok y el conector no oficial no garantiza recibir cada comentario. Consulta [decisiones de diseño](docs/DECISIONES-STREAM-DUAL-2026.md).
+Requiere Git y Node.js 20 o superior. Clona la edición TikTok:
 
-Prototipo de juego interactivo para transmisiones en vivo. Los espectadores pueden participar mediante mensajes y comandos; el streamer puede controlar al personaje principal y simular interacciones de audiencia para realizar pruebas.
+```powershell
+git clone --branch feature/tiktok-live-chat-mvp https://github.com/PoldKent/arena-live.git Arena_Live_GitHub
+cd Arena_Live_GitHub
+npm.cmd install
+npm.cmd start
+```
 
-## Ejecutar
+Abre **http://127.0.0.1:4173/** y mantén abierta la consola. El servidor comienza con TikTok desconectado. El botón **📡 TikTok** conecta o desconecta según el estado real del puente.
 
-1. Descarga **[index.html](index.html)**.
-2. Ábrelo en un navegador moderno.
-3. Utiliza **Herramientas de Prueba** para simular espectadores y comandos.
+Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only`, después `npm.cmd install` y `npm.cmd start`. Si Git señala cambios locales, consérvalos antes de actualizar. Comprueba `git log -1 --oneline`, recarga con **Ctrl+F5** y consulta **v0.2** en Ajustes.
 
-> **Estado:** prototipo local. Los eventos del simulador no equivalen a una conexión real con TikTok, YouTube, Facebook u otras plataformas; una integración en producción requerirá autenticación, recepción de eventos y validación en un servidor.
+## Barra del operador
 
-## Pantalla completa dual (TikTok)
+La misma barra horizontal se utiliza en preparación y en **🎥 Modo Stream**. Los botones tienen icono, nombre corto y explicación al pasar el cursor. Incluye:
 
-Abre Arena Live mediante `npm.cmd start` en Windows, entra en `http://127.0.0.1:4173` y pulsa **Dual · Pantalla completa**. Los controles quedan en una barra superior y en un cajón inferior plegable, fuera de los lienzos. La bandeja del chat muestra mensajes **recibidos** de TikTok, no publica respuestas. Consulta [la guía de la consola dual](docs/DUAL-OPERADOR-TIKTOK.md).
+- **Modo Stream:** composición dual en pantalla completa, con 16:9 a la izquierda y 9:16 a la derecha.
+- **Vista / Pantalla:** alternar la vista de preparación y abrir una vista individual en pantalla completa.
+- **Pausa, Lobby, Revancha y Prota:** accesos directos a la partida y a la participación del streamer.
+- **Clase, Audio, TikTok, Herramientas, Chat y Ajustes:** accesos del operador.
 
-## Características actuales
+En pantallas estrechas la barra se desplaza horizontalmente. **Prota** significa participar como jugador; **Modo Stream** es la composición para emitir.
 
-- Aplicación monolítica: HTML, CSS y JavaScript en un solo archivo.
-- Dos formatos de juego: **16:9** horizontal y **9:16** vertical, con vista dual.
-- Combate automático con clases **Guerrero, Shinobi, Rayo, Espíritu y Titán**.
-- Modos adaptables a la cantidad de participantes; lobby, combate, K.O. y victoria.
-- Controles de teclado y gestos táctiles, incluida la opción de jugar como protagonista.
-- Chat de prueba, comandos localizados, burbujas sobre los luchadores y efectos sociales simulados.
-- Interfaz multilingüe: español, inglés, francés, alemán, portugués, italiano, chino y japonés.
+## Menús y ajustes
 
-## Controles principales
+**Ajustes pausa la partida al abrirse y la reanuda al cerrarse.** Todas las opciones comparten el mismo menú: Partida, Prota y combate, Pantallas y OBS, Audio e idioma, y Audiencia y chat.
 
-- **WASD:** desplazamiento de Prota.
-- **Espacio:** salto y doble salto.
-- **E:** golpe normal.
-- **R:** ataque especial de la clase.
-- **Móvil:** joystick de movimiento, toque para saltar, deslizamiento para golpear y pulsación mantenida para el especial.
+Los menús se ocultan **después de cada acción**: pulsar un botón, elegir un valor, marcar una casilla o terminar de mover un deslizador. También se cierran con Esc o clic fuera. Los campos de texto permiten terminar de escribir antes de enviar. Ocultar un menú conserva el historial, la selección del objetivo y sus valores.
 
-La pantalla contiene ayuda contextual para otras acciones.
+La etiqueta **Opacidad de la información del juego** explica el porcentaje: afecta a textos y barras de ambas vistas; **100 % = totalmente visible**.
 
-## Arquitectura del prototipo
+## OBS
 
-Por decisión de diseño, el juego permanece en **[index.html](index.html)**. Dentro del archivo se han identificado límites lógicos para una futura separación de módulos, pero **no se ha dividido aún**.
+**Modo Stream** conserva una sola simulación y dos regiones de captura. Los menús de herramientas y chat ocupan la franja reservada del operador; abrirlos o cerrarlos mantiene las dimensiones y posiciones de los juegos.
 
-Actualmente utiliza dependencias de interfaz desde CDN, por lo que algunas tipografías, iconos o estilos externos requieren conexión a Internet.
+Se mantienen la calibración existente y sus valores guardados: desplazamiento lateral **0–16 px** (10 px por defecto) y franja inferior **72–148 px** (76 px por defecto). Los cambios deliberados de calibración deben realizarse antes de fijar los recortes de OBS.
+
+## Chat de TikTok y pruebas
+
+En **🧰 Herramientas** se encuentra **Probar comando**, para comprobar el recorrido local con `!guerrero`. Para una prueba real, inicia un LIVE público y pulsa **📡 TikTok**. El chat recibido se consulta en **💬 Chat**, con historial y exportación TXT.
+
+El conector es no oficial. La conexión con un LIVE real requiere verificación en una emisión activa; las pruebas locales o simuladas no la sustituyen. La integración recibe texto; los regalos, likes y otros eventos sociales de las herramientas son simulaciones.
+
+## Controles y desarrollo
+
+WASD mueve a Prota, Espacio salta, E golpea y R activa su especial. En móvil se conserva el joystick y los gestos. Esc / P abre o cierra Pausa/Ajustes cuando no hay un menú que cerrar primero. Esc cierra primero las opciones abiertas y conserva Modo Stream.
+
+El juego permanece en `index.html`; el puente usa `ws` y `tiktok-live-connector`, escucha solo en 127.0.0.1 y no pide contraseñas de TikTok.
+
+```powershell
+npm.cmd test
+```
+
+Para la regresión de menús en Chromium (dependencia de desarrollo):
+
+```powershell
+npx.cmd playwright install chromium
+npm.cmd run test:browser
+```
+
+Esta prueba arranca y cierra su propio servidor local; simula las respuestas de conexión a TikTok.
 
 ## Documentación
 
+- [Notas de v0.2 y decisiones de la encuesta](docs/RELEASE-0.2-OPERADOR.md).
+- [Operación de la composición dual](docs/DUAL-OPERADOR-TIKTOK.md).
+- [Conexión inicial con TikTok LIVE y limitaciones](docs/TIKTOK-LIVE-MVP.md).
 - [Registro de cambios](CHANGELOG.md).
-- [Decisiones de producto y presentación](docs/DECISIONES.md).
-- [Informe de la Fase 3](docs/informe-layout-fase3.md).
+- [Calibración y ajustes visuales de v0.1](docs/RELEASE-0.1-OBS.md).
 
-## Próximos pasos
+La rama `main` conserva la edición HTML independiente. La edición con servidor y TikTok se mantiene en `feature/tiktok-live-chat-mvp`.
 
-- Terminar de implementar y verificar las recompensas de sesión acordadas en la Fase 2.
-- Integrar eventos reales de plataformas mediante una capa de servidor segura.
-- Añadir pruebas automatizadas repetibles y revisar el rendimiento en móviles reales.
-- Separar módulos gradualmente cuando el prototipo esté estabilizado.
-
-**Importante:** la rama `main` contiene la base actual; conviene desarrollar cambios posteriores en ramas y revisarlos antes de fusionarlos.
-
-## Primer puente de chat TikTok LIVE (rama de prueba)
-
-La rama `feature/tiktok-live-chat-mvp` incorpora un servicio Node.js local para el primer experimento con el chat de **@polkent.live**. Todavía **no** integra eventos de regalos, no ofrece salidas OBS independientes ni sustituye al HTML monolítico.
-
-En Windows, con Node.js 20+ instalado:
-
-```powershell
-npm install
-npm start
-```
-
-Abre `http://127.0.0.1:4173/`, prueba el comando con el botón **Probar comando** y conecta al LIVE público desde el panel **TikTok LIVE** cuando estés emitiendo. Consulta la [guía paso a paso](docs/TIKTOK-LIVE-MVP.md).
-
-El conector es no oficial, con dependencias de terceros. Esta integración requiere prueba real y revisión de licencias antes de distribuirse comercialmente.
-
-## Pantalla completa dual ultrawide (3440×1440)
-
-La pantalla **9:16 se muestra prioritariamente en el extremo derecho**; el juego **16:9** queda a la izquierda con los controles del LIVE encima y debajo. Se corrigió el problema por el que la pantalla vertical quedaba oculta. Compatible con escalado de Windows. [Guía de la corrección](docs/ULTRAWIDE-3440-FIX.md).
-
-## Arena Live v0.1 · calibración OBS
-
-Dentro de **Ajustes** aparece `Arena Live v0.1 · TikTok`. En **Pantallas → Calibración para OBS** ajusta el margen de la 9:16 y el espacio inferior del operador **antes de configurar tus recortes de OBS**. Las etiquetas repetidas del lobby fueron retiradas. [Notas de versión](docs/RELEASE-0.1-OBS.md).
-
-## Afinado visual v0.1 para OBS
-
-En **Ajustes** aparece `Arena Live v0.1` y el nombre de la edición. La barra de vida del duelo **9:16** tiene ahora **14 px**; los nombres y porcentajes, **12 px**. En ultrawide, la barra LIVE superior ocupa **34 px** y el cajón inferior predeterminado **76 px**, con desplazamiento vertical inicial de **10 px**. Desde la calibración OBS puedes ajustar el desplazamiento entre **0–16 px** y el cajón entre **72–148 px** antes de fijar recortes. [Ver notas de la versión](docs/RELEASE-0.1-OBS.md).

@@ -1,47 +1,36 @@
-# Pantalla completa dual — Puesto de control del directo
+# Operador de Arena Live · v0.2 · TikTok
 
-Versión de prueba de Arena Live para la rama `feature/tiktok-live-chat-mvp`. **No modifica la rama `main` independiente de TikTok.**
+## Preparación y emisión
 
-## Abrir el puesto de control
+En escritorio se prepara la vista 16:9; en móvil, la 9:16. **🖥 Vista** cambia entre ambas. **⛶ Pantalla** permite abrir una vista individual a pantalla completa.
 
-1. En Windows, abre PowerShell en la carpeta del proyecto y ejecuta `npm.cmd install` (solo la primera vez, o si faltan dependencias) y `npm.cmd start`.
-2. Abre `http://127.0.0.1:4173` en Chrome o Edge.
-3. Pulsa **Dual · Pantalla completa + controles**, encima de las dos vistas del juego.
-4. Para salir, pulsa **⤡ Salir** o `Esc`.
+**🎥 Modo Stream** abre la composición dual de OBS con una sola partida, horizontal a la izquierda y vertical a la derecha. La misma barra del operador pasa a la parte superior. El botón cambia a **Salir de Stream** para volver a la preparación anterior.
 
-El modo dual usa el fullscreen nativo del navegador sobre **un único juego**. Mantiene a la vista tanto el lienzo 16:9 como el 9:16. Los controles no se montan sobre ninguno de los dos lienzos; ocupan una columna lateral independiente. En pantallas estrechas las dos vistas se colocan arriba y las herramientas abajo.
+## Barra y menús
 
-## Herramientas en la barra lateral
+Pausa, Lobby, Revancha, Prota, Audio y TikTok están disponibles directamente. Herramientas, Chat, Vista, Pantalla y Clase despliegan sus opciones. Ajustes contiene también Modo Stream y todas las opciones de audiencia, sin una pestaña Streamer separada.
 
-- **Controles rápidos**: Pausa/Continuar, Unirse como Prota, Nuevo lobby (con confirmación) y Revancha.
-- **TikTok LIVE**: el mismo panel local de Conectar, Desconectar y Probar comando que existe fuera de fullscreen.
-- **Chat TikTok · recibido**: mensajes **entrantes** del LIVE recibidos por el puente, incluidos los comandos que el motor decida limitar por antispam.
-- **Herramientas de Prueba**: el panel completo de pruebas del juego, desplegable y desplazable.
-- **Chat general y comandos manuales**: panel separado, también desplegable.
+Abrir Ajustes pausa el juego. Cerrar o confirmar una acción lo reanuda. Cada acción de los menús cierra su panel; Esc y clic fuera también los cierran. Un deslizador se confirma al terminar el gesto. Los campos de texto permanecen abiertos mientras escribes.
 
-Son **los mismos controles**, movidos temporalmente de su sitio original sin duplicar los eventos. Al salir de fullscreen vuelven a su posición previa.
+La franja del operador conserva su espacio al ocultar los menús. En ultrawide, herramientas y chat se muestran dentro de la franja inferior calibrada: abrirlos no mueve ni reescala los juegos. En una pantalla estrecha, desplaza horizontalmente la barra para alcanzar todos los accesos.
 
-## Cómo se gestiona el chat
+## Conexión y chat
 
-El puente local utiliza `@polkent.live` de forma predeterminada. Cada mensaje de TikTok que llega al puente de la página controladora se agrega primero a la bandeja **Chat TikTok · recibido** y después se envía a `ArenaLive.sendChat()` para que el motor lo procese con sus reglas normales.
+El servidor arranca sin conectarse a TikTok. **📡 TikTok** está deshabilitado si el puente no está disponible y usa el estado del puente para conectar o desconectar. El estado detallado se consulta con la ayuda del botón y en Herramientas.
 
-- Hasta **450 mensajes recientes** se dibujan simultáneamente en pantalla para mantener la fluidez del navegador. **Anteriores** permite consultar tramos más antiguos; **Directo** vuelve a los recientes.
-- Se conserva un historial **en memoria durante la sesión**, hasta **50 000 mensajes recibidos**. Si se supera ese límite, los más antiguos dejan de estar en memoria y aparece un contador de lo descartado.
-- **↓ TXT** exporta a un archivo local los mensajes aún conservados en memoria.
-- Esto permite ver **todos los mensajes que efectivamente entregue el puente** dentro del límite de la sesión, incluso si alguno no genera una acción de juego. No significa que TikTok garantice entregar todos los comentarios a un conector no oficial.
-- **No envía mensajes de vuelta al chat público de TikTok.** El panel es de lectura; para escribir en la sala oficial se requieren otras capacidades y autorizaciones. Los mensajes del juego aparecen en el chat de Arena Live, no en TikTok.
+**💬 Chat** muestra el historial recibido de TikTok y el chat manual de pruebas. Recibidos, anteriores, volver al directo y exportar TXT conservan el historial cuando el panel se oculta. Los comentarios se reciben aunque el panel esté cerrado; únicamente la ventana controladora los entrega al juego.
 
-## Para OBS y TikTok LIVE Studio
+El chat de TikTok es de lectura; el formulario manual sirve para el simulador local. No publica respuestas en el LIVE.
 
-Este fullscreen dual es una **consola de operación local**. Si capturas **toda la pantalla** por OBS, también aparecerá la barra lateral. Para transmitir **solo el juego** hay que capturar o recortar el lienzo correspondiente; las salidas independientes para OBS con una sola partida sincronizada siguen siendo un desarrollo separado.
+## OBS y calibración
 
-No abras dos pestañas independientes del juego para crear las dos transmisiones: serían **partidas distintas**. El puente actual entrega el chat a una única pestaña controladora.
+Configura el desplazamiento de 9:16 y la altura inferior desde **Ajustes → Pantallas y OBS**. Se conservan los valores guardados de v0.1. Ajusta antes de fijar tus recortes de OBS. Cada deslizador cierra Ajustes al confirmar, de acuerdo con la encuesta.
 
-## Validaciones realizadas
+Usa una composición de una sola instancia; dos fuentes que carguen el juego por separado producirían partidas distintas.
 
-- Chromium a 1920×1080, 1280×720 y móvil 390×844: ambas proporciones correctas, sin solapar los controles; restauración al salir; compatibilidad con el fullscreen individual.
-- 810 mensajes de TikTok simulados: 450 visibles, navegación por el historial y exportación completa de los 810, incluso con comandos repetidos antispam.
-- Se comprobaron pausa, autoaudiencia, traslado del panel de conexión, apertura de ajustes y funcionamiento de ocho traducciones desde el mismo HTML.
-- Pruebas de normalización Node.js y comprobaciones sintácticas de los scripts sin errores.
+## Alcance de las pruebas
 
-**Pendiente:** prueba con un TikTok LIVE real; la recepción utiliza una biblioteca no oficial y puede cambiar si TikTok modifica su servicio.
+El botón Probar comando comprueba el recorrido local sin emitir. Una conexión real necesita el LIVE público activo y un comentario desde otra cuenta. Las pruebas simuladas no verifican la recepción ni latencia reales del proveedor.
+
+Consulta [v0.2 y decisiones confirmadas](RELEASE-0.2-OPERADOR.md) y [la guía de TikTok LIVE](TIKTOK-LIVE-MVP.md).
+

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.1 — TikTok LIVE</title>
+    <title>Arena Live v0.2 — TikTok LIVE</title>
     <!--
       ARENA LIVE · MONOLITHIC DELIVERY
       All application code intentionally stays in this HTML file.
@@ -597,8 +597,8 @@ body.touch-controls-active #portraitChatOverlay {
     box-shadow: none !important;
 }
 #card-16x9:fullscreen::backdrop, #card-9x16:fullscreen::backdrop { background: #000; }
-#card-16x9:fullscreen > :not(#viewport16x9),
-#card-9x16:fullscreen > :not(#viewport9x16) { display: none !important; }
+#card-16x9:fullscreen > :not(#viewport16x9):not(#settingsPauseModal),
+#card-9x16:fullscreen > :not(#viewport9x16):not(#settingsPauseModal) { display: none !important; }
 #card-16x9:fullscreen #viewport16x9 {
     width: min(100vw, 177.777778dvh) !important;
     height: min(100dvh, 56.25vw) !important;
@@ -885,7 +885,7 @@ body.touch-controls-active #portraitChatOverlay {
 
 
 <style id="arena-visual-polish-v01">
-/* Arena Live v0.1: duelo vertical legible y controles compactos fuera de la imagen. */
+/* Arena Live v0.2: duelo vertical legible y controles compactos fuera de la imagen. */
 #viewport9x16 #hud1v1Bars9 {padding:9px 10px!important;border-radius:14px!important;border-color:rgba(251,191,36,.62)!important;box-shadow:0 5px 20px rgba(0,0,0,.28)}
 #viewport9x16 #hud1v1Bars9 .grid-cols-11 {gap:7px!important}
 #viewport9x16 #p1Bar1v1_9,#viewport9x16 #p2Bar1v1_9 {height:100%!important}
@@ -903,6 +903,64 @@ body.touch-controls-active #portraitChatOverlay {
 #broadcastStageSection:fullscreen.arena-dual-ultrawide .arena-dual-dock-quick button,#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaDualOperatorDock .arena-stream-top-action {padding:4px 7px!important;min-height:25px!important;font-size:10px!important}
 </style>
 
+
+<style id="arena-operator-v02">
+/* v0.2 controls stay in operator bands; opening menus never changes video geometry. */
+#arenaTopBarInner {max-width:none;gap:8px}
+body > main {display:flex!important;flex-direction:column!important;max-width:none!important;width:100%;box-sizing:border-box}
+#arenaHeaderActions.arena-operator-toolbar {display:flex!important;flex-wrap:nowrap!important;align-items:center;gap:4px;width:100%;min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:thin;padding:3px;box-sizing:border-box}
+#arenaHeaderActions.arena-operator-toolbar button,#arenaOperatorPopover button,.arena-settings-resume {flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:30px;padding:5px 8px!important;white-space:nowrap;border:1px solid #334c64;border-radius:7px;background:#112438;color:#d9edf7;font:650 11px/1.2 Inter,system-ui,sans-serif;cursor:pointer}
+#arenaHeaderActions.arena-operator-toolbar button:hover,#arenaOperatorPopover button:hover {background:#23465e}
+#arenaHeaderActions.arena-operator-toolbar button:focus-visible,#arenaOperatorPopover :focus-visible {outline:2px solid #67e8f9;outline-offset:1px}
+#arenaHeaderActions.arena-operator-toolbar button[aria-pressed="true"],#arenaHeaderActions.arena-operator-toolbar button[aria-expanded="true"] {border-color:#38bdf8;background:#123c52;color:#a5f3fc}
+#arenaHeaderActions.arena-operator-toolbar #btnFullscreenDual {border-color:#34856d;color:#bcf5d8}
+#arenaHeaderActions.arena-operator-toolbar button:disabled,#arenaOperatorPopover button:disabled {opacity:.48;cursor:default}
+.arena-toolbar-separator {height:18px;width:1px;background:#334155;flex:0 0 auto;margin:0 2px}
+#streamerJoinLabel {max-width:none!important}
+#arenaStreamToolbarMount {width:100%;min-width:0}
+#arenaDualOperatorDock #arenaDualTopCluster {overflow:visible}
+#arenaDualOperatorDock #arenaDualBottomCluster {position:relative;overflow:hidden}
+#arenaPreparationOperatorRail {height:110px;min-height:110px;border:1px solid #26394d;border-radius:9px;background:#0b1423}
+#arenaOperatorPopover {position:fixed;z-index:110;box-sizing:border-box;border:1px solid #41647d;border-radius:8px;background:#0d1b2c;color:#dbeafe;padding:6px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;box-shadow:0 2px 12px #0006}
+#arenaOperatorPopover[hidden],#arenaOperatorPopover [hidden] {display:none!important}
+#arenaOperatorPopover > [data-operator-panel] {min-height:0}
+.arena-operator-menu-row {display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+#arenaOperatorPopover select,#arenaOperatorPopover input {font-size:11px;min-height:28px}
+#arenaDualToolsMount #audienceSimulatorPanel {display:flex!important;flex-direction:row!important;align-items:flex-start;gap:6px;width:max-content!important;height:auto!important;border:0;overflow:visible;padding:0}
+#arenaDualToolsMount #audienceSimulatorPanel > div:has(h2) {display:none}
+#arenaDualToolsMount #audienceSimulatorPanel > div.p-3 {display:flex;flex-direction:row;align-items:flex-start;padding:0;gap:6px}
+#arenaDualToolsMount #audienceSimulatorPanel > div.p-3 > * {flex:0 0 auto;min-width:180px;max-width:none}
+#arenaDualToolsMount #audienceSimulatorPanel > #arena-live-bridge-panel {flex-direction:row;flex-wrap:nowrap!important;align-items:center;width:max-content;max-width:none;min-height:50px}
+#arenaDualToolsMount .arena-test-groups {display:flex;width:max-content;gap:6px}
+#arenaDualToolsMount .arena-test-group {width:max-content;flex:0 0 auto;padding:4px}
+#arenaDualToolsMount .arena-test-group > .grid,#arenaDualToolsMount .arena-skill-buttons {display:flex!important;flex-wrap:nowrap;gap:4px}
+#arenaDualToolsMount #advancedAudienceLab {min-width:280px}
+#arenaDualToolsMount .arena-test-group button {min-height:26px}
+#arenaDualToolsMount .arena-skill-buttons button {min-height:28px;padding:3px 6px}
+#arenaDualToolsMount #quickSkillTargetStatus,#arenaDualToolsMount .arena-chat-shortcut {display:none}
+#arenaOperatorPopover #arena-live-bridge-panel {margin:0 0 4px!important;padding:5px!important;border-radius:6px!important;gap:5px!important}
+.arena-operator-chat-grid {display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:580px}
+#arenaOperatorPopover #arenaDualTikTokChat {margin:0;height:auto;min-height:100px}
+#arenaOperatorPopover #chatSimulatorSidebar {display:flex!important;position:static!important;width:100%!important;height:auto!important;min-height:0!important;border:0}
+#arenaOperatorPopover #chatSimulatorSidebar #arenaChatContents {display:block!important}
+#arenaOperatorPopover #mobileChatExpand {display:none!important}
+#arenaOperatorPopover #chatFeedFrame {height:110px!important;min-height:60px!important}
+#arenaOperatorPopover .arena-skill-buttons button [data-command-label] {display:block;font-size:10px}
+#settingsPauseModal {z-index:120;pointer-events:auto}
+#settingsPauseModal.hidden {display:none!important}
+.arena-settings-resume {background:#0e624d;color:#d1fae5;border-color:#34d399}
+#settingsPauseModal .arena-settings-resume {padding:8px 12px!important}
+#settingsPanelsScroll h3 {display:flex;align-items:center;gap:5px}
+#settingsPauseModal #btnViewDual {display:flex!important}
+#settingsPauseModal .arena-option-hint {display:none!important}
+@media (max-width:767px) {
+ #arenaHeaderActions.arena-operator-toolbar button {min-height:40px;font-size:12px}
+ #arenaPreparationOperatorRail {height:144px;min-height:144px}
+ #settingsPauseModal > div {max-height:94dvh}
+}
+/* Preserve the calibrated 34px / 76px ultrawide tracks, including while menus are open. */
+#broadcastStageSection:fullscreen.arena-dual-ultrawide #arenaHeaderActions button {min-height:26px;padding:3px 7px!important;font-size:10px}
+</style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#06080f] text-slate-100">
 
@@ -957,37 +1015,24 @@ body.touch-controls-active #portraitChatOverlay {
                 </span>
             </div>
 
-            <!-- PHASE 3 · STREAM BAR | PARTIDA · PROTA · AUDIO/IDIOMA · AJUSTES -->
-            <nav id="arenaHeaderActions" class="arena-header-actions flex flex-wrap items-center gap-2" aria-label="Controles de Arena Live">
-                <div class="arena-header-group arena-header-group-prota" aria-label="Prota">
-                    <span class="arena-group-label" data-ui-label="groupProta">Prota</span>
-                    <button id="btnStreamerJoin" onclick="joinAsStreamer()" class="arena-join-button rounded-xl border border-amber-400/70 bg-amber-400 text-slate-950 px-3 py-2 text-xs font-extrabold flex items-center gap-1.5" aria-describedby="streamerJoinStatus" title="Unirse como Prota">
-                        <i class="fa-solid fa-crown"></i><span id="streamerJoinLabel">Unirse como Prota</span>
-                    </button>
-                    <div class="relative" id="protaClassDropdown">
-                        <button type="button" id="btnProtaClassMenu" onclick="toggleProtaClassMenu()" aria-expanded="false" aria-controls="protaClassMenu" class="rounded-lg border border-amber-400/40 bg-slate-900 px-2 py-2 text-amber-200 text-xs font-bold" title="Clase de Prota" aria-label="Clase de Prota"><span aria-hidden="true">🎭</span> <span data-ui-label="classShort">Clase</span> <span aria-hidden="true">⌄</span></button>
-                        <div id="protaClassMenu" class="hidden absolute right-0 top-full mt-2 rounded-xl border border-amber-400/40 bg-[#10192c] p-3 z-[90] shadow-2xl min-w-[185px]" role="group" aria-label="Clase de Prota">
-                            <label for="protagonistClassSelect" class="block text-xs font-semibold text-amber-200 mb-2" data-ui-label="classLabel">Clase de Prota</label>
-                            <select id="protagonistClassSelect" class="w-full px-2 py-2 rounded-lg bg-slate-950 border border-amber-400/40 text-xs text-amber-100" title="Clase de Prota">
-                                <option value="kame">☄️ Guerrero</option><option value="ninja">🥷 Shinobi</option><option value="trueno">⚡ Rayo</option><option value="esmeralda">🌿 Espíritu</option><option value="titan">🗿 Titán</option>
-                            </select>
-                        </div>
-                    </div>
-                    <span id="streamerJoinStatus" class="sr-only" aria-live="polite">Prota puede unirse en cualquier modo.</span>
-                </div>
-                <div class="arena-header-group arena-header-group-audio" aria-label="Audio e Idioma">
-                    <span class="arena-group-label" data-ui-label="groupAudio">Audio / Idioma</span>
-                    <button id="btnQuickSound" onclick="toggleSound()" class="rounded-lg bg-slate-800 border border-slate-700 text-cyan-300 px-2 py-2 text-xs" aria-label="Sonido" title="Sonido"><i id="quickSoundIcon" class="fa-solid fa-volume-high" aria-hidden="true"></i><span class="sr-only" data-ui-label="audio">Audio</span></button>
-                    <label for="languageSelect" class="sr-only">Idioma</label>
-                    <select id="languageSelect" onchange="setLanguage(this.value)" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-xs font-semibold text-slate-200" title="Idioma" data-no-translate>
-                        <option value="es">🇪🇸 Español</option><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="de">🇩🇪 Deutsch</option><option value="zh">🇨🇳 中文</option><option value="ja">🇯🇵 日本語</option><option value="pt">🇧🇷 Português</option><option value="it">🇮🇹 Italiano</option>
-                    </select>
-                </div>
-                <div class="arena-header-group arena-header-group-settings" aria-label="Ajustes">
-                    <span class="arena-group-label" data-ui-label="groupSettings">Ajustes</span>
-                    <button id="btnToggleSidebar" onclick="toggleChatSidebar()" class="rounded-lg bg-slate-800/90 border border-slate-700 text-slate-200 px-3 py-2 text-xs font-bold" title="Chat en Vivo" aria-expanded="false" aria-controls="chatSimulatorSidebar"><i class="fa-solid fa-comments text-cyan-400"></i><span id="sidebarToggleLabel" class="ml-1" data-ui-label="chat">Chat</span></button>
-                    <button id="btnOpenSettingsModal" onclick="toggleSettingsModal()" class="rounded-xl border border-cyan-400/50 bg-cyan-500/20 text-cyan-200 px-3 py-2 text-xs font-extrabold" title="Pausa y ajustes"><i class="fa-solid fa-pause"></i><span class="ml-1" data-ui-label="pause">Pausa</span></button>
-                </div>
+            <!-- v0.2: one horizontal toolbar for preparation and stream mode. -->
+            <nav id="arenaHeaderActions" class="arena-operator-toolbar" aria-label="Controles de Arena Live" data-no-translate>
+                <button type="button" id="btnFullscreenDual" aria-controls="broadcastStageSection"><span id="arenaDualFullscreenEntryLabel">🎥 Modo Stream</span></button>
+                <button type="button" id="arenaViewMenuBtn" data-operator-menu="view" aria-expanded="false" aria-controls="arenaOperatorPopover">🖥 Vista</button>
+                <button type="button" id="arenaFullscreenMenuBtn" data-operator-menu="screen" aria-expanded="false" aria-controls="arenaOperatorPopover">⛶ Pantalla</button>
+                <span class="arena-toolbar-separator" aria-hidden="true"></span>
+                <button type="button" id="arenaDualPauseBtn" aria-pressed="false">⏸ Pausa</button>
+                <button type="button" id="arenaDualLobbyBtn">🚪 Lobby</button>
+                <button type="button" id="arenaDualRematchBtn">🔄 Revancha</button>
+                <button type="button" id="btnStreamerJoin" onclick="joinAsStreamer()" aria-describedby="streamerJoinStatus"><span aria-hidden="true">👑</span> <span id="streamerJoinLabel">Prota</span></button>
+                <button type="button" id="btnProtaClassMenu" data-operator-menu="class" aria-expanded="false" aria-controls="arenaOperatorPopover">🎭 Clase</button>
+                <span id="streamerJoinStatus" class="sr-only" aria-live="polite">Prota puede unirse en cualquier modo.</span>
+                <span class="arena-toolbar-separator" aria-hidden="true"></span>
+                <button type="button" id="btnQuickSound" onclick="toggleSound()" aria-pressed="true"><span id="quickSoundIcon" aria-hidden="true">🔊</span> <span id="arenaQuickSoundLabel">Audio</span></button>
+                <button type="button" id="arenaDualTikTokConnectBtn" aria-pressed="false" disabled>📡 TikTok</button>
+                <button type="button" id="arenaDualTestsToggle" data-operator-menu="tools" aria-expanded="false" aria-controls="arenaOperatorPopover">🧰 Herramientas</button>
+                <button type="button" id="arenaDualChatToggleBtn" data-operator-menu="chat" aria-expanded="false" aria-controls="arenaOperatorPopover">💬 Chat</button>
+                <button type="button" id="arenaDualSettingsBtn" aria-controls="settingsPauseModal" aria-expanded="false">⚙ Ajustes</button>
             </nav>
         </div>
     </header>
@@ -1001,26 +1046,7 @@ body.touch-controls-active #portraitChatOverlay {
             <!-- Subtle Background Grid Accent -->
             <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#38bdf8 1px, transparent 1px); background-size: 24px 24px;"></div>
 
-            <!-- Minimal Info Strip Inside Stage -->
-            <div class="relative z-10 flex items-center justify-between gap-2 px-2 py-0.5">
-                <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Emisión Activa
-                    </span>
-                    <span id="stageAutoModeExplain" class="hidden" aria-hidden="true"></span>
-                </div>
-                <button onclick="openLiveSettings()" title="Ajustes LIVE sin pausar" aria-label="Ajustes LIVE sin pausar" class="text-[10px] font-semibold text-slate-400 hover:text-cyan-300 transition-colors flex items-center gap-1 shrink-0">
-                    <i class="fa-solid fa-gear"></i> Ajustes LIVE
-                </button>
-            </div>
-
-            <!-- STRICT SIDE-BY-SIDE DUAL MONITORS CONTAINER: 16:9 ON THE LEFT, 9:16 IMMEDIATELY TO ITS RIGHT -->
-<div id="arenaDualFullscreenEntry">
-                <button type="button" id="btnFullscreenDual" title="Pantalla completa dual con herramientas y chat TikTok" aria-label="Pantalla completa dual 16:9 y 9:16" aria-controls="broadcastStageSection"><span aria-hidden="true">⛶</span><span id="arenaDualFullscreenEntryLabel">Dual · Pantalla completa + controles</span></button>
-            </div>
-            <div id="arenaPrepViewSwitch">
-                <button type="button" id="arenaPrepSwitchBtn" aria-label="Cambiar vista de preparación">Ver 9:16</button>
-            </div>
+            <!-- Game viewports contain no operator buttons. -->
             <div id="dualMonitorsGrid" class="dual-rig-row relative z-10 flex-1 my-auto py-1 select-none">
 
                 <!-- ==================== LEFT MONITOR (#card-16x9): 16:9 HORIZONTAL STREAM ==================== -->
@@ -1031,12 +1057,6 @@ body.touch-controls-active #portraitChatOverlay {
                             <span class="truncate">HORIZONTAL · Twitch / YouTube / Kick</span>
                         </div>
                         <span class="text-[9px] text-slate-400 font-semibold hidden sm:inline shrink-0 ml-2">960×540</span>
-                    </div>
-
-                    <div id="arenaFullscreenActions16" class="arena-monitor-fullscreen-actions">
-                        <button type="button" id="btnFullscreen16" title="Pantalla completa 16:9" aria-label="Pantalla completa 16:9" aria-controls="card-16x9">
-                            <span aria-hidden="true">⛶</span><span class="arena-fullscreen-label">Pantalla completa</span>
-                        </button>
                     </div>
 
                     <div id="viewport16x9" class="dual-monitor-16-9 relative rounded-2xl overflow-hidden border-2 border-cyan-500/60 shadow-[0_0_35px_rgba(0,243,255,0.14)] bg-slate-950 flex flex-col justify-between" style="width: 640px; height: 360px;">
@@ -1247,12 +1267,6 @@ body.touch-controls-active #portraitChatOverlay {
                         <span class="text-[8px] text-emerald-300 font-bold shrink-0">🎯 Auto-Zoom</span>
                     </div>
 
-                    <div id="arenaFullscreenActions9" class="arena-monitor-fullscreen-actions">
-                        <button type="button" id="btnFullscreen9" title="Pantalla completa 9:16" aria-label="Pantalla completa 9:16" aria-controls="card-9x16">
-                            <span aria-hidden="true">⛶</span><span class="arena-fullscreen-label">Pantalla completa</span>
-                        </button>
-                    </div>
-
                     <div id="viewport9x16" class="dual-monitor-9-16 relative rounded-3xl overflow-hidden border-2 border-pink-500/60 shadow-[0_0_35px_rgba(255,0,127,0.18)] bg-slate-950 flex flex-col justify-between" style="width: 203px; height: 360px;">
                         <!-- 9:16 Vertical Canvas (Driven by Smart Dynamic Tracking Camera) -->
                         <canvas id="canvas9x16" width="540" height="960" class="absolute inset-0 w-full h-full block z-0"></canvas>
@@ -1392,44 +1406,9 @@ body.touch-controls-active #portraitChatOverlay {
 
             <div id="arenaDualUltrawideVerticalStage" aria-hidden="true"></div>
             <aside id="arenaDualOperatorDock" aria-label="Control del directo" data-no-translate>
-                <div id="arenaDualTopCluster">
-                    <div class="arena-dual-dock-top">
-                        <strong id="arenaDualDockTitle">Control LIVE</strong>
-                        <button type="button" id="btnExitFullscreenDual" title="Salir de pantalla completa">⤡ Salir</button>
-                    </div>
-                    <div class="arena-dual-dock-quick" role="group" aria-label="Controles rápidos">
-                        <button type="button" id="arenaDualPauseBtn">⏸ Pausa</button>
-                        <button type="button" id="arenaDualLobbyBtn">↻ Lobby</button>
-                        <button type="button" id="arenaDualJoinBtn">+ Prota</button>
-                        <button type="button" id="arenaDualSettingsBtn" class="arena-stream-top-action">⚙ Ajustes</button>
-                        <button type="button" id="arenaDualTestsToggle" class="arena-stream-top-action">🧪 Pruebas</button>
-                        <button type="button" id="arenaDualTikTokConnectBtn" class="arena-stream-top-action">📡 Conectar TikTok</button>
-                        <button type="button" id="arenaDualChatToggleBtn" class="arena-stream-top-action">💬 Chat</button>
-                        <button type="button" id="arenaDualRematchBtn" class="arena-stream-top-action" hidden>⚔ Revancha</button>
-                    </div>
-                </div>
+                <div id="arenaDualTopCluster"><div id="arenaStreamToolbarMount"></div></div>
                 <div id="arenaDualCenterStageMount" aria-hidden="true"></div>
-                <div id="arenaDualBottomCluster">
-                    <details id="arenaDualDrawerDisclosure">
-                        <summary id="arenaDualDrawerSummary">☷ Herramientas y chat · abrir panel</summary>
-                        <div id="arenaDualDrawerContents">
-                            <div id="arenaDualBridgeMount" aria-label="Conexión TikTok LIVE"></div>
-                            <details id="arenaDualChatDisclosure"><summary id="arenaDualChatSummary">💬 Chat TikTok · recibido</summary>
-                                <section id="arenaDualTikTokChat" aria-label="Mensajes recibidos de TikTok">
-                                    <header id="arenaDualTikTokChatHeader"><strong id="arenaDualTikTokChatTitle">Chat TikTok · recibido</strong><span id="arenaTikTokChatStatus">Desconectado</span></header>
-                                    <div id="arenaTikTokChatFeed" role="log" aria-label="Mensajes recibidos" aria-live="off"><div id="arenaTikTokChatEmpty">Los mensajes recibidos aparecerán aquí.</div></div>
-                                    <footer class="arena-tiktok-chat-footer"><span id="arenaTikTokChatCount">0 mensajes</span>
-                                        <button type="button" id="arenaTikTokChatOlder" disabled>◀ Anteriores</button>
-                                        <button type="button" id="arenaTikTokChatLatest" disabled>↓ Directo</button>
-                                        <button type="button" id="arenaTikTokChatExport">↓ TXT</button>
-                                    </footer>
-                                </section>
-                            </details>
-                            <details id="arenaDualToolsDisclosure"><summary id="arenaDualToolsSummary">🧪 Herramientas de Prueba</summary><div id="arenaDualToolsMount"></div></details>
-                            <details id="arenaDualGeneralDisclosure"><summary id="arenaDualGeneralSummary">💬 Chat general y comandos manuales</summary><div id="arenaDualGeneralMount"></div></details>
-                        </div>
-                    </details>
-                </div>
+                <div id="arenaDualBottomCluster"><div id="arenaStreamMenuRail" aria-label="Opciones del operador"></div></div>
             </aside>
         </section>
 
@@ -1593,10 +1572,41 @@ body.touch-controls-active #portraitChatOverlay {
             </div><!-- arenaChatContents -->
         </aside>
 
+        <div id="arenaPreparationOperatorRail" aria-label="Opciones del operador"></div>
+        <div id="arenaOperatorPopover" hidden role="dialog" aria-modal="false" aria-label="Opciones del operador" data-no-translate>
+            <div data-operator-panel="view" hidden class="arena-operator-menu-row">
+                <button type="button" id="arenaPrepSwitchBtn" aria-pressed="true">🖥 16:9</button>
+                <button type="button" id="arenaPrepPortraitBtn" aria-pressed="false">📱 9:16</button>
+            </div>
+            <div data-operator-panel="screen" hidden class="arena-operator-menu-row">
+                <button type="button" id="btnFullscreen16" aria-controls="card-16x9">⛶ 16:9</button>
+                <button type="button" id="btnFullscreen9" aria-controls="card-9x16">⛶ 9:16</button>
+                <button type="button" id="arenaExitFullscreenBtn">⤡ Salir</button>
+            </div>
+            <div data-operator-panel="class" hidden class="arena-operator-menu-row">
+                <label for="protagonistClassSelect" id="arenaClassMenuLabel">🎭 Clase de Prota</label>
+                <select id="protagonistClassSelect" class="w-full px-2 py-2 rounded-lg bg-slate-950 border border-amber-400/40 text-xs text-amber-100" title="Clase de Prota">
+                                <option value="kame">☄️ Guerrero</option><option value="ninja">🥷 Shinobi</option><option value="trueno">⚡ Rayo</option><option value="esmeralda">🌿 Espíritu</option><option value="titan">🗿 Titán</option>
+                            </select>
+            </div>
+            <div data-operator-panel="tools" hidden id="arenaDualToolsMount"></div>
+            <div data-operator-panel="chat" hidden class="arena-operator-chat-grid">
+                <section id="arenaDualTikTokChat" aria-label="Mensajes recibidos de TikTok">
+                                    <header id="arenaDualTikTokChatHeader"><strong id="arenaDualTikTokChatTitle">Chat TikTok · recibido</strong><span id="arenaTikTokChatStatus">Desconectado</span></header>
+                                    <div id="arenaTikTokChatFeed" role="log" aria-label="Mensajes recibidos" aria-live="off"><div id="arenaTikTokChatEmpty">Los mensajes recibidos aparecerán aquí.</div></div>
+                                    <footer class="arena-tiktok-chat-footer"><span id="arenaTikTokChatCount">0 mensajes</span>
+                                        <button type="button" id="arenaTikTokChatOlder" disabled>◀ Anteriores</button>
+                                        <button type="button" id="arenaTikTokChatLatest" disabled>↓ Directo</button>
+                                        <button type="button" id="arenaTikTokChatExport">↓ TXT</button>
+                                    </footer>
+                                </section>
+                <div id="arenaDualGeneralMount"></div>
+            </div>
+        </div>
     </main>
 
         <!-- ==================== GAMEPLAY SETTINGS (LIVE QUICK CONTROLS REMAIN VISIBLE) ==================== -->
-    <div id="settingsPauseModal" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 select-none pointer-events-none">
+    <div id="settingsPauseModal" role="dialog" aria-modal="true" aria-labelledby="arenaSettingsTitle" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 select-none">
         <div class="w-full max-w-4xl bg-[#0b101e] border-2 border-cyan-500/50 rounded-3xl shadow-[0_0_60px_rgba(0,243,255,0.18)] overflow-hidden flex flex-col max-h-[92vh] pointer-events-auto">
             
             <!-- Modal Header -->
@@ -1608,35 +1618,20 @@ body.touch-controls-active #portraitChatOverlay {
                     <div>
                         <div class="flex items-center gap-2">
                             <h2 class="font-display font-black text-base sm:text-lg text-white tracking-wide">
-                                <span data-menu-key="title">Pausa y ajustes de partida</span>
+                                <span id="arenaSettingsTitle" data-operator-label="settingsTitle">Pausa y ajustes</span>
                             </h2>
-                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.1 · TikTok</span>
+                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.2 · TikTok</span>
                             <span id="settingsModeBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400/40">
                                 ⏸️ JUEGO EN PAUSA
                             </span>
                         </div>
-                        <p id="settingsModeDescription" class="text-xs text-slate-400">Configura las reglas, el ritmo, las pantallas y la audiencia. <span class="settings-paused-copy">La simulación está detenida.</span><span class="settings-live-copy">La simulación continúa mientras editas.</span></p>
+                        <p id="settingsModeDescription" class="text-xs text-slate-400" data-operator-label="pauseHint">La partida se reanuda al cerrar o completar una acción.</p>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 flex-wrap">
-                    <button onclick="pauseWithSettingsOpen()" class="settings-pause-action px-3 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-200 font-bold text-xs transition-all items-center gap-1.5">
-                        <i class="fa-solid fa-pause"></i><span data-menu-key="pauseNow">Pausar ahora</span>
-                    </button>
-                    <button onclick="openLiveSettings()" title="Modificar ajustes sin pausar el combate" class="px-3 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/40 text-emerald-200 font-bold text-xs transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-bolt"></i><span data-menu-key="editLive">Editar durante LIVE</span>
-                    </button>
-                    <button onclick="toggleSettingsModal(false)" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-400 hover:brightness-110 text-slate-950 font-display font-black text-xs shadow-lg active:scale-95 transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-play"></i><span id="resumeGameLabel">Reanudar partida</span>
-                    </button>
-                </div>
+                <button type="button" onclick="toggleSettingsModal(false)" class="arena-settings-resume"><span id="resumeGameLabel">▶ Reanudar</span></button>
             </div>
 
-            <!-- Separate everyday controls from stream-host operations. -->
-            <div class="flex gap-2 px-5 pt-3 bg-[#0b101e]">
-                <button type="button" id="settingsGeneralTab" onclick="showSettingsSection('general')" aria-selected="true" class="rounded-lg bg-cyan-500 text-slate-950 px-4 py-2 text-xs font-bold">General</button>
-                <button type="button" id="settingsHostTab" onclick="showSettingsSection('host')" aria-selected="false" class="rounded-lg bg-slate-800 text-slate-200 px-4 py-2 text-xs font-bold">🎙️ Streamer</button>
-            </div>
             <!-- Modal Body: Categorized Grid -->
             <div id="settingsPanelsScroll" class="p-4 sm:p-5 overflow-y-auto">
             <div id="settingsGeneralPanel" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1646,7 +1641,7 @@ body.touch-controls-active #portraitChatOverlay {
                     <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
                         <i class="fa-solid fa-scale-balanced text-amber-400"></i>
                         <h3 class="font-display font-bold text-xs uppercase tracking-wider text-amber-300">
-                            <span data-menu-key="rules">1. Duración, vidas y reingreso</span>
+                            <span data-operator-label="match">🎮 Partida</span>
                         </h3>
                     </div>
 
@@ -1723,7 +1718,7 @@ body.touch-controls-active #portraitChatOverlay {
                     <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
                         <i class="fa-solid fa-gamepad text-emerald-400"></i>
                         <h3 class="font-display font-bold text-xs uppercase tracking-wider text-emerald-300">
-                            <span data-menu-key="pace">2. Ritmo de Combate y Controles</span>
+                            <span data-operator-label="pace">👑 Prota y combate</span>
                         </h3>
                     </div>
 
@@ -1758,16 +1753,16 @@ body.touch-controls-active #portraitChatOverlay {
                     <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
                         <i class="fa-solid fa-tv text-cyan-400"></i>
                         <h3 class="font-display font-bold text-xs uppercase tracking-wider text-cyan-300">
-                            <span data-menu-key="screen">3. Pantallas de Stream y Audio</span>
+                            <span data-operator-label="displays">🖥 Pantallas y OBS</span>
                         </h3>
                     </div>
 
                     <div class="flex flex-col gap-1.5">
-                        <span class="text-[11px] font-semibold text-slate-300">Disposición de Monitores (Ambos activos en simultáneo):</span>
+                        <span class="text-[11px] font-semibold text-slate-300"><span data-operator-label="preparation">Vista de preparación</span></span>
                         <div class="grid grid-cols-3 gap-2">
-                            <button id="btnViewDual" hidden data-stream-only="true" onclick="setMonitorFocus('dual')" class="px-2.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-cyan-500 text-slate-950 shadow-md">
+                            <button id="btnViewDual" onclick="arenaLaunchStreamFromSettings()" class="px-2.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-cyan-500 text-slate-950 shadow-md">
                                 <i class="fa-solid fa-table-columns"></i>
-                                <span>Dual 16:9 + 9:16</span>
+                                <span data-operator-label="stream">🎥 Modo Stream</span>
                             </button>
                             <button id="btnView16x9" onclick="setMonitorFocus('16:9')" class="px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-950 border border-slate-800 text-slate-300 hover:text-white transition-all flex items-center justify-center gap-1.5">
                                 <i class="fa-solid fa-desktop"></i>
@@ -1783,7 +1778,7 @@ body.touch-controls-active #portraitChatOverlay {
                     <!-- Ajustes de calibración específicos del operador. No modifica la lógica de la partida. -->
                     <section id="arenaObsCalibrationPanel" data-no-translate class="rounded-xl border border-cyan-800/50 bg-slate-950/70 p-3 flex flex-col gap-2" aria-label="Calibración OBS">
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <strong class="text-[11px] text-cyan-200" id="arenaObsCalibrationTitle">📐 Calibración para OBS · v0.1</strong>
+                            <strong class="text-[11px] text-cyan-200" id="arenaObsCalibrationTitle">📐 Calibración para OBS · v0.2</strong>
                             <button type="button" id="arenaObsResetCalibration" onclick="resetArenaObsCalibration()" class="rounded-md px-2 py-1 border border-slate-700 bg-slate-900 text-slate-200 text-[10px]">Restablecer</button>
                         </div>
                         <p class="text-[10px] text-slate-400" id="arenaObsCalibrationHint">Ajusta esto antes de emitir; los recortes de OBS deben configurarse después. Abrir las herramientas no modificará las dimensiones.</p>
@@ -1795,12 +1790,20 @@ body.touch-controls-active #portraitChatOverlay {
                             <span id="arenaObsFooterHeightLabel">Espacio inferior para herramientas: <output id="arenaObsFooterHeightValue">76 px</output></span>
                             <input type="range" id="arenaObsFooterHeight" min="72" max="148" step="4" value="76" oninput="setArenaObsCalibration('footer',this.value)" class="w-full accent-cyan-400" />
                         </label>
-                        <output id="arenaObsGeometrySummary" class="text-[10px] leading-relaxed text-slate-400" aria-live="polite">Abre Dual Full Screen para consultar las dimensiones efectivas de ambas vistas.</output>
+                        <output id="arenaObsGeometrySummary" class="text-[10px] leading-relaxed text-slate-400" aria-live="polite">Abre Modo Stream para consultar las dimensiones efectivas de ambas vistas.</output>
                     </section>
                     <label class="block text-xs text-slate-300 border-t border-slate-800/80 pt-3" for="hudOpacityRange">
-                        <span data-ui-label="hudOpacity">Opacidad del HUD</span>: <output id="hudOpacityValue">85 %</output>
-                        <input id="hudOpacityRange" type="range" min="35" max="100" value="85" step="5" oninput="setArenaHudOpacity(this.value)" class="w-full accent-cyan-400 mt-2" aria-label="Opacidad del HUD">
+                        <span data-operator-label="opacity">Opacidad de la información del juego</span>: <output id="hudOpacityValue">85 %</output>
+                        <input id="hudOpacityRange" type="range" min="35" max="100" value="85" step="5" oninput="setArenaHudOpacity(this.value)" class="w-full accent-cyan-400 mt-2" aria-label="Opacidad de la información del juego" aria-describedby="arenaHudOpacityHelp">
+                        <small id="arenaHudOpacityHelp" class="block text-[10px] text-slate-400" data-operator-label="opacityHelp">Afecta a textos y barras de ambas vistas. 100 % = totalmente visible.</small>
                     </label>
+                </div>
+                <div class="bg-slate-900/75 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
+                    <h3 class="font-display font-bold text-xs text-cyan-300" data-operator-label="audioLanguage">🔊 Audio e idioma</h3>
+                    <label for="languageSelect" data-operator-label="language">🌐 Idioma</label>
+                    <select id="languageSelect" onchange="setLanguage(this.value)" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-xs font-semibold text-slate-200" title="Idioma" data-no-translate>
+                        <option value="es">🇪🇸 Español</option><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="de">🇩🇪 Deutsch</option><option value="zh">🇨🇳 中文</option><option value="ja">🇯🇵 日本語</option><option value="pt">🇧🇷 Português</option><option value="it">🇮🇹 Italiano</option>
+                    </select>
                     <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80">
                         <button id="btnAudioToggle" onclick="toggleSound()" class="px-3 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 flex items-center justify-center gap-2 text-xs font-bold text-cyan-300 transition-all">
                             <i id="audioIcon" class="fa-solid fa-volume-high"></i>
@@ -1809,20 +1812,19 @@ body.touch-controls-active #portraitChatOverlay {
 
                         <button onclick="toggleChatSidebar()" class="px-3 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 flex items-center justify-center gap-2 text-xs font-bold text-slate-200 transition-all">
                             <i class="fa-solid fa-comments text-cyan-400"></i>
-                            <span>Mostrar u ocultar chat en vivo</span>
+                            <span>💬 Chat</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- El simulador de audiencia vive ahora debajo de las pantallas de juego. -->
 
-            </div>
-            <div id="settingsHostPanel" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+
                 <!-- CATEGORÍA 4: AUDIENCIA, BOOSTS Y CHAT -->
                 <div class="bg-slate-900/75 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3 md:col-span-2">
                     <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
                         <i class="fa-solid fa-users text-pink-400"></i>
-                        <h3 class="font-display font-bold text-xs uppercase tracking-wider text-pink-300" data-menu-key="audience">4. Audiencia, boosts y chat</h3>
+                        <h3 class="font-display font-bold text-xs uppercase tracking-wider text-pink-300" data-operator-label="audience">👥 Audiencia y chat</h3>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <label for="autoAudienceRateSettings" class="flex flex-col gap-1.5 text-[11px] font-semibold text-slate-300">🤝 Frecuencia de la audiencia automática
@@ -1857,15 +1859,8 @@ body.touch-controls-active #portraitChatOverlay {
             </div>
             </div> <!-- settingsPanelsScroll -->
 
-            <!-- Modal Footer -->
-            <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
-                <div id="arenaVersionInfo" role="note" class="shrink-0 rounded-lg border border-cyan-500/30 bg-cyan-950/25 px-2.5 py-1 text-cyan-200 font-bold">Arena Live v0.1 <span class="font-normal text-slate-400">· TikTok</span></div>
-                <div>
-                    💡 <strong class="text-slate-200">Atajo rápido:</strong> Pulsa <kbd class="px-1.5 py-0.5 bg-slate-800 text-cyan-300 rounded">ESC</kbd> o <kbd class="px-1.5 py-0.5 bg-slate-800 text-cyan-300 rounded">P</kbd> en cualquier momento para abrir o cerrar este menú.
-                </div>
-                <button onclick="toggleSettingsModal(false)" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold transition-all">
-                    <span data-menu-key="close">Cerrar menú (ESC)</span>
-                </button>
+            <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
+                <div id="arenaVersionInfo">Arena Live v0.2 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
@@ -2690,39 +2685,15 @@ body.touch-controls-active #portraitChatOverlay {
             document.querySelectorAll('.arena-skill-buttons button').forEach(button => button.setAttribute('aria-pressed', String(button === skill)));
         });
         function toggleProtaClassMenu(force) {
-            const panel = document.getElementById('protaClassMenu');
-            const button = document.getElementById('btnProtaClassMenu');
-            if (!panel || !button) return;
-            const open = typeof force === 'boolean' ? force : panel.classList.contains('hidden');
-            panel.classList.toggle('hidden', !open);
-            button.setAttribute('aria-expanded', String(open));
+            if (force === false) closeArenaOperatorPopover();
+            else toggleArenaOperatorPopover('class', document.getElementById('btnProtaClassMenu'));
         }
-        document.addEventListener('pointerdown', event => {
-            if (!event.target.closest('#protaClassDropdown')) toggleProtaClassMenu(false);
-        });
         function openArenaChatComposer() {
-            if (document.fullscreenElement === document.getElementById('broadcastStageSection')) {
-                const disclosure = document.getElementById('arenaDualGeneralDisclosure');
-                if (disclosure) disclosure.open = true;
-                document.getElementById('chatMessageInput')?.focus({preventScroll:true});
-                return;
-            }
-            const panel = document.getElementById('chatSimulatorSidebar');
-            if (panel) {
-                panel.classList.remove('hidden');
-                panel.classList.add('mobile-chat-expanded');
-            }
-            syncChatDisclosureState();
+            toggleArenaOperatorPopover('chat', document.getElementById('arenaDualChatToggleBtn'), true);
             document.getElementById('chatMessageInput')?.focus({preventScroll:true});
-            panel?.scrollIntoView({behavior:'smooth',block:'nearest'});
         }
         function syncChatDisclosureState() {
-            const panel = document.getElementById('chatSimulatorSidebar');
-            const expanded = !!panel && (window.matchMedia('(min-width: 768px)').matches ? !panel.classList.contains('hidden') : panel.classList.contains('mobile-chat-expanded'));
-            document.getElementById('mobileChatExpand')?.setAttribute('aria-expanded', String(expanded));
-            document.getElementById('btnToggleSidebar')?.setAttribute('aria-expanded', String(expanded));
-            const label = document.querySelector('#mobileChatExpand [data-ui-label]');
-            if (label) label.textContent = presentationText(expanded ? 'collapse' : 'expand');
+            document.getElementById('arenaDualChatToggleBtn')?.setAttribute('aria-expanded', String(arenaOperatorOpenMenu === 'chat'));
         }
         function setArenaHudOpacity(input) {
             const amount = Math.max(35,Math.min(100,Math.round(Number(input)||85)));
@@ -2762,6 +2733,7 @@ body.touch-controls-active #portraitChatOverlay {
             refreshPresentationLabels();
             refreshArenaFullscreenLabels();
             syncChatDisclosureState();
+            refreshArenaOperatorToolbar();
             document.querySelectorAll('#killFeed16 [data-original-notice], #killFeed9 [data-original-notice]').forEach(badge => {
                 badge.textContent = localizeArenaNotice(badge.dataset.originalNotice);
             });
@@ -2947,65 +2919,39 @@ body.touch-controls-active #portraitChatOverlay {
             if (quickBtn) quickBtn.className = soundEnabled
                 ? 'px-2 py-1.5 rounded-lg bg-slate-800 border border-cyan-500/50 text-cyan-300 text-[10px] font-bold'
                 : 'px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-500 text-[10px] font-bold';
-            if (quickIcon) quickIcon.className = soundEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+            if (quickIcon) quickIcon.textContent = soundEnabled ? '🔊' : '🔇';
+            refreshArenaOperatorToolbar();
         }
 
         let isGamePaused = false;
         let isSettingsOpen = false;
-        let settingsAccessMode = 'pause'; // 'pause' stops simulation; 'live' leaves it running behind the controls.
 
         function syncSettingsModalState() {
             const modal = document.getElementById('settingsPauseModal');
-            const pausedBadge = document.getElementById('pausedBadgeHeader');
-            const modeBadge = document.getElementById('settingsModeBadge');
             if (!modal) return;
             modal.classList.toggle('hidden', !isSettingsOpen);
-            modal.classList.toggle('settings-live-mode', isSettingsOpen && settingsAccessMode === 'live');
-            if (pausedBadge) pausedBadge.classList.toggle('hidden', !isGamePaused);
-            if (modeBadge) {
-                modeBadge.textContent = isGamePaused ? `⏸️ ${runtimeCopy('paused')}` : `⚡ ${runtimeCopy('live')}`;
-                modeBadge.className = isGamePaused
-                    ? 'px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400/40'
-                    : 'px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40';
-            }
-            const description = document.getElementById('settingsModeDescription');
-            if (description) description.title = isGamePaused ? 'La física y la audiencia automática están en pausa.' : 'La partida y la audiencia continúan mientras cambias los ajustes.';
+            document.getElementById('pausedBadgeHeader')?.classList.toggle('hidden', !isGamePaused);
+            const badge = document.getElementById('settingsModeBadge');
+            if (badge) badge.textContent = `⏸ ${runtimeCopy('paused')}`;
             refreshPauseMenuLabels();
-            const resume = document.getElementById('resumeGameLabel');
-            if (resume) resume.textContent = isGamePaused ? runtimeCopy('resume') : runtimeCopy('finish');
+            refreshArenaOperatorToolbar();
             updateTouchControlsVisibility();
         }
-
         function toggleSettingsModal(forceState = null) {
-            const shouldOpen = typeof forceState === 'boolean' ? forceState : !isSettingsOpen;
-            if (shouldOpen) {
-                isSettingsOpen = true;
-                settingsAccessMode = 'pause';
-                isGamePaused = true;
-            } else {
-                const closingMode = settingsAccessMode;
-                isSettingsOpen = false;
-                if (closingMode === 'pause') isGamePaused = false;
-                settingsAccessMode = 'pause';
-            }
+            const open = typeof forceState === 'boolean' ? forceState : !isSettingsOpen;
+            closeArenaOperatorPopover(false);
+            isSettingsOpen = open;
+            isGamePaused = open;
             syncSettingsModalState();
-            if(shouldOpen)requestAnimationFrame(updateArenaObsGeometrySummary);
+            if (open) {
+                requestAnimationFrame(() => {
+                    updateArenaObsGeometrySummary();
+                    document.querySelector('#settingsPauseModal .arena-settings-resume')?.focus({preventScroll:true});
+                });
+            } else document.getElementById('arenaDualSettingsBtn')?.focus({preventScroll:true});
         }
-
-        function openLiveSettings() {
-            isSettingsOpen = true;
-            settingsAccessMode = 'live';
-            isGamePaused = false;
-            syncSettingsModalState();
-            requestAnimationFrame(updateArenaObsGeometrySummary);
-        }
-
-        function pauseWithSettingsOpen() {
-            isSettingsOpen = true;
-            settingsAccessMode = 'pause';
-            isGamePaused = true;
-            syncSettingsModalState();
-        }
+        function openLiveSettings() { toggleSettingsModal(true); }
+        function pauseWithSettingsOpen() { toggleSettingsModal(true); }
 
         /*************************************************************************
          * 2. SHARED WORLD STATE & DUAL SIMULTANEOUS CANVASES (16:9 + 9:16)
@@ -4481,7 +4427,8 @@ body.touch-controls-active #portraitChatOverlay {
                 stageExplain = `Modo Automático (${countForMode} Vivos): <strong class="text-purple-300">🏟️ Arena Isométrica 2.5D (Al quedar 8 vivos cambia a Smash)</strong>`;
             }
 
-            document.getElementById('stageAutoModeExplain').innerHTML = stageExplain;
+            const stageDescription = document.getElementById('stageAutoModeExplain');
+            if (stageDescription) stageDescription.innerHTML = stageExplain;
 
             // Update Both 16:9 and 9:16 Perimeter HUDs
             document.getElementById('hudModeIcon16').textContent = modeIcon;
@@ -6319,29 +6266,7 @@ body.touch-controls-active #portraitChatOverlay {
         }
 
         function toggleChatSidebar() {
-            if (document.fullscreenElement === document.getElementById('broadcastStageSection')) {
-                const disclosure = document.getElementById('arenaDualGeneralDisclosure');
-                if (disclosure) disclosure.open = !disclosure.open;
-                return;
-            }
-            const sidebar = document.getElementById('chatSimulatorSidebar');
-            const btn = document.getElementById('btnToggleSidebar');
-            if (!sidebar) return;
-            if (window.matchMedia('(max-width: 767px), (orientation: portrait) and (max-width: 1024px)').matches) {
-                sidebar.classList.remove('hidden');
-                sidebar.classList.toggle('mobile-chat-expanded');
-                syncChatDisclosureState();
-                requestAnimationFrame(fitDualMonitorsSideBySide);
-                return;
-            }
-            const isHidden = sidebar.classList.toggle('hidden');
-            if (btn) {
-                btn.className = isHidden
-                    ? 'px-2.5 py-1.5 rounded-xl bg-cyan-500/20 border border-cyan-400/50 text-[11px] font-bold text-cyan-300 transition-all flex items-center gap-1'
-                    : 'px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-slate-200 transition-all flex items-center gap-1';
-            }
-            syncChatDisclosureState();
-            requestAnimationFrame(fitDualMonitorsSideBySide);
+            toggleArenaOperatorPopover('chat', document.getElementById('arenaDualChatToggleBtn'));
         }
 
         const ARENA_EXTRA_UI_COPY = Object.freeze({
@@ -6378,18 +6303,9 @@ body.touch-controls-active #portraitChatOverlay {
             if (victoryLabel && !countdownsEnabled) victoryLabel.textContent = '∞';
         }
 
-        function showSettingsSection(which = 'general') {
-            const host = which === 'host';
-            document.getElementById('settingsGeneralPanel')?.classList.toggle('hidden', host);
-            document.getElementById('settingsHostPanel')?.classList.toggle('hidden', !host);
-            for (const [id, selected] of [['settingsGeneralTab',!host], ['settingsHostTab',host]]) {
-                const button = document.getElementById(id);
-                if (!button) continue;
-                button.setAttribute('aria-selected', String(selected));
-                button.className = selected
-                    ? 'rounded-lg bg-cyan-500 text-slate-950 px-4 py-2 text-xs font-bold'
-                    : 'rounded-lg bg-slate-800 text-slate-200 px-4 py-2 text-xs font-bold';
-            }
+        function showSettingsSection() {
+            // Compatibility for older integrations: all settings now share the same menu.
+            toggleSettingsModal(true);
         }
 
         function toggleLobbyTimerPause() {
@@ -6719,6 +6635,7 @@ body.touch-controls-active #portraitChatOverlay {
                 classSelect.classList.toggle('opacity-50', alive);
                 if (alive && protagonist?.archetypeKey) classSelect.value = protagonist.archetypeKey;
             }
+            refreshArenaOperatorToolbar();
             updateTouchControlsVisibility();
         }
 
@@ -7610,6 +7527,7 @@ body.touch-controls-active #portraitChatOverlay {
             installArenaDualOperatorControls();
             loadArenaObsCalibration();
             installArenaPreparationSwitch();
+            installArenaOperatorToolbar();
             refreshStreamerControlLabels();
             updateRuleSpecificSettings();
             loadViewerProfiles();
@@ -7650,14 +7568,12 @@ body.touch-controls-active #portraitChatOverlay {
           return window.matchMedia && window.matchMedia('(max-width:767px)').matches ? '9:16' : '16:9';
         }
         function updateArenaPreparationSwitchLabel() {
-          const btn=document.getElementById('arenaPrepSwitchBtn');
-          if(!btn)return;
-          const words=ARENA_PREP_TEXT[currentLanguage]||ARENA_PREP_TEXT.es;
-          const nextView=monitorFocus==='9:16'?'16:9':'9:16';
-          const txt=words[nextView==='16:9'?1:0];
-          btn.textContent=txt;
-          btn.title=txt;
-          btn.setAttribute('aria-label',txt);
+          for(const [id,view] of [['arenaPrepSwitchBtn','16:9'],['arenaPrepPortraitBtn','9:16']]) {
+            const btn=document.getElementById(id);
+            if(!btn)continue;
+            btn.setAttribute('aria-pressed',String(monitorFocus===view));
+            btn.title=`${arenaOperatorText('view')} ${view}`;
+          }
         }
         function setArenaPreparationView(nextFocus) {
           if(document.fullscreenElement===document.getElementById('broadcastStageSection'))return;
@@ -7665,9 +7581,8 @@ body.touch-controls-active #portraitChatOverlay {
           updateArenaPreparationSwitchLabel();
         }
         function installArenaPreparationSwitch() {
-          document.getElementById('arenaPrepSwitchBtn')?.addEventListener('click',()=>{
-            setArenaPreparationView(monitorFocus==='9:16'?'16:9':'9:16');
-          });
+          document.getElementById('arenaPrepSwitchBtn')?.addEventListener('click',()=>setArenaPreparationView('16:9'));
+          document.getElementById('arenaPrepPortraitBtn')?.addEventListener('click',()=>setArenaPreparationView('9:16'));
           window.matchMedia?.('(max-width:767px)').addEventListener?.('change',()=>{
             if(document.fullscreenElement!==document.getElementById('broadcastStageSection'))setArenaPreparationView(arenaPreparationDefaultFocus());
           });
@@ -7676,23 +7591,8 @@ body.touch-controls-active #portraitChatOverlay {
 
 
         function arenaOpenOperatorDrawer(sectionId) {
-          const drawer=document.getElementById('arenaDualDrawerDisclosure');
-          const section=document.getElementById(sectionId);
-          if(!drawer||!section)return;
-          // An open drawer doesn't alter either video viewport rectangle.
-          drawer.open=true;
-          section.open=true;
-          const contents=document.getElementById('arenaDualDrawerContents');
-          if(contents)contents.scrollTop=Math.max(0,section.offsetTop - contents.offsetTop - 10);
-        }
-        function installArenaOperatorExtraActions() {
-          document.getElementById('arenaDualSettingsBtn')?.addEventListener('click',()=>openLiveSettings());
-          document.getElementById('arenaDualTestsToggle')?.addEventListener('click',()=>arenaOpenOperatorDrawer('arenaDualToolsDisclosure'));
-          document.getElementById('arenaDualTikTokConnectBtn')?.addEventListener('click',()=>{
-            arenaOpenOperatorDrawer('arenaDualToolsDisclosure');
-            document.getElementById('bridge-connect')?.click();
-          });
-          document.getElementById('arenaDualChatToggleBtn')?.addEventListener('click',()=>arenaOpenOperatorDrawer('arenaDualChatDisclosure'));
+            const menu = sectionId === 'arenaDualToolsDisclosure' ? 'tools' : 'chat';
+            toggleArenaOperatorPopover(menu, document.getElementById(menu === 'tools' ? 'arenaDualTestsToggle' : 'arenaDualChatToggleBtn'), true);
         }
 
         // MODULE BLOCK: FULLSCREEN VIEW CONTROLS — browser-native fullscreen for each broadcast canvas.
@@ -7762,6 +7662,7 @@ body.touch-controls-active #portraitChatOverlay {
                 }
             });
             document.addEventListener('fullscreenchange', () => {
+                syncArenaSingleFullscreenSettings();
                 requestAnimationFrame(fitDualMonitorsSideBySide);
                 updateTouchControlsVisibility();
             });
@@ -7770,8 +7671,8 @@ body.touch-controls-active #portraitChatOverlay {
 
         // MODULE BLOCK: DUAL FULLSCREEN OPERATOR STATION (game canvas stays separate from dock).
         const ARENA_DUAL_OPERATOR_COPY = Object.freeze({
-            es: ['Dual · Pantalla completa + controles','Control del directo','Herramientas fuera de la imagen del juego','Salir','Pausa','Continuar','Prota','Lobby','Revancha','Chat TikTok · recibido','Herramientas de Prueba','Chat general y comandos manuales','¿Crear un nuevo lobby y reiniciar la ronda actual?'],
-            en: ['Dual · Fullscreen + controls','Live controls','Tools outside the game image','Exit','Pause','Resume','MC','Lobby','Rematch','TikTok chat · incoming','Test Tools','General chat and manual commands','Create a new lobby and reset this round?'],
+            es: ['Modo Stream','Control del directo','Herramientas fuera de la imagen del juego','Salir','Pausa','Continuar','Prota','Lobby','Revancha','Chat TikTok · recibido','Herramientas de Prueba','Chat general y comandos manuales','¿Crear un nuevo lobby y reiniciar la ronda actual?'],
+            en: ['Stream Mode','Live controls','Tools outside the game image','Exit','Pause','Resume','MC','Lobby','Rematch','TikTok chat · incoming','Test Tools','General chat and manual commands','Create a new lobby and reset this round?'],
             fr: ['Double · Plein écran + contrôles','Contrôle du live','Outils hors de l’image du jeu','Quitter','Pause','Reprendre','MC','Lobby','Revanche','Chat TikTok · reçu','Outils de test','Chat général et commandes manuelles','Créer un nouveau lobby et réinitialiser la manche ?'],
             de: ['Dual · Vollbild + Steuerung','Live-Steuerung','Werkzeuge außerhalb des Spielfelds','Schließen','Pause','Fortsetzen','MC','Lobby','Revanche','TikTok-Chat · empfangen','Testwerkzeuge','Allgemeiner Chat und manuelle Befehle','Neue Lobby erstellen und Runde zurücksetzen?'],
             zh: ['双画面全屏 + 控制','直播控制','工具位于游戏画面之外','退出','暂停','继续','主播','大厅','再战','TikTok 聊天 · 已接收','测试工具','通用聊天和手动命令','创建新大厅并重置本轮？'],
@@ -7786,14 +7687,14 @@ body.touch-controls-active #portraitChatOverlay {
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.1';
+        const ARENA_RELEASE_VERSION = '0.2';
         const ARENA_RELEASE_EDITION = 'tiktok';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:10, footer:76});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
         const ARENA_OBS_COPY = Object.freeze({
-          es:['Calibración para OBS','Restablecer','Ajusta antes de emitir; los recortes se configuran después. Abrir el cajón no cambiará el tamaño del juego.','Mover 9:16 a la derecha','Altura del cajón inferior','Abre Dual Full Screen para comprobar tamaños.','Pantallas','Preparación'],
-          en:['OBS calibration','Reset','Adjust before going live, then configure OBS crops. Opening the drawer will not resize the game.','Move 9:16 to the right','Bottom drawer height','Enter Dual Full Screen to check dimensions.','Displays','Preparation'],
+          es:['Calibración para OBS','Restablecer','Ajusta antes de emitir; los recortes se configuran después. Abrir el cajón no cambiará el tamaño del juego.','Mover 9:16 a la derecha','Altura del cajón inferior','Abre Modo Stream para comprobar tamaños.','Pantallas','Preparación'],
+          en:['OBS calibration','Reset','Adjust before going live, then configure OBS crops. Opening the drawer will not resize the game.','Move 9:16 to the right','Bottom drawer height','Enter Stream Mode to check dimensions.','Displays','Preparation'],
           fr:['Calibrage OBS','Réinitialiser','Réglez avant le direct; configurez ensuite les recadrages OBS. Le tiroir ne modifie pas le jeu.','Déplacer 9:16 vers la droite','Hauteur du tiroir','Ouvrez le double plein écran pour vérifier.','Écrans','Préparation'],
           de:['OBS-Kalibrierung','Zurücksetzen','Vor der Übertragung einstellen; danach OBS-Ausschnitt konfigurieren. Die Schublade ändert keine Bildgrößen.','9:16 nach rechts verschieben','Höhe der unteren Leiste','Dual-Vollbild für die Maße öffnen.','Ansichten','Vorbereitung'],
           zh:['OBS 校准','重置','直播前调整，然后配置 OBS 裁剪；打开抽屉不会改变游戏画面尺寸。','9:16 右移','底部工具栏高度','进入双屏全屏以查看尺寸。','画面','准备'],
@@ -7897,6 +7798,7 @@ body.touch-controls-active #portraitChatOverlay {
             }
             const exit = document.getElementById('btnExitFullscreenDual');
             if (exit) exit.title = c[3];
+            refreshArenaOperatorToolbar();
         }
 
         function moveArenaDualNode(nodeId, targetId) {
@@ -7945,10 +7847,10 @@ body.touch-controls-active #portraitChatOverlay {
             return false;
         }
         function mountArenaDualTools() {
-            // Move existing DOM instead of cloning: listeners, input state and game identities stay intact.
-            moveArenaDualNode('audienceSimulatorPanel','arenaDualToolsMount');
-            moveArenaDualNode('chatSimulatorSidebar','arenaDualGeneralMount');
-            moveArenaDualNode('arena-live-bridge-panel','arenaDualBridgeMount');
+            // Reuse the same toolbar and menus; never duplicate a game or controller.
+            closeArenaOperatorPopover(false);
+            moveArenaDualNode('arenaHeaderActions','arenaStreamToolbarMount');
+            moveArenaDualNode('arenaOperatorPopover','arenaDualBottomCluster');
             moveArenaDualNode('settingsPauseModal','broadcastStageSection');
             const chat = document.getElementById('chatSimulatorSidebar');
             if (chat) chat.classList.remove('hidden');
@@ -7967,7 +7869,9 @@ body.touch-controls-active #portraitChatOverlay {
             arenaDualWasFullscreen = false;
             const stage = document.getElementById('broadcastStageSection');
             if (stage) stage.classList.remove('arena-dual-ultrawide');
+            closeArenaOperatorPopover(false);
             if (isSettingsOpen) toggleSettingsModal(false);
+            refreshArenaOperatorToolbar();
             setMonitorFocus(arenaDualOldMonitorFocus);
             syncChatDisclosureState();
         }
@@ -8048,12 +7952,13 @@ body.touch-controls-active #portraitChatOverlay {
             if(leave)leave.addEventListener('click',()=>{void toggleArenaDualFullscreen();});
             const pause=document.getElementById('arenaDualPauseBtn');
             if(pause)pause.addEventListener('click',()=>{
-                if(isSettingsOpen)toggleSettingsModal(false);
+                if(isSettingsOpen) { toggleSettingsModal(false); return; }
+                closeArenaOperatorPopover(false);
                 isGamePaused=!isGamePaused;
                 syncSettingsModalState();
                 refreshArenaDualOperatorLabels();
             });
-            document.getElementById('arenaDualJoinBtn')?.addEventListener('click',joinAsStreamer);
+            document.getElementById('arenaDualSettingsBtn')?.addEventListener('click',()=>toggleSettingsModal());
             document.getElementById('arenaDualRematchBtn')?.addEventListener('click',rematchSamePlayers);
             document.getElementById('arenaDualLobbyBtn')?.addEventListener('click',()=>{
                 const c=ARENA_DUAL_OPERATOR_COPY[currentLanguage]||ARENA_DUAL_OPERATOR_COPY.es;
@@ -8071,7 +7976,201 @@ body.touch-controls-active #portraitChatOverlay {
                 updateTouchControlsVisibility();
             });
             refreshArenaDualOperatorLabels();
-            installArenaOperatorExtraActions();
+            refreshArenaOperatorToolbar();
+        }
+
+
+        // MODULE BLOCK: v0.2 shared operator toolbar and dismiss-on-action menus.
+        const ARENA_OPERATOR_COPY = Object.freeze({
+            es:['Modo Stream','Salir de Stream','Vista','Pantalla','Herramientas','Chat','Ajustes','Audio','Silenciado','Clase','Pausa y ajustes','La partida se reanuda al cerrar o completar una acción.','🎮 Partida','👑 Prota y combate','🖥 Pantallas y OBS','👥 Audiencia y chat','🔊 Audio e idioma','🌐 Idioma','Opacidad de la información del juego','Afecta a textos y barras de ambas vistas. 100 % = totalmente visible.','Vista de preparación','Conectar TikTok','Desconectar TikTok','Puente local no disponible'],
+            en:['Stream Mode','Exit Stream','View','Screen','Tools','Chat','Settings','Audio','Muted','Class','Pause and settings','The game resumes when you close or complete an action.','🎮 Match','👑 MC and combat','🖥 Displays and OBS','👥 Audience and chat','🔊 Audio and language','🌐 Language','Game information opacity','Affects text and bars in both views. 100% = fully visible.','Preparation view','Connect TikTok','Disconnect TikTok','Local bridge unavailable'],
+            fr:['Mode Stream','Quitter Stream','Vue','Écran','Outils','Chat','Réglages','Audio','Muet','Classe','Pause et réglages','La partie reprend à la fermeture ou après une action.','🎮 Partie','👑 MC et combat','🖥 Écrans et OBS','👥 Public et chat','🔊 Audio et langue','🌐 Langue','Opacité des informations de jeu','Textes et barres des deux vues. 100 % = totalement visible.','Vue de préparation','Connecter TikTok','Déconnecter TikTok','Pont local indisponible'],
+            de:['Stream-Modus','Stream beenden','Ansicht','Vollbild','Werkzeuge','Chat','Einstellungen','Audio','Stumm','Klasse','Pause und Einstellungen','Nach dem Schließen oder einer Aktion läuft das Spiel weiter.','🎮 Spiel','👑 MC und Kampf','🖥 Ansichten und OBS','👥 Publikum und Chat','🔊 Audio und Sprache','🌐 Sprache','Deckkraft der Spielinformationen','Text und Balken beider Ansichten. 100 % = vollständig sichtbar.','Vorbereitungsansicht','TikTok verbinden','TikTok trennen','Lokale Brücke nicht verfügbar'],
+            zh:['直播模式','退出直播模式','视图','全屏','工具','聊天','设置','声音','静音','职业','暂停与设置','关闭菜单或完成操作后继续游戏。','🎮 对局','👑 主角与战斗','🖥 画面与 OBS','👥 观众与聊天','🔊 声音与语言','🌐 语言','游戏信息不透明度','影响两个视图中的文字和状态条。100% 表示完全可见。','准备视图','连接 TikTok','断开 TikTok','本地桥接不可用'],
+            ja:['配信モード','配信を終了','表示','全画面','ツール','チャット','設定','音声','消音','クラス','一時停止と設定','閉じるか操作を完了するとゲームを再開します。','🎮 対戦','👑 主人公と戦闘','🖥 画面と OBS','👥 視聴者とチャット','🔊 音声と言語','🌐 言語','ゲーム情報の不透明度','両画面の文字とバーに適用。100% で完全に表示。','準備画面','TikTok に接続','TikTok を切断','ローカル接続が利用できません'],
+            pt:['Modo Stream','Sair do Stream','Vista','Tela','Ferramentas','Chat','Ajustes','Áudio','Silenciado','Classe','Pausa e ajustes','A partida continua ao fechar ou concluir uma ação.','🎮 Partida','👑 Prota e combate','🖥 Telas e OBS','👥 Público e chat','🔊 Áudio e idioma','🌐 Idioma','Opacidade das informações do jogo','Afeta textos e barras das duas vistas. 100% = totalmente visível.','Vista de preparação','Conectar TikTok','Desconectar TikTok','Ponte local indisponível'],
+            it:['Modalità Stream','Esci da Stream','Vista','Schermo','Strumenti','Chat','Impostazioni','Audio','Muto','Classe','Pausa e impostazioni','La partita riprende alla chiusura o dopo un’azione.','🎮 Partita','👑 Prota e combattimento','🖥 Schermi e OBS','👥 Pubblico e chat','🔊 Audio e lingua','🌐 Lingua','Opacità delle informazioni di gioco','Testi e barre di entrambe le viste. 100% = del tutto visibile.','Vista di preparazione','Connetti TikTok','Disconnetti TikTok','Ponte locale non disponibile']
+        });
+        const ARENA_OPERATOR_KEYS = ['stream','exitStream','view','screen','tools','chat','settings','audio','muted','class','settingsTitle','pauseHint','match','pace','displays','audience','audioLanguage','language','opacity','opacityHelp','preparation','connect','disconnect','unavailable'];
+        let arenaOperatorOpenMenu = null;
+        let arenaOperatorReturnFocus = null;
+        let arenaSingleSettingsMarker = null;
+        let arenaOperatorBridgeState = {canConnect:false,canDisconnect:false,phase:'disconnected',message:''};
+        function arenaOperatorText(key) {
+            return (ARENA_OPERATOR_COPY[currentLanguage] || ARENA_OPERATOR_COPY.en)[ARENA_OPERATOR_KEYS.indexOf(key)] || key;
+        }
+        function syncArenaSingleFullscreenSettings() {
+            const modal=document.getElementById('settingsPauseModal');
+            const fullscreen=document.fullscreenElement;
+            if(!modal)return;
+            if(fullscreen && ['card-16x9','card-9x16'].includes(fullscreen.id)) {
+                if(!arenaSingleSettingsMarker) {
+                    arenaSingleSettingsMarker=document.createComment('Restore settings after individual fullscreen');
+                    modal.before(arenaSingleSettingsMarker);
+                }
+                fullscreen.appendChild(modal);
+            } else if(arenaSingleSettingsMarker) {
+                arenaSingleSettingsMarker.replaceWith(modal);
+                arenaSingleSettingsMarker=null;
+                if(isSettingsOpen)toggleSettingsModal(false);
+            }
+        }
+        function refreshArenaOperatorToolbar() {
+            const dual = document.fullscreenElement === document.getElementById('broadcastStageSection');
+            const c = ARENA_DUAL_OPERATOR_COPY[currentLanguage] || ARENA_DUAL_OPERATOR_COPY.es;
+            const labels = {
+                arenaDualFullscreenEntryLabel:`🎥 ${arenaOperatorText(dual ? 'exitStream' : 'stream')}`,
+                arenaViewMenuBtn:`🖥 ${arenaOperatorText('view')}`,
+                arenaFullscreenMenuBtn:`⛶ ${arenaOperatorText('screen')}`,
+                arenaDualPauseBtn:`${isGamePaused ? '▶' : '⏸'} ${isGamePaused ? c[5] : c[4]}`,
+                arenaDualLobbyBtn:`🚪 ${c[7]}`,arenaDualRematchBtn:`🔄 ${c[8]}`,
+                btnProtaClassMenu:`🎭 ${arenaOperatorText('class')}`,
+                arenaQuickSoundLabel:arenaOperatorText(soundEnabled ? 'audio' : 'muted'),
+                arenaDualTestsToggle:`🧰 ${arenaOperatorText('tools')}`,
+                arenaDualChatToggleBtn:`💬 ${arenaOperatorText('chat')}`,
+                arenaDualSettingsBtn:`⚙ ${arenaOperatorText('settings')}`,
+                resumeGameLabel:`▶ ${c[5]}`,
+                arenaExitFullscreenBtn:`⤡ ${(ARENA_FULLSCREEN_COPY[currentLanguage] || ARENA_FULLSCREEN_COPY.es).exit}`
+            };
+            for (const [id,text] of Object.entries(labels)) {
+                const node = document.getElementById(id);
+                if (node && node.textContent !== text) node.textContent = text;
+            }
+            document.querySelectorAll('[data-operator-label]').forEach(node => {
+                const text = arenaOperatorText(node.dataset.operatorLabel);
+                node.setAttribute('data-no-translate','');
+                if (node.textContent !== text) node.textContent = text;
+            });
+            const prota = document.getElementById('streamerJoinLabel');
+            if (prota) prota.textContent = protagonistShortLabel();
+            const audio = document.getElementById('btnQuickSound');
+            if (audio) audio.setAttribute('aria-pressed',String(soundEnabled));
+            const icon = document.getElementById('quickSoundIcon');
+            if (icon) icon.textContent = soundEnabled ? '🔊' : '🔇';
+            document.getElementById('arenaDualPauseBtn')?.setAttribute('aria-pressed',String(isGamePaused));
+            document.getElementById('btnFullscreenDual')?.setAttribute('aria-pressed',String(dual));
+            document.getElementById('arenaDualSettingsBtn')?.setAttribute('aria-expanded',String(isSettingsOpen));
+            const streamSetting = document.querySelector('#btnViewDual [data-operator-label]');
+            if(streamSetting)streamSetting.textContent=`🎥 ${arenaOperatorText(dual ? 'exitStream' : 'stream')}`;
+            for(const id of ['btnView16x9','btnView9x16']) {
+                const button=document.getElementById(id);
+                if(button)button.disabled=dual;
+            }
+            const exitScreen=document.getElementById('arenaExitFullscreenBtn');
+            if(exitScreen)exitScreen.disabled=!document.fullscreenElement;
+            for (const button of document.querySelectorAll('#arenaHeaderActions button')) {
+                if (button.id !== 'btnStreamerJoin' && button.id !== 'arenaDualTikTokConnectBtn') button.title = button.textContent.trim();
+            }
+            const hints={
+                btnFullscreenDual:`${arenaOperatorText(dual ? 'exitStream' : 'stream')} · 16:9 + 9:16 · OBS`,
+                arenaFullscreenMenuBtn:`${arenaOperatorText('screen')} · 16:9 / 9:16`,
+                arenaDualLobbyBtn:c[12],btnProtaClassMenu:presentationText('classLabel'),
+                btnQuickSound:arenaText(soundEnabled ? 'soundOn' : 'soundOff'),
+                arenaDualTestsToggle:presentationText('testTools'),
+                arenaDualChatToggleBtn:`${c[9]} · ${c[11]}`,
+                arenaDualSettingsBtn:`${arenaOperatorText('settings')} · ${runtimeCopy('paused')}`
+            };
+            for(const [id,title] of Object.entries(hints)){const button=document.getElementById(id);if(button)button.title=title;}
+            const view = document.getElementById('arenaViewMenuBtn');
+            if (view) {view.disabled=dual;view.title=dual ? `16:9 + 9:16 · ${arenaOperatorText('stream')}` : `${arenaOperatorText('view')} · ${monitorFocus}`;}
+            const tiktok = document.getElementById('arenaDualTikTokConnectBtn');
+            if (tiktok) {
+                const state = arenaOperatorBridgeState;
+                const disconnect = ['connected','connecting'].includes(state.phase);
+                tiktok.disabled = disconnect ? !state.canDisconnect : !state.canConnect;
+                tiktok.textContent = state.phase === 'connecting' ? '⏳ TikTok' : '📡 TikTok';
+                tiktok.setAttribute('aria-pressed',String(state.phase === 'connected'));
+                tiktok.title = `${arenaOperatorText(disconnect ? 'disconnect' : 'connect')} · ${state.message || arenaOperatorText('unavailable')}`;
+                tiktok.setAttribute('aria-label',tiktok.title);
+            }
+        }
+        window.addEventListener('arena-bridge-status', event => {
+            arenaOperatorBridgeState = {...event.detail};
+            refreshArenaOperatorToolbar();
+        });
+        function positionArenaOperatorPopover() {
+            const popover = document.getElementById('arenaOperatorPopover');
+            if (!popover || popover.hidden) return;
+            const dual = document.fullscreenElement === document.getElementById('broadcastStageSection');
+            const rail = document.getElementById(dual ? 'arenaDualBottomCluster' : 'arenaPreparationOperatorRail');
+            const rect = rail?.getBoundingClientRect();
+            if (!rect) return;
+            Object.assign(popover.style,{left:`${rect.left+2}px`,top:`${rect.top+2}px`,width:`${Math.max(1,rect.width-4)}px`,height:`${Math.max(1,rect.height-4)}px`});
+        }
+        function closeArenaOperatorPopover(restoreFocus = true) {
+            const popover = document.getElementById('arenaOperatorPopover');
+            const wasOpen = !!popover && !popover.hidden;
+            if (popover) popover.hidden=true;
+            arenaOperatorOpenMenu=null;
+            document.querySelectorAll('[data-operator-menu]').forEach(button=>button.setAttribute('aria-expanded','false'));
+            if(wasOpen && restoreFocus)arenaOperatorReturnFocus?.focus({preventScroll:true});
+        }
+        function toggleArenaOperatorPopover(name, trigger, force = false) {
+            const popover = document.getElementById('arenaOperatorPopover');
+            if (!popover) return;
+            if (!force && arenaOperatorOpenMenu === name) {closeArenaOperatorPopover();return;}
+            if (isSettingsOpen) toggleSettingsModal(false);
+            closeArenaOperatorPopover(false);
+            arenaOperatorReturnFocus=trigger;
+            arenaOperatorOpenMenu=name;
+            popover.querySelectorAll('[data-operator-panel]').forEach(panel=>panel.hidden=panel.dataset.operatorPanel!==name);
+            popover.hidden=false;
+            trigger?.setAttribute('aria-expanded','true');
+            const dual = document.fullscreenElement === document.getElementById('broadcastStageSection');
+            if(!dual)document.getElementById('arenaPreparationOperatorRail')?.scrollIntoView({block:'nearest',behavior:'instant'});
+            positionArenaOperatorPopover();
+            const first = popover.querySelector(`[data-operator-panel="${name}"] button:not(:disabled),[data-operator-panel="${name}"] select:not(:disabled),[data-operator-panel="${name}"] input:not(:disabled)`);
+            first?.focus({preventScroll:true});
+        }
+        function arenaLaunchStreamFromSettings() {
+            toggleSettingsModal(false);
+            document.getElementById('btnFullscreenDual')?.click();
+        }
+        function finishArenaOperatorAction() {
+            closeArenaOperatorPopover();
+            if (isSettingsOpen) toggleSettingsModal(false);
+        }
+        function installArenaOperatorToolbar() {
+            // Keep original controls, listeners, chat history and selected targets intact.
+            const tools=document.getElementById('audienceSimulatorPanel');
+            const chat=document.getElementById('chatSimulatorSidebar');
+            if(tools)document.getElementById('arenaDualToolsMount')?.appendChild(tools);
+            if(chat){document.getElementById('arenaDualGeneralMount')?.appendChild(chat);chat.classList.remove('hidden');}
+            document.querySelectorAll('[data-operator-menu]').forEach(button=>button.addEventListener('click',()=>toggleArenaOperatorPopover(button.dataset.operatorMenu,button)));
+            document.getElementById('arenaExitFullscreenBtn')?.addEventListener('click',()=>{if(document.fullscreenElement)void document.exitFullscreen();});
+            document.getElementById('arenaDualTikTokConnectBtn')?.addEventListener('click',()=>{
+                const disconnect=['connected','connecting'].includes(arenaOperatorBridgeState.phase);
+                document.getElementById(disconnect ? 'bridge-disconnect' : 'bridge-connect')?.click();
+            });
+            document.addEventListener('pointerdown',event=>{
+                if(!event.target.closest('#arenaOperatorPopover,[data-operator-menu]'))closeArenaOperatorPopover(false);
+                if(event.target.id==='settingsPauseModal')toggleSettingsModal(false);
+            });
+            const inSurface = target => target.closest('#arenaOperatorPopover,#settingsPauseModal');
+            document.addEventListener('click',event=>{
+                const button=event.target.closest('button');
+                if(button && inSurface(button) && !button.disabled && !button.hasAttribute('data-operator-keep-open'))finishArenaOperatorAction();
+            });
+            document.addEventListener('change',event=>{
+                if(inSurface(event.target) && event.target.matches('select,input[type="range"],input[type="checkbox"]'))finishArenaOperatorAction();
+            });
+            document.addEventListener('submit',event=>{if(inSurface(event.target))finishArenaOperatorAction();});
+            document.addEventListener('keydown',event=>{
+                const popover=document.getElementById('arenaOperatorPopover');
+                const surface=isSettingsOpen ? document.getElementById('settingsPauseModal') : (popover && !popover.hidden ? popover : null);
+                if(!surface)return;
+                if(event.key==='Escape') {event.preventDefault();event.stopImmediatePropagation();finishArenaOperatorAction();return;}
+                if(event.key==='Tab') {
+                    const controls=[...surface.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),summary,[tabindex="0"]')].filter(node=>node.getClientRects().length);
+                    const first=controls[0],last=controls.at(-1);
+                    if(event.shiftKey && document.activeElement===first){event.preventDefault();last?.focus();}
+                    else if(!event.shiftKey && document.activeElement===last){event.preventDefault();first?.focus();}
+                }
+            },true);
+            window.addEventListener('resize',positionArenaOperatorPopover);
+            window.addEventListener('scroll',positionArenaOperatorPopover,true);
+            document.addEventListener('fullscreenchange',()=>{closeArenaOperatorPopover(false);refreshArenaOperatorToolbar();});
+            refreshArenaOperatorToolbar();
         }
 
         // Use a named load listener instead of overwriting window.onload.
@@ -8085,7 +8184,7 @@ body.touch-controls-active #portraitChatOverlay {
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.1.0',
+            version: '0.2.0',
             edition: 'tiktok',
             getState() {
                 const alive = fighters.filter(fighter => !fighter.eliminated);
@@ -8143,3 +8242,4 @@ body.touch-controls-active #portraitChatOverlay {
     </script>
 </body>
 </html>
+

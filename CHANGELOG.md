@@ -1,5 +1,15 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-22 — Arena Live v0.2 · barra y menús del operador
+
+- Barra horizontal única en preparación y Modo Stream, con iconos, leyendas cortas y estados.
+- Acceso directo a Pausa, Lobby, Revancha, Prota, Audio y Conectar/Desconectar TikTok.
+- Ajustes pausa al abrir y reanuda al cerrar; cada acción cierra su panel, incluidos selectores y calibración.
+- Modo Stream y audiencia integrados en el mismo menú de ajustes; retirada la separación General/Streamer.
+- Opacidad de la información del juego rotulada y explicada; versión visible 0.2 y API 0.2.0.
+- Menús dentro de las franjas del operador, manteniendo los recortes y la calibración OBS guardada.
+- Historial, controles y partida reutilizados al entrar y salir de Modo Stream.
+
 ## 2026-10-22 — Pulido visual de Arena Live v0.1
 
 - Barras de vida del duelo **9:16** aumentadas a **14 px**, nombres y porcentajes a **12 px**, energía a **6 px**.
@@ -31,3 +41,4 @@
 ### Alcance de esta importación
 
 Se ha importado la última entrega **Arena_Live_layout_fase3.html**. No se han reescrito reglas de gameplay ni inventado integraciones con plataformas reales. No se incluyen archivos de pruebas locales ni capturas en el repositorio inicial.
+

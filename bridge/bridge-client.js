@@ -131,6 +131,10 @@
     for (const b of [buttonConnect, buttonDisconnect, buttonTest]) b.style.opacity = b.disabled ? '.4' : '1';
     count.textContent = `Mensajes recibidos: ${state.received}`;
     updateLiveChatStatus();
+    window.dispatchEvent(new CustomEvent('arena-bridge-status', {detail: {
+      phase: state.phase, message: indicator.textContent,
+      canConnect: !buttonConnect.disabled, canDisconnect: !buttonDisconnect.disabled
+    }}));
   }
   async function post(path, data = {}) {
     const response = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
@@ -185,3 +189,4 @@
   }
   openSocket();
 })();
+
