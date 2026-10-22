@@ -1,5 +1,14 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-22 — Pulido visual de Arena Live v0.1
+
+- Barras de vida del duelo **9:16** aumentadas a **14 px**, nombres y porcentajes a **12 px**, energía a **6 px**.
+- **Arena Live v0.1** y la edición identificadas en el pie de **Ajustes**.
+- Los rótulos redundantes de lobby ya retirados permanecen ausentes en ambas pantallas.
+- En Dual Full Screen ultrawide, barra superior **34 px**, franja inferior **76 px** y ajuste horizontal 9:16 predeterminado **+10 px**.
+- Calibración de OBS entre **0–16 px** horizontal y **72–148 px** inferior; migración de valores previos por defecto, sin alterar valores personalizados distintos.
+- El cajón continúa sin cambiar tamaño ni posición de los lienzos al abrirse o cerrarse.
+
 ## 2026-10-22 — Emisión dual definitiva y preparación adaptativa
 
 - **Dual Full Screen** reservado como composición principal de OBS con dos lienzos de una sola partida.
