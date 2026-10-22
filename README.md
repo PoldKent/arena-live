@@ -1,5 +1,11 @@
 # Arena Live
 
+## Modo de transmisión dual definitivo (22/10/2026)
+
+**Dual Full Screen permanece como vista definitiva para OBS**, con una sola partida y dos lienzos sincronizados. En preparación, 16:9 aparece sola en escritorio y 9:16 sola en móvil, con botón para alternar. En fullscreen: la **9:16 está al extremo derecho**, la **16:9 se maximiza a la izquierda**, la barra LIVE ocupa 42 px y un cajón de herramientas inferior está **cerrado por defecto**. Abrirlo no mueve las dos regiones de captura de OBS. Los nombres en vertical crecen o se compactan según el número de luchadores.
+
+La barra conserva **Pausa, Lobby, Prota, Ajustes, Pruebas, Conectar TikTok y Chat**. El cajón integra el puente local de `@polkent.live`, herramientas y la bandeja plegable de mensajes **recibidos** (historial/exportación). No se envían mensajes al chat público de TikTok y el conector no oficial no garantiza recibir cada comentario. Consulta [decisiones de diseño](docs/DECISIONES-STREAM-DUAL-2026.md).
+
 Prototipo de juego interactivo para transmisiones en vivo. Los espectadores pueden participar mediante mensajes y comandos; el streamer puede controlar al personaje principal y simular interacciones de audiencia para realizar pruebas.
 
 ## Ejecutar
@@ -12,7 +18,7 @@ Prototipo de juego interactivo para transmisiones en vivo. Los espectadores pued
 
 ## Pantalla completa dual (TikTok)
 
-Abre Arena Live mediante `npm.cmd start` en Windows, entra en `http://127.0.0.1:4173` y pulsa **Dual · Pantalla completa + controles**. Aparecerán ambos juegos y, a la derecha, herramientas del directo y una bandeja de mensajes **recibidos** de TikTok. El panel no escribe en el chat público de TikTok ni está destinado a capturar la imagen limpia del juego. Consulta [la guía de la consola dual](docs/DUAL-OPERADOR-TIKTOK.md).
+Abre Arena Live mediante `npm.cmd start` en Windows, entra en `http://127.0.0.1:4173` y pulsa **Dual · Pantalla completa**. Los controles quedan en una barra superior y en un cajón inferior plegable, fuera de los lienzos. La bandeja del chat muestra mensajes **recibidos** de TikTok, no publica respuestas. Consulta [la guía de la consola dual](docs/DUAL-OPERADOR-TIKTOK.md).
 
 ## Características actuales
 
