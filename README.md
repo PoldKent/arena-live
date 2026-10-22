@@ -79,3 +79,7 @@ El conector es no oficial, con dependencias de terceros. Esta integración requi
 ## Pantalla completa dual ultrawide (3440×1440)
 
 La pantalla **9:16 se muestra prioritariamente en el extremo derecho**; el juego **16:9** queda a la izquierda con los controles del LIVE encima y debajo. Se corrigió el problema por el que la pantalla vertical quedaba oculta. Compatible con escalado de Windows. [Guía de la corrección](docs/ULTRAWIDE-3440-FIX.md).
+
+## Arena Live v0.1 · calibración OBS
+
+Dentro de **Ajustes** aparece `Arena Live v0.1 · TikTok`. En **Pantallas → Calibración para OBS** ajusta el margen de la 9:16 y el espacio inferior del operador **antes de configurar tus recortes de OBS**. Las etiquetas repetidas del lobby fueron retiradas. [Notas de versión](docs/RELEASE-0.1-OBS.md).
