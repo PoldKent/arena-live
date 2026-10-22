@@ -1,5 +1,11 @@
 # Arena Live
 
+## Modo de transmisión dual definitivo (22/10/2026)
+
+**La emisión oficial en OBS utiliza Dual Full Screen**, no dos procesos de juego distintos. En preparación, el navegador muestra solo **16:9 en escritorio** o **9:16 en móvil**; el botón «Ver 9:16 / Ver 16:9» alterna sin reiniciar la partida. El botón **Dual · Pantalla completa** activa ambos lienzos sincronizados: horizontal grande a la izquierda, vertical en el extremo derecho (corrección visual de 4 px para ultrawide), barra LIVE de 42 px y cajón inferior de pruebas cerrado. Abrir el cajón no mueve ni reescala los lienzos que captura OBS. La tipografía vertical se adapta al número de jugadores.
+
+Controles en la barra: **Pausa, Lobby, Prota, Ajustes y Pruebas**. Esta rama mantiene su **HTML autónomo sin Node.js ni conexión a TikTok**. Consulta [decisiones de diseño](docs/DECISIONES-STREAM-DUAL-2026.md).
+
 Prototipo de juego interactivo para transmisiones en vivo. Los espectadores pueden participar mediante mensajes y comandos; el streamer puede controlar al personaje principal y simular interacciones de audiencia para realizar pruebas.
 
 ## Ejecutar
