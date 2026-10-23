@@ -101,6 +101,12 @@ En móvil se prioriza 9:16 y una barra inferior con **Prota, Pausa, Saltar, Golp
 
 En escritorio: **WASD** mueve a Prota, **Espacio** salta, **E** golpea y **R** activa su especial. **Esc / P** abre o cierra Pausa/Ajustes cuando no estás escribiendo. Esc cierra primero el panel abierto y conserva Stream o la captura individual en pantalla completa.
 
+## Equilibrio de clases
+
+El [estudio de v0.5](docs/BALANCE-CLASES-v0.5.md) compara 33.400 partidas simuladas: duelos, arenas y controles de IA. Titán domina la muestra; la clase de menor rendimiento depende del modo. Los poderes conservan sus valores actuales.
+
+`npm.cmd run analyze:balance` ejecuta una evaluación reproducible de 4.800 casos y guarda los datos en `reports/balance/latest.json`. Requiere Chromium de Playwright. Las instrucciones para repetir la muestra ampliada y sus límites están en el estudio.
+
 ## Desarrollo y verificación
 
 El juego permanece en `index.html`. El puente usa `ws` y `tiktok-live-connector`, escucha solo en 127.0.0.1 y no pide contraseñas.

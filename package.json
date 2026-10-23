@@ -12,7 +12,8 @@
     "dev": "node bridge/server.mjs",
     "test": "node --test test/*.test.mjs",
     "test:browser": "node test/operator-browser.mjs",
-    "test:performance": "node test/performance-browser.mjs"
+    "test:performance": "node test/performance-browser.mjs",
+    "analyze:balance": "node test/balance-simulation.mjs"
   },
   "dependencies": {
     "tiktok-live-connector": "^2.5.0",
