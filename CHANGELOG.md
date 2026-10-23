@@ -1,5 +1,13 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-23 — Arena Live v0.4 en main
+
+- Integración de la rama TikTok en main, conservando el historial de ambas ramas y las mejoras de juego y OBS de v0.1.
+- Main incluye ahora el servidor local, TikTok, la interfaz reconstruida y las reglas configurables de v0.4.
+- Código de juego v0.4 conservado; calibración OBS, paneles, perfiles y reglas guardadas mantienen sus claves.
+- Documentación de instalación y actualización dirigida a main; decisiones de v0.1 identificadas como históricas.
+- Las comprobaciones de versión v0.4 sustituyen a las de v0.1; se conservan las entradas históricas del registro de main.
+
 ## 2026-10-22 — Arena Live v0.4 · reglas de combate y paneles persistentes
 
 - Ajustes → Reglas y parámetros: cupo compartido 2–128, clase única o todas, y modos con poderes, sin especiales o Solo golpes.
@@ -9,7 +17,7 @@
 - Stream mantiene el panel elegido al actuar y hacer clic fuera; otro menú lo reemplaza y la × o Esc lo cierran. Ajustes conserva su × visible.
 - Calibración y distribuciones de v0.3 conservadas. Versiones visibles/API/paquete 0.4/0.4.0.
 - 21 comprobaciones de contrato y 33 de navegador, incluidos efectos reales de las reglas y geometría estable.
-- Edición de TikTok actualizada en su rama; main conserva v0.1 independiente.
+- Publicación original en la rama TikTok; integrada posteriormente en main (ver 2026-10-23).
 
 ## 2026-10-22 — Arena Live v0.3 · espacios de trabajo reconstruidos
 
@@ -42,6 +50,15 @@
 - Calibración de OBS entre **0–16 px** horizontal y **72–148 px** inferior; migración de valores previos por defecto, sin alterar valores personalizados distintos.
 - El cajón continúa sin cambiar tamaño ni posición de los lienzos al abrirse o cerrarse.
 
+## 2026-10-22 — Arena Live v0.1 · OBS
+
+- Versión visible en Ajustes (`Arena Live v0.1 · main`) y API `window.ArenaLive.version = '0.1.0'`.
+- Rótulos redundantes del lobby 16:9/9:16 eliminados.
+- Calibración OBS del margen vertical (0–16 px) y franja inferior (72–148 px; 76 por defecto).
+- Más espacio para 16:9; geometría estable al abrir/cerrar herramientas.
+- Edición autónoma, sin puente de TikTok.
+
+
 ## 2026-10-22 — Emisión dual definitiva y preparación adaptativa
 
 - **Dual Full Screen** reservado como composición principal de OBS con dos lienzos de una sola partida.
@@ -53,6 +70,16 @@
 - Documento de decisiones cerrado y pruebas de regresión de interfaz y geometría.
 - Sin cambios en reglas de combate, clases ni límite de 128 luchadores.
 
+
+## 2026-10-21 — Catálogo de 128 luchadores en la rama principal
+
+- 128 nombres de prueba únicos, asignados a Guerrero, Shinobi, Titán, Rayo o Espíritu.
+- Límite de 128 luchadores registrados por partida, incluido el protagonista; los espectadores nuevos no crean un luchador compartido al llenarse el cupo.
+- Nuevo preset de prueba `128 · Arena`, con posiciones distribuidas dentro del círculo.
+- Encabezados del HUD simplificados a **Arena**, **Smash** y **Final**, tanto en 16:9 como en 9:16.
+- Caída animada al abismo circular antes del K.O., respetando el intento de rescate.
+- Solo se han trasladado cambios del juego, **sin integrar en `main` Node.js, WebSocket ni el conector TikTok**.
+- Validación funcional del catálogo, aforo, HUD en ocho idiomas y caída fuera del círculo.
 
 ## 2026-10-21 — Base inicial en GitHub
 

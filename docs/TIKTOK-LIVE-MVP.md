@@ -2,7 +2,7 @@
 
 **Cuenta de prueba:** [@polkent.live](https://www.tiktok.com/@polkent.live)
 
-Esta rama añade un **puente local de chat**. No es todavía una aplicación instalable ni contiene una cámara virtual o salidas OBS independientes. El juego sigue en `index.html` sin cambiar las reglas de gameplay.
+Arena Live incluye un **puente local de chat** en `main` desde v0.4. No es todavía una aplicación instalable ni contiene una cámara virtual o salidas OBS independientes. El juego sigue en `index.html`; las reglas configurables actuales se describen en las [notas de v0.4](RELEASE-0.4-REGLAS.md).
 
 ## Qué funciona en esta etapa
 
@@ -19,12 +19,12 @@ Esta rama añade un **puente local de chat**. No es todavía una aplicación ins
 ## Instalación
 
 1. Instala [Node.js LTS](https://nodejs.org/) **20 o superior** en Windows.
-2. Descarga o clona el repositorio y selecciona la rama `feature/tiktok-live-chat-mvp`.
+2. Descarga o clona el repositorio y selecciona la rama `main`.
 3. Abre PowerShell en la carpeta del proyecto y ejecuta:
 
    ```powershell
-   npm install
-   npm start
+   npm.cmd install
+   npm.cmd start
    ```
 
 4. Abre **http://127.0.0.1:4173/** en Chrome o Edge.

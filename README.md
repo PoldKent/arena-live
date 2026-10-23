@@ -1,13 +1,13 @@
 # Arena Live · v0.4
 
-Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Esta rama incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
+Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
 ## Instalar y arrancar en Windows
 
 Requiere Git y Node.js 20 o superior:
 
 ```powershell
-git clone --branch feature/tiktok-live-chat-mvp https://github.com/PoldKent/arena-live.git Arena_Live_GitHub
+git clone --branch main https://github.com/PoldKent/arena-live.git Arena_Live_GitHub
 cd Arena_Live_GitHub
 npm.cmd install
 npm.cmd start
@@ -16,6 +16,18 @@ npm.cmd start
 Abre **http://127.0.0.1:4173/** y conserva abierta la consola. TikTok comienza desconectado; **📡 TikTok** conecta o desconecta según el estado real del puente.
 
 Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only`, `npm.cmd install` y `npm.cmd start`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.4** en Ajustes.
+
+Si venías usando la rama de TikTok, cambia a `main` antes de actualizar:
+
+```powershell
+git fetch origin
+git switch main
+git pull --ff-only origin main
+npm.cmd install
+npm.cmd start
+```
+
+Detén la secuencia si Git avisa de cambios locales o falla algún comando; conserva esos cambios antes de continuar.
 
 ## Inicio / Pruebas
 
@@ -102,4 +114,4 @@ Las pruebas del navegador arrancan y cierran su servidor local y simulan las res
 - [Registro de cambios](CHANGELOG.md).
 - Historial: [v0.2](docs/RELEASE-0.2-OPERADOR.md), [v0.1](docs/RELEASE-0.1-OBS.md).
 
-`main` conserva la edición HTML independiente v0.1; esta v0.4 está en la rama TikTok y todavía no se ha integrado en main. La edición con servidor y TikTok está en `feature/tiktok-live-chat-mvp`.
+`main` contiene Arena Live v0.4, incluida la interfaz reconstruida, las reglas de combate y el puente local de TikTok. La edición independiente v0.1 se conserva en el historial de Git. La integración mantiene el historial de ambas ramas.

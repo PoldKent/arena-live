@@ -37,9 +37,9 @@ Móvil conserva los paneles compactos bajo demanda y la barra de acciones. La ac
 
 ## Rama y actualización
 
-Esta entrega está en `feature/tiktok-live-chat-mvp`. `main` conserva la edición independiente v0.1; no se ha fusionado esta rama. Continúa una sola simulación para 16:9 y 9:16 y se conservan la calibración y las distribuciones guardadas de v0.3.
+La v0.4 se integra en `main` con el historial de la rama `feature/tiktok-live-chat-mvp` y las mejoras previas de la rama principal. Continúa una sola simulación para 16:9 y 9:16 y se conservan la calibración y las distribuciones guardadas de v0.3. La edición independiente v0.1 permanece en el historial de Git.
 
-Detener servidor, `git pull --ff-only origin feature/tiktok-live-chat-mvp`, `npm.cmd install`, `npm.cmd start`, Ctrl+F5; comprobar v0.4 en Ajustes.
+Detener servidor, `git fetch origin`, `git switch main`, `git pull --ff-only origin main`, `npm.cmd install`, `npm.cmd start`, Ctrl+F5; comprobar v0.4 en Ajustes. Detenerse si falla un comando y conservar los cambios locales que Git señale antes de continuar.
 
 ## Validación
 
