@@ -2,6 +2,8 @@
 
 Fecha: 22 de octubre de 2026
 
+**Nota histórica:** este documento describe el diseño de v0.1. Desde v0.4, `main` incluye también el puente de TikTok; la separación entre ramas descrita aquí ya no aplica. La organización actual usa paneles en la columna izquierda de Stream y se detalla en la [guía del operador](DUAL-OPERADOR-TIKTOK.md) y las [notas de v0.4](RELEASE-0.4-REGLAS.md).
+
 ## Objetivo
 
 **Dual Full Screen es la única composición de emisión definitiva para OBS.** Nunca se elimina, no se sustituye por tres motores ni por tres ventanas, y muestra simultáneamente los dos lienzos del mismo combate.

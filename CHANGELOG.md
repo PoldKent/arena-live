@@ -1,5 +1,46 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-23 — Arena Live v0.4 en main
+
+- Integración de la rama TikTok en main, conservando el historial de ambas ramas y las mejoras de juego y OBS de v0.1.
+- Main incluye ahora el servidor local, TikTok, la interfaz reconstruida y las reglas configurables de v0.4.
+- Código de juego v0.4 conservado; calibración OBS, paneles, perfiles y reglas guardadas mantienen sus claves.
+- Documentación de instalación y actualización dirigida a main; decisiones de v0.1 identificadas como históricas.
+- Las comprobaciones de versión v0.4 sustituyen a las de v0.1; se conservan las entradas históricas del registro de main.
+
+## 2026-10-22 — Arena Live v0.4 · reglas de combate y paneles persistentes
+
+- Ajustes → Reglas y parámetros: cupo compartido 2–128, clase única o todas, y modos con poderes, sin especiales o Solo golpes.
+- Vida máxima, daño, empuje recibido, movimiento y recarga pasiva ajustables y guardados por navegador.
+- Cupo aplicado a TikTok, chat local, Prota, escenarios y lotes; una reducción en combate se completa al preparar el próximo lobby, conservando los inscritos durante la pelea.
+- Clase única para jugadores actuales y nuevos; preferencias originales conservadas. Bloqueos compartidos para poderes de IA, Prota, chat y pruebas; Solo golpes también elimina/bloquea apoyos.
+- Stream mantiene el panel elegido al actuar y hacer clic fuera; otro menú lo reemplaza y la × o Esc lo cierran. Ajustes conserva su × visible.
+- Calibración y distribuciones de v0.3 conservadas. Versiones visibles/API/paquete 0.4/0.4.0.
+- 21 comprobaciones de contrato y 33 de navegador, incluidos efectos reales de las reglas y geometría estable.
+- Publicación original en la rama TikTok; integrada posteriormente en main (ver 2026-10-23).
+
+## 2026-10-22 — Arena Live v0.3 · espacios de trabajo reconstruidos
+
+- Inicio/Pruebas con juego central, chats con pestañas a la izquierda y paneles de prueba persistentes; solo sociales desplegados por defecto.
+- Paneles movibles, redimensionables, acoplables y flotantes; restauración independiente de Inicio y Stream.
+- Objetivo con nombre, clase y estado; selector de escenario con Cargar, incluidos 128 personajes.
+- Stream abre herramientas/chats en la columna izquierda y los oculta al actuar; barra superior autoocultable sin cambiar las capturas.
+- Ajustes por secciones plegables: en Inicio permanece abierto al cambiar valores; al cerrarlo siempre reanuda.
+- Comandos diferenciados y seguimiento automático del mensaje más reciente en ambos chats.
+- Móvil orientado a jugar: barra inferior de acciones, herramientas bajo Menú, joystick y gestos conservados.
+- Conservada la calibración OBS y sus valores; comprobar recortes una vez para la nueva composición con columna izquierda.
+- Versiones visibles/API/paquete 0.3/0.3.0; 21 pruebas de contrato y 23 verificaciones de navegador.
+
+## 2026-10-22 — Arena Live v0.2 · barra y menús del operador
+
+- Barra horizontal única en preparación y Modo Stream, con iconos, leyendas cortas y estados.
+- Acceso directo a Pausa, Lobby, Revancha, Prota, Audio y Conectar/Desconectar TikTok.
+- Ajustes pausa al abrir y reanuda al cerrar; cada acción cierra su panel, incluidos selectores y calibración.
+- Modo Stream y audiencia integrados en el mismo menú de ajustes; retirada la separación General/Streamer.
+- Opacidad de la información del juego rotulada y explicada; versión visible 0.2 y API 0.2.0.
+- Menús dentro de las franjas del operador, manteniendo los recortes y la calibración OBS guardada.
+- Historial, controles y partida reutilizados al entrar y salir de Modo Stream.
+
 ## 2026-10-22 — Pulido visual de Arena Live v0.1
 
 - Barras de vida del duelo **9:16** aumentadas a **14 px**, nombres y porcentajes a **12 px**, energía a **6 px**.
@@ -50,3 +91,4 @@
 ### Alcance de esta importación
 
 Se ha importado la última entrega **Arena_Live_layout_fase3.html**. No se han reescrito reglas de gameplay ni inventado integraciones con plataformas reales. No se incluyen archivos de pruebas locales ni capturas en el repositorio inicial.
+

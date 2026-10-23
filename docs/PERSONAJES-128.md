@@ -1,6 +1,6 @@
 # Arena Live — 128 personajes de prueba
 
-Catálogo de nombres ficticios con clase fija para **Herramientas de Prueba**. En una integración de chat real, cada espectador conserva su propio nombre y sus comandos.
+Catálogo de nombres ficticios con clase fija para **Herramientas de Prueba**. En un TikTok LIVE auténtico, cada espectador conserva su propio usuario y sus comandos.
 
 Máximo **128 luchadores registrados** en una partida, incluidos Prota y los personajes de prueba. Al completar el cupo, los ingresos nuevos se rechazan: no se añade un luchador extra ni se refuerza a otro personaje.
 
@@ -157,4 +157,4 @@ Usa el botón **128 · Arena** para cargar el catálogo completo. El preset reem
 
 La recuperación al caer conserva sus reglas anteriores; si falla, el personaje se hunde y se elimina.
 
-El rendimiento real de 128 luchadores dependerá del navegador y del equipo.
+El rendimiento real de 128 luchadores en OBS/TikTok Studio dependerá del equipo.

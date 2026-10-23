@@ -18,20 +18,20 @@ test('responsive preparation and manual switching', () => {
   assert.match(html, /function setArenaPreparationView\(nextFocus\)/);
 });
 test('fullscreen retains portrait on the right and fixed operator bands', () => {
-  assert.match(html, /grid-template-rows:42px minmax\(0,1fr\) var\(--arena-operator-footer-height,108px\)!important/);
-  assert.match(html, /translateX\(var\(--arena-vertical-nudge,4px\)\)/);
+  assert.match(html, /grid-template-rows:34px minmax\(0,1fr\) var\(--arena-operator-footer-height,76px\)!important/);
+  assert.match(html, /translateX\(var\(--arena-vertical-nudge,10px\)\)/);
   assert.match(html, /function fitArenaDualOperatorMonitors\(\)/);
   assert.match(html, /moveArenaDualMonitorNode\('card-9x16', 'arenaDualUltrawideVerticalStage'\)/);
-  assert.match(html, /id="arenaDualDrawerDisclosure"/);
+  assert.match(html, /id="arenaStreamMenuRail"/);
 });
 test('operator controls use existing game handlers', () => {
-  for(const id of ['arenaDualPauseBtn','arenaDualLobbyBtn','arenaDualJoinBtn','arenaDualSettingsBtn','arenaDualTestsToggle']) {
+  for(const id of ['arenaDualPauseBtn','arenaDualLobbyBtn','btnStreamerJoin','arenaDualSettingsBtn','arenaDualTestsToggle']) {
     assert.ok(ids.includes(id), id);
   }
-  assert.match(html, /installArenaOperatorExtraActions\(\)/);
 });
 test('portrait text scales with fighter counts', () => {
   assert.match(html, /portraitLabel = targetCtx === ctx9/);
   assert.match(html, /packedFighterCount <= 8 \? 12/);
   assert.match(html, /packedFighterCount <= 32 \? 10/);
 });
+
