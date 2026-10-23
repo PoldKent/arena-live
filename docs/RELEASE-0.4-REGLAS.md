@@ -1,5 +1,7 @@
 # Arena Live v0.4 · reglas y paneles persistentes
 
+> Documento histórico. La versión vigente y las instrucciones actuales están en [Arena Live v0.6](RELEASE-0.6-UNIFICADA.md) y en el [README](../README.md).
+
 ## Reglas y parámetros
 
 La sección nueva de Ajustes comparte los mismos valores en Inicio/Pruebas y Stream. Los cambios son inmediatos y se guardan en el navegador; no se necesita recargar el juego.

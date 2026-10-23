@@ -1,5 +1,7 @@
 # Arena Live — Diseño de emisión dual (decisiones cerradas)
 
+> Documento histórico. La versión vigente y las instrucciones actuales están en [Arena Live v0.6](RELEASE-0.6-UNIFICADA.md) y en el [README](../README.md).
+
 Fecha: 22 de octubre de 2026
 
 **Nota histórica:** este documento describe el diseño de v0.1. Desde v0.4, `main` incluye también el puente de TikTok; la separación entre ramas descrita aquí ya no aplica. La organización actual usa paneles en la columna izquierda de Stream y se detalla en la [guía del operador](DUAL-OPERADOR-TIKTOK.md) y las [notas de v0.4](RELEASE-0.4-REGLAS.md).

@@ -1,5 +1,7 @@
 # Arena Live v0.5 · revisión y rendimiento
 
+> Documento histórico. La versión vigente y las instrucciones actuales están en [Arena Live v0.6](RELEASE-0.6-UNIFICADA.md) y en el [README](../README.md).
+
 Fecha: 23 de octubre de 2026. Base comparada: main v0.4, commit `ce1b596`.
 
 ## Revisión del historial

@@ -5,11 +5,10 @@ import { createHash } from 'node:crypto';
 import { resolve, dirname } from 'node:path';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
-import { balanceVariant } from './balance-variants.mjs';
+import { summarizeBalance } from './balance-summary.mjs';
 const productionHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-const variant = process.env.ARENA_BALANCE_VARIANT || 'published';
-const tuning = JSON.parse(process.env.ARENA_BALANCE_TUNING || '{}');
-const html = balanceVariant(productionHtml, variant, tuning);
+const variant = 'published';
+const html = productionHtml;
 const harness = await readFile(new URL('./balance-harness.js', import.meta.url), 'utf8');
 const pilot = process.env.ARENA_BALANCE_PILOT === '1';
 const duelSeeds = Number(process.env.ARENA_BALANCE_DUEL_SEEDS || (pilot ? 2 : 50));
@@ -81,7 +80,7 @@ try {
   assert.deepEqual(errors, [], 'Browser engine must have no JavaScript errors');
   const bytes = Buffer.from(html);
   const productionBytes = Buffer.from(productionHtml);
-  const report = { metadata: { ...metadata, variant, tuning,
+  const report = { metadata: { ...metadata, variant,
     productionGitBlob: createHash('sha1').update(`blob ${productionBytes.length}\0`).update(productionBytes).digest('hex'),
     engineGitBlob: createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex'),
     browser: await browser.version(), duelSeeds, arenaSeeds, seedStart, counts, maxSeconds: seconds, matches: results.length,
@@ -89,5 +88,8 @@ try {
     probes, deterministic: true, telemetryParity: true, crossScenarioParity: true, errors, results };
   await mkdir(dirname(output), { recursive: true });
   await writeFile(output, JSON.stringify(report) + '\n');
-  console.log(JSON.stringify({ output, matches: results.length, elapsedSeconds: (Date.now() - started) / 1000 }));
+  const summary = await summarizeBalance(report, output.replace(/\.json$/, ''));
+  console.log(JSON.stringify({ output, matches: results.length, elapsedSeconds: (Date.now() - started) / 1000,
+    duels: summary.duels.classes.map(({name,winPct})=>({name,winPct})),
+    arenas: Object.fromEntries(Object.entries(summary.arenas).map(([n,g])=>[n,g.classes.map(({name,winPct})=>({name,winPct}))])) }));
 } finally { await browser?.close(); await new Promise(r => server.close(r)); }

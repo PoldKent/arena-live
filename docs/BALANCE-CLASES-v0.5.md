@@ -1,5 +1,7 @@
 # Equilibrio de clases · Arena Live v0.5
 
+> Documento histórico. La versión vigente y las instrucciones actuales están en [Arena Live v0.6](RELEASE-0.6-UNIFICADA.md) y en el [README](../README.md).
+
 Estudio del 23 de octubre de 2026. Motor de main `6850dc1`, HTML Git blob `c2260f181dbce56c896a4806537f5fd5327bee2a`. Este cambio añade herramientas y resultados; los poderes del juego conservan sus valores publicados.
 
 ## Resultado principal

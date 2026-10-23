@@ -1,5 +1,7 @@
 # Arena Live v0.3 · reconstrucción de la interfaz
 
+> Documento histórico. La versión vigente y las instrucciones actuales están en [Arena Live v0.6](RELEASE-0.6-UNIFICADA.md) y en el [README](../README.md).
+
 La interfaz diferencia Inicio/Pruebas, Stream y juego móvil. Inicio recupera controles persistentes y organizados; Stream presenta opciones temporales fuera de las capturas. El motor sigue en un solo HTML y ambas vistas usan la misma simulación.
 
 ## Encuesta confirmada y resultado

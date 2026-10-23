@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.5 — TikTok LIVE</title>
+    <title>Arena Live v0.6 — TikTok LIVE</title>
     <!--
       ARENA LIVE · MONOLITHIC DELIVERY
       All application code intentionally stays in this HTML file.
@@ -1396,7 +1396,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <h2 class="font-display font-black text-base sm:text-lg text-white tracking-wide">
                                 <span id="arenaSettingsTitle" data-operator-label="settingsTitle">Pausa y ajustes</span>
                             </h2>
-                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.5 · TikTok</span>
+                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.6 · TikTok</span>
                             <span id="settingsModeBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400/40">
                                 ⏸️ JUEGO EN PAUSA
                             </span>
@@ -4533,25 +4533,49 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             playSound('hit');
         }
 
-        // ==================== COMBAT RULES: CLASS RIVALRIES + LAUNCH ====================
+        // ==================== COMBAT RULES: BALANCE + LAUNCH ====================
         // One ground jump begins at 9.4 units/frame. Normal hit ~one jump;
         // special hit ~two jumps horizontally, before modest damage scaling.
         const ARENA_GROUND_JUMP_IMPULSE = 9.4;
         const ARENA_SPECIAL_LAUNCH_MULTIPLIER = 2;
         const ARENA_BONUS_DURATION_FRAMES = 10 * 60; // Fixed-step engine: 60 FPS.
-        const CLASS_RIVALRIES = Object.freeze({
-            kame: 'kame',          // Guerrero -> Guerrero
-            ninja: 'esmeralda',   // Shinobi -> Espíritu
-            trueno: 'ninja',      // Rayo -> Shinobi
-            esmeralda: 'trueno',  // Espíritu -> Rayo
-            titan: null          // Titán -> weakest nearby fighter
+        // One native profile for AI, Prota, chat and test powers. Null targets
+        // means every valid target; finite caps choose the nearest, with stable ties.
+        const ARENA_CLASS_BALANCE = Object.freeze({
+            '1v1': Object.freeze({
+                kame: Object.freeze({damage:43,windup:34,targets:null}),
+                ninja: Object.freeze({damage:38,windup:34,targets:1}),
+                titan: Object.freeze({damage:38,windup:34,targets:null}),
+                trueno: Object.freeze({damage:37,windup:34,targets:3}),
+                esmeralda: Object.freeze({damage:37,windup:34,targets:1})
+            }),
+            smash: Object.freeze({
+                kame: Object.freeze({damage:44,windup:34,targets:null}),
+                ninja: Object.freeze({damage:50,windup:18,targets:1}),
+                titan: Object.freeze({damage:38,windup:34,targets:null}),
+                trueno: Object.freeze({damage:28,windup:34,targets:2}),
+                esmeralda: Object.freeze({damage:44,windup:22,targets:1})
+            }),
+            iso: Object.freeze({
+                kame: Object.freeze({damage:38,windup:34,targets:3}),
+                ninja: Object.freeze({damage:60,windup:20,targets:1}),
+                titan: Object.freeze({damage:38,windup:34,targets:3}),
+                trueno: Object.freeze({damage:32,windup:34,targets:3}),
+                esmeralda: Object.freeze({damage:60,windup:20,targets:1})
+            })
         });
-        const COMBAT_TARGET_PREFERENCE_RANGE = Object.freeze({ ratio: 1.5, extra: 38 });
+        const COMBAT_TARGET_POLICY = 'nearest';
 
-        function areFinalShinobiDuelists(attacker, target) {
-            if (!attacker || !target || attacker.archetypeKey !== 'ninja' || target.archetypeKey !== 'ninja') return false;
-            const alive = fighters.filter(f => !f.eliminated);
-            return alive.length === 2 && alive.every(f => f.archetypeKey === 'ninja');
+        function getFighterSpecialRule(fighter) {
+            return ARENA_CLASS_BALANCE[activeMode]?.[fighter?.archetypeKey] || null;
+        }
+
+        function getFighterSpecialTargets(fighter, inRange) {
+            const candidates = fighters.filter(other => canFighterAttack(fighter, other) && inRange(other));
+            const limit = getFighterSpecialRule(fighter)?.targets;
+            if (limit == null) return candidates;
+            return candidates.sort((a,b) => Math.hypot(a.x-fighter.x,a.y-fighter.y)
+                - Math.hypot(b.x-fighter.x,b.y-fighter.y)).slice(0,limit);
         }
 
         function canFighterAttack(attacker, target) {
@@ -4561,9 +4585,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         function findPreferredCombatTarget(attacker, inRange = null) {
             if (!attacker) return null;
-            // Two linear passes preserve nearest/rival/weakest priorities and stable ties.
-            // The old per-fighter sort recalculated square roots O(n log n) times.
-            // Evaluate optional predicates once, matching the original targeting contract.
+            // One linear nearest-target pass shared by every class. Range predicates
+            // run once per eligible rival; equal distances retain roster order.
             const candidates = inRange
                 ? fighters.filter(other => canFighterAttack(attacker, other) && inRange(other))
                 : fighters;
@@ -4578,32 +4601,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     closestDistanceSq = distanceSq;
                 }
             }
-            if (!closest) return null;
-            const closeLimit = Math.sqrt(closestDistanceSq) * COMBAT_TARGET_PREFERENCE_RANGE.ratio
-                + COMBAT_TARGET_PREFERENCE_RANGE.extra;
-            const closeLimitSq = closeLimit * closeLimit;
-            const rival = CLASS_RIVALRIES[attacker.archetypeKey];
-            let preferred = closest;
-            let preferredDistanceSq = Infinity;
-            let weakestRatio = Infinity;
-            for (const other of candidates) {
-                if (!canFighterAttack(attacker, other)) continue;
-                const dx = other.x - attacker.x, dy = other.y - attacker.y;
-                const distanceSq = dx * dx + dy * dy;
-                if (distanceSq > closeLimitSq) continue;
-                if (attacker.archetypeKey === 'titan') {
-                    const healthRatio = other.hp / Math.max(1, other.maxHp);
-                    if (healthRatio < weakestRatio || (healthRatio === weakestRatio && distanceSq < preferredDistanceSq)) {
-                        preferred = other;
-                        weakestRatio = healthRatio;
-                        preferredDistanceSq = distanceSq;
-                    }
-                } else if (other.archetypeKey === rival && distanceSq < preferredDistanceSq) {
-                    preferred = other;
-                    preferredDistanceSq = distanceSq;
-                }
-            }
-            return preferred;
+            return closest;
         }
 
         function getFighterMoveSpeedMultiplier(fighter) {
@@ -4641,6 +4639,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             if (!arenaClassPowersAllowed() || !fighter || fighter.eliminated) return false;
             const requiredClass=SKILL_REQUIRED_CLASS[getMatchedSkillCommand(command)||command];
             if(!requiredClass||fighter.archetypeKey!==requiredClass)return false;
+            const rule = getFighterSpecialRule(fighter);
+            if (!rule) return false;
             if (gameState !== 'COMBAT') {
                 spawnFloatingText(fighter.x, fighter.y - 42, `⚡ LISTO: ${command.toUpperCase()}`, '#00f3ff', 15);
                 return;
@@ -4656,11 +4656,11 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             playSound('charge');
             fighter.castingSkill = {
                 cmd: cmd,
-                timer: 34, // visible and interruptible charge
-                maxTimer: 34,
+                timer: rule.windup, // visible and interruptible charge
+                maxTimer: rule.windup,
                 powerFactor
             };
-            if (!fighter.isStreamer) fighter.aiSpecialCooldown = Math.max(fighter.aiSpecialCooldown, 480);
+            if (!fighter.isStreamer) fighter.aiSpecialCooldown = Math.max(fighter.aiSpecialCooldown, AI_SPECIAL_RULES.cooldownFrames);
 
             spawnFloatingText(fighter.x, fighter.y - 48, `⚡ CARGANDO ${cmd.toUpperCase()}...`, '#ffbe0b', 16);
         }
@@ -4670,6 +4670,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             if (!arenaClassPowersAllowed() || !fighter || fighter.eliminated) return false;
             const requiredClass=SKILL_REQUIRED_CLASS[getMatchedSkillCommand(cmd)||cmd];
             if(!requiredClass||fighter.archetypeKey!==requiredClass)return false;
+            if (!getFighterSpecialRule(fighter)) return false;
             // Clear special-charge burst with class-colored particles. Both canvases render it.
             const specialColors = { kame:'#00e5ff', ninja:'#a855f7', trueno:'#facc15', titan:'#fb7185', esmeralda:'#4ade80' };
             const burstColor = specialColors[fighter.archetypeKey] || fighter.color;
@@ -4696,11 +4697,14 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 spawnFloatingText(fighter.x, fighter.y - 44, '☄️ ¡KAME!', '#00f3ff', 18);
                 addKillFeed(`☄️ ${getFighterDisplayName(fighter)} lanzó !kame`);
 
-                fighters.forEach(target => {
+                getFighterSpecialTargets(fighter, target =>
+                    (dir === 1 ? target.x > fighter.x - 10 : target.x < fighter.x + 10)
+                    && Math.abs(target.y - fighter.y) < 75).forEach(target => {
                     if (!canFighterAttack(fighter, target)) return;
                     const inFront = dir === 1 ? target.x > fighter.x - 10 : target.x < fighter.x + 10;
                     if (inFront && Math.abs(target.y - fighter.y) < 75) {
-                        applyDamage(target, 38, fighter, true, 10.5, 'special');
+                        // A K.O. can change mode and reposition survivors during this cast.
+                        applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 10.5, 'special');
                     }
                 });
 
@@ -4723,7 +4727,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 const target = findPreferredCombatTarget(fighter, other =>
                     Math.hypot(other.x - fighter.x, other.y - fighter.y) < 170
                     && Math.sign(other.x - fighter.x || dir) === dir);
-                if (target) applyDamage(target, 34, fighter, true, 11.5, 'special');
+                if (target) applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 11.5, 'special');
 
             } else if (cmd === '!trueno') {
                 playSound('thunder');
@@ -4734,16 +4738,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 addKillFeed(`⚡ ${getFighterDisplayName(fighter)} invocó !trueno`);
 
                 let struck = 0;
-                const nearbyTargets = fighters.filter(target => canFighterAttack(fighter, target)
-                    && Math.hypot(target.x - fighter.x, target.y - fighter.y) < 300);
-                nearbyTargets.sort((a, b) => {
-                    const distA = Math.hypot(a.x - fighter.x, a.y - fighter.y);
-                    const distB = Math.hypot(b.x - fighter.x, b.y - fighter.y);
-                    const scoreA = distA * (a.archetypeKey === 'ninja' ? 0.65 : 1);
-                    const scoreB = distB * (b.archetypeKey === 'ninja' ? 0.65 : 1);
-                    return scoreA - scoreB;
-                });
-                nearbyTargets.slice(0, 3).forEach(target => {
+                getFighterSpecialTargets(fighter, target =>
+                    Math.hypot(target.x - fighter.x, target.y - fighter.y) < 300).forEach(target => {
                         struck++;
                         addActiveEffect({
                             type: 'lightning',
@@ -4752,7 +4748,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             timer: 28,
                             maxTimer: 28
                         });
-                        applyDamage(target, 32, fighter, true, 8.5, 'special');
+                        applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 8.5, 'special');
                 });
                 if (struck === 0) {
                     addActiveEffect({
@@ -4786,7 +4782,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                         );
                     }
                     addActiveEffect({ type: 'thornVine', x: target.x, y: target.y, color: '#4ade80', timer: 28, maxTimer: 28 });
-                    applyDamage(target, 38, fighter, true, 14.5, 'special');
+                    applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 14.5, 'special');
                 } else {
                     for (let step = 1; step <= 8; step++) {
                         spawnParticle(fighter.x + dir * step * 22, fighter.y - 6, '#4ade80', 2.8, 18, 0.05);
@@ -4800,13 +4796,14 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 screenShake = Math.max(screenShake, 14);
                 addActiveEffect({ type: 'titanQuake', x: fighter.x, y: fighter.y + fighter.radius, color: '#f43f5e', timer: 25, maxTimer: 25 });
                 let hits = 0;
-                fighters.forEach(target => {
+                getFighterSpecialTargets(fighter, target =>
+                    Math.hypot(target.x - fighter.x, target.y - fighter.y) <= 135).forEach(target => {
                     if (!canFighterAttack(fighter, target)) return;
                     const distance = Math.hypot(target.x - fighter.x, target.y - fighter.y);
                     if (distance <= 135) {
                         hits++;
                         target.vx += Math.sign(target.x - fighter.x || fighter.facing) * 16 * arenaCombatRules.knockback;
-                        applyDamage(target, 46, fighter, true, 14, 'special');
+                        applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 14, 'special');
                     }
                 });
                 for (let i = 0; i < 22; i++) spawnParticle(fighter.x + (Math.random() - 0.5) * 150, fighter.y + fighter.radius, '#fb7185', 4.5, 24, 0.15);
@@ -7746,7 +7743,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.5';
+        const ARENA_RELEASE_VERSION = '0.6';
         const ARENA_RELEASE_EDITION = 'tiktok';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:10, footer:76});
@@ -8493,8 +8490,11 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.5.0',
+            version: '0.6.0',
             edition: 'tiktok',
+            getBalanceRules() {
+                return ARENA_CLASS_BALANCE;
+            },
             getState() {
                 const alive = fighters.filter(fighter => !fighter.eliminated);
                 return Object.freeze({

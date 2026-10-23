@@ -158,5 +158,6 @@ window.ArenaBalanceHarness = (() => {
     }
   }
   return { run, reference, probe, meta: () => ({ version: ArenaLive.version, defaults: { ...ARENA_COMBAT_RULE_DEFAULTS },
-    ai: AI_SPECIAL_RULES, rivalries: CLASS_RIVALRIES, hz: 60 }) };
+    ai: AI_SPECIAL_RULES, targeting: typeof COMBAT_TARGET_POLICY === 'undefined' ? 'nearest-counterfactual' : COMBAT_TARGET_POLICY,
+    balance: typeof ARENA_CLASS_BALANCE === 'undefined' ? null : ARENA_CLASS_BALANCE, hz: 60 }) };
 })();

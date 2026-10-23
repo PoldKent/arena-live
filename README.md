@@ -1,16 +1,16 @@
-# Arena Live · v0.5
+# Arena Live · v0.6
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
-## Prueba de equilibrio
+## Versión principal
 
-En la rama `preview/class-balance-v05`, `npm.cmd run start:balance` abre el candidato jugable en **http://127.0.0.1:4174**, identificado en Ajustes como **v0.5 · equilibrio (prueba)**. Usa el juego completo con los valores por modo del laboratorio. `npm.cmd start` sigue sirviendo los valores publicados originales. [Descarga separada, escenarios y comparación](docs/PROBAR-EQUILIBRIO.md).
+`main` contiene TikTok LIVE y el equilibrio por modo integrados. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. Ajustes, la API del juego, el servidor y el paquete identifican la versión 0.6. [Cambios y validación](docs/RELEASE-0.6-UNIFICADA.md).
 
-## Rendimiento de v0.5
+## Rendimiento con 128 jugadores
 
-La selección de rivales evita ordenar listas por cada luchador y las colisiones descartan cuerpos lejanos antes de calcular distancias. Ambas capturas comparten el orden de dibujo, las medidas de los nombres se reutilizan y el HUD solo cambia los valores que variaron. Los escenarios actualizan sus controles una vez al completar la lista; los chats agrupan scroll y contadores por cuadro.
+La selección de rivales usa un recorrido lineal por luchador y las colisiones descartan cuerpos lejanos antes de calcular distancias. Ambas capturas comparten el orden de dibujo, las medidas de los nombres se reutilizan y el HUD solo cambia los valores que variaron. Los escenarios actualizan sus controles una vez al completar la lista; los chats agrupan scroll y contadores por cuadro.
 
-Se mantiene el cupo de 128, todos los poderes, los efectos y las dos vistas sincronizadas. [Revisión de versiones, mediciones y alcance](docs/RELEASE-0.5-RENDIMIENTO.md). Las cifras de este entorno no sustituyen una prueba en tu equipo con OBS.
+Se mantiene el cupo de 128, todos los poderes, los efectos y las dos vistas sincronizadas. [Mediciones de v0.6](docs/performance-v0.6.json). Las cifras de este entorno no sustituyen una prueba en tu equipo con OBS.
 
 ## Instalar y arrancar en Windows
 
@@ -25,9 +25,9 @@ npm.cmd start
 
 Abre **http://127.0.0.1:4173/** y conserva abierta la consola. TikTok comienza desconectado; **📡 TikTok** conecta o desconecta según el estado real del puente.
 
-Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only`, `npm.cmd install` y `npm.cmd start`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.5** en Ajustes.
+Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd install` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.6** en Ajustes.
 
-Si venías usando la rama de TikTok, cambia a `main` antes de actualizar:
+Para volver a `main` desde una rama anterior:
 
 ```powershell
 git fetch origin
@@ -38,6 +38,8 @@ npm.cmd start
 ```
 
 Detén la secuencia si Git avisa de cambios locales o falla algún comando; conserva esos cambios antes de continuar.
+
+Después de actualizar, `npm.cmd run clean:branches` retira las cuatro ramas antiguas conocidas. Primero verifica que todo su historial esté en `origin/main`; usa una operación atómica con comprobación de referencias para conservar cualquier trabajo nuevo. Utiliza la autenticación Git de tu equipo y conserva las ramas personales ajenas a esta migración. Puede repetirse cuando ya estén retiradas.
 
 ## Inicio / Pruebas
 
@@ -107,9 +109,11 @@ En escritorio: **WASD** mueve a Prota, **Espacio** salta, **E** golpea y **R** a
 
 ## Equilibrio de clases
 
-El [estudio de v0.5](docs/BALANCE-CLASES-v0.5.md) compara 33.400 partidas simuladas: duelos, arenas y controles de IA. Titán domina la muestra; la clase de menor rendimiento depende del modo. Los poderes conservan sus valores actuales.
+Todas las clases eligen al rival cercano. Daño, carga y objetivos de los poderes se definen en `ARENA_CLASS_BALANCE` dentro de `index.html`, compartido por IA, Prota, chat y herramientas. En Arena, Kame y Coloso alcanzan hasta tres objetivos; Trueno alcanza tres en Arena y dos en Smash. Shinobi y Espíritu cargan antes en partidas con varios jugadores.
 
-`npm.cmd run analyze:balance` ejecuta una evaluación reproducible de 4.800 casos y guarda los datos en `reports/balance/latest.json`. Requiere Chromium de Playwright. Las instrucciones para repetir la muestra ampliada y sus límites están en el estudio.
+La integración reproduce 33.000 casos del candidato: 16.000 duelos con poderes, 16.000 controles y 1.000 partidas con varios jugadores. [Resultados actuales e intervalos](docs/balance-v0.6-summary.json). El [diagnóstico v0.5](docs/BALANCE-CLASES-v0.5.md) se conserva como antecedente histórico.
+
+`npm.cmd run analyze:balance` evalúa la versión actual con 4.800 casos y genera `reports/balance/latest.json`, `latest-summary.json` y `latest-matches.csv.gz`. Requiere Chromium de Playwright. `ARENA_BALANCE_PILOT=1` reduce la muestra para comprobar el recorrido; `ARENA_BALANCE_DUEL_SEEDS`, `ARENA_BALANCE_ARENA_SEEDS`, `ARENA_BALANCE_SEED_START`, `ARENA_BALANCE_COUNTS` y `ARENA_BALANCE_OUTPUT` permiten ampliar o guardar otra muestra. El analizador sirve el mismo juego publicado y no conecta con un LIVE.
 
 ## Desarrollo y verificación
 
@@ -124,6 +128,7 @@ npm.cmd run test:performance
 
 Las pruebas del navegador arrancan y cierran su servidor local y simulan las respuestas de TikTok. Cubren paneles, persistencia, escenarios, chats, pausa, capturas, idiomas y controles móviles; no conectan con una emisión real.
 
+- [Versión unificada v0.6, equilibrio y validación](docs/RELEASE-0.6-UNIFICADA.md).
 - [Rendimiento y depuración de v0.5](docs/RELEASE-0.5-RENDIMIENTO.md).
 - [Reglas y paneles persistentes de v0.4](docs/RELEASE-0.4-REGLAS.md).
 - [Decisiones de la reconstrucción v0.3](docs/RELEASE-0.3-INTERFAZ.md).
@@ -132,4 +137,4 @@ Las pruebas del navegador arrancan y cierran su servidor local y simulan las res
 - [Registro de cambios](CHANGELOG.md).
 - Historial: [v0.2](docs/RELEASE-0.2-OPERADOR.md), [v0.1](docs/RELEASE-0.1-OBS.md).
 
-`main` contiene Arena Live v0.5, incluida la interfaz reconstruida, las reglas de combate y el puente local de TikTok. La edición independiente v0.1 se conserva en el historial de Git. La integración mantiene el historial de ambas ramas.
+El desarrollo y las actualizaciones continúan en `main`. Las versiones anteriores y la prueba separada quedan en el historial de Git; la entrega vigente es Arena Live v0.6 con TikTok, interfaz, reglas y equilibrio integrados.

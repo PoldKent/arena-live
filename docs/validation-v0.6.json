@@ -1,0 +1,30 @@
+{
+  "version": "0.6.0",
+  "releaseEngineGitBlob": "77c48bf0d5a32894e931bd18f2f99ab4893a6d4e",
+  "runtimeScriptSha256": "d09963d8334b8b25c69a219754cd5f15cdb6986c42222cdd6567eaca3b635d1f",
+  "checks": {
+    "node": 26,
+    "operatorBrowser": 36,
+    "performance": 11,
+    "browserErrors": 0,
+    "exactCandidateMatches": 33000,
+    "exactMatchRecordDifferences": 0
+  },
+  "preserved": {
+    "tiktokBridge": true,
+    "obsCalibrationKeys": true,
+    "workspaceKeys": true,
+    "capacity": 128
+  },
+  "balanceSummary": "balance-v0.6-summary.json",
+  "performanceReport": "performance-v0.6.json",
+  "provenance": {
+    "releaseEngineGitBlob": "77c48bf0d5a32894e931bd18f2f99ab4893a6d4e",
+    "measuredEngineGitBlobs": [
+      "4c382cb51bafebd9acd16ff9795e5bf136fd82e1",
+      "77c48bf0d5a32894e931bd18f2f99ab4893a6d4e"
+    ],
+    "scriptSha256": "d09963d8334b8b25c69a219754cd5f15cdb6986c42222cdd6567eaca3b635d1f",
+    "note": "32,800 cases were recorded before correcting the static HTML title from v0.5 to v0.6; the complete script blocks are byte-identical to the release. The additional 200 five-player matches were recorded from the final release HTML. All 33,000 records match the measured v0.5 candidate exactly."
+  }
+}

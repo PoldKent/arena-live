@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 
-test('release v0.5 is visible in Settings and the API', () => {
-  assert.match(html, /id="arenaSettingsVersion"[^>]*>Arena Live v0\.5/);
-  assert.match(html, /version: '0\.5\.0'/);
+test('release v0.6 is visible in Settings and the API', () => {
+  assert.match(html, /<title>Arena Live v0\.6/);
+  assert.match(html, /id="arenaSettingsVersion"[^>]*>Arena Live v0\.6/);
+  assert.match(html, /version: '0\.6\.0'/);
   assert.match(html, /function updateArenaObsGeometrySummary\(\)/);
 });
 test('lobby overlays have no redundant streaming format tags', () => {

@@ -1,4 +1,4 @@
-// Browser regressions for the v0.5 independent operator workspaces. Never connects to a real TikTok LIVE.
+// Browser regressions for the unified v0.6 release. Never connects to a real TikTok LIVE.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -7,8 +7,7 @@ import { join } from 'node:path';
 import { chromium } from 'playwright';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const port=process.env.ARENA_TEST_PORT || '4175';
-const balancePreview=process.env.ARENA_TEST_BALANCE_PREVIEW==='1';
-const server=spawn(process.execPath,['bridge/server.mjs',...(balancePreview?['--balance-preview']:[])],{cwd:root,env:{...process.env,PORT:port}});
+const server=spawn(process.execPath,['bridge/server.mjs'],{cwd:root,env:{...process.env,PORT:port}});
 let browser;
 try {
  await new Promise((resolve,reject)=>{
@@ -44,8 +43,8 @@ const shot=async name=>{if(process.env.ARENA_TEST_SCREENSHOTS){await mkdir(proce
 async function unfold(id){const panel=page.locator('#'+id);if(!await panel.evaluate(n=>n.open))await panel.locator('> summary').click({noWaitAfter:true});}
 async function settingsSection(index){const section=page.locator('.arena-settings-section').nth(index);if(!await section.evaluate(n=>n.open))await section.locator('> summary').click({noWaitAfter:true});}
 async function streamClick(id){await page.mouse.move(600,20);await page.locator('#'+id).click({noWaitAfter:true});}
-await check('v0.5 starts with large game, left chat and only the social test group expanded',async()=>{
- assert.equal(await page.evaluate(()=>ArenaLive.version),balancePreview?'0.5.0-balance-preview':'0.5.0');
+await check('v0.6 starts with large game, left chat and only the social test group expanded',async()=>{
+ assert.equal(await page.evaluate(()=>ArenaLive.version),'0.6.0');
  const panels=await page.locator('.arena-work-panel').evaluateAll(ns=>ns.map(n=>({id:n.id,open:n.open,parent:n.parentElement.id})));
  assert.equal(panels.find(n=>n.id==='arenaPanelChat').parent,'arenaDockLeft');
  assert.deepEqual(panels.filter(n=>n.open&&n.id!=='arenaPanelChat').map(n=>n.id),['arenaPanelSocial']);
@@ -288,12 +287,12 @@ await check('Mobile special action follows the no-powers rule while movement and
  const rules=page.locator('.arena-settings-section').filter({has:page.locator('#arenaPowerMode')});if(!await rules.evaluate(n=>n.open))await rules.locator('summary').click();
  await page.locator('#arenaPowerMode').selectOption('noSpecials');await page.keyboard.press('Escape');assert.equal(await page.locator('#arenaMobilePower').isDisabled(),true);assert.equal(await page.locator('#arenaMobileAttack').isEnabled(),true);assert.equal(await page.locator('#arenaMobileJump').isEnabled(),true);
 });
-if(balancePreview){
- await check('Playable balance preview retains real clock, randomness, animation and the normal bridge',async()=>{
-  const status=await (await page.request.get(`http://127.0.0.1:${port}/api/status`)).json();assert.equal(status.balancePreview,true);
+ await check('Unified release uses native clock, randomness, animation and the TikTok bridge',async()=>{
+  const status=await (await page.request.get(`http://127.0.0.1:${port}/api/status`)).json();assert.equal(status.version,'0.6.0');
   const native=await page.evaluate(()=>({clock:Date.now.toString().includes('[native code]'),random:Math.random.toString().includes('[native code]'),raf:requestAnimationFrame.toString().includes('[native code]'),harness:typeof window.ArenaBalanceHarness}));
   assert.deepEqual(native,{clock:true,random:true,raf:true,harness:'undefined'});
-  assert.match(await page.locator('#arenaObsCalibrationTitle').textContent(),/equilibrio \(prueba\)/);
+  assert.match(await page.locator('#arenaSettingsVersion').textContent(),/v0\.6/);
+  assert.equal(await page.evaluate(()=>Object.isFrozen(ArenaLive.getBalanceRules())&&Object.isFrozen(ArenaLive.getBalanceRules().iso.ninja)),true);
  });
  await check('Playable powers apply the measured damage, windup and target caps in all three modes',async()=>{
   const tuning=JSON.parse(await readFile(new URL('../docs/balance-candidate-v0.5.json',import.meta.url),'utf8'));
@@ -320,6 +319,5 @@ if(balancePreview){
    actor.x=240;actor.y=250;near.x=280;near.y=250;weak.x=305;weak.y=250;weak.hp=1;fighters=[actor,near,weak];return findPreferredCombatTarget(actor)?.id===near.id;
   }));assert.ok(matches.every(Boolean));
  });
-}
-assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,balancePreview}));
+assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:'0.6.0'}));
 } finally {await browser?.close();server.kill('SIGKILL');}

@@ -1,5 +1,15 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-23 — Arena Live v0.6 · TikTok y equilibrio unificados en main
+
+- Equilibrio nativo por Duelo, Smash y Arena, compartido por IA, Prota, chat y pruebas. Selección de rivales cercana para las cinco clases.
+- Kame y Coloso limitados a tres objetivos en Arena; Trueno a dos en Smash. Daño y cargas por clase conservan el perfil medido, incluidas transiciones durante un mismo poder.
+- Retirados el inicio separado, puerto de prueba y parches del HTML. Un solo inicio con `npm.cmd start`, puerto 4173 por defecto; versión 0.6/0.6.0 en Ajustes, API, servidor y paquete.
+- Selección de objetivos simplificada a un recorrido lineal y retirada una función de duelo sin uso. Se mantienen física, apoyos, reingresos, controles, paneles y calibración OBS.
+- Analizador unificado del motor publicado: genera resumen con intervalos y archivo de partidas sin mezclar variantes. Evidencia de equivalencia de 33.000 partidas del candidato.
+- Limpieza de ramas antiguas mediante `npm.cmd run clean:branches`, con verificación de historial integrado, referencias y operación atómica desde Git autenticado.
+- 26 pruebas de Node, 36 de interfaz/combate y 11 de carga; escenarios de 32/64/128 jugadores y ráfaga de 500 comentarios.
+
 ## 2026-10-23 — Diagnóstico de equilibrio sobre v0.5
 
 - Analizador reproducible del motor real: semillas, lados/orden cruzados, tiempo virtual, telemetría de poderes y control de selección de blancos.

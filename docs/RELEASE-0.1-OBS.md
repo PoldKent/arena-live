@@ -1,5 +1,7 @@
 # Arena Live v0.1 — ajuste visual para OBS
 
+> Documento histórico. La versión vigente y las instrucciones actuales están en [Arena Live v0.6](RELEASE-0.6-UNIFICADA.md) y en el [README](../README.md).
+
 22 de octubre de 2026
 
 **Dual Full Screen sigue siendo la vista de transmisión definitiva para OBS**, con una única partida y dos lienzos simultáneos. El juego independiente `main` no incorpora el puente de TikTok.

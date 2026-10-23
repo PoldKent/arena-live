@@ -8,12 +8,9 @@ import { normalizeTikTokChat, normalizeCreatorHandle } from './chat-normalize.mj
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
 const HOST = '127.0.0.1'; // Intentional: never expose game control endpoints to the LAN/Internet.
-const BALANCE_PREVIEW = process.argv.includes('--balance-preview');
-const PORT = Number(process.env.PORT || (BALANCE_PREVIEW ? 4174 : 4173));
+const PORT = Number(process.env.PORT || 4173);
 if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) throw new Error('Puerto inválido.');
-const renderHtml = BALANCE_PREVIEW
-  ? (await import('./balance-preview.mjs')).renderBalancePreview
-  : html => html;
+const { version: VERSION } = JSON.parse(await readFile(resolve(ROOT, 'package.json'), 'utf8'));
 const TIKTOK_USERNAME = normalizeCreatorHandle(process.env.TIKTOK_USERNAME || 'polkent.live');
 const ORIGIN = `http://${HOST}:${PORT}`;
 const wss = new WebSocketServer({ noServer: true, maxPayload: 8192 });
@@ -29,7 +26,7 @@ function snapshot() {
   return {
     type: 'status', phase, account: `@${TIKTOK_USERNAME}`, lastError, connectedSince,
     viewers: connectedSockets.size, controllerConnected: controller?.readyState === WebSocket.OPEN,
-    balancePreview: BALANCE_PREVIEW
+    version: VERSION
   };
 }
 function push(ws, payload) {
@@ -133,7 +130,7 @@ const server = createServer(async (req, res) => {
   const pathname = new URL(req.url || '/', ORIGIN).pathname;
   try {
     if (req.method === 'GET' && (pathname === '/' || pathname === '/index.html')) {
-      const html = renderHtml(await readFile(resolve(ROOT, 'index.html'), 'utf8'));
+      const html = await readFile(resolve(ROOT, 'index.html'), 'utf8');
       const injected = html.replace(/<\/body>\s*<\/html>\s*$/i,
         '<script src="/bridge-client.js" defer></script>\n</body>\n</html>');
       res.writeHead(200, { ...noCache, 'Content-Type': 'text/html; charset=utf-8' });
@@ -188,7 +185,7 @@ wss.on('connection', ws => {
 
 server.listen(PORT, HOST, () => {
   console.log(`Arena Live: ${ORIGIN}`);
-  if (BALANCE_PREVIEW) console.log('PRUEBA DE EQUILIBRIO · Ajustes: v0.5 · equilibrio (prueba). El archivo index.html no se modifica.');
+  console.log(`Versión ${VERSION} · TikTok y equilibrio integrados`);
   console.log(`TikTok: @${TIKTOK_USERNAME} (desconectado hasta que pulses Conectar)`);
   console.log('El puente solo escucha en 127.0.0.1. No utiliza contraseña de TikTok.');
 });

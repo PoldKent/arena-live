@@ -1,99 +1,62 @@
-// Aggregate seeded studies; keep side/order rotations in the same bootstrap cluster.
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { dirname } from 'node:path';
-import { gzipSync } from 'node:zlib';
-import { createHash } from 'node:crypto';
+// Summarize one release's real-engine study. Historical source/variants are not
+// mixed into current rates. Bootstrap whole seed clusters, including rotations.
 import assert from 'node:assert/strict';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
+import { gzipSync } from 'node:zlib';
 
-const [primaryPath, duelPath, nearestPath, prefix = 'docs/balance-v0.5'] = process.argv.slice(2);
-assert.ok(primaryPath && duelPath && nearestPath, 'Usage: node test/balance-summary.mjs primary.json expanded-duels.json nearest.json [output-prefix]');
-const [primary, expanded, nearest] = await Promise.all([primaryPath, duelPath, nearestPath].map(async p => JSON.parse(await readFile(p, 'utf8'))));
-const classes = ['kame', 'ninja', 'titan', 'trueno', 'esmeralda'];
-const labels = { kame: 'Guerrero', ninja: 'Shinobi', titan: 'Titán', trueno: 'Rayo', esmeralda: 'Espíritu' };
-const engine = expanded.metadata.engineGitBlob;
-assert.equal(primary.metadata.engineGitBlob, engine);
-assert.equal(nearest.metadata.productionGitBlob, engine);
-assert.equal(nearest.metadata.variant, 'nearest');
-for (const study of [primary, expanded, nearest]) { assert.equal(study.deterministic, true); assert.deepEqual(study.errors, []); }
-const published = [...expanded.results.filter(r => r.kind === 'duel'), ...primary.results.filter(r => r.kind === 'arena')];
-let rngState = 20261023;
-const random = () => ((rngState = (Math.imul(rngState, 1664525) + 1013904223) >>> 0) / 4294967296);
-const round = x => Math.round(x * 10000) / 10000;
-
-function scoreCI(matches, key) {
-  const groups = new Map();
-  for (const r of matches) {
-    const group = groups.get(r.baseSeed) || { total: 0, points: 0 };
-    group.total++; group.points += r.winner === key ? 1 : r.winner === null ? 0.5 : 0;
-    groups.set(r.baseSeed, group);
-  }
-  const values = [...groups.values()].map(x => x.points / x.total), samples = [];
-  for (let sample = 0; sample < 2000; sample++) {
-    let sum = 0;
-    for (let i = 0; i < values.length; i++) sum += values[Math.floor(random() * values.length)];
-    samples.push(sum / values.length * 100);
-  }
-  samples.sort((a, b) => a - b);
-  return { seeds: values.length, low: round(samples[50]), high: round(samples[1949]) };
+const classes=['kame','ninja','titan','trueno','esmeralda'];
+const names=['Guerrero','Shinobi','Titán','Rayo','Espíritu'];
+export async function summarizeBalance(study, prefix) {
+  assert.equal(study.deterministic,true);assert.equal(study.telemetryParity,true);assert.equal(study.crossScenarioParity,true);
+  assert.deepEqual(study.errors,[]);assert.ok(study.metadata.engineGitBlob);
+  const rows=study.results;
+  const key=r=>[r.kind,r.powerMode,r.count||2,r.pair?.join('/'),r.seed,r.side,r.first,r.rotation].join('|');
+  assert.equal(new Set(rows.map(key)).size,rows.length,'Count each case once');
+  let state=20261023;
+  const random=()=>((state=(Math.imul(state,1664525)+1013904223)>>>0)/4294967296);
+  const round=n=>Math.round(n*10000)/10000;
+  const ci=(matches,key)=>{
+    const groups=new Map();
+    for(const r of matches){const g=groups.get(r.baseSeed)||{n:0,wins:0};g.n++;g.wins+=Number(r.winner===key);groups.set(r.baseSeed,g);}
+    const values=[...groups.values()].map(g=>g.wins/g.n),samples=[];
+    for(let j=0;j<2000;j++){let sum=0;for(let i=0;i<values.length;i++)sum+=values[Math.floor(random()*values.length)];samples.push(sum/values.length*100);}
+    samples.sort((a,b)=>a-b);return{seedClusters:values.length,low:round(samples[50]),high:round(samples[1949])};
+  };
+  const aggregate=matches=>{
+    const result={matches:matches.length,timeouts:matches.filter(r=>!r.winner).length,classes:[]};
+    if(!matches.length)return result;
+    result.classes=classes.map((key,i)=>{
+      const eligible=matches.filter(r=>!r.pair||r.pair.includes(key)),fighters=eligible.flatMap(r=>r.fighters.filter(f=>f.classKey===key));
+      if(!eligible.length)return{classKey:key,name:names[i],matches:0};
+      const wins=eligible.filter(r=>r.winner===key).length;
+      return{classKey:key,name:names[i],matches:eligible.length,wins,winPct:round(wins/eligible.length*100),ci95:ci(eligible,key),
+        meanHpDamage:round(fighters.reduce((n,f)=>n+f.hpDamage,0)/fighters.length),meanKills:round(fighters.reduce((n,f)=>n+f.kills,0)/fighters.length)};
+    });
+    assert.equal(result.classes.reduce((n,r)=>n+(r.wins||0),0),result.matches-result.timeouts);return result;
+  };
+  const header='kind,power_mode,players,class_a,class_b,base_seed,seed,side,first,rotation,winner,seconds\n';
+  const csv=header+rows.map(r=>[r.kind,r.powerMode,r.count||2,r.pair?.[0]||'',r.pair?.[1]||'',r.baseSeed,r.seed,r.side??'',r.first??'',r.rotation??'',r.winner||'timeout',r.seconds].join(',')).join('\n')+'\n';
+  const archive=gzipSync(Buffer.from(csv),{level:9});
+  const summary={version:study.metadata.version,engineGitBlob:study.metadata.engineGitBlob,balance:study.metadata.balance,targeting:study.metadata.targeting,
+    sampling:{matches:rows.length,duelSeeds:study.metadata.duelSeeds,arenaSeeds:study.metadata.arenaSeeds,seedStart:study.metadata.seedStart,seedRanges:study.metadata.seedRanges||null,maxSeconds:study.metadata.maxSeconds,browser:study.metadata.browser},
+    provenance:study.provenance||null,
+    method:'Seeded AI; mirrored duel side/update order; balanced arena classes and five rotations. Actual mode transitions, no audience bonuses/re-entry. 2000 bootstrap resamples of whole seed clusters. Rates describe full matches and include unfinished cases in the denominator; timeouts are reported separately.',
+    duels:aggregate(rows.filter(r=>r.kind==='duel'&&r.powerMode==='full')),
+    noSpecials:aggregate(rows.filter(r=>r.kind==='duel'&&r.powerMode==='noSpecials')),
+    arenas:Object.fromEntries([...new Set(rows.filter(r=>r.kind==='arena').map(r=>r.count))].sort((a,b)=>a-b).map(n=>[n,aggregate(rows.filter(r=>r.kind==='arena'&&r.count===n))])),
+    checks:{deterministic:true,telemetryParity:true,crossScenarioParity:true,errors:[]},
+    evidence:{archive:prefix.split(/[\\/]/).at(-1)+'-matches.csv.gz',rows:rows.length,sha256:createHash('sha256').update(archive).digest('hex')}};
+  await mkdir(dirname(prefix),{recursive:true});
+  await writeFile(prefix+'-summary.json',JSON.stringify(summary,null,2)+'\n');await writeFile(prefix+'-matches.csv.gz',archive);
+  return summary;
 }
-
-function aggregate(matches) {
-  assert.ok(matches.length);
-  const timeouts = matches.filter(r => r.winner === null).length;
-  const rows = classes.map(key => {
-    const eligible = matches.filter(r => r.fighters.some(f => f.classKey === key));
-    const individuals = eligible.flatMap(r => r.fighters.filter(f => f.classKey === key));
-    const wins = eligible.filter(r => r.winner === key).length;
-    const draws = eligible.filter(r => r.winner === null).length;
-    const totals = Object.fromEntries(['hpDamage', 'specialHpDamage', 'normalHpDamage', 'kills', 'started', 'executed', 'hitCasts', 'specialTargets', 'interrupted', 'energySpent']
-      .map(field => [field, individuals.reduce((sum, f) => sum + f[field], 0)]));
-    const lifeSeconds = eligible.reduce((sum, r) => sum + r.fighters.filter(f => f.classKey === key).reduce((n, f) => n + (f.deathSeconds ?? r.seconds), 0), 0);
-    return { classKey: key, name: labels[key], matches: eligible.length, fighters: individuals.length, wins, draws,
-      winPct: round(100 * wins / eligible.length), scorePct: round(100 * (wins + draws / 2) / eligible.length),
-      scoreCI95: scoreCI(eligible, key), meanHpDamage: round(totals.hpDamage / individuals.length),
-      meanKills: round(totals.kills / individuals.length), meanSurvivalSeconds: round(lifeSeconds / individuals.length),
-      specialDamagePerExecution: round(totals.specialHpDamage / Math.max(1, totals.executed)),
-      specialTargetsPerExecution: round(totals.specialTargets / Math.max(1, totals.executed)),
-      specialHitPct: round(100 * totals.hitCasts / Math.max(1, totals.executed)),
-      chargeExecutedPct: round(100 * totals.executed / Math.max(1, totals.started)),
-      hpDeaths: individuals.filter(f => f.deathCause === 'hp').length,
-      fallDeaths: individuals.filter(f => f.deathCause === 'fall').length,
-      totals: Object.fromEntries(Object.entries(totals).map(([k, v]) => [k, round(v)])) };
-  });
-  assert.equal(rows.reduce((sum, r) => sum + r.wins, 0), matches.length - timeouts);
-  return { matches: matches.length, timeouts, maxSeconds: expanded.metadata.maxSeconds, classes: rows };
+if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+  const [input,prefix,...extra]=process.argv.slice(2);
+  assert.ok(input&&!extra.length,'Usage: node test/balance-summary.mjs study.json [output-prefix]');
+  const study=JSON.parse(await readFile(input,'utf8'));
+  const summary=await summarizeBalance(study,prefix||input.replace(/\.json$/,'')+'-report');
+  console.log(JSON.stringify({version:summary.version,matches:summary.sampling.matches,duels:summary.duels.classes,arenas:summary.arenas}));
 }
-
-const duels = aggregate(published.filter(r => r.kind === 'duel' && r.powerMode === 'full'));
-const noSpecials = aggregate(published.filter(r => r.kind === 'duel' && r.powerMode === 'noSpecials'));
-for (const row of noSpecials.classes) assert.equal(row.scorePct, 50, 'Mirrored equal-stat duels must be symmetric without powers');
-const arenas = Object.fromEntries(primary.metadata.counts.map(n => [n, aggregate(published.filter(r => r.kind === 'arena' && r.count === n))]));
-const neutral = Object.fromEntries(nearest.metadata.counts.map(n => [n, aggregate(nearest.results.filter(r => r.count === n))]));
-const matrix = Object.fromEntries(classes.map(key => [key, Object.fromEntries(classes.filter(k => k !== key).map(other => {
-  const games = published.filter(r => r.kind === 'duel' && r.powerMode === 'full' && r.pair.includes(key) && r.pair.includes(other));
-  return [other, { matches: games.length, wins: games.filter(r => r.winner === key).length,
-    draws: games.filter(r => r.winner === null).length, winPct: round(100 * games.filter(r => r.winner === key).length / games.length) }];
-}))]));
-const combined = [...published.map(r => ({ ...r, variant: 'published' })), ...nearest.results.map(r => ({ ...r, variant: 'nearest' }))];
-const caseKeys = combined.map(r => [r.variant, r.kind, r.powerMode, r.count || 2, r.pair?.join('/'), r.baseSeed, r.side, r.first, r.rotation].join('|'));
-assert.equal(new Set(caseKeys).size, combined.length, 'Each trial must be counted exactly once');
-const header = 'variant,kind,power_mode,players,class_a,class_b,base_seed,side,first,rotation,winner,seconds\n';
-const csv = header + combined.map(r => [r.variant, r.kind, r.powerMode, r.count || 2,
-  r.pair?.[0] || '', r.pair?.[1] || '', r.baseSeed, r.side ?? '', r.first ?? '', r.rotation ?? '', r.winner || 'timeout', r.seconds].join(',')).join('\n') + '\n';
-const archive = gzipSync(Buffer.from(csv), { level: 9 });
-const summary = { version: '0.5.0', productionEngineGitBlob: engine,
-  sampling: { publishedMatches: published.length, counterfactualMatches: nearest.results.length, uniqueMatches: combined.length,
-    duelSeeds: expanded.metadata.duelSeeds, arenaSeeds: primary.metadata.arenaSeeds, rotationsPerArenaSeed: 5,
-    variantsPerDuelSeed: 4, maxSeconds: expanded.metadata.maxSeconds, browser: expanded.metadata.browser,
-    note: 'Earlier 50-seed duels and pilot runs are excluded to avoid double-counting repeated trials.' },
-  methodology: { timerHz: 60, externalBoosts: false, reentry: false, targeting: 'published class rivalries; neutral control removes class preferences including lightning prioritization',
-    intervals: '2000 bootstrap resamples of seed clusters; side/order/class rotations remain together. Intervals describe this simulation, not human skill or LIVE outcomes.' },
-  duels, noSpecials, arenas, nearestTargetControl: neutral, duelMatrix: matrix, probes: primary.probes,
-  evidence: { archive: prefix.split('/').at(-1) + '-matches.csv.gz', rows: combined.length,
-    sha256: createHash('sha256').update(archive).digest('hex') } };
-await mkdir(dirname(prefix), { recursive: true });
-await writeFile(prefix + '-summary.json', JSON.stringify(summary, null, 2) + '\n');
-await writeFile(prefix + '-matches.csv.gz', archive);
-console.log(JSON.stringify({ uniqueMatches: combined.length, archiveBytes: archive.length,
-  duels: duels.classes.map(({ name, wins, matches, winPct, scoreCI95 }) => ({ name, wins, matches, winPct, scoreCI95 })),
-  arena125: arenas[125]?.classes.map(({ name, winPct }) => ({ name, winPct })) }));
