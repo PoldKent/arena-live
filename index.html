@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.4 — TikTok LIVE</title>
+    <title>Arena Live v0.5 — TikTok LIVE</title>
     <!--
       ARENA LIVE · MONOLITHIC DELIVERY
       All application code intentionally stays in this HTML file.
@@ -629,7 +629,7 @@ body.touch-controls-active #portraitChatOverlay {
 </style>
 
 <style id="arena-visual-polish-v01">
-/* Arena Live v0.4: duelo vertical legible y controles compactos fuera de la imagen. */
+/* Arena Live v0.5: duelo vertical legible y controles compactos fuera de la imagen. */
 #viewport9x16 #hud1v1Bars9 {padding:9px 10px!important;border-radius:14px!important;border-color:rgba(251,191,36,.62)!important;box-shadow:0 5px 20px rgba(0,0,0,.28)}
 #viewport9x16 #hud1v1Bars9 .grid-cols-11 {gap:7px!important}
 #viewport9x16 #p1Bar1v1_9,#viewport9x16 #p2Bar1v1_9 {height:100%!important}
@@ -642,7 +642,7 @@ body.touch-controls-active #portraitChatOverlay {
 
 
 <style id="arena-workspace-v03">
-/* MODULE BLOCK: v0.4 operator workspaces. Games keep their original canvases and HUD. */
+/* MODULE BLOCK: v0.5 operator workspaces. Games keep their original canvases and HUD. */
 :root {--arena-left-width:260px;--arena-right-width:300px;--arena-stream-width:260px;--arena-line:#29313e;--arena-surface:#111720;--arena-muted:#97a3b5}
 html,body {height:100%;min-height:100%;overflow:hidden!important;background:#090d13}
 body>header {position:relative!important;flex:none;padding:7px 10px!important;background:#111720!important;backdrop-filter:none!important;border-color:var(--arena-line)!important}
@@ -1396,7 +1396,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <h2 class="font-display font-black text-base sm:text-lg text-white tracking-wide">
                                 <span id="arenaSettingsTitle" data-operator-label="settingsTitle">Pausa y ajustes</span>
                             </h2>
-                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.4 · TikTok</span>
+                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.5 · TikTok</span>
                             <span id="settingsModeBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400/40">
                                 ⏸️ JUEGO EN PAUSA
                             </span>
@@ -1554,7 +1554,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     <!-- Ajustes de calibración específicos del operador. No modifica la lógica de la partida. -->
                     <section id="arenaObsCalibrationPanel" data-no-translate class="rounded-xl border border-cyan-800/50 bg-slate-950/70 p-3 flex flex-col gap-2" aria-label="Calibración OBS">
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <strong class="text-[11px] text-cyan-200" id="arenaObsCalibrationTitle">📐 Calibración para OBS · v0.4</strong>
+                            <strong class="text-[11px] text-cyan-200" id="arenaObsCalibrationTitle">📐 Calibración para OBS · v0.5</strong>
                             <button type="button" id="arenaObsResetCalibration" onclick="resetArenaObsCalibration()" class="rounded-md px-2 py-1 border border-slate-700 bg-slate-900 text-slate-200 text-[10px]">Restablecer</button>
                         </div>
                         <p class="text-[10px] text-slate-400" id="arenaObsCalibrationHint">Ajusta esto antes de emitir; los recortes de OBS deben configurarse después. Abrir las herramientas no modificará las dimensiones.</p>
@@ -1649,7 +1649,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo">Arena Live v0.4 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo">Arena Live v0.5 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
@@ -2839,6 +2839,28 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         // Entities & Rosters
         let fighters = [];
+        let arenaRoundRevision = 0;
+        let arenaRosterBatchDepth = 0;
+        function refreshArenaRosterUI() {
+            if (arenaRosterBatchDepth) return;
+            updateTargetSelectDropdown();
+            updateHudFighterCards();
+            updateStreamerJoinButton();
+            refreshArenaCombatRuleControls();
+        }
+        function withArenaRosterBatch(action) {
+            const previousMode = activeMode;
+            arenaRosterBatchDepth++;
+            try { return action(); }
+            finally {
+                arenaRosterBatchDepth--;
+                if (!arenaRosterBatchDepth) {
+                    activeMode = previousMode;
+                    evaluateArenaMode(true);
+                    refreshArenaRosterUI();
+                }
+            }
+        }
         let eliminationOrder = [];
         let lastMatchRoster = [];
         // Spectator identity/class data persists across rounds and page reloads.
@@ -3714,7 +3736,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             }
 
             const incomingIdentityKey = viewerIdentityKey(username, platformKey);
-            if (!isStreamer && gameState === 'COMBAT' && fighters.filter(f => !f.eliminated).length <= 2) {
+            if (!arenaRosterBatchDepth && !isStreamer && gameState === 'COMBAT' && fighters.filter(f => !f.eliminated).length <= 2) {
                 const alreadyAlive = fighters.some(f => !f.eliminated && viewerIdentityKey(f.name, f.platformKey) === incomingIdentityKey);
                 if (!alreadyAlive) {
                     appendChatMessage('@ArenaSystem', platformKey, '🏁 Duelo final: la inscripción y el reingreso están cerrados.', 'normal');
@@ -3810,8 +3832,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             ? `Vida ${existing.joinsUsed} de ${MAX_OPPORTUNITIES} ${existing.joinsUsed === MAX_OPPORTUNITIES ? '• ¡ÚLTIMA VIDA!' : ''}`
                             : `Re-ingreso Ilimitado #${existing.joinsUsed} en modo Por Tiempo`);
                 }
-                updateTargetSelectDropdown();
-                updateHudFighterCards();
+                refreshArenaRosterUI();
                 return existing;
             }
 
@@ -3832,8 +3853,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 : (rejoinRuleMode === '3_lives' ? `¡ENTRÓ (1/${MAX_OPPORTUNITIES})!` : '¡ENTRÓ A PELEAR!');
             spawnFloatingText(f.x, f.y - 38, firstJoinLabel, f.color, 14);
             if (!silentBanner) playSound('powerup');
-            updateTargetSelectDropdown();
-            updateHudFighterCards();updateStreamerJoinButton();refreshArenaCombatRuleControls();
+            refreshArenaRosterUI();
             return f;
         }
 
@@ -3884,15 +3904,25 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         function applyPlayerCountPreset(targetCount) {
             // Simulator presets use curated names and can never create a 129th body.
             targetCount = Math.max(0, Math.min(getArenaPlayerLimit(), Math.trunc(Number(targetCount) || 0)));
+            arenaRoundRevision++;
+            koSequenceActive = false;
+            slowMoFactor = 1;
+            if (gameState === 'VICTORY') gameState = 'LOBBY';
+            currentWinner = null;
+            activeEffects = []; particles = []; floatingTexts = []; confetti = [];
+            screenShake = 0; skyFlashTimer = 0;
+            document.querySelectorAll('.fighter-speech-bubble').forEach(node => node.remove());
             fighters = [];
             totalParticipants = 0;
             document.getElementById('hudCoopBadge16').classList.add('hidden');
             document.getElementById('hudCoopBadge9').classList.add('hidden');
 
             const platforms = ['tiktok', 'twitch', 'youtube', 'kick', 'facebook'];
-            for (const [index, bot] of BOT_ROSTER.slice(0, targetCount).entries()) {
-                addOrBoostFighter(bot.name, platforms[index % platforms.length], false, bot.classKey, true);
-            }
+            withArenaRosterBatch(() => {
+                for (const [index, bot] of BOT_ROSTER.slice(0, targetCount).entries()) {
+                    addOrBoostFighter(bot.name, platforms[index % platforms.length], false, bot.classKey, true);
+                }
+            });
 
             if (gameState === 'COMBAT') {
                 // Re-space fighters cleanly for the new automatic mode
@@ -3916,6 +3946,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 arrangeFightersForCurrentState();
             }
 
+            updatePhaseUI();
             playSound('powerup');
             showDualBanner(
                 `⚡ ESCALADO AUTOMÁTICO (${targetCount} VIVOS)`,
@@ -3999,6 +4030,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         function openLobby(clearFighters = false) {
+            arenaRoundRevision++;
             currentWinner = null;
             gameState = 'LOBBY';
             koSequenceActive = false;
@@ -4015,8 +4047,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 document.getElementById('hudCoopBadge16')?.classList.add('hidden');
                 document.getElementById('hudCoopBadge9')?.classList.add('hidden');
                 // Known spectators automatically rejoin the lobby with their prior classes.
-                [...viewerProfiles.values()].forEach(profile =>
-                    addOrBoostFighter(profile.name, profile.platformKey, false, profile.archetypeKey, true));
+                withArenaRosterBatch(() => [...viewerProfiles.values()].forEach(profile =>
+                    addOrBoostFighter(profile.name, profile.platformKey, false, profile.archetypeKey, true)));
                 ensureMinimumLobbyRoster();
                 manualSpectatorFighter = null; // Roster replaced; reattach from the identity key below.
                 if (manualSpectatorIdentity) {
@@ -4067,6 +4099,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         function startCombatFromLobby() {
+            arenaRoundRevision++;
             trimArenaRosterToLimit();
             currentWinner = null;
             if (fighters.length < 2) {
@@ -4301,6 +4334,10 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 activeMode = 'iso';
             }
 
+            // Admission batches still update mode/physics immediately, then refresh
+            // the HUD and controls once with the completed roster.
+            if (arenaRosterBatchDepth) return;
+
             // Update Top Auto-Mode Pipeline Badges
             const b1v1 = document.getElementById('autoBadge-1v1');
             const bSmash = document.getElementById('autoBadge-smash');
@@ -4522,24 +4559,51 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 );
         }
 
-        function findPreferredCombatTarget(attacker, inRange = () => true) {
+        function findPreferredCombatTarget(attacker, inRange = null) {
             if (!attacker) return null;
-            const candidates = fighters.filter(other => canFighterAttack(attacker, other) && inRange(other));
-            if (!candidates.length) return null;
-            const distance = other => Math.hypot(other.x - attacker.x, other.y - attacker.y);
-            candidates.sort((a, b) => distance(a) - distance(b));
-            const closest = candidates[0];
-            const closeLimit = distance(closest) * COMBAT_TARGET_PREFERENCE_RANGE.ratio
-                + COMBAT_TARGET_PREFERENCE_RANGE.extra;
-            const reachable = candidates.filter(other => distance(other) <= closeLimit);
-            if (attacker.archetypeKey === 'titan') {
-                // Finish off the weakest fighter among reasonably close candidates;
-                // Titans never cross the entire arena just to chase low HP.
-                return reachable.sort((a,b) => (a.hp / Math.max(1,a.maxHp))
-                    - (b.hp / Math.max(1,b.maxHp)) || distance(a) - distance(b))[0] || closest;
+            // Two linear passes preserve nearest/rival/weakest priorities and stable ties.
+            // The old per-fighter sort recalculated square roots O(n log n) times.
+            // Evaluate optional predicates once, matching the original targeting contract.
+            const candidates = inRange
+                ? fighters.filter(other => canFighterAttack(attacker, other) && inRange(other))
+                : fighters;
+            let closest = null;
+            let closestDistanceSq = Infinity;
+            for (const other of candidates) {
+                if (!canFighterAttack(attacker, other)) continue;
+                const dx = other.x - attacker.x, dy = other.y - attacker.y;
+                const distanceSq = dx * dx + dy * dy;
+                if (distanceSq < closestDistanceSq) {
+                    closest = other;
+                    closestDistanceSq = distanceSq;
+                }
             }
+            if (!closest) return null;
+            const closeLimit = Math.sqrt(closestDistanceSq) * COMBAT_TARGET_PREFERENCE_RANGE.ratio
+                + COMBAT_TARGET_PREFERENCE_RANGE.extra;
+            const closeLimitSq = closeLimit * closeLimit;
             const rival = CLASS_RIVALRIES[attacker.archetypeKey];
-            return reachable.find(other => other.archetypeKey === rival) || closest;
+            let preferred = closest;
+            let preferredDistanceSq = Infinity;
+            let weakestRatio = Infinity;
+            for (const other of candidates) {
+                if (!canFighterAttack(attacker, other)) continue;
+                const dx = other.x - attacker.x, dy = other.y - attacker.y;
+                const distanceSq = dx * dx + dy * dy;
+                if (distanceSq > closeLimitSq) continue;
+                if (attacker.archetypeKey === 'titan') {
+                    const healthRatio = other.hp / Math.max(1, other.maxHp);
+                    if (healthRatio < weakestRatio || (healthRatio === weakestRatio && distanceSq < preferredDistanceSq)) {
+                        preferred = other;
+                        weakestRatio = healthRatio;
+                        preferredDistanceSq = distanceSq;
+                    }
+                } else if (other.archetypeKey === rival && distanceSq < preferredDistanceSq) {
+                    preferred = other;
+                    preferredDistanceSq = distanceSq;
+                }
+            }
+            return preferred;
         }
 
         function getFighterMoveSpeedMultiplier(fighter) {
@@ -4918,6 +4982,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             koSequenceActive = true;
             updateStreamerJoinButton();
             slowMoFactor = 0.22;
+            const roundRevision = arenaRoundRevision;
 
             ['16', '9'].forEach(sfx => {
                 const koOverlay = document.getElementById(`koSlowMoOverlay${sfx}`);
@@ -4929,6 +4994,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             });
 
             setTimeout(() => {
+                if (roundRevision !== arenaRoundRevision || !koSequenceActive) return;
                 ['16', '9'].forEach(sfx => {
                     document.getElementById(`koSlowMoOverlay${sfx}`).classList.add('hidden');
                 });
@@ -5358,9 +5424,13 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     if (other.id === f.id || other.eliminated) return;
                     const dx = f.x - other.x;
                     const dy = f.y - other.y;
-                    const dist = Math.hypot(dx, dy);
                     const minSep = (f.radius + other.radius) * 0.9;
-                    if (dist > 0 && dist < minSep) {
+                    // Reject distant bodies before computing a square root. Keep the
+                    // original roster order and sequential separation response.
+                    if (Math.abs(dx) >= minSep || Math.abs(dy) >= minSep) return;
+                    const distanceSq = dx * dx + dy * dy;
+                    if (distanceSq > 0 && distanceSq < minSep * minSep) {
+                        const dist = Math.sqrt(distanceSq);
                         const push = (minSep - dist) * 0.07 * dt;
                         f.x += (dx / dist) * push;
                         if (activeMode === 'iso') f.y += (dy / dist) * push;
@@ -5441,13 +5511,27 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
          *************************************************************************/
         // ==================== 5. HUD, RENDERING, CHAT & SOCIAL EVENTS ====================
         // MODULE BLOCK I: CANVAS RENDERING + HUD DRAWING (future js/render.js).
+        function writeArenaHudText(node, text) {
+            if (node && node.textContent !== text) node.textContent = text;
+        }
+        function writeArenaHudWidth(node, percent) {
+            const width = `${percent}%`;
+            if (node && node.style.width !== width) node.style.width = width;
+        }
         function renderBothScreensSimultaneously() {
+            const fullscreenId = document.fullscreenElement?.id;
+            const draw16 = fullscreenId === 'broadcastStageSection' || fullscreenId === 'card-16x9'
+                || (fullscreenId !== 'card-9x16' && monitorFocus !== '9:16');
+            const draw9 = fullscreenId === 'broadcastStageSection' || fullscreenId === 'card-9x16'
+                || (fullscreenId !== 'card-16x9' && monitorFocus !== '16:9');
+            // Both captures share one depth order from the same simulation snapshot.
+            const orderedFighters = fighters.filter(f => !f.eliminated).sort((a, b) => a.y - b.y);
             // 1. Render 16:9 Horizontal Broadcast Canvas (960x540)
             const zoom16 = (gameState === 'COMBAT' && activeMode === '1v1') ? 1.12 : 1.0;
-            renderWorldToViewport(ctx16, 960, 540, WORLD_W * 0.5, WORLD_H * 0.54, zoom16);
+            if (draw16) renderWorldToViewport(ctx16, 960, 540, WORLD_W * 0.5, WORLD_H * 0.54, zoom16, orderedFighters);
 
             // 2. Render 9:16 Vertical Mobile Broadcast Canvas (540x960) with Smart Camera
-            renderWorldToViewport(ctx9, 540, 960, camera9x16.x, camera9x16.y, camera9x16.zoom);
+            if (draw9) renderWorldToViewport(ctx9, 540, 960, camera9x16.x, camera9x16.y, camera9x16.zoom, orderedFighters);
 
             // 3. Synchronize 1v1 Top Health Bars on Both Screens when in 1v1 Combat
             if (gameState === 'COMBAT' && activeMode === '1v1') {
@@ -5463,72 +5547,30 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     ['16', '9'].forEach(sfx => {
                         const p1Name = document.getElementById(`p1Name1v1_${sfx}`);
                         const p2Name = document.getElementById(`p2Name1v1_${sfx}`);
-                        if (p1Name) p1Name.textContent = `${p1.platform.icon} ${getFighterDisplayName(p1)}`;
-                        if (p2Name) p2Name.textContent = `${p2.platform.icon} ${getFighterDisplayName(p2)}`;
-                        document.getElementById(`p1Bar1v1_${sfx}`).style.width = `${p1Pct}%`;
-                        document.getElementById(`p2Bar1v1_${sfx}`).style.width = `${p2Pct}%`;
+                        writeArenaHudText(p1Name, `${p1.platform.icon} ${getFighterDisplayName(p1)}`);
+                        writeArenaHudText(p2Name, `${p2.platform.icon} ${getFighterDisplayName(p2)}`);
+                        writeArenaHudWidth(document.getElementById(`p1Bar1v1_${sfx}`), p1Pct);
+                        writeArenaHudWidth(document.getElementById(`p2Bar1v1_${sfx}`), p2Pct);
                         const p1HpText = document.getElementById(`p1HpText1v1_${sfx}`);
                         const p2HpText = document.getElementById(`p2HpText1v1_${sfx}`);
                         const p1EnergyBar = document.getElementById(`p1Energy1v1_${sfx}`);
                         const p2EnergyBar = document.getElementById(`p2Energy1v1_${sfx}`);
                         const p1EnergyText = document.getElementById(`p1EnergyText1v1_${sfx}`);
                         const p2EnergyText = document.getElementById(`p2EnergyText1v1_${sfx}`);
-                        if (p1HpText) p1HpText.textContent = `${p1Pct}%`;
-                        if (p2HpText) p2HpText.textContent = `${p2Pct}%`;
-                        if (p1EnergyBar) p1EnergyBar.style.width = `${p1Energy}%`;
-                        if (p2EnergyBar) p2EnergyBar.style.width = `${p2Energy}%`;
-                        if (p1EnergyText) p1EnergyText.textContent = `${p1Energy}%`;
-                        if (p2EnergyText) p2EnergyText.textContent = `${p2Energy}%`;
+                        writeArenaHudText(p1HpText, `${p1Pct}%`);
+                        writeArenaHudText(p2HpText, `${p2Pct}%`);
+                        writeArenaHudWidth(p1EnergyBar, p1Energy);
+                        writeArenaHudWidth(p2EnergyBar, p2Energy);
+                        writeArenaHudText(p1EnergyText, `${p1Energy}%`);
+                        writeArenaHudText(p2EnergyText, `${p2Energy}%`);
                     });
                 }
             }
         }
 
-        function renderWorldToViewport(targetCtx, viewW, viewH, camX, camY, camZoom) {
-            targetCtx.save();
-
-            // 1. Viewport Background Sky Gradient (Covers full 16:9 or 9:16 frame)
-            const bgGrad = targetCtx.createLinearGradient(0, 0, 0, viewH);
-            if (gameState === 'LOBBY') {
-                bgGrad.addColorStop(0, '#061224');
-                bgGrad.addColorStop(0.55, '#0f172a');
-                bgGrad.addColorStop(1, '#050811');
-            } else if (gameState === 'VICTORY') {
-                bgGrad.addColorStop(0, '#1a1207');
-                bgGrad.addColorStop(0.5, '#0f172a');
-                bgGrad.addColorStop(1, '#05070e');
-            } else if (activeMode === '1v1') {
-                bgGrad.addColorStop(0, '#090d1f');
-                bgGrad.addColorStop(0.55, '#17153b');
-                bgGrad.addColorStop(1, '#090a14');
-            } else {
-                bgGrad.addColorStop(0, '#071126');
-                bgGrad.addColorStop(0.6, '#0f172a');
-                bgGrad.addColorStop(1, '#050811');
-            }
-            targetCtx.fillStyle = bgGrad;
-            targetCtx.fillRect(0, 0, viewW, viewH);
-
-            if (skyFlashTimer > 0) {
-                targetCtx.fillStyle = skyFlashColor + '33';
-                targetCtx.fillRect(0, 0, viewW, viewH);
-            }
-
-            // 2. Apply Camera Transform (Pan, Zoom & Screen Shake)
-            if (screenShake > 0.4) {
-                const sx = (Math.random() - 0.5) * screenShake * 2;
-                const sy = (Math.random() - 0.5) * screenShake * 2;
-                targetCtx.translate(sx, sy);
-            }
-
-            targetCtx.translate(viewW * 0.5, viewH * 0.56);
-            targetCtx.scale(camZoom, camZoom);
-            targetCtx.translate(-camX, -camY);
-
-            const W = WORLD_W;
-            const H = WORLD_H;
-            const groundY = H * 0.79;
-
+        // Stage geometry stays separate from moving fighters, particles and HUD.
+        function paintArenaStageGeometry(targetCtx) {
+            const W = WORLD_W, H = WORLD_H, groundY = H * 0.79;
             // 3. Render Stage Geometry in World Coordinates
             if (activeMode === 'iso' && (gameState === 'COMBAT' || (gameState === 'LOBBY' && fighters.length >= 9))) {
                 // ISOMETRIC 2.5D COLOSSEUM FLOOR
@@ -5645,8 +5687,53 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 }
             }
 
+        }
+
+        function renderWorldToViewport(targetCtx, viewW, viewH, camX, camY, camZoom, orderedFighters = null) {
+            targetCtx.save();
+
+            // 1. Viewport Background Sky Gradient (Covers full 16:9 or 9:16 frame)
+            const bgGrad = targetCtx.createLinearGradient(0, 0, 0, viewH);
+            if (gameState === 'LOBBY') {
+                bgGrad.addColorStop(0, '#061224');
+                bgGrad.addColorStop(0.55, '#0f172a');
+                bgGrad.addColorStop(1, '#050811');
+            } else if (gameState === 'VICTORY') {
+                bgGrad.addColorStop(0, '#1a1207');
+                bgGrad.addColorStop(0.5, '#0f172a');
+                bgGrad.addColorStop(1, '#05070e');
+            } else if (activeMode === '1v1') {
+                bgGrad.addColorStop(0, '#090d1f');
+                bgGrad.addColorStop(0.55, '#17153b');
+                bgGrad.addColorStop(1, '#090a14');
+            } else {
+                bgGrad.addColorStop(0, '#071126');
+                bgGrad.addColorStop(0.6, '#0f172a');
+                bgGrad.addColorStop(1, '#050811');
+            }
+            targetCtx.fillStyle = bgGrad;
+            targetCtx.fillRect(0, 0, viewW, viewH);
+
+            if (skyFlashTimer > 0) {
+                targetCtx.fillStyle = skyFlashColor + '33';
+                targetCtx.fillRect(0, 0, viewW, viewH);
+            }
+
+            // 2. Apply Camera Transform (Pan, Zoom & Screen Shake)
+            if (screenShake > 0.4) {
+                const sx = (Math.random() - 0.5) * screenShake * 2;
+                const sy = (Math.random() - 0.5) * screenShake * 2;
+                targetCtx.translate(sx, sy);
+            }
+
+            targetCtx.translate(viewW * 0.5, viewH * 0.56);
+            targetCtx.scale(camZoom, camZoom);
+            targetCtx.translate(-camX, -camY);
+
+            paintArenaStageGeometry(targetCtx);
+
             // 4. Depth-Sort Living Fighters
-            const visibleFighters = fighters
+            const visibleFighters = orderedFighters || fighters
                 .filter(f => !f.eliminated)
                 .sort((a, b) => a.y - b.y);
 
@@ -5691,6 +5778,44 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             });
 
             targetCtx.restore();
+        }
+
+        // Cache text metrics rather than whole-frame bitmaps. Two small entries
+        // per fighter keep native glyph rendering and are released with the roster.
+        const arenaFighterLabelCache = new WeakMap();
+        let arenaRenderFontRevision = 0;
+        document.fonts?.addEventListener('loadingdone', () => { arenaRenderFontRevision++; });
+        function drawFighterLabel(targetCtx, f, drawX, plateY, nameFont, classFont, packedFighterCount) {
+            targetCtx.textAlign = 'center';
+            const oppShort = rejoinRuleMode === '3_lives' ? `${f.joinsUsed}/${MAX_OPPORTUNITIES}` : `#${f.joinsUsed}`;
+            const displayName = getFighterDisplayName(f, true);
+            const nameLimit = packedFighterCount >= 70 ? 9 : packedFighterCount >= 30 ? 11 : 16;
+            const compactName = displayName.length > nameLimit ? `${displayName.slice(0, nameLimit - 1)}…` : displayName;
+            const displayTag = f.coopCount > 1
+                ? `${f.platform.icon} ${compactName} ${oppShort} x${f.coopCount}`
+                : `${f.platform.icon} ${compactName} ${oppShort}`;
+
+            targetCtx.font = `700 ${nameFont}px "Inter", sans-serif`;
+            const key = `${arenaRenderFontRevision}|${nameFont}|${displayTag}`;
+            let entries = arenaFighterLabelCache.get(f);
+            if (!entries) { entries = []; arenaFighterLabelCache.set(f, entries); }
+            const slot = targetCtx === ctx9 ? 1 : 0;
+            if (!entries[slot] || entries[slot].key !== key) {
+                entries[slot] = { key, width: targetCtx.measureText(displayTag).width + 10 };
+            }
+            const textWidth = entries[slot].width;
+            targetCtx.fillStyle = 'rgba(9, 13, 22, 0.82)';
+            targetCtx.beginPath();
+            targetCtx.roundRect(drawX - textWidth / 2, plateY - (nameFont + 2), textWidth, nameFont + 5, 3);
+            targetCtx.fill();
+            targetCtx.fillStyle = f.isStreamer ? '#ffbe0b' : (f.joinsUsed === MAX_OPPORTUNITIES && rejoinRuleMode === '3_lives' ? '#fda4af' : '#f8fafc');
+            targetCtx.fillText(displayTag, drawX, plateY - 1);
+
+            targetCtx.font = `700 ${classFont}px "Inter", sans-serif`;
+            targetCtx.fillStyle = f.color;
+            const visibleClassTitle = ARCHETYPES.find(archetype => archetype.key === f.archetypeKey)?.title || getFighterClassTitle(f);
+            targetCtx.fillText(visibleClassTitle, drawX, plateY + classFont + 1, 90);
+
         }
 
         function drawFighterOnCtx(targetCtx, f) {
@@ -5838,28 +5963,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 ? (packedFighterCount <= 8 ? 9 : packedFighterCount <= 32 ? 8 : 7)
                 : (packedFighterCount <= 8 ? 8 : 7);
             const plateY = drawY - r - (portraitLabel ? 24 : 22);
-            targetCtx.textAlign = 'center';
-            const oppShort = rejoinRuleMode === '3_lives' ? `${f.joinsUsed}/${MAX_OPPORTUNITIES}` : `#${f.joinsUsed}`;
-            const displayName = getFighterDisplayName(f, true);
-            const nameLimit = packedFighterCount >= 70 ? 9 : packedFighterCount >= 30 ? 11 : 16;
-            const compactName = displayName.length > nameLimit ? `${displayName.slice(0, nameLimit - 1)}…` : displayName;
-            const displayTag = f.coopCount > 1
-                ? `${f.platform.icon} ${compactName} ${oppShort} x${f.coopCount}`
-                : `${f.platform.icon} ${compactName} ${oppShort}`;
-
-            targetCtx.font = `700 ${nameFont}px "Inter", sans-serif`;
-            const textWidth = targetCtx.measureText(displayTag).width + 10;
-            targetCtx.fillStyle = 'rgba(9, 13, 22, 0.82)';
-            targetCtx.beginPath();
-            targetCtx.roundRect(drawX - textWidth / 2, plateY - (nameFont + 2), textWidth, nameFont + 5, 3);
-            targetCtx.fill();
-            targetCtx.fillStyle = f.isStreamer ? '#ffbe0b' : (f.joinsUsed === MAX_OPPORTUNITIES && rejoinRuleMode === '3_lives' ? '#fda4af' : '#f8fafc');
-            targetCtx.fillText(displayTag, drawX, plateY - 1);
-
-            targetCtx.font = `700 ${classFont}px "Inter", sans-serif`;
-            targetCtx.fillStyle = f.color;
-            const visibleClassTitle = ARCHETYPES.find(archetype => archetype.key === f.archetypeKey)?.title || getFighterClassTitle(f);
-            targetCtx.fillText(visibleClassTitle, drawX, plateY + classFont + 1, 90);
+            drawFighterLabel(targetCtx, f, drawX, plateY, nameFont, classFont, packedFighterCount);
 
             if (gameState !== 'LOBBY') {
                 const barW = 44;
@@ -7190,6 +7294,16 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             });
         }
 
+        const arenaChatScrollFrames = new WeakSet();
+        function followArenaChat(feed) {
+            if (arenaChatScrollFrames.has(feed)) return;
+            arenaChatScrollFrames.add(feed);
+            requestAnimationFrame(() => {
+                arenaChatScrollFrames.delete(feed);
+                feed.scrollTop = feed.scrollHeight;
+            });
+        }
+
         function appendChatMessage(username, platformKey, message, styleType = 'normal') {
             const feed = document.getElementById('chatFeed');
             if (!feed) return;
@@ -7226,7 +7340,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             while (feed.children.length > chatRetention) {
                 feed.removeChild(feed.firstChild);
             }
-            feed.scrollTop = feed.scrollHeight;
+            followArenaChat(feed);
         }
 
         function localizeArenaNotice(source, language = currentLanguage) {
@@ -7274,7 +7388,13 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 while (container.children.length > 3) container.removeChild(container.firstChild);
                 setTimeout(() => badge.remove(), 2700);
             });
-            koFeedBatch.set(source, {time:now,count:1,nodes});
+            record = {time:now,count:1,nodes};
+            koFeedBatch.set(source, record);
+            // Release detached badges after their display window. A repeated notice
+            // may already own a newer record, which this timer must not remove.
+            setTimeout(() => {
+                if (koFeedBatch.get(source) === record) koFeedBatch.delete(source);
+            }, 2700);
         }
 
         function updateHudFighterCards() {
@@ -7626,7 +7746,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.4';
+        const ARENA_RELEASE_VERSION = '0.5';
         const ARENA_RELEASE_EDITION = 'tiktok';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:10, footer:76});
@@ -7914,7 +8034,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
 
-        // MODULE BLOCK: v0.4 shared operator toolbar and dismiss-on-action menus.
+        // MODULE BLOCK: v0.5 shared operator toolbar and persistent Stream panels.
         const ARENA_OPERATOR_COPY = Object.freeze({
             es:['Modo Stream','Salir de Stream','Vista','Pantalla','Herramientas','Chat','Ajustes','Audio','Silenciado','Clase','Pausa y ajustes','Los cambios se aplican al instante. Cierra Ajustes para reanudar.','🎮 Partida','👑 Prota y combate','🖥 Pantallas y OBS','👥 Audiencia y chat','🔊 Audio e idioma','🌐 Idioma','Opacidad de la información del juego','Afecta a textos y barras de ambas vistas. 100 % = totalmente visible.','Vista de preparación','Conectar TikTok','Desconectar TikTok','Puente local no disponible'],
             en:['Stream Mode','Exit Stream','View','Screen','Tools','Chat','Settings','Audio','Muted','Class','Pause and settings','Changes apply immediately. Close Settings to resume.','🎮 Match','👑 MC and combat','🖥 Displays and OBS','👥 Audience and chat','🔊 Audio and language','🌐 Language','Game information opacity','Affects text and bars in both views. 100% = fully visible.','Preparation view','Connect TikTok','Disconnect TikTok','Local bridge unavailable'],
@@ -8373,7 +8493,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.4.0',
+            version: '0.5.0',
             edition: 'tiktok',
             getState() {
                 const alive = fighters.filter(fighter => !fighter.eliminated);

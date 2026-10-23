@@ -1,4 +1,4 @@
-// Browser regressions for the v0.4 independent operator workspaces. Never connects to a real TikTok LIVE.
+// Browser regressions for the v0.5 independent operator workspaces. Never connects to a real TikTok LIVE.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -43,8 +43,8 @@ const shot=async name=>{if(process.env.ARENA_TEST_SCREENSHOTS){await mkdir(proce
 async function unfold(id){const panel=page.locator('#'+id);if(!await panel.evaluate(n=>n.open))await panel.locator('> summary').click({noWaitAfter:true});}
 async function settingsSection(index){const section=page.locator('.arena-settings-section').nth(index);if(!await section.evaluate(n=>n.open))await section.locator('> summary').click({noWaitAfter:true});}
 async function streamClick(id){await page.mouse.move(600,20);await page.locator('#'+id).click({noWaitAfter:true});}
-await check('v0.4 starts with large game, left chat and only the social test group expanded',async()=>{
- assert.equal(await page.evaluate(()=>ArenaLive.version),'0.4.0');
+await check('v0.5 starts with large game, left chat and only the social test group expanded',async()=>{
+ assert.equal(await page.evaluate(()=>ArenaLive.version),'0.5.0');
  const panels=await page.locator('.arena-work-panel').evaluateAll(ns=>ns.map(n=>({id:n.id,open:n.open,parent:n.parentElement.id})));
  assert.equal(panels.find(n=>n.id==='arenaPanelChat').parent,'arenaDockLeft');
  assert.deepEqual(panels.filter(n=>n.open&&n.id!=='arenaPanelChat').map(n=>n.id),['arenaPanelSocial']);
@@ -83,7 +83,7 @@ await check('TikTok button delegates connect/disconnect to the bridge, with no r
  const pendingDisconnect=page.waitForResponse('**/api/disconnect');await page.locator('#arenaDualTikTokConnectBtn').click();await pendingDisconnect;assert.deepEqual(requests,['connect','disconnect']);
 });
 await check('Tabbed chats distinguish commands and always follow new messages',async()=>{
- await page.locator('#arenaChatTabLocal').click();await page.locator('#chatMessageInput').fill('hola desde pruebas v0.4');await page.locator('#chatForm button[type=submit]').click();assert.equal(await page.locator('#arenaChatLocalPanel').isVisible(),true);
+ await page.locator('#arenaChatTabLocal').click();await page.locator('#chatMessageInput').fill('hola desde pruebas v0.5');await page.locator('#chatForm button[type=submit]').click();assert.equal(await page.locator('#arenaChatLocalPanel').isVisible(),true);
  await page.evaluate(()=>{for(let i=0;i<510;i++)window.arenaTestSocket.dispatchEvent(new MessageEvent('message',{data:JSON.stringify({type:'chat',platformKey:'tiktok',username:'qa_chat',message:i%25===0?'!jugar':'mensaje '+i})}));});
  await page.locator('#arenaChatTabTikTok').click();assert.ok(await page.locator('.arena-tiktok-chat-line.is-command').count()>0);
  await page.locator('#arenaTikTokChatFeed').evaluate(n=>n.scrollTop=0);

@@ -1,4 +1,4 @@
-# Operador de Arena Live · v0.4 · TikTok
+# Operador de Arena Live · v0.5 · TikTok
 
 ## Preparar y jugar
 
@@ -47,3 +47,5 @@ Comprueba los recortes al pasar a la nueva composición v0.3 y después de cambi
 Las regresiones comprueban geometría estable en 1720×720 y 3440×1440, restauración de paneles, pausa, chats, escenarios y móvil 390×844. No acreditan conexión ni latencia real de TikTok; esa validación necesita un LIVE activo y un comentario desde otra cuenta.
 
 Consulta [las reglas y ajustes de v0.4](RELEASE-0.4-REGLAS.md), [las 25 decisiones de v0.3](RELEASE-0.3-INTERFAZ.md) y [la guía de TikTok LIVE](TIKTOK-LIVE-MVP.md).
+
+La [v0.5](RELEASE-0.5-RENDIMIENTO.md) optimiza el trabajo del motor y del chat sin cambiar la distribución ni la calibración. Para comprobar el equipo con 128 participantes usa Pruebas → Escenario → 128 → Cargar y, después, inicia combate en Modo Stream.

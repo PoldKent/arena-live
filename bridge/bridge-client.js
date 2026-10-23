@@ -42,6 +42,16 @@
   const buttonOlder = document.getElementById('arenaTikTokChatOlder');
   const buttonLatest = document.getElementById('arenaTikTokChatLatest');
   const buttonExport = document.getElementById('arenaTikTokChatExport');
+  let inboxRefreshFrame = 0;
+  function scheduleInboxRefresh() {
+    if (inboxRefreshFrame) return;
+    inboxRefreshFrame = requestAnimationFrame(() => {
+      inboxRefreshFrame = 0;
+      if (inbox && followLive) inbox.scrollTop = inbox.scrollHeight;
+      updateInboxControls();
+      count.textContent = `Mensajes recibidos: ${state.received}`;
+    });
+  }
 
   function chatRow(entry) {
     const line = document.createElement('div');
@@ -94,8 +104,9 @@
     inbox.appendChild(chatRow(entry));
     while (inbox.children.length > LIVE_WINDOW) inbox.removeChild(inbox.firstChild);
     browseEnd = incoming.length;
-    inbox.scrollTop = inbox.scrollHeight;
-    updateInboxControls();
+    // Appends stay immediate; scroll/layout and counters run once per frame even
+    // when many comments arrive together. Gameplay still receives every event.
+    scheduleInboxRefresh();
   }
   buttonOlder?.addEventListener('click', () => {
     const end = followLive ? Math.max(1, incoming.length - LIVE_WINDOW) : Math.max(1, browseEnd - HISTORY_PAGE);
@@ -177,7 +188,9 @@
         if (window.ArenaLive?.sendChat) {
           window.ArenaLive.sendChat({ username: data.username, platformKey: 'tiktok', message: data.message });
         }
-        refresh();
+        // Connection state did not change. Rebuilding/distributing toolbar state
+        // per comment used to flood the DOM/localization observer during bursts.
+        scheduleInboxRefresh();
       }
     });
     socket.addEventListener('close', () => {

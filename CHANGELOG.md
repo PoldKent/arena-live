@@ -1,5 +1,17 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-23 — Arena Live v0.5 · rendimiento con 128 jugadores
+
+- Selección de objetivos con dos recorridos lineales y distancias al cuadrado; conserva las rivalidades, prioridades del Titán y desempates de las versiones anteriores.
+- Separación física descarta cuerpos lejanos antes de calcular raíces; conserva el orden de respuesta y los 60 pasos de simulación por segundo.
+- En preparación se dibuja la vista visible; Stream conserva ambas capturas simultáneas, que comparten el orden de luchadores. Medidas de rótulos reutilizadas por vista y renovación al cambiar nombre, vidas o fuente; texto y efectos se siguen dibujando de forma nativa.
+- Carga de escenarios y perfiles agrupa las actualizaciones de HUD, objetivos y ajustes. Se corrige cargar escenarios durante combate, conservando el cupo y la transición de modo.
+- Scroll y contadores de chat agrupados por cuadro; los comentarios se reciben y procesan de inmediato sin redistribuir el estado de conexión por mensaje.
+- Al reemplazar escenario se limpian efectos anteriores; los temporizadores de victoria quedan ligados a su ronda.
+- HUD del duelo evita reescribir valores iguales; los avisos K.O. liberan las referencias a sus elementos al vencer.
+- Funciones de selección, geometría del escenario, rótulos y sincronización de HUD separadas dentro del HTML existente. No cambia la geometría OBS ni las claves de datos guardados.
+- Revisión comparativa de la entrega inicial y v0.1–v0.4; pruebas específicas de equivalencia de IA y cargas de 32, 64 y 128 jugadores.
+
 ## 2026-10-23 — Arena Live v0.4 en main
 
 - Integración de la rama TikTok en main, conservando el historial de ambas ramas y las mejoras de juego y OBS de v0.1.
