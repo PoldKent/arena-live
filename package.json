@@ -1,7 +1,7 @@
 {
   "name": "arena-live",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Local TikTok LIVE chat bridge for the Arena Live prototype",
   "type": "module",
   "engines": {
@@ -11,7 +11,8 @@
     "start": "node bridge/server.mjs",
     "dev": "node bridge/server.mjs",
     "test": "node --test test/*.test.mjs",
-    "test:browser": "node test/operator-browser.mjs"
+    "test:browser": "node test/operator-browser.mjs",
+    "test:performance": "node test/performance-browser.mjs"
   },
   "dependencies": {
     "tiktok-live-connector": "^2.5.0",

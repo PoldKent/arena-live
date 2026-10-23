@@ -1,6 +1,12 @@
-# Arena Live · v0.4
+# Arena Live · v0.5
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
+
+## Rendimiento de v0.5
+
+La selección de rivales evita ordenar listas por cada luchador y las colisiones descartan cuerpos lejanos antes de calcular distancias. Ambas capturas comparten el orden de dibujo, las medidas de los nombres se reutilizan y el HUD solo cambia los valores que variaron. Los escenarios actualizan sus controles una vez al completar la lista; los chats agrupan scroll y contadores por cuadro.
+
+Se mantiene el cupo de 128, todos los poderes, los efectos y las dos vistas sincronizadas. [Revisión de versiones, mediciones y alcance](docs/RELEASE-0.5-RENDIMIENTO.md). Las cifras de este entorno no sustituyen una prueba en tu equipo con OBS.
 
 ## Instalar y arrancar en Windows
 
@@ -15,7 +21,7 @@ npm.cmd start
 
 Abre **http://127.0.0.1:4173/** y conserva abierta la consola. TikTok comienza desconectado; **📡 TikTok** conecta o desconecta según el estado real del puente.
 
-Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only`, `npm.cmd install` y `npm.cmd start`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.4** en Ajustes.
+Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only`, `npm.cmd install` y `npm.cmd start`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.5** en Ajustes.
 
 Si venías usando la rama de TikTok, cambia a `main` antes de actualizar:
 
@@ -103,10 +109,12 @@ El juego permanece en `index.html`. El puente usa `ws` y `tiktok-live-connector`
 npm.cmd test
 npx.cmd playwright install chromium
 npm.cmd run test:browser
+npm.cmd run test:performance
 ```
 
 Las pruebas del navegador arrancan y cierran su servidor local y simulan las respuestas de TikTok. Cubren paneles, persistencia, escenarios, chats, pausa, capturas, idiomas y controles móviles; no conectan con una emisión real.
 
+- [Rendimiento y depuración de v0.5](docs/RELEASE-0.5-RENDIMIENTO.md).
 - [Reglas y paneles persistentes de v0.4](docs/RELEASE-0.4-REGLAS.md).
 - [Decisiones de la reconstrucción v0.3](docs/RELEASE-0.3-INTERFAZ.md).
 - [Guía de operación y OBS](docs/DUAL-OPERADOR-TIKTOK.md).
@@ -114,4 +122,4 @@ Las pruebas del navegador arrancan y cierran su servidor local y simulan las res
 - [Registro de cambios](CHANGELOG.md).
 - Historial: [v0.2](docs/RELEASE-0.2-OPERADOR.md), [v0.1](docs/RELEASE-0.1-OBS.md).
 
-`main` contiene Arena Live v0.4, incluida la interfaz reconstruida, las reglas de combate y el puente local de TikTok. La edición independiente v0.1 se conserva en el historial de Git. La integración mantiene el historial de ambas ramas.
+`main` contiene Arena Live v0.5, incluida la interfaz reconstruida, las reglas de combate y el puente local de TikTok. La edición independiente v0.1 se conserva en el historial de Git. La integración mantiene el historial de ambas ramas.
