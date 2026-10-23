@@ -5,45 +5,36 @@ import { createHash } from 'node:crypto';
 import { resolve, dirname } from 'node:path';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
+import { balanceVariant } from './balance-variants.mjs';
 const productionHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 const variant = process.env.ARENA_BALANCE_VARIANT || 'published';
-let html = productionHtml;
-if (variant === 'nearest') {
-  // Counterfactual AI control only: powers keep their published values. This
-  // in-memory HTML is never written over or served as the production game.
-  const changes = [
-    [/const CLASS_RIVALRIES = Object\.freeze\(\{[\s\S]*?\}\);/, 'const CLASS_RIVALRIES = Object.freeze({kame:null,ninja:null,titan:null,trueno:null,esmeralda:null});'],
-    ["if (attacker.archetypeKey === 'titan') {", 'if (false) {'],
-    ["distA * (a.archetypeKey === 'ninja' ? 0.65 : 1)", 'distA'],
-    ["distB * (b.archetypeKey === 'ninja' ? 0.65 : 1)", 'distB']
-  ];
-  for (const [before, after] of changes) {
-    const next = html.replace(before, after); assert.notEqual(next, html, 'AI control patch must match this engine'); html = next;
-  }
-} else assert.equal(variant, 'published', 'Unknown balance variant');
+const tuning = JSON.parse(process.env.ARENA_BALANCE_TUNING || '{}');
+const html = balanceVariant(productionHtml, variant, tuning);
 const harness = await readFile(new URL('./balance-harness.js', import.meta.url), 'utf8');
 const pilot = process.env.ARENA_BALANCE_PILOT === '1';
 const duelSeeds = Number(process.env.ARENA_BALANCE_DUEL_SEEDS || (pilot ? 2 : 50));
 const arenaSeeds = Number(process.env.ARENA_BALANCE_ARENA_SEEDS || (pilot ? 2 : 40));
+const seedStart = Number(process.env.ARENA_BALANCE_SEED_START || 0);
 const seconds = Number(process.env.ARENA_BALANCE_SECONDS || 180);
 const counts = (process.env.ARENA_BALANCE_COUNTS || '5,10,25,125').split(',').map(Number);
 const output = resolve(process.env.ARENA_BALANCE_OUTPUT || 'reports/balance/latest.json');
 const classes = ['kame', 'ninja', 'titan', 'trueno', 'esmeralda'];
 assert.ok(Number.isInteger(duelSeeds) && duelSeeds >= 0 && Number.isInteger(arenaSeeds) && arenaSeeds >= 0, 'Seed counts must be nonnegative integers');
+assert.ok(Number.isSafeInteger(seedStart) && seedStart >= 0 && seedStart + Math.max(duelSeeds, arenaSeeds) < 100000, 'Invalid seed offset');
 assert.ok(Number.isFinite(seconds) && seconds > 0 && seconds <= 3600, 'Duration must be 0–3600 seconds');
 assert.ok(counts.every(n => Number.isInteger(n) && n >= 5 && n <= 128 && n % 5 === 0), 'Balanced arenas need a multiple of five, up to 128');
 const tasks = [];
 for (const powerMode of ['full', 'noSpecials']) {
   for (let a = 0; a < 5; a++) for (let b = a + 1; b < 5; b++) {
     for (let s = 0; s < duelSeeds; s++) for (let variant = 0; variant < 4; variant++) {
-      tasks.push({ kind: 'duel', powerMode, pair: [classes[a], classes[b]], baseSeed: s,
-        seed: 41000 + s * 7919, side: variant % 2, first: Math.floor(variant / 2), seconds });
+      tasks.push({ kind: 'duel', powerMode, pair: [classes[a], classes[b]], baseSeed: s + seedStart,
+        seed: 41000 + (s + seedStart) * 7919, side: variant % 2, first: Math.floor(variant / 2), seconds });
     }
   }
 }
 for (const count of counts) for (let s = 0; s < arenaSeeds; s++) for (let rotation = 0; rotation < 5; rotation++) {
-  tasks.push({ kind: 'arena', count, powerMode: 'full', baseSeed: s,
-    seed: 91000 + s * 7919, rotation, seconds });
+  tasks.push({ kind: 'arena', count, powerMode: 'full', baseSeed: s + seedStart,
+    seed: 91000 + (s + seedStart) * 7919, rotation, seconds });
 }
 const server = createServer((_, response) => { response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); response.end(html); });
 await new Promise(r => server.listen(0, '127.0.0.1', r));
@@ -80,7 +71,7 @@ try {
     ].map(config => [shape(ArenaBalanceHarness.run(config)), shape(ArenaBalanceHarness.reference(config))]);
   });
   for (const [measured, reference] of parity) assert.deepEqual(measured, reference, 'Telemetry must not change combat results');
-  const probes = await page.evaluate(() => ['iso', '1v1'].flatMap(mode => ['kame', 'ninja', 'titan', 'trueno', 'esmeralda'].map(key => ArenaBalanceHarness.probe(key, mode))));
+  const probes = await page.evaluate(() => ['iso', 'smash', '1v1'].flatMap(mode => ['kame', 'ninja', 'titan', 'trueno', 'esmeralda'].map(key => ArenaBalanceHarness.probe(key, mode))));
   const results = [], started = Date.now();
   for (let i = 0; i < tasks.length; i += 10) {
     const group = tasks.slice(i, i + 10);
@@ -90,10 +81,10 @@ try {
   assert.deepEqual(errors, [], 'Browser engine must have no JavaScript errors');
   const bytes = Buffer.from(html);
   const productionBytes = Buffer.from(productionHtml);
-  const report = { metadata: { ...metadata, variant,
+  const report = { metadata: { ...metadata, variant, tuning,
     productionGitBlob: createHash('sha1').update(`blob ${productionBytes.length}\0`).update(productionBytes).digest('hex'),
     engineGitBlob: createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex'),
-    browser: await browser.version(), duelSeeds, arenaSeeds, counts, maxSeconds: seconds, matches: results.length,
+    browser: await browser.version(), duelSeeds, arenaSeeds, seedStart, counts, maxSeconds: seconds, matches: results.length,
     method: 'Seeded AI, no audience boosts or re-entry, canonical spawns; crossed duel side/order and rotated arena assignments; virtual 60Hz timers; UI and rendering suppressed, combat/particle RNG preserved.' },
     probes, deterministic: true, telemetryParity: true, crossScenarioParity: true, errors, results };
   await mkdir(dirname(output), { recursive: true });

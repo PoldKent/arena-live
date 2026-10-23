@@ -2,6 +2,10 @@
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
+## Prueba de equilibrio
+
+En la rama `preview/class-balance-v05`, `npm.cmd run start:balance` abre el candidato jugable en **http://127.0.0.1:4174**, identificado en Ajustes como **v0.5 · equilibrio (prueba)**. Usa el juego completo con los valores por modo del laboratorio. `npm.cmd start` sigue sirviendo los valores publicados originales. [Descarga separada, escenarios y comparación](docs/PROBAR-EQUILIBRIO.md).
+
 ## Rendimiento de v0.5
 
 La selección de rivales evita ordenar listas por cada luchador y las colisiones descartan cuerpos lejanos antes de calcular distancias. Ambas capturas comparten el orden de dibujo, las medidas de los nombres se reutilizan y el HUD solo cambia los valores que variaron. Los escenarios actualizan sus controles una vez al completar la lista; los chats agrupan scroll y contadores por cuadro.

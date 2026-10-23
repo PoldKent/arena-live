@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "node bridge/server.mjs",
+    "start:balance": "node bridge/server.mjs --balance-preview",
     "dev": "node bridge/server.mjs",
     "test": "node --test test/*.test.mjs",
     "test:browser": "node test/operator-browser.mjs",

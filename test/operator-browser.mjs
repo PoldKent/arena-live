@@ -7,7 +7,8 @@ import { join } from 'node:path';
 import { chromium } from 'playwright';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const port=process.env.ARENA_TEST_PORT || '4175';
-const server=spawn(process.execPath,['bridge/server.mjs'],{cwd:root,env:{...process.env,PORT:port}});
+const balancePreview=process.env.ARENA_TEST_BALANCE_PREVIEW==='1';
+const server=spawn(process.execPath,['bridge/server.mjs',...(balancePreview?['--balance-preview']:[])],{cwd:root,env:{...process.env,PORT:port}});
 let browser;
 try {
  await new Promise((resolve,reject)=>{
@@ -44,7 +45,7 @@ async function unfold(id){const panel=page.locator('#'+id);if(!await panel.evalu
 async function settingsSection(index){const section=page.locator('.arena-settings-section').nth(index);if(!await section.evaluate(n=>n.open))await section.locator('> summary').click({noWaitAfter:true});}
 async function streamClick(id){await page.mouse.move(600,20);await page.locator('#'+id).click({noWaitAfter:true});}
 await check('v0.5 starts with large game, left chat and only the social test group expanded',async()=>{
- assert.equal(await page.evaluate(()=>ArenaLive.version),'0.5.0');
+ assert.equal(await page.evaluate(()=>ArenaLive.version),balancePreview?'0.5.0-balance-preview':'0.5.0');
  const panels=await page.locator('.arena-work-panel').evaluateAll(ns=>ns.map(n=>({id:n.id,open:n.open,parent:n.parentElement.id})));
  assert.equal(panels.find(n=>n.id==='arenaPanelChat').parent,'arenaDockLeft');
  assert.deepEqual(panels.filter(n=>n.open&&n.id!=='arenaPanelChat').map(n=>n.id),['arenaPanelSocial']);
@@ -287,5 +288,38 @@ await check('Mobile special action follows the no-powers rule while movement and
  const rules=page.locator('.arena-settings-section').filter({has:page.locator('#arenaPowerMode')});if(!await rules.evaluate(n=>n.open))await rules.locator('summary').click();
  await page.locator('#arenaPowerMode').selectOption('noSpecials');await page.keyboard.press('Escape');assert.equal(await page.locator('#arenaMobilePower').isDisabled(),true);assert.equal(await page.locator('#arenaMobileAttack').isEnabled(),true);assert.equal(await page.locator('#arenaMobileJump').isEnabled(),true);
 });
-assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length}));
+if(balancePreview){
+ await check('Playable balance preview retains real clock, randomness, animation and the normal bridge',async()=>{
+  const status=await (await page.request.get(`http://127.0.0.1:${port}/api/status`)).json();assert.equal(status.balancePreview,true);
+  const native=await page.evaluate(()=>({clock:Date.now.toString().includes('[native code]'),random:Math.random.toString().includes('[native code]'),raf:requestAnimationFrame.toString().includes('[native code]'),harness:typeof window.ArenaBalanceHarness}));
+  assert.deepEqual(native,{clock:true,random:true,raf:true,harness:'undefined'});
+  assert.match(await page.locator('#arenaObsCalibrationTitle').textContent(),/equilibrio \(prueba\)/);
+ });
+ await check('Playable powers apply the measured damage, windup and target caps in all three modes',async()=>{
+  const tuning=JSON.parse(await readFile(new URL('../docs/balance-candidate-v0.5.json',import.meta.url),'utf8'));
+  const probes=await page.evaluate(()=>{
+   arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};isGamePaused=true;gameState='COMBAT';soundEnabled=false;
+   const rows=[];
+   for(const mode of ['1v1','smash','iso'])for(const key of ['kame','ninja','titan','trueno','esmeralda']){
+    activeMode=mode;const actor=new Fighter('@preview_actor','tiktok',false,key);actor.x=240;actor.y=250;actor.facing=1;actor.energy=100;
+    const targets=Array.from({length:6},(_,i)=>{const f=new Fighter('@preview_'+i,'tiktok',false,'ninja');f.x=270+i*8;f.y=250;return f;});fighters=[actor,...targets];
+    const command=CLASS_COMMANDS[key].powers[0];queueFighterSkillWindup(actor,command);const windup=actor.castingSkill.timer;
+    actor.castingSkill=null;actor.activeSpecialFactor=1;executeFighterSkill(actor,command);
+    rows.push({mode,key,windup,damage:targets.map(f=>180-f.hp).filter(d=>d>0)});
+   }return rows;
+  });
+  for(const p of probes){
+   const rule=tuning[p.mode][p.key];assert.equal(p.windup,rule.windup||34);
+   const hits=p.key==='ninja'||p.key==='esmeralda'?1:p.key==='trueno'?(rule.targets||3):(rule.targets||6);
+   assert.equal(p.damage.length,hits,p.mode+'/'+p.key+' target cap');assert.ok(p.damage.every(d=>d===rule.damage),p.mode+'/'+p.key+' damage');
+  }
+ });
+ await check('All five playable classes select the closest rival instead of health/class priorities',async()=>{
+  const matches=await page.evaluate(()=>['kame','ninja','titan','trueno','esmeralda'].map(key=>{
+   const actor=new Fighter('@actor','tiktok',false,key),near=new Fighter('@near','tiktok',false,'ninja'),weak=new Fighter('@weak','tiktok',false,key);
+   actor.x=240;actor.y=250;near.x=280;near.y=250;weak.x=305;weak.y=250;weak.hp=1;fighters=[actor,near,weak];return findPreferredCombatTarget(actor)?.id===near.id;
+  }));assert.ok(matches.every(Boolean));
+ });
+}
+assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,balancePreview}));
 } finally {await browser?.close();server.kill('SIGKILL');}
