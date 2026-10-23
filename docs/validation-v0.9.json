@@ -1,0 +1,89 @@
+{
+  "release": "0.9.0",
+  "date": "2026-10-23",
+  "sourceGitBlob": "a700406e547925709e2984effe10950be37ce4be",
+  "previousSourceGitBlob": "1c8ca3be88e64b52cfa4ba795182e894bcf6b9c3",
+  "node": {
+    "passed": 40,
+    "failed": 0
+  },
+  "browser": {
+    "passed": 53,
+    "errors": 0
+  },
+  "performance": {
+    "passed": 11,
+    "errors": 0,
+    "report": "performance-v0.9.json",
+    "conditions": {
+      "node": "v24.19.0",
+      "browser": "153.0.8010.0",
+      "gpu": "disabled; software raster and readback included",
+      "viewport": "1720x720",
+      "simulationHz": 60,
+      "workload": "Constant-population timings disable knockback in both sources and suppress autonomous specials; subsequent stress checks restore full knockback and specials."
+    }
+  },
+  "captures": {
+    "landscape": {
+      "width": 1920,
+      "height": 1080,
+      "logicalWidth": 960,
+      "logicalHeight": 540
+    },
+    "portrait": {
+      "width": 1080,
+      "height": 1920,
+      "logicalWidth": 540,
+      "logicalHeight": 960
+    },
+    "physicalPixelCountMultiplier": 4,
+    "OBSGeometryAndCalibrationUnchanged": true
+  },
+  "pixelChecks": [
+    "opaque native last pixel of both captures",
+    "lightning crosses the top pixel rows of both captures and reaches the target",
+    "beam reaches left and right portrait borders",
+    "flash covers the first and last portrait rows",
+    "confetti appears near top and bottom independently of world camera",
+    "scene changes refresh the bounded background cache",
+    "flash does not remain in a reused background"
+  ],
+  "cache": {
+    "backgrounds": "One native layer per live context, replaced on scene or size change.",
+    "isometricFloor": {
+      "width": 2176,
+      "height": 1336,
+      "copies": 1
+    },
+    "fightersAndEffectsCached": false
+  },
+  "balanceRegression": {
+    "comparedMatches": 240,
+    "exactMatches": 240,
+    "duels": 160,
+    "smash": 20,
+    "arena": 60,
+    "timeouts": 0,
+    "seedRanges": {
+      "duels": [
+        1000,
+        1001
+      ],
+      "smash": [
+        1000,
+        1003
+      ],
+      "arenas": [
+        2000,
+        2003
+      ]
+    },
+    "comparison": "Complete winner, duration, eliminations and per-fighter telemetry exactly reproduce the measured v0.8 results. Drawing no longer consumes combat randomness for lightning."
+  },
+  "limitations": [
+    "Headless Chromium used software rendering and pixel readback; timings are not OBS or user-PC FPS.",
+    "TikTok was simulated; no real LIVE was connected.",
+    "Native canvas resolution does not automatically change OBS output settings."
+  ]
+}

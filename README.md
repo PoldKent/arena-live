@@ -1,16 +1,16 @@
-# Arena Live · v0.8
+# Arena Live · v0.9
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
 ## Versión principal
 
-`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. Ajustes, la API del juego, el servidor y el paquete identifican la versión 0.8. [Cambios y validación](docs/RELEASE-0.8-ARENA.md).
+`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. Ajustes, la API del juego, el servidor y el paquete identifican la versión 0.9. [Cambios y validación](docs/RELEASE-0.9-FULL-HD.md).
 
 ## Rendimiento con 128 jugadores
 
 La selección de rivales usa un recorrido lineal por luchador y las colisiones descartan cuerpos lejanos antes de calcular distancias. Ambas capturas comparten el orden de dibujo, las medidas de los nombres se reutilizan y el HUD solo cambia los valores que variaron. Los escenarios actualizan sus controles una vez al completar la lista; los chats agrupan scroll y contadores por cuadro.
 
-Se mantiene el cupo de 128, todos los poderes, los efectos y las dos vistas sincronizadas. [Mediciones de v0.8](docs/performance-v0.8.json). Las cifras de este entorno no sustituyen una prueba en tu equipo con OBS.
+Se mantiene el cupo de 128, todos los poderes, los efectos y las dos vistas sincronizadas. Los fondos y el suelo isométrico reutilizan capas estáticas para reducir el coste de dibujar Full HD; jugadores, textos y efectos se actualizan en cada cuadro. [Mediciones de v0.9](docs/performance-v0.9.json). Las cifras de este entorno no sustituyen una prueba en tu equipo con OBS.
 
 ## Instalar y arrancar en Windows
 
@@ -25,7 +25,7 @@ npm.cmd start
 
 Abre **http://127.0.0.1:4173/** y conserva abierta la consola. TikTok comienza desconectado; **📡 TikTok** conecta o desconecta según el estado real del puente.
 
-Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd install` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.8** en Ajustes.
+Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd install` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.9** en Ajustes.
 
 Para volver a `main` desde una rama anterior:
 
@@ -91,6 +91,10 @@ Estas reglas se recuerdan en este navegador. **Restablecer reglas** recupera los
 
 Stream conserva una sola simulación, 16:9 grande a la izquierda y 9:16 al extremo derecho. Herramientas y chats se abren en una columna reservada al extremo izquierdo, fuera de los juegos. El chat se abre bajo demanda. El panel elegido permanece abierto al actuar, enviar mensajes, modificar valores o hacer clic en el juego. Elegir otro menú lo reemplaza. Usa **×** o Esc para cerrarlo; pulsar de nuevo el mismo acceso mantiene su panel abierto.
 
+Los lienzos tienen resolución interna **1920 × 1080** y **1080 × 1920**, también cuando la preparación los muestra más pequeños. El juego y sus textos se dibujan a esa resolución. Puedes consultar ambos tamaños en **Ajustes → Pantallas y OBS**. Las proporciones, la distribución y la calibración guardada se conservan.
+
+Los rayos nacen desde el borde superior de cada vista, los haces Kame llegan al borde correspondiente y las columnas de K.O. cubren la altura hasta el límite superior. Destellos y confeti utilizan todo el cuadro vertical. Los anillos de golpe/salto y las partículas siguen ligados a los personajes; el alcance visual hasta el borde no aumenta el daño ni el número de objetivos.
+
 La columna puede ajustar su ancho. La barra superior oculta sus botones hasta acercar el cursor y también se muestra con el foco del teclado; conserva su espacio. Abrir/cerrar paneles o mostrar/ocultar la barra **no mueve ni reescala las capturas**. Los dispositivos táctiles mantienen accesible la barra.
 
 Se conservan la calibración y su clave de almacenamiento: desplazamiento **0–16 px** (10 por defecto) y espacio inferior **72–148 px** (76 por defecto). La nueva columna forma parte de la composición v0.3: comprueba los recortes de OBS una vez al actualizar y después de cambiar deliberadamente ancho o calibración. Usa una sola instancia del juego para ambas capturas.
@@ -142,6 +146,7 @@ npm.cmd run test:performance
 
 Las pruebas del navegador arrancan y cierran su servidor local y simulan las respuestas de TikTok. Cubren paneles, persistencia, escenarios, chats, pausa, capturas, idiomas y controles móviles; no conectan con una emisión real.
 
+- [Full HD y efectos de toda la vista en v0.9](docs/RELEASE-0.9-FULL-HD.md).
 - [Arena ampliada, caída, rescate y vibración de v0.8](docs/RELEASE-0.8-ARENA.md).
 - [Comandos visibles de entradas y especiales en v0.7](docs/RELEASE-0.7-COMANDOS.md).
 - [Integración del equilibrio en v0.6](docs/RELEASE-0.6-UNIFICADA.md).
@@ -153,4 +158,4 @@ Las pruebas del navegador arrancan y cierran su servidor local y simulan las res
 - [Registro de cambios](CHANGELOG.md).
 - Historial: [v0.2](docs/RELEASE-0.2-OPERADOR.md), [v0.1](docs/RELEASE-0.1-OBS.md).
 
-El desarrollo y las actualizaciones continúan en `main`. La entrega vigente es Arena Live v0.8, con TikTok, interfaz, reglas, potencias por modo, comandos y caída isométrica integrados. Las entregas anteriores quedan como historial.
+El desarrollo y las actualizaciones continúan en `main`. La entrega vigente es Arena Live v0.9, con ambas capturas Full HD, efectos adaptados a cada vista, TikTok, reglas, potencias, comandos y caída isométrica integrados. Las entregas anteriores quedan como historial.

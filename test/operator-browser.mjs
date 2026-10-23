@@ -1,4 +1,4 @@
-// Browser regressions for the unified v0.8 release. Never connects to a real TikTok LIVE.
+// Browser regressions for the unified v0.9 release. Never connects to a real TikTok LIVE.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -43,8 +43,8 @@ const shot=async name=>{if(process.env.ARENA_TEST_SCREENSHOTS){await mkdir(proce
 async function unfold(id){const panel=page.locator('#'+id);if(!await panel.evaluate(n=>n.open))await panel.locator('> summary').click({noWaitAfter:true});}
 async function settingsSection(index){const section=page.locator('.arena-settings-section').nth(index);if(!await section.evaluate(n=>n.open))await section.locator('> summary').click({noWaitAfter:true});}
 async function streamClick(id){await page.mouse.move(600,20);await page.locator('#'+id).click({noWaitAfter:true});}
-await check('v0.8 starts with large game, left chat and only the social test group expanded',async()=>{
- assert.equal(await page.evaluate(()=>ArenaLive.version),'0.8.0');
+await check('v0.9 starts with large game, left chat and only the social test group expanded',async()=>{
+ assert.equal(await page.evaluate(()=>ArenaLive.version),'0.9.0');
  const panels=await page.locator('.arena-work-panel').evaluateAll(ns=>ns.map(n=>({id:n.id,open:n.open,parent:n.parentElement.id})));
  assert.equal(panels.find(n=>n.id==='arenaPanelChat').parent,'arenaDockLeft');
  assert.deepEqual(panels.filter(n=>n.open&&n.id!=='arenaPanelChat').map(n=>n.id),['arenaPanelSocial']);
@@ -303,10 +303,10 @@ await check('Mobile special action follows the no-powers rule while movement and
  await page.locator('#arenaPowerMode').selectOption('noSpecials');await page.keyboard.press('Escape');assert.equal(await page.locator('#arenaMobilePower').isDisabled(),true);assert.equal(await page.locator('#arenaMobileAttack').isEnabled(),true);assert.equal(await page.locator('#arenaMobileJump').isEnabled(),true);
 });
  await check('Unified release uses native clock, randomness, animation and the TikTok bridge',async()=>{
-  const status=await (await page.request.get(`http://127.0.0.1:${port}/api/status`)).json();assert.equal(status.version,'0.8.0');
+  const status=await (await page.request.get(`http://127.0.0.1:${port}/api/status`)).json();assert.equal(status.version,'0.9.0');
   const native=await page.evaluate(()=>({clock:Date.now.toString().includes('[native code]'),random:Math.random.toString().includes('[native code]'),raf:requestAnimationFrame.toString().includes('[native code]'),harness:typeof window.ArenaBalanceHarness}));
   assert.deepEqual(native,{clock:true,random:true,raf:true,harness:'undefined'});
-  assert.match(await page.locator('#arenaSettingsVersion').textContent(),/v0\.8/);
+  assert.match(await page.locator('#arenaSettingsVersion').textContent(),/v0\.9/);
   assert.equal(await page.evaluate(()=>Object.isFrozen(ArenaLive.getBalanceRules())&&Object.isFrozen(ArenaLive.getBalanceRules().iso.ninja)),true);
  });
  await check('Playable powers apply the measured damage, windup and target caps in all three modes',async()=>{
@@ -524,5 +524,60 @@ await check('A ring-out at nine survivors switches to Smash and a new arrival re
   isGamePaused=true;return {smash,clean,returned};
  });assert.deepEqual(result,{smash:true,clean:true,returned:true});
 });
-assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:'0.8.0'}));
+await check('Full HD raster fills every capture pixel while logical physics, OBS calibration and canvas proportions stay unchanged',async()=>{
+ const result=await page.evaluate(()=>{
+  isGamePaused=true;gameState='COMBAT';skyFlashTimer=0;activeEffects=[];particles=[];floatingTexts=[];setMonitorFocus('dual');renderBothScreensSimultaneously();
+  return {sizes:[canvas16,canvas9].map(c=>[c.width,c.height]),opaque:[ctx16,ctx9].every(ctx=>ctx.getImageData(ctx.canvas.width-1,ctx.canvas.height-1,1,1).data[3]===255),world:[WORLD_W,WORLD_H],calibration:JSON.parse(localStorage.getItem(ARENA_OBS_CALIBRATION_KEY)).offset};
+ });
+ assert.deepEqual(result,{sizes:[[1920,1080],[1080,1920]],opaque:true,world:[960,540],calibration:8});
+});
+await check('Lightning pixels reach the top of both native captures and strike the exact target without advancing combat randomness',async()=>{
+ const result=await page.evaluate(()=>{
+  gameState='COMBAT';activeMode='iso';isGamePaused=true;particles=[];floatingTexts=[];skyFlashTimer=0;
+  activeEffects=[{type:'lightning',x:480,y:300,timer:28,maxTimer:28}];
+  const random=Math.random;let randomCalls=0;Math.random=()=>{randomCalls++;return .5;};
+  const check=ctx=>{
+   const width=ctx===ctx16?960:540,height=ctx===ctx16?540:960;
+   renderWorldToViewport(ctx,width,height,480,302.4,.64,[],{x:0,y:0});
+   const pixels=ctx.getImageData(0,0,ctx.canvas.width,4).data;
+   const top=Array.from({length:pixels.length/4},(_,i)=>i*4).some(i=>pixels[i]>160&&pixels[i+1]>120&&pixels[i+2]<100);
+   const y=Math.round((height*.56+(300-302.4)*.64)*2),x=ctx.canvas.width/2;
+   const hit=ctx.getImageData(x-2,y-2,4,4).data;
+   return {top,hit:Array.from({length:hit.length/4},(_,i)=>i*4).some(i=>hit[i]>160&&hit[i+1]>120&&hit[i+2]<100)};
+  };
+  try{return {views:[check(ctx16),check(ctx9)],randomCalls};}finally{Math.random=random;}
+ });
+ assert.deepEqual(result,{views:[{top:true,hit:true},{top:true,hit:true}],randomCalls:0});
+});
+await check('Kame beams touch either edge, flashes fill all rows, and victory confetti reaches the portrait bottom independently of its camera',async()=>{
+ const result=await page.evaluate(()=>{
+  const edges=[];gameState='COMBAT';activeMode='iso';
+  for(const dir of [-1,1]){
+   activeEffects=[{type:'kamehameha',x:480,y:300,dir,timer:36,maxTimer:36}];
+   renderWorldToViewport(ctx9,540,960,480,302.4,.64,[],{x:0,y:0});
+   const y=Math.round((960*.56+(300-302.4)*.64)*2),x=dir===1?1078:0;
+   edges.push(ctx9.getImageData(x,y,1,1).data[0]>220);
+  }
+  activeEffects=[];skyFlashTimer=10;skyFlashColor='#ffffff';renderWorldToViewport(ctx9,540,960,480,302.4,.64,[],{x:0,y:0});
+  const flash=[ctx9.getImageData(0,0,1,1).data[0]>40,ctx9.getImageData(0,1919,1,1).data[0]>40];
+  skyFlashTimer=0;gameState='VICTORY';confetti=[{x:WORLD_W*.25,y:WORLD_H*.05,size:10,angle:0,color:'#ff00ff'},{x:WORLD_W*.75,y:WORLD_H*.95,size:10,angle:0,color:'#ff00ff'}];
+  renderWorldToViewport(ctx9,540,960,700,100,1.3,[],{x:0,y:0});
+  const rain=[[270,96],[810,1824]].map(([x,y])=>{const p=ctx9.getImageData(x,y,1,1).data;return p[0]===255&&p[1]===0&&p[2]===255;});
+  return {edges,flash,rain};
+ });assert.deepEqual(result,{edges:[true,true],flash:[true,true],rain:[true,true]});
+});
+await check('Static Full HD layers are bounded, refresh with scene changes and never retain a power or flash',async()=>{
+ const result=await page.evaluate(()=>{
+  activeEffects=[];confetti=[];skyFlashTimer=0;particles=[];floatingTexts=[];activeMode='iso';gameState='COMBAT';
+  const draw=()=>renderWorldToViewport(ctx16,960,540,480,302.4,1,[],{x:0,y:0});
+  draw();const first=arenaBackgroundCache.get(ctx16),floor=arenaIsometricFloorCache;
+  draw();const reused=first===arenaBackgroundCache.get(ctx16)&&floor===arenaIsometricFloorCache;
+  const clean=Array.from(ctx16.getImageData(10,10,1,1).data);skyFlashTimer=10;skyFlashColor='#ffffff';draw();skyFlashTimer=0;draw();
+  const fresh=clean.every((v,i)=>v===ctx16.getImageData(10,10,1,1).data[i]);
+  gameState='VICTORY';draw();const victory=arenaBackgroundCache.get(ctx16)!==first;
+  const victoryLayer=arenaBackgroundCache.get(ctx16);gameState='LOBBY';draw();const lobby=arenaBackgroundCache.get(ctx16)!==victoryLayer;
+  return {reused,fresh,victory,lobby,floorSize:[floor.width,floor.height],nativeBackground:[arenaBackgroundCache.get(ctx16).layer.width,arenaBackgroundCache.get(ctx16).layer.height]};
+ });assert.deepEqual(result,{reused:true,fresh:true,victory:true,lobby:true,floorSize:[2176,1336],nativeBackground:[1920,1080]});
+});
+assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:'0.9.0'}));
 } finally {await browser?.close();server.kill('SIGKILL');}

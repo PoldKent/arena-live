@@ -1,5 +1,14 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-23 — Arena Live v0.9 · Full HD y efectos en toda la vista
+
+- Lienzos nativos de 1920 × 1080 para 16:9 y 1080 × 1920 para 9:16. Vectores y textos se dibujan al doble de resolución, conservando el mundo, la física y las dimensiones de las capturas en OBS.
+- Rayos y columnas de K.O. hasta el límite superior real de cada cámara, y Kame hasta su borde lateral. Se elimina el origen vertical fijo que cortaba los rayos a media pantalla en 9:16.
+- Destellos de cuadro completo y confeti de victoria normalizado sobre cada vista. Anillos y partículas locales conservan su relación con el personaje.
+- Trazado visual de rayos sin consumir azar del combate y con el extremo vinculado al punto de impacto. Las potencias, el alcance físico y los objetivos no cambian.
+- Reutilización acotada de fondos a resolución nativa y un suelo isométrico estático, conservando jugadores y efectos vivos en cada cuadro.
+- Resoluciones visibles en Pantallas y OBS; versión 0.9/0.9.0 en Ajustes, API, servidor y paquete. Detalles y validación en `docs/RELEASE-0.9-FULL-HD.md`.
+
 ## 2026-10-23 — Arena Live v0.8 · Borde isométrico, caída y rescate
 
 - Coliseo aproximadamente un 7 % mayor en cada eje. Dibujo, puntos de apoyo bajo los pies, aparición y transiciones comparten una sola elipse.

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.8 — TikTok LIVE</title>
+    <title>Arena Live v0.9 — TikTok LIVE</title>
     <!--
       ARENA LIVE · MONOLITHIC DELIVERY
       All application code intentionally stays in this HTML file.
@@ -912,12 +912,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <span class="px-1.5 py-0.2 rounded bg-cyan-500/20 border border-cyan-400/40 text-cyan-200">📺 16:9</span>
                             <span class="truncate">HORIZONTAL · Twitch / YouTube / Kick</span>
                         </div>
-                        <span class="text-[9px] text-slate-400 font-semibold hidden sm:inline shrink-0 ml-2">960×540</span>
+                        <span class="text-[9px] text-slate-400 font-semibold hidden sm:inline shrink-0 ml-2">1920×1080</span>
                     </div>
 
                     <div id="viewport16x9" class="dual-monitor-16-9 relative rounded-2xl overflow-hidden border-2 border-cyan-500/60 shadow-[0_0_35px_rgba(0,243,255,0.14)] bg-slate-950 flex flex-col justify-between" style="width: 640px; height: 360px;">
                         <!-- 16:9 Canvas -->
-                        <canvas id="canvas16x9" width="960" height="540" class="absolute inset-0 w-full h-full block z-0"></canvas>
+                        <canvas id="canvas16x9" width="1920" height="1080" class="absolute inset-0 w-full h-full block z-0"></canvas>
                         <button type="button" id="btnExitFullscreen16" class="arena-fullscreen-exit-button" title="Salir de pantalla completa" aria-label="Salir de pantalla completa"><span aria-hidden="true">⤡</span></button>
 
                         <!-- 16:9 TOP PERIMETER HUD -->
@@ -1125,7 +1125,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
                     <div id="viewport9x16" class="dual-monitor-9-16 relative rounded-3xl overflow-hidden border-2 border-pink-500/60 shadow-[0_0_35px_rgba(255,0,127,0.18)] bg-slate-950 flex flex-col justify-between" style="width: 203px; height: 360px;">
                         <!-- 9:16 Vertical Canvas (Driven by Smart Dynamic Tracking Camera) -->
-                        <canvas id="canvas9x16" width="540" height="960" class="absolute inset-0 w-full h-full block z-0"></canvas>
+                        <canvas id="canvas9x16" width="1080" height="1920" class="absolute inset-0 w-full h-full block z-0"></canvas>
                         <button type="button" id="btnExitFullscreen9" class="arena-fullscreen-exit-button" title="Salir de pantalla completa" aria-label="Salir de pantalla completa"><span aria-hidden="true">⤡</span></button>
                         <!-- Touch controls are anchored to the portrait 9:16 stream viewport. -->
                         <div id="touchControlDock" class="touch-control-dock" role="group" aria-label="Controles táctiles flotantes">
@@ -1396,7 +1396,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <h2 class="font-display font-black text-base sm:text-lg text-white tracking-wide">
                                 <span id="arenaSettingsTitle" data-operator-label="settingsTitle">Pausa y ajustes</span>
                             </h2>
-                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.8 · TikTok</span>
+                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.9 · TikTok</span>
                             <span id="settingsModeBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400/40">
                                 ⏸️ JUEGO EN PAUSA
                             </span>
@@ -1568,6 +1568,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                         </label>
                         <output id="arenaObsGeometrySummary" class="text-[10px] leading-relaxed text-slate-400" aria-live="polite">Abre Modo Stream para consultar las dimensiones efectivas de ambas vistas.</output>
                     </section>
+                    <p id="arenaCaptureResolution" data-no-translate class="text-[10px] text-cyan-200">16:9 · 1920×1080 px &nbsp;|&nbsp; 9:16 · 1080×1920 px</p>
                     <label class="block text-xs text-slate-300 border-t border-slate-800/80 pt-3" for="hudOpacityRange">
                         <span data-operator-label="opacity">Opacidad de la información del juego</span>: <output id="hudOpacityValue">85 %</output>
                         <input id="hudOpacityRange" type="range" min="35" max="100" value="85" step="5" oninput="setArenaHudOpacity(this.value)" class="w-full accent-cyan-400 mt-2" aria-label="Opacidad de la información del juego" aria-describedby="arenaHudOpacityHelp" title="Opacidad de textos y barras del juego en ambas vistas; 100 % es totalmente visible">
@@ -5571,11 +5572,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             // Both captures share one depth order from the same simulation snapshot.
             const orderedFighters = fighters.filter(f => !f.eliminated).sort((a, b) => a.y - b.y);
             const shake = sampleArenaScreenShake();
-            // 1. Render 16:9 Horizontal Broadcast Canvas (960x540)
+            // Full HD backing stores; logical camera/world coordinates remain unchanged.
+            // 1. Render 16:9 Horizontal Broadcast Canvas (1920x1080)
             const zoom16 = (gameState === 'COMBAT' && activeMode === '1v1') ? 1.12 : 1.0;
             if (draw16) renderWorldToViewport(ctx16, 960, 540, WORLD_W * 0.5, WORLD_H * 0.54, zoom16, orderedFighters, shake);
 
-            // 2. Render 9:16 Vertical Mobile Broadcast Canvas (540x960) with Smart Camera
+            // 2. Render 9:16 Vertical Mobile Broadcast Canvas (1080x1920) with Smart Camera
             if (draw9) renderWorldToViewport(ctx9, 540, 960, camera9x16.x, camera9x16.y, camera9x16.zoom, orderedFighters, shake);
 
             // 3. Synchronize 1v1 Top Health Bars on Both Screens when in 1v1 Combat
@@ -5731,10 +5733,25 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         }
 
-        function renderWorldToViewport(targetCtx, viewW, viewH, camX, camY, camZoom, orderedFighters = null, shake = sampleArenaScreenShake()) {
-            targetCtx.save();
-
-            // 1. Viewport Background Sky Gradient (Covers full 16:9 or 9:16 frame)
+        // At most one background per live context and one immutable isometric floor.
+        // Never cache a whole gameplay frame: fighters, effects and flashes stay live.
+        const arenaBackgroundCache = new WeakMap();
+        let arenaIsometricFloorCache = null;
+        function paintArenaViewportBackground(targetCtx, viewW, viewH) {
+            const theme = gameState === 'LOBBY' || gameState === 'VICTORY' ? gameState : (activeMode === '1v1' ? 'duel' : 'arena');
+            const key = `${targetCtx.canvas.width}:${targetCtx.canvas.height}:${theme}`;
+            let entry = arenaBackgroundCache.get(targetCtx);
+            if (!entry || entry.key !== key) {
+                const layer = document.createElement('canvas');
+                layer.width = targetCtx.canvas.width; layer.height = targetCtx.canvas.height;
+                const painter = layer.getContext('2d');
+                painter.setTransform(layer.width / viewW, 0, 0, layer.height / viewH, 0, 0);
+                paintArenaSkyGradient(painter, viewW, viewH);
+                entry = {key, layer}; arenaBackgroundCache.set(targetCtx, entry);
+            }
+            targetCtx.drawImage(entry.layer, 0, 0, viewW, viewH);
+        }
+        function paintArenaSkyGradient(targetCtx, viewW, viewH) {
             const bgGrad = targetCtx.createLinearGradient(0, 0, 0, viewH);
             if (gameState === 'LOBBY') {
                 bgGrad.addColorStop(0, '#061224');
@@ -5755,6 +5772,28 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             }
             targetCtx.fillStyle = bgGrad;
             targetCtx.fillRect(0, 0, viewW, viewH);
+        }
+        function paintArenaCachedStage(targetCtx) {
+            if (activeMode !== 'iso' || (gameState !== 'COMBAT' && !(gameState === 'LOBBY' && fighters.length >= 9))) {
+                paintArenaStageGeometry(targetCtx);
+                return;
+            }
+            const margin = 64, width = WORLD_W + margin * 2, height = WORLD_H + margin * 2;
+            if (!arenaIsometricFloorCache) {
+                const layer = document.createElement('canvas');
+                layer.width = width * 2; layer.height = height * 2;
+                const painter = layer.getContext('2d');
+                painter.setTransform(2, 0, 0, 2, margin * 2, margin * 2);
+                paintArenaStageGeometry(painter);
+                arenaIsometricFloorCache = layer;
+            }
+            targetCtx.drawImage(arenaIsometricFloorCache, -margin, -margin, width, height);
+        }
+        function renderWorldToViewport(targetCtx, viewW, viewH, camX, camY, camZoom, orderedFighters = null, shake = sampleArenaScreenShake()) {
+            targetCtx.save();
+            // Rasterize vectors and text at the actual capture resolution, not a CSS upscale.
+            targetCtx.setTransform(targetCtx.canvas.width / viewW, 0, 0, targetCtx.canvas.height / viewH, 0, 0);
+            paintArenaViewportBackground(targetCtx, viewW, viewH);
 
             if (skyFlashTimer > 0) {
                 targetCtx.fillStyle = skyFlashColor + '33';
@@ -5768,7 +5807,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             targetCtx.scale(camZoom, camZoom);
             targetCtx.translate(-camX, -camY);
 
-            paintArenaStageGeometry(targetCtx);
+            paintArenaCachedStage(targetCtx);
 
             // 4. Depth-Sort Living Fighters
             const visibleFighters = orderedFighters || fighters
@@ -5778,7 +5817,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             visibleFighters.forEach(f => drawFighterOnCtx(targetCtx, f));
 
             // 5. Render Special Effects & Particles
-            drawSpecialEffectsOnCtx(targetCtx);
+            drawSpecialEffectsOnCtx(targetCtx, getArenaViewportBounds(viewW, viewH, camX, camY, camZoom, shake));
 
             particles.forEach(p => {
                 targetCtx.fillStyle = p.color;
@@ -5791,14 +5830,18 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
             // 6. Confetti Rain in Victory State
             if (gameState === 'VICTORY') {
+                targetCtx.save();
+                targetCtx.setTransform(targetCtx.canvas.width / viewW, 0, 0, targetCtx.canvas.height / viewH, 0, 0);
                 confetti.forEach(c => {
                     targetCtx.save();
-                    targetCtx.translate(c.x, c.y);
+                    // Celebration covers each whole capture independently of its world camera.
+                    targetCtx.translate(c.x / WORLD_W * viewW, c.y / WORLD_H * viewH);
                     targetCtx.rotate(c.angle);
                     targetCtx.fillStyle = c.color;
                     targetCtx.fillRect(-c.size / 2, -c.size / 2, c.size, c.size * 0.6);
                     targetCtx.restore();
                 });
+                targetCtx.restore();
             }
 
             // 7. Floating Combat Texts
@@ -6038,15 +6081,22 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             targetCtx.restore();
         }
 
-        function drawSpecialEffectsOnCtx(targetCtx) {
-            const W = WORLD_W;
+        function getArenaViewportBounds(viewW, viewH, camX, camY, camZoom, shake = {x:0, y:0}) {
+            return {
+                left: camX - (viewW * 0.5 + shake.x) / camZoom,
+                right: camX + (viewW * 0.5 - shake.x) / camZoom,
+                top: camY - (viewH * 0.56 + shake.y) / camZoom,
+                bottom: camY + (viewH * 0.44 - shake.y) / camZoom
+            };
+        }
+
+        function drawSpecialEffectsOnCtx(targetCtx, bounds = {left:0, right:WORLD_W, top:0, bottom:WORLD_H}) {
             activeEffects.forEach(ef => {
                 targetCtx.save();
                 const progress = ef.timer / ef.maxTimer;
 
                 if (ef.type === 'kamehameha') {
-                    const beamLength = W * 0.85;
-                    const endX = ef.dir === 1 ? ef.x + beamLength : ef.x - beamLength;
+                    const endX = ef.dir === 1 ? Math.max(ef.x, bounds.right + 40) : Math.min(ef.x, bounds.left - 40);
                     const beamHeight = 36 * progress;
 
                     targetCtx.strokeStyle = 'rgba(0, 243, 255, 0.45)';
@@ -6082,14 +6132,16 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     targetCtx.strokeStyle = '#facc15';
                     targetCtx.lineWidth = 4 * progress;
                     targetCtx.beginPath();
-                    let curX = ef.x;
-                    let curY = -120;
-                    targetCtx.moveTo(curX, curY);
-                    while (curY < ef.y) {
-                        curY += 28;
-                        curX += (Math.random() - 0.5) * 34;
-                        targetCtx.lineTo(curX, Math.min(ef.y, curY));
+                    const top = Math.floor(Math.min(ef.y, bounds.top) / 28) * 28 - 28;
+                    const bottom = Math.min(ef.y, bounds.bottom + 28);
+                    const phase = Math.floor((ef.maxTimer - ef.timer) / 3);
+                    targetCtx.moveTo(ef.x, top);
+                    // The same world-height noise is shared by both cameras. Rendering never
+                    // advances combat randomness, even when a taller crop needs more segments.
+                    for (let y = top + 28; y < bottom; y += 28) {
+                        targetCtx.lineTo(ef.x + Math.sin(y * 0.17 + ef.x * 0.13 + phase * 1.7) * 17, y);
                     }
+                    targetCtx.lineTo(ef.x, bottom);
                     targetCtx.stroke();
 
                 } else if (ef.type === 'titanQuake') {
@@ -6120,12 +6172,13 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
                 } else if (ef.type === 'ringOutPillar') {
                     const pillarW = 68 * progress;
-                    const grad = targetCtx.createLinearGradient(ef.x, ef.y, ef.x, ef.y - 360);
+                    const top = Math.min(ef.y, bounds.top - 16);
+                    const grad = targetCtx.createLinearGradient(ef.x, ef.y, ef.x, top);
                     grad.addColorStop(0, ef.color || '#f43f5e');
                     grad.addColorStop(1, 'rgba(244, 63, 94, 0)');
                     targetCtx.fillStyle = grad;
                     targetCtx.globalAlpha = progress * 0.85;
-                    targetCtx.fillRect(ef.x - pillarW / 2, ef.y - 360, pillarW, 360);
+                    targetCtx.fillRect(ef.x - pillarW / 2, top, pillarW, ef.y - top);
                     targetCtx.globalAlpha = 1;
                 }
 
@@ -7820,7 +7873,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.8';
+        const ARENA_RELEASE_VERSION = '0.9';
         const ARENA_RELEASE_EDITION = 'tiktok';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:10, footer:76});
@@ -8567,7 +8620,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.8.0',
+            version: '0.9.0',
             edition: 'tiktok',
             getBalanceRules() {
                 return ARENA_CLASS_BALANCE;
