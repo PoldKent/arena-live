@@ -1,0 +1,2169 @@
+{
+  "version": "0.5.0",
+  "productionEngineGitBlob": "c2260f181dbce56c896a4806537f5fd5327bee2a",
+  "sampling": {
+    "publishedMatches": 32800,
+    "counterfactualMatches": 600,
+    "uniqueMatches": 33400,
+    "duelSeeds": 400,
+    "arenaSeeds": 40,
+    "rotationsPerArenaSeed": 5,
+    "variantsPerDuelSeed": 4,
+    "maxSeconds": 180,
+    "browser": "153.0.8010.0",
+    "note": "Earlier 50-seed duels and pilot runs are excluded to avoid double-counting repeated trials."
+  },
+  "methodology": {
+    "timerHz": 60,
+    "externalBoosts": false,
+    "reentry": false,
+    "targeting": "published class rivalries; neutral control removes class preferences including lightning prioritization",
+    "intervals": "2000 bootstrap resamples of seed clusters; side/order/class rotations remain together. Intervals describe this simulation, not human skill or LIVE outcomes."
+  },
+  "duels": {
+    "matches": 16000,
+    "timeouts": 0,
+    "maxSeconds": 180,
+    "classes": [
+      {
+        "classKey": "kame",
+        "name": "Guerrero",
+        "matches": 6400,
+        "fighters": 6400,
+        "wins": 2960,
+        "draws": 0,
+        "winPct": 46.25,
+        "scorePct": 46.25,
+        "scoreCI95": {
+          "seeds": 400,
+          "low": 44.4688,
+          "high": 48.1563
+        },
+        "meanHpDamage": 122.6175,
+        "meanKills": 0.4625,
+        "meanSurvivalSeconds": 26.8523,
+        "specialDamagePerExecution": 31.5746,
+        "specialTargetsPerExecution": 0.8729,
+        "specialHitPct": 87.2942,
+        "chargeExecutedPct": 75.6689,
+        "hpDeaths": 2314,
+        "fallDeaths": 1126,
+        "totals": {
+          "hpDamage": 784752,
+          "specialHpDamage": 517886,
+          "normalHpDamage": 266866,
+          "kills": 2960,
+          "started": 21676,
+          "executed": 16402,
+          "hitCasts": 14318,
+          "specialTargets": 14318,
+          "interrupted": 5036,
+          "energySpent": 971508.8
+        }
+      },
+      {
+        "classKey": "ninja",
+        "name": "Shinobi",
+        "matches": 6400,
+        "fighters": 6400,
+        "wins": 2792,
+        "draws": 0,
+        "winPct": 43.625,
+        "scorePct": 43.625,
+        "scoreCI95": {
+          "seeds": 400,
+          "low": 41.8438,
+          "high": 45.375
+        },
+        "meanHpDamage": 122.2894,
+        "meanKills": 0.4363,
+        "meanSurvivalSeconds": 27.1684,
+        "specialDamagePerExecution": 31.1227,
+        "specialTargetsPerExecution": 0.9479,
+        "specialHitPct": 94.7874,
+        "chargeExecutedPct": 76.7303,
+        "hpDeaths": 2486,
+        "fallDeaths": 1122,
+        "totals": {
+          "hpDamage": 782652,
+          "specialHpDamage": 518256,
+          "normalHpDamage": 264396,
+          "kills": 2792,
+          "started": 21702,
+          "executed": 16652,
+          "hitCasts": 15784,
+          "specialTargets": 15784,
+          "interrupted": 4800,
+          "energySpent": 972243.4
+        }
+      },
+      {
+        "classKey": "titan",
+        "name": "Titán",
+        "matches": 6400,
+        "fighters": 6400,
+        "wins": 4086,
+        "draws": 0,
+        "winPct": 63.8438,
+        "scorePct": 63.8438,
+        "scoreCI95": {
+          "seeds": 400,
+          "low": 62,
+          "high": 65.8438
+        },
+        "meanHpDamage": 132.9297,
+        "meanKills": 0.6384,
+        "meanSurvivalSeconds": 24.9653,
+        "specialDamagePerExecution": 38.8264,
+        "specialTargetsPerExecution": 0.9141,
+        "specialHitPct": 91.4077,
+        "chargeExecutedPct": 76.9783,
+        "hpDeaths": 1332,
+        "fallDeaths": 982,
+        "totals": {
+          "hpDamage": 850750,
+          "specialHpDamage": 607322,
+          "normalHpDamage": 243428,
+          "kills": 4086,
+          "started": 20320,
+          "executed": 15642,
+          "hitCasts": 14298,
+          "specialTargets": 14298,
+          "interrupted": 4504,
+          "energySpent": 910014.58
+        }
+      },
+      {
+        "classKey": "trueno",
+        "name": "Rayo",
+        "matches": 6400,
+        "fighters": 6400,
+        "wins": 2688,
+        "draws": 0,
+        "winPct": 42,
+        "scorePct": 42,
+        "scoreCI95": {
+          "seeds": 400,
+          "low": 40.2188,
+          "high": 43.8438
+        },
+        "meanHpDamage": 121.2084,
+        "meanKills": 0.42,
+        "meanSurvivalSeconds": 27.426,
+        "specialDamagePerExecution": 30.8963,
+        "specialTargetsPerExecution": 0.9992,
+        "specialHitPct": 99.9153,
+        "chargeExecutedPct": 75.7262,
+        "hpDeaths": 2742,
+        "fallDeaths": 970,
+        "totals": {
+          "hpDamage": 775734,
+          "specialHpDamage": 510654,
+          "normalHpDamage": 265080,
+          "kills": 2688,
+          "started": 21826,
+          "executed": 16528,
+          "hitCasts": 16514,
+          "specialTargets": 16514,
+          "interrupted": 5036,
+          "energySpent": 977945.64
+        }
+      },
+      {
+        "classKey": "esmeralda",
+        "name": "Espíritu",
+        "matches": 6400,
+        "fighters": 6400,
+        "wins": 3474,
+        "draws": 0,
+        "winPct": 54.2813,
+        "scorePct": 54.2813,
+        "scoreCI95": {
+          "seeds": 400,
+          "low": 52.5625,
+          "high": 56.0938
+        },
+        "meanHpDamage": 130.1672,
+        "meanKills": 0.5428,
+        "meanSurvivalSeconds": 26.4909,
+        "specialDamagePerExecution": 35.4218,
+        "specialTargetsPerExecution": 0.9838,
+        "specialHitPct": 98.3752,
+        "chargeExecutedPct": 75.6002,
+        "hpDeaths": 1970,
+        "fallDeaths": 956,
+        "totals": {
+          "hpDamage": 833070,
+          "specialHpDamage": 575534,
+          "normalHpDamage": 257536,
+          "kills": 3474,
+          "started": 21492,
+          "executed": 16248,
+          "hitCasts": 15984,
+          "specialTargets": 15984,
+          "interrupted": 4996,
+          "energySpent": 962574.4
+        }
+      }
+    ]
+  },
+  "noSpecials": {
+    "matches": 16000,
+    "timeouts": 0,
+    "maxSeconds": 180,
+    "classes": [
+      {
+        "classKey": "kame",
+        "name": "Guerrero",
+        "matches": 6400,
+        "fighters": 6400,
+        "wins": 3200,
+        "draws": 0,
+        "winPct": 50,
+        "scorePct": 50,
+        "scoreCI95": {
+          "seeds": 400,
+          "low": 50,
+          "high": 50
+        },
+        "meanHpDamage": 116.785,
+        "meanKills": 0.5,
+        "meanSurvivalSeconds": 41.0147,
+        "specialDamagePerExecution": 0,
+        "specialTargetsPerExecution": 0,
+        "specialHitPct": 0,
+        "chargeExecutedPct": 0,
+        "hpDeaths": 1768,
+        "fallDeaths": 1432,
+        "totals": {
+          "hpDamage": 747424,
+          "specialHpDamage": 0,
+          "normalHpDamage": 747424,
+          "kills": 3200,
+          "started": 0,
+          "executed": 0,
+          "hitCasts": 0,
+          "specialTargets": 0,
+          "interrupted": 0,
+          "energySpent": 0
+        }
+      },
+      {
+        "classKey": "ninja",
+        "name": "Shinobi",
+        "matches": 6400,
+        "fighters": 6400,
+        "wins": 3200,
+        "draws": 0,
+        "winPct": 50,
+        "scorePct": 50,
+        "scoreCI95": {
+          "seeds": 400,
+          "low": 50,
+          "high": 50
+        },
+        "meanHpDamage": 116.785,
+        "meanKills": 0.5,
+        "meanSurvivalSeconds": 41.0147,
+        "specialDamagePerExecution": 0,
+        "specialTargetsPerExecution": 0,
+        "specialHitPct": 0,
+        "chargeExecutedPct": 0,
+        "hpDeaths": 1768,
+        "fallDeaths": 1432,
+        "totals": {
+          "hpDamage": 747424,
+          "specialHpDamage": 0,
+          "normalHpDamage": 747424,
+          "kills": 3200,
+          "started": 0,
+          "executed": 0,
+          "hitCasts": 0,
+          "specialTargets": 0,
+          "interrupted": 0,
+          "energySpent": 0
+        }
+      },
+      {
+        "classKey": "titan",
+        "name": "Titán",
+        "matches": 6400,
+        "fighters": 6400,
+        "wins": 3200,
+        "draws": 0,
+        "winPct": 50,
+        "scorePct": 50,
+        "scoreCI95": {
+          "seeds": 400,
+          "low": 50,
+          "high": 50
+        },
+        "meanHpDamage": 116.785,
+        "meanKills": 0.5,
+        "meanSurvivalSeconds": 41.0147,
+        "specialDamagePerExecution": 0,
+        "specialTargetsPerExecution": 0,
+        "specialHitPct": 0,
+        "chargeExecutedPct": 0,
+        "hpDeaths": 1768,
+        "fallDeaths": 1432,
+        "totals": {
+          "hpDamage": 747424,
+          "specialHpDamage": 0,
+          "normalHpDamage": 747424,
+          "kills": 3200,
+          "started": 0,
+          "executed": 0,
+          "hitCasts": 0,
+          "specialTargets": 0,
+          "interrupted": 0,
+          "energySpent": 0
+        }
+      },
+      {
+        "classKey": "trueno",
+        "name": "Rayo",
+        "matches": 6400,
+        "fighters": 6400,
+        "wins": 3200,
+        "draws": 0,
+        "winPct": 50,
+        "scorePct": 50,
+        "scoreCI95": {
+          "seeds": 400,
+          "low": 50,
+          "high": 50
+        },
+        "meanHpDamage": 116.785,
+        "meanKills": 0.5,
+        "meanSurvivalSeconds": 41.0147,
+        "specialDamagePerExecution": 0,
+        "specialTargetsPerExecution": 0,
+        "specialHitPct": 0,
+        "chargeExecutedPct": 0,
+        "hpDeaths": 1768,
+        "fallDeaths": 1432,
+        "totals": {
+          "hpDamage": 747424,
+          "specialHpDamage": 0,
+          "normalHpDamage": 747424,
+          "kills": 3200,
+          "started": 0,
+          "executed": 0,
+          "hitCasts": 0,
+          "specialTargets": 0,
+          "interrupted": 0,
+          "energySpent": 0
+        }
+      },
+      {
+        "classKey": "esmeralda",
+        "name": "Espíritu",
+        "matches": 6400,
+        "fighters": 6400,
+        "wins": 3200,
+        "draws": 0,
+        "winPct": 50,
+        "scorePct": 50,
+        "scoreCI95": {
+          "seeds": 400,
+          "low": 50,
+          "high": 50
+        },
+        "meanHpDamage": 116.785,
+        "meanKills": 0.5,
+        "meanSurvivalSeconds": 41.0147,
+        "specialDamagePerExecution": 0,
+        "specialTargetsPerExecution": 0,
+        "specialHitPct": 0,
+        "chargeExecutedPct": 0,
+        "hpDeaths": 1768,
+        "fallDeaths": 1432,
+        "totals": {
+          "hpDamage": 747424,
+          "specialHpDamage": 0,
+          "normalHpDamage": 747424,
+          "kills": 3200,
+          "started": 0,
+          "executed": 0,
+          "hitCasts": 0,
+          "specialTargets": 0,
+          "interrupted": 0,
+          "energySpent": 0
+        }
+      }
+    ]
+  },
+  "arenas": {
+    "5": {
+      "matches": 200,
+      "timeouts": 0,
+      "maxSeconds": 180,
+      "classes": [
+        {
+          "classKey": "kame",
+          "name": "Guerrero",
+          "matches": 200,
+          "fighters": 200,
+          "wins": 41,
+          "draws": 0,
+          "winPct": 20.5,
+          "scorePct": 20.5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 15,
+            "high": 26
+          },
+          "meanHpDamage": 135.935,
+          "meanKills": 0.75,
+          "meanSurvivalSeconds": 25.7608,
+          "specialDamagePerExecution": 37.8031,
+          "specialTargetsPerExecution": 1.0853,
+          "specialHitPct": 80.5252,
+          "chargeExecutedPct": 72.655,
+          "hpDeaths": 79,
+          "fallDeaths": 80,
+          "totals": {
+            "hpDamage": 27187,
+            "specialHpDamage": 17276,
+            "normalHpDamage": 9911,
+            "kills": 150,
+            "started": 629,
+            "executed": 457,
+            "hitCasts": 368,
+            "specialTargets": 496,
+            "interrupted": 161,
+            "energySpent": 28164.0285
+          }
+        },
+        {
+          "classKey": "ninja",
+          "name": "Shinobi",
+          "matches": 200,
+          "fighters": 200,
+          "wins": 13,
+          "draws": 0,
+          "winPct": 6.5,
+          "scorePct": 6.5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 3.5,
+            "high": 10
+          },
+          "meanHpDamage": 98.23,
+          "meanKills": 0.375,
+          "meanSurvivalSeconds": 20.4693,
+          "specialDamagePerExecution": 29.6676,
+          "specialTargetsPerExecution": 0.922,
+          "specialHitPct": 92.1965,
+          "chargeExecutedPct": 69.4779,
+          "hpDeaths": 88,
+          "fallDeaths": 99,
+          "totals": {
+            "hpDamage": 19646,
+            "specialHpDamage": 10265,
+            "normalHpDamage": 9381,
+            "kills": 75,
+            "started": 498,
+            "executed": 346,
+            "hitCasts": 319,
+            "specialTargets": 319,
+            "interrupted": 149,
+            "energySpent": 22381.546
+          }
+        },
+        {
+          "classKey": "titan",
+          "name": "Titán",
+          "matches": 200,
+          "fighters": 200,
+          "wins": 69,
+          "draws": 0,
+          "winPct": 34.5,
+          "scorePct": 34.5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 29.5,
+            "high": 39.5
+          },
+          "meanHpDamage": 179.095,
+          "meanKills": 1.125,
+          "meanSurvivalSeconds": 27.9956,
+          "specialDamagePerExecution": 49.8948,
+          "specialTargetsPerExecution": 1.1944,
+          "specialHitPct": 89.0873,
+          "chargeExecutedPct": 73.9003,
+          "hpDeaths": 57,
+          "fallDeaths": 74,
+          "totals": {
+            "hpDamage": 35819,
+            "specialHpDamage": 25147,
+            "normalHpDamage": 10672,
+            "kills": 225,
+            "started": 682,
+            "executed": 504,
+            "hitCasts": 449,
+            "specialTargets": 602,
+            "interrupted": 170,
+            "energySpent": 30576.4345
+          }
+        },
+        {
+          "classKey": "trueno",
+          "name": "Rayo",
+          "matches": 200,
+          "fighters": 200,
+          "wins": 53,
+          "draws": 0,
+          "winPct": 26.5,
+          "scorePct": 26.5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 21.5,
+            "high": 31.5
+          },
+          "meanHpDamage": 178.125,
+          "meanKills": 1.18,
+          "meanSurvivalSeconds": 26.7566,
+          "specialDamagePerExecution": 53.0528,
+          "specialTargetsPerExecution": 1.8069,
+          "specialHitPct": 97.1545,
+          "chargeExecutedPct": 74.0964,
+          "hpDeaths": 69,
+          "fallDeaths": 78,
+          "totals": {
+            "hpDamage": 35625,
+            "specialHpDamage": 26102,
+            "normalHpDamage": 9523,
+            "kills": 236,
+            "started": 664,
+            "executed": 492,
+            "hitCasts": 478,
+            "specialTargets": 889,
+            "interrupted": 164,
+            "energySpent": 29731.5255
+          }
+        },
+        {
+          "classKey": "esmeralda",
+          "name": "Espíritu",
+          "matches": 200,
+          "fighters": 200,
+          "wins": 24,
+          "draws": 0,
+          "winPct": 12,
+          "scorePct": 12,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 7.5,
+            "high": 16.5
+          },
+          "meanHpDamage": 111.84,
+          "meanKills": 0.57,
+          "meanSurvivalSeconds": 23.7173,
+          "specialDamagePerExecution": 31.3933,
+          "specialTargetsPerExecution": 0.8946,
+          "specialHitPct": 89.4602,
+          "chargeExecutedPct": 67.77,
+          "hpDeaths": 95,
+          "fallDeaths": 81,
+          "totals": {
+            "hpDamage": 22368,
+            "specialHpDamage": 12212,
+            "normalHpDamage": 10156,
+            "kills": 114,
+            "started": 574,
+            "executed": 389,
+            "hitCasts": 348,
+            "specialTargets": 348,
+            "interrupted": 176,
+            "energySpent": 25702.2075
+          }
+        }
+      ]
+    },
+    "10": {
+      "matches": 200,
+      "timeouts": 0,
+      "maxSeconds": 180,
+      "classes": [
+        {
+          "classKey": "kame",
+          "name": "Guerrero",
+          "matches": 200,
+          "fighters": 400,
+          "wins": 43,
+          "draws": 0,
+          "winPct": 21.5,
+          "scorePct": 21.5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 15.5,
+            "high": 27.5
+          },
+          "meanHpDamage": 180.8125,
+          "meanKills": 0.78,
+          "meanSurvivalSeconds": 28.2505,
+          "specialDamagePerExecution": 45.0333,
+          "specialTargetsPerExecution": 1.8844,
+          "specialHitPct": 86.69,
+          "chargeExecutedPct": 66.8618,
+          "hpDeaths": 225,
+          "fallDeaths": 132,
+          "totals": {
+            "hpDamage": 72325,
+            "specialHpDamage": 25714,
+            "normalHpDamage": 46611,
+            "kills": 312,
+            "started": 854,
+            "executed": 571,
+            "hitCasts": 495,
+            "specialTargets": 1076,
+            "interrupted": 237,
+            "energySpent": 38418.036
+          }
+        },
+        {
+          "classKey": "ninja",
+          "name": "Shinobi",
+          "matches": 200,
+          "fighters": 400,
+          "wins": 10,
+          "draws": 0,
+          "winPct": 5,
+          "scorePct": 5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 2.5,
+            "high": 8
+          },
+          "meanHpDamage": 137.9875,
+          "meanKills": 0.55,
+          "meanSurvivalSeconds": 25.9233,
+          "specialDamagePerExecution": 20.7065,
+          "specialTargetsPerExecution": 0.9224,
+          "specialHitPct": 92.2432,
+          "chargeExecutedPct": 63.2626,
+          "hpDeaths": 255,
+          "fallDeaths": 135,
+          "totals": {
+            "hpDamage": 55195,
+            "specialHpDamage": 9877,
+            "normalHpDamage": 45318,
+            "kills": 220,
+            "started": 754,
+            "executed": 477,
+            "hitCasts": 440,
+            "specialTargets": 440,
+            "interrupted": 239,
+            "energySpent": 33930
+          }
+        },
+        {
+          "classKey": "titan",
+          "name": "Titán",
+          "matches": 200,
+          "fighters": 400,
+          "wins": 83,
+          "draws": 0,
+          "winPct": 41.5,
+          "scorePct": 41.5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 35.5,
+            "high": 47.5
+          },
+          "meanHpDamage": 224.7775,
+          "meanKills": 1.66,
+          "meanSurvivalSeconds": 34.5967,
+          "specialDamagePerExecution": 50.9291,
+          "specialTargetsPerExecution": 1.5037,
+          "specialHitPct": 92.2886,
+          "chargeExecutedPct": 68.0203,
+          "hpDeaths": 172,
+          "fallDeaths": 145,
+          "totals": {
+            "hpDamage": 89911,
+            "specialHpDamage": 40947,
+            "normalHpDamage": 48964,
+            "kills": 664,
+            "started": 1182,
+            "executed": 804,
+            "hitCasts": 742,
+            "specialTargets": 1209,
+            "interrupted": 349,
+            "energySpent": 53190
+          }
+        },
+        {
+          "classKey": "trueno",
+          "name": "Rayo",
+          "matches": 200,
+          "fighters": 400,
+          "wins": 42,
+          "draws": 0,
+          "winPct": 21,
+          "scorePct": 21,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 16.5,
+            "high": 25.5
+          },
+          "meanHpDamage": 174.2725,
+          "meanKills": 0.9125,
+          "meanSurvivalSeconds": 28.2023,
+          "specialDamagePerExecution": 44.0794,
+          "specialTargetsPerExecution": 2.2148,
+          "specialHitPct": 99.278,
+          "chargeExecutedPct": 64.0462,
+          "hpDeaths": 246,
+          "fallDeaths": 112,
+          "totals": {
+            "hpDamage": 69709,
+            "specialHpDamage": 24420,
+            "normalHpDamage": 45289,
+            "kills": 365,
+            "started": 865,
+            "executed": 554,
+            "hitCasts": 550,
+            "specialTargets": 1227,
+            "interrupted": 265,
+            "energySpent": 38925
+          }
+        },
+        {
+          "classKey": "esmeralda",
+          "name": "Espíritu",
+          "matches": 200,
+          "fighters": 400,
+          "wins": 22,
+          "draws": 0,
+          "winPct": 11,
+          "scorePct": 11,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 7,
+            "high": 15
+          },
+          "meanHpDamage": 139.4925,
+          "meanKills": 0.5975,
+          "meanSurvivalSeconds": 26.3291,
+          "specialDamagePerExecution": 23.142,
+          "specialTargetsPerExecution": 0.9457,
+          "specialHitPct": 94.572,
+          "chargeExecutedPct": 62.4511,
+          "hpDeaths": 251,
+          "fallDeaths": 127,
+          "totals": {
+            "hpDamage": 55797,
+            "specialHpDamage": 11085,
+            "normalHpDamage": 44712,
+            "kills": 239,
+            "started": 767,
+            "executed": 479,
+            "hitCasts": 453,
+            "specialTargets": 453,
+            "interrupted": 245,
+            "energySpent": 34515
+          }
+        }
+      ]
+    },
+    "25": {
+      "matches": 200,
+      "timeouts": 0,
+      "maxSeconds": 180,
+      "classes": [
+        {
+          "classKey": "kame",
+          "name": "Guerrero",
+          "matches": 200,
+          "fighters": 1000,
+          "wins": 14,
+          "draws": 0,
+          "winPct": 7,
+          "scorePct": 7,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 3.5,
+            "high": 10.5
+          },
+          "meanHpDamage": 172.462,
+          "meanKills": 0.649,
+          "meanSurvivalSeconds": 23.1884,
+          "specialDamagePerExecution": 101.1066,
+          "specialTargetsPerExecution": 3.4104,
+          "specialHitPct": 90.4762,
+          "chargeExecutedPct": 57.4967,
+          "hpDeaths": 695,
+          "fallDeaths": 291,
+          "totals": {
+            "hpDamage": 172462,
+            "specialHpDamage": 44588,
+            "normalHpDamage": 127874,
+            "kills": 649,
+            "started": 767,
+            "executed": 441,
+            "hitCasts": 399,
+            "specialTargets": 1504,
+            "interrupted": 275,
+            "energySpent": 34515
+          }
+        },
+        {
+          "classKey": "ninja",
+          "name": "Shinobi",
+          "matches": 200,
+          "fighters": 1000,
+          "wins": 10,
+          "draws": 0,
+          "winPct": 5,
+          "scorePct": 5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 2.5,
+            "high": 8
+          },
+          "meanHpDamage": 127.699,
+          "meanKills": 0.553,
+          "meanSurvivalSeconds": 21.5006,
+          "specialDamagePerExecution": 21.4901,
+          "specialTargetsPerExecution": 0.9282,
+          "specialHitPct": 92.8218,
+          "chargeExecutedPct": 59.1508,
+          "hpDeaths": 624,
+          "fallDeaths": 366,
+          "totals": {
+            "hpDamage": 127699,
+            "specialHpDamage": 8682,
+            "normalHpDamage": 119017,
+            "kills": 553,
+            "started": 683,
+            "executed": 404,
+            "hitCasts": 375,
+            "specialTargets": 375,
+            "interrupted": 235,
+            "energySpent": 30735
+          }
+        },
+        {
+          "classKey": "titan",
+          "name": "Titán",
+          "matches": 200,
+          "fighters": 1000,
+          "wins": 148,
+          "draws": 0,
+          "winPct": 74,
+          "scorePct": 74,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 69.5,
+            "high": 79
+          },
+          "meanHpDamage": 298.237,
+          "meanKills": 2.49,
+          "meanSurvivalSeconds": 36.7443,
+          "specialDamagePerExecution": 95.5074,
+          "specialTargetsPerExecution": 2.4699,
+          "specialHitPct": 93.0481,
+          "chargeExecutedPct": 62.8571,
+          "hpDeaths": 444,
+          "fallDeaths": 408,
+          "totals": {
+            "hpDamage": 298237,
+            "specialHpDamage": 142879,
+            "normalHpDamage": 155358,
+            "kills": 2490,
+            "started": 2380,
+            "executed": 1496,
+            "hitCasts": 1392,
+            "specialTargets": 3695,
+            "interrupted": 805,
+            "energySpent": 107100
+          }
+        },
+        {
+          "classKey": "trueno",
+          "name": "Rayo",
+          "matches": 200,
+          "fighters": 1000,
+          "wins": 20,
+          "draws": 0,
+          "winPct": 10,
+          "scorePct": 10,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 6.5,
+            "high": 13.5
+          },
+          "meanHpDamage": 136.163,
+          "meanKills": 0.607,
+          "meanSurvivalSeconds": 21.8356,
+          "specialDamagePerExecution": 50.5082,
+          "specialTargetsPerExecution": 2.3962,
+          "specialHitPct": 100,
+          "chargeExecutedPct": 53.5088,
+          "hpDeaths": 612,
+          "fallDeaths": 368,
+          "totals": {
+            "hpDamage": 136163,
+            "specialHpDamage": 18486,
+            "normalHpDamage": 117677,
+            "kills": 607,
+            "started": 684,
+            "executed": 366,
+            "hitCasts": 366,
+            "specialTargets": 877,
+            "interrupted": 268,
+            "energySpent": 30780
+          }
+        },
+        {
+          "classKey": "esmeralda",
+          "name": "Espíritu",
+          "matches": 200,
+          "fighters": 1000,
+          "wins": 8,
+          "draws": 0,
+          "winPct": 4,
+          "scorePct": 4,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 1.5,
+            "high": 6.5
+          },
+          "meanHpDamage": 127.504,
+          "meanKills": 0.501,
+          "meanSurvivalSeconds": 21.4682,
+          "specialDamagePerExecution": 23.4409,
+          "specialTargetsPerExecution": 0.9501,
+          "specialHitPct": 95.0131,
+          "chargeExecutedPct": 58.1679,
+          "hpDeaths": 665,
+          "fallDeaths": 327,
+          "totals": {
+            "hpDamage": 127504,
+            "specialHpDamage": 8931,
+            "normalHpDamage": 118573,
+            "kills": 501,
+            "started": 655,
+            "executed": 381,
+            "hitCasts": 362,
+            "specialTargets": 362,
+            "interrupted": 237,
+            "energySpent": 29475
+          }
+        }
+      ]
+    },
+    "125": {
+      "matches": 200,
+      "timeouts": 0,
+      "maxSeconds": 180,
+      "classes": [
+        {
+          "classKey": "kame",
+          "name": "Guerrero",
+          "matches": 200,
+          "fighters": 5000,
+          "wins": 2,
+          "draws": 0,
+          "winPct": 1,
+          "scorePct": 1,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 0,
+            "high": 2.5
+          },
+          "meanHpDamage": 132.3532,
+          "meanKills": 0.7108,
+          "meanSurvivalSeconds": 12.9358,
+          "specialDamagePerExecution": 625.5625,
+          "specialTargetsPerExecution": 16.8495,
+          "specialHitPct": 97.6852,
+          "chargeExecutedPct": 42.2287,
+          "hpDeaths": 2438,
+          "fallDeaths": 2560,
+          "totals": {
+            "hpDamage": 661766,
+            "specialHpDamage": 270243,
+            "normalHpDamage": 391523,
+            "kills": 3554,
+            "started": 1023,
+            "executed": 432,
+            "hitCasts": 422,
+            "specialTargets": 7279,
+            "interrupted": 563,
+            "energySpent": 46035
+          }
+        },
+        {
+          "classKey": "ninja",
+          "name": "Shinobi",
+          "matches": 200,
+          "fighters": 5000,
+          "wins": 2,
+          "draws": 0,
+          "winPct": 1,
+          "scorePct": 1,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 0,
+            "high": 2.5
+          },
+          "meanHpDamage": 76.0124,
+          "meanKills": 0.4316,
+          "meanSurvivalSeconds": 12.255,
+          "specialDamagePerExecution": 31.3261,
+          "specialTargetsPerExecution": 0.9848,
+          "specialHitPct": 98.4783,
+          "chargeExecutedPct": 39.8959,
+          "hpDeaths": 2322,
+          "fallDeaths": 2676,
+          "totals": {
+            "hpDamage": 380062,
+            "specialHpDamage": 14410,
+            "normalHpDamage": 365652,
+            "kills": 2158,
+            "started": 1153,
+            "executed": 460,
+            "hitCasts": 453,
+            "specialTargets": 453,
+            "interrupted": 671,
+            "energySpent": 51885
+          }
+        },
+        {
+          "classKey": "titan",
+          "name": "Titán",
+          "matches": 200,
+          "fighters": 5000,
+          "wins": 190,
+          "draws": 0,
+          "winPct": 95,
+          "scorePct": 95,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 92,
+            "high": 98
+          },
+          "meanHpDamage": 403.9762,
+          "meanKills": 2.9136,
+          "meanSurvivalSeconds": 27.5578,
+          "specialDamagePerExecution": 403.6143,
+          "specialTargetsPerExecution": 9.1603,
+          "specialHitPct": 93.7763,
+          "chargeExecutedPct": 51.5259,
+          "hpDeaths": 1792,
+          "fallDeaths": 3018,
+          "totals": {
+            "hpDamage": 2019881,
+            "specialHpDamage": 1342421,
+            "normalHpDamage": 677460,
+            "kills": 14568,
+            "started": 6455,
+            "executed": 3326,
+            "hitCasts": 3119,
+            "specialTargets": 30467,
+            "interrupted": 2937,
+            "energySpent": 290475
+          }
+        },
+        {
+          "classKey": "trueno",
+          "name": "Rayo",
+          "matches": 200,
+          "fighters": 5000,
+          "wins": 5,
+          "draws": 0,
+          "winPct": 2.5,
+          "scorePct": 2.5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 0.5,
+            "high": 4.5
+          },
+          "meanHpDamage": 82.9028,
+          "meanKills": 0.4702,
+          "meanSurvivalSeconds": 12.6017,
+          "specialDamagePerExecution": 83.1895,
+          "specialTargetsPerExecution": 2.8649,
+          "specialHitPct": 99.7821,
+          "chargeExecutedPct": 39.7747,
+          "hpDeaths": 2315,
+          "fallDeaths": 2680,
+          "totals": {
+            "hpDamage": 414514,
+            "specialHpDamage": 38184,
+            "normalHpDamage": 376330,
+            "kills": 2351,
+            "started": 1154,
+            "executed": 459,
+            "hitCasts": 458,
+            "specialTargets": 1315,
+            "interrupted": 678,
+            "energySpent": 51930
+          }
+        },
+        {
+          "classKey": "esmeralda",
+          "name": "Espíritu",
+          "matches": 200,
+          "fighters": 5000,
+          "wins": 1,
+          "draws": 0,
+          "winPct": 0.5,
+          "scorePct": 0.5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 0,
+            "high": 1.5
+          },
+          "meanHpDamage": 78.5324,
+          "meanKills": 0.4338,
+          "meanSurvivalSeconds": 12.6085,
+          "specialDamagePerExecution": 34.05,
+          "specialTargetsPerExecution": 0.9935,
+          "specialHitPct": 99.3478,
+          "chargeExecutedPct": 38.623,
+          "hpDeaths": 2343,
+          "fallDeaths": 2656,
+          "totals": {
+            "hpDamage": 392662,
+            "specialHpDamage": 15663,
+            "normalHpDamage": 376999,
+            "kills": 2169,
+            "started": 1191,
+            "executed": 460,
+            "hitCasts": 457,
+            "specialTargets": 457,
+            "interrupted": 708,
+            "energySpent": 53595
+          }
+        }
+      ]
+    }
+  },
+  "nearestTargetControl": {
+    "10": {
+      "matches": 200,
+      "timeouts": 0,
+      "maxSeconds": 180,
+      "classes": [
+        {
+          "classKey": "kame",
+          "name": "Guerrero",
+          "matches": 200,
+          "fighters": 400,
+          "wins": 49,
+          "draws": 0,
+          "winPct": 24.5,
+          "scorePct": 24.5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 19,
+            "high": 30
+          },
+          "meanHpDamage": 198.85,
+          "meanKills": 1.0325,
+          "meanSurvivalSeconds": 33.2359,
+          "specialDamagePerExecution": 31.0766,
+          "specialTargetsPerExecution": 1.7748,
+          "specialHitPct": 89.6396,
+          "chargeExecutedPct": 62.8006,
+          "hpDeaths": 301,
+          "fallDeaths": 50,
+          "totals": {
+            "hpDamage": 79540,
+            "specialHpDamage": 13798,
+            "normalHpDamage": 65742,
+            "kills": 413,
+            "started": 707,
+            "executed": 444,
+            "hitCasts": 398,
+            "specialTargets": 788,
+            "interrupted": 195,
+            "energySpent": 31815
+          }
+        },
+        {
+          "classKey": "ninja",
+          "name": "Shinobi",
+          "matches": 200,
+          "fighters": 400,
+          "wins": 16,
+          "draws": 0,
+          "winPct": 8,
+          "scorePct": 8,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 4.5,
+            "high": 12
+          },
+          "meanHpDamage": 176.3075,
+          "meanKills": 0.6325,
+          "meanSurvivalSeconds": 31.8258,
+          "specialDamagePerExecution": 13.8167,
+          "specialTargetsPerExecution": 0.9167,
+          "specialHitPct": 91.6667,
+          "chargeExecutedPct": 55.47,
+          "hpDeaths": 330,
+          "fallDeaths": 54,
+          "totals": {
+            "hpDamage": 70523,
+            "specialHpDamage": 4974,
+            "normalHpDamage": 65549,
+            "kills": 253,
+            "started": 649,
+            "executed": 360,
+            "hitCasts": 330,
+            "specialTargets": 330,
+            "interrupted": 207,
+            "energySpent": 29205
+          }
+        },
+        {
+          "classKey": "titan",
+          "name": "Titán",
+          "matches": 200,
+          "fighters": 400,
+          "wins": 42,
+          "draws": 0,
+          "winPct": 21,
+          "scorePct": 21,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 16,
+            "high": 26.5
+          },
+          "meanHpDamage": 195.89,
+          "meanKills": 0.9125,
+          "meanSurvivalSeconds": 32.977,
+          "specialDamagePerExecution": 30.9696,
+          "specialTargetsPerExecution": 1.2248,
+          "specialHitPct": 88.993,
+          "chargeExecutedPct": 61.3506,
+          "hpDeaths": 292,
+          "fallDeaths": 66,
+          "totals": {
+            "hpDamage": 78356,
+            "specialHpDamage": 13224,
+            "normalHpDamage": 65132,
+            "kills": 365,
+            "started": 696,
+            "executed": 427,
+            "hitCasts": 380,
+            "specialTargets": 523,
+            "interrupted": 196,
+            "energySpent": 31320
+          }
+        },
+        {
+          "classKey": "trueno",
+          "name": "Rayo",
+          "matches": 200,
+          "fighters": 400,
+          "wins": 59,
+          "draws": 0,
+          "winPct": 29.5,
+          "scorePct": 29.5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 24.5,
+            "high": 34.5
+          },
+          "meanHpDamage": 204.5875,
+          "meanKills": 1.175,
+          "meanSurvivalSeconds": 34.1472,
+          "specialDamagePerExecution": 32.4524,
+          "specialTargetsPerExecution": 2.158,
+          "specialHitPct": 99.1342,
+          "chargeExecutedPct": 61.9303,
+          "hpDeaths": 283,
+          "fallDeaths": 58,
+          "totals": {
+            "hpDamage": 81835,
+            "specialHpDamage": 14993,
+            "normalHpDamage": 66842,
+            "kills": 470,
+            "started": 746,
+            "executed": 462,
+            "hitCasts": 458,
+            "specialTargets": 997,
+            "interrupted": 220,
+            "energySpent": 33570
+          }
+        },
+        {
+          "classKey": "esmeralda",
+          "name": "Espíritu",
+          "matches": 200,
+          "fighters": 400,
+          "wins": 34,
+          "draws": 0,
+          "winPct": 17,
+          "scorePct": 17,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 12,
+            "high": 22.5
+          },
+          "meanHpDamage": 179.4775,
+          "meanKills": 0.7475,
+          "meanSurvivalSeconds": 32.087,
+          "specialDamagePerExecution": 16.8779,
+          "specialTargetsPerExecution": 0.9273,
+          "specialHitPct": 92.7273,
+          "chargeExecutedPct": 58.8685,
+          "hpDeaths": 305,
+          "fallDeaths": 61,
+          "totals": {
+            "hpDamage": 71791,
+            "specialHpDamage": 6498,
+            "normalHpDamage": 65293,
+            "kills": 299,
+            "started": 654,
+            "executed": 385,
+            "hitCasts": 357,
+            "specialTargets": 357,
+            "interrupted": 189,
+            "energySpent": 29430
+          }
+        }
+      ]
+    },
+    "25": {
+      "matches": 200,
+      "timeouts": 0,
+      "maxSeconds": 180,
+      "classes": [
+        {
+          "classKey": "kame",
+          "name": "Guerrero",
+          "matches": 200,
+          "fighters": 1000,
+          "wins": 51,
+          "draws": 0,
+          "winPct": 25.5,
+          "scorePct": 25.5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 20.5,
+            "high": 31
+          },
+          "meanHpDamage": 209.752,
+          "meanKills": 1.037,
+          "meanSurvivalSeconds": 30.1244,
+          "specialDamagePerExecution": 71.0809,
+          "specialTargetsPerExecution": 2.6609,
+          "specialHitPct": 89.5954,
+          "chargeExecutedPct": 60.4895,
+          "hpDeaths": 792,
+          "fallDeaths": 157,
+          "totals": {
+            "hpDamage": 209752,
+            "specialHpDamage": 36891,
+            "normalHpDamage": 172861,
+            "kills": 1037,
+            "started": 858,
+            "executed": 519,
+            "hitCasts": 465,
+            "specialTargets": 1381,
+            "interrupted": 260,
+            "energySpent": 38610
+          }
+        },
+        {
+          "classKey": "ninja",
+          "name": "Shinobi",
+          "matches": 200,
+          "fighters": 1000,
+          "wins": 21,
+          "draws": 0,
+          "winPct": 10.5,
+          "scorePct": 10.5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 7,
+            "high": 14
+          },
+          "meanHpDamage": 176.249,
+          "meanKills": 0.825,
+          "meanSurvivalSeconds": 28.7134,
+          "specialDamagePerExecution": 18.2867,
+          "specialTargetsPerExecution": 0.9431,
+          "specialHitPct": 94.3128,
+          "chargeExecutedPct": 58.0468,
+          "hpDeaths": 819,
+          "fallDeaths": 160,
+          "totals": {
+            "hpDamage": 176249,
+            "specialHpDamage": 7717,
+            "normalHpDamage": 168532,
+            "kills": 825,
+            "started": 727,
+            "executed": 422,
+            "hitCasts": 398,
+            "specialTargets": 398,
+            "interrupted": 222,
+            "energySpent": 32715
+          }
+        },
+        {
+          "classKey": "titan",
+          "name": "Titán",
+          "matches": 200,
+          "fighters": 1000,
+          "wins": 44,
+          "draws": 0,
+          "winPct": 22,
+          "scorePct": 22,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 15.5,
+            "high": 29
+          },
+          "meanHpDamage": 205.19,
+          "meanKills": 0.995,
+          "meanSurvivalSeconds": 30.0408,
+          "specialDamagePerExecution": 66.7741,
+          "specialTargetsPerExecution": 1.9921,
+          "specialHitPct": 94.8919,
+          "chargeExecutedPct": 61.697,
+          "hpDeaths": 801,
+          "fallDeaths": 155,
+          "totals": {
+            "hpDamage": 205190,
+            "specialHpDamage": 33988,
+            "normalHpDamage": 171202,
+            "kills": 995,
+            "started": 825,
+            "executed": 509,
+            "hitCasts": 483,
+            "specialTargets": 1014,
+            "interrupted": 239,
+            "energySpent": 37125
+          }
+        },
+        {
+          "classKey": "trueno",
+          "name": "Rayo",
+          "matches": 200,
+          "fighters": 1000,
+          "wins": 62,
+          "draws": 0,
+          "winPct": 31,
+          "scorePct": 31,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 25,
+            "high": 37.5
+          },
+          "meanHpDamage": 192.021,
+          "meanKills": 1.07,
+          "meanSurvivalSeconds": 29.9294,
+          "specialDamagePerExecution": 39.7337,
+          "specialTargetsPerExecution": 2.257,
+          "specialHitPct": 98.324,
+          "chargeExecutedPct": 62.9543,
+          "hpDeaths": 782,
+          "fallDeaths": 156,
+          "totals": {
+            "hpDamage": 192021,
+            "specialHpDamage": 21337,
+            "normalHpDamage": 170684,
+            "kills": 1070,
+            "started": 853,
+            "executed": 537,
+            "hitCasts": 528,
+            "specialTargets": 1212,
+            "interrupted": 258,
+            "energySpent": 38385
+          }
+        },
+        {
+          "classKey": "esmeralda",
+          "name": "Espíritu",
+          "matches": 200,
+          "fighters": 1000,
+          "wins": 22,
+          "draws": 0,
+          "winPct": 11,
+          "scorePct": 11,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 7,
+            "high": 15.5
+          },
+          "meanHpDamage": 178.81,
+          "meanKills": 0.873,
+          "meanSurvivalSeconds": 29.1987,
+          "specialDamagePerExecution": 21.8842,
+          "specialTargetsPerExecution": 0.9555,
+          "specialHitPct": 95.5457,
+          "chargeExecutedPct": 59.0013,
+          "hpDeaths": 799,
+          "fallDeaths": 179,
+          "totals": {
+            "hpDamage": 178810,
+            "specialHpDamage": 9826,
+            "normalHpDamage": 168984,
+            "kills": 873,
+            "started": 761,
+            "executed": 449,
+            "hitCasts": 429,
+            "specialTargets": 429,
+            "interrupted": 239,
+            "energySpent": 34245
+          }
+        }
+      ]
+    },
+    "125": {
+      "matches": 200,
+      "timeouts": 0,
+      "maxSeconds": 180,
+      "classes": [
+        {
+          "classKey": "kame",
+          "name": "Guerrero",
+          "matches": 200,
+          "fighters": 5000,
+          "wins": 56,
+          "draws": 0,
+          "winPct": 28,
+          "scorePct": 28,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 22,
+            "high": 34
+          },
+          "meanHpDamage": 226.7254,
+          "meanKills": 1.3992,
+          "meanSurvivalSeconds": 19.4455,
+          "specialDamagePerExecution": 496.8561,
+          "specialTargetsPerExecution": 13.6732,
+          "specialHitPct": 92.3863,
+          "chargeExecutedPct": 54.7813,
+          "hpDeaths": 2657,
+          "fallDeaths": 2287,
+          "totals": {
+            "hpDamage": 1133627,
+            "specialHpDamage": 535114,
+            "normalHpDamage": 598513,
+            "kills": 6996,
+            "started": 1966,
+            "executed": 1077,
+            "hitCasts": 995,
+            "specialTargets": 14726,
+            "interrupted": 816,
+            "energySpent": 88470
+          }
+        },
+        {
+          "classKey": "ninja",
+          "name": "Shinobi",
+          "matches": 200,
+          "fighters": 5000,
+          "wins": 15,
+          "draws": 0,
+          "winPct": 7.5,
+          "scorePct": 7.5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 4,
+            "high": 11.5
+          },
+          "meanHpDamage": 118.0164,
+          "meanKills": 0.71,
+          "meanSurvivalSeconds": 18.121,
+          "specialDamagePerExecution": 26.3522,
+          "specialTargetsPerExecution": 0.9507,
+          "specialHitPct": 95.0739,
+          "chargeExecutedPct": 50.9091,
+          "hpDeaths": 2658,
+          "fallDeaths": 2327,
+          "totals": {
+            "hpDamage": 590082,
+            "specialHpDamage": 21398,
+            "normalHpDamage": 568684,
+            "kills": 3550,
+            "started": 1595,
+            "executed": 812,
+            "hitCasts": 772,
+            "specialTargets": 772,
+            "interrupted": 728,
+            "energySpent": 71775
+          }
+        },
+        {
+          "classKey": "titan",
+          "name": "Titán",
+          "matches": 200,
+          "fighters": 5000,
+          "wins": 65,
+          "draws": 0,
+          "winPct": 32.5,
+          "scorePct": 32.5,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 27,
+            "high": 38.5
+          },
+          "meanHpDamage": 233.8442,
+          "meanKills": 1.2894,
+          "meanSurvivalSeconds": 19.6067,
+          "specialDamagePerExecution": 520.3257,
+          "specialTargetsPerExecution": 11.7319,
+          "specialHitPct": 94.785,
+          "chargeExecutedPct": 53.6837,
+          "hpDeaths": 2633,
+          "fallDeaths": 2302,
+          "totals": {
+            "hpDamage": 1169221,
+            "specialHpDamage": 568716,
+            "normalHpDamage": 600505,
+            "kills": 6447,
+            "started": 2036,
+            "executed": 1093,
+            "hitCasts": 1036,
+            "specialTargets": 12823,
+            "interrupted": 861,
+            "energySpent": 91620
+          }
+        },
+        {
+          "classKey": "trueno",
+          "name": "Rayo",
+          "matches": 200,
+          "fighters": 5000,
+          "wins": 42,
+          "draws": 0,
+          "winPct": 21,
+          "scorePct": 21,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 17,
+            "high": 25.5
+          },
+          "meanHpDamage": 126.049,
+          "meanKills": 0.7996,
+          "meanSurvivalSeconds": 18.372,
+          "specialDamagePerExecution": 67.5269,
+          "specialTargetsPerExecution": 2.6057,
+          "specialHitPct": 98.9714,
+          "chargeExecutedPct": 50.6659,
+          "hpDeaths": 2618,
+          "fallDeaths": 2340,
+          "totals": {
+            "hpDamage": 630245,
+            "specialHpDamage": 59086,
+            "normalHpDamage": 571159,
+            "kills": 3998,
+            "started": 1727,
+            "executed": 875,
+            "hitCasts": 866,
+            "specialTargets": 2280,
+            "interrupted": 775,
+            "energySpent": 77715
+          }
+        },
+        {
+          "classKey": "esmeralda",
+          "name": "Espíritu",
+          "matches": 200,
+          "fighters": 5000,
+          "wins": 22,
+          "draws": 0,
+          "winPct": 11,
+          "scorePct": 11,
+          "scoreCI95": {
+            "seeds": 40,
+            "low": 6,
+            "high": 16.5
+          },
+          "meanHpDamage": 119.2002,
+          "meanKills": 0.7618,
+          "meanSurvivalSeconds": 18.2731,
+          "specialDamagePerExecution": 29.9395,
+          "specialTargetsPerExecution": 0.9627,
+          "specialHitPct": 96.2747,
+          "chargeExecutedPct": 51.4371,
+          "hpDeaths": 2623,
+          "fallDeaths": 2355,
+          "totals": {
+            "hpDamage": 596001,
+            "specialHpDamage": 25718,
+            "normalHpDamage": 570283,
+            "kills": 3809,
+            "started": 1670,
+            "executed": 859,
+            "hitCasts": 827,
+            "specialTargets": 827,
+            "interrupted": 742,
+            "energySpent": 75150
+          }
+        }
+      ]
+    }
+  },
+  "duelMatrix": {
+    "kame": {
+      "ninja": {
+        "matches": 1600,
+        "wins": 848,
+        "draws": 0,
+        "winPct": 53
+      },
+      "titan": {
+        "matches": 1600,
+        "wins": 562,
+        "draws": 0,
+        "winPct": 35.125
+      },
+      "trueno": {
+        "matches": 1600,
+        "wins": 874,
+        "draws": 0,
+        "winPct": 54.625
+      },
+      "esmeralda": {
+        "matches": 1600,
+        "wins": 676,
+        "draws": 0,
+        "winPct": 42.25
+      }
+    },
+    "ninja": {
+      "kame": {
+        "matches": 1600,
+        "wins": 752,
+        "draws": 0,
+        "winPct": 47
+      },
+      "titan": {
+        "matches": 1600,
+        "wins": 540,
+        "draws": 0,
+        "winPct": 33.75
+      },
+      "trueno": {
+        "matches": 1600,
+        "wins": 828,
+        "draws": 0,
+        "winPct": 51.75
+      },
+      "esmeralda": {
+        "matches": 1600,
+        "wins": 672,
+        "draws": 0,
+        "winPct": 42
+      }
+    },
+    "titan": {
+      "kame": {
+        "matches": 1600,
+        "wins": 1038,
+        "draws": 0,
+        "winPct": 64.875
+      },
+      "ninja": {
+        "matches": 1600,
+        "wins": 1060,
+        "draws": 0,
+        "winPct": 66.25
+      },
+      "trueno": {
+        "matches": 1600,
+        "wins": 1072,
+        "draws": 0,
+        "winPct": 67
+      },
+      "esmeralda": {
+        "matches": 1600,
+        "wins": 916,
+        "draws": 0,
+        "winPct": 57.25
+      }
+    },
+    "trueno": {
+      "kame": {
+        "matches": 1600,
+        "wins": 726,
+        "draws": 0,
+        "winPct": 45.375
+      },
+      "ninja": {
+        "matches": 1600,
+        "wins": 772,
+        "draws": 0,
+        "winPct": 48.25
+      },
+      "titan": {
+        "matches": 1600,
+        "wins": 528,
+        "draws": 0,
+        "winPct": 33
+      },
+      "esmeralda": {
+        "matches": 1600,
+        "wins": 662,
+        "draws": 0,
+        "winPct": 41.375
+      }
+    },
+    "esmeralda": {
+      "kame": {
+        "matches": 1600,
+        "wins": 924,
+        "draws": 0,
+        "winPct": 57.75
+      },
+      "ninja": {
+        "matches": 1600,
+        "wins": 928,
+        "draws": 0,
+        "winPct": 58
+      },
+      "titan": {
+        "matches": 1600,
+        "wins": 684,
+        "draws": 0,
+        "winPct": 42.75
+      },
+      "trueno": {
+        "matches": 1600,
+        "wins": 938,
+        "draws": 0,
+        "winPct": 58.625
+      }
+    }
+  },
+  "probes": [
+    {
+      "classKey": "kame",
+      "mode": "iso",
+      "targets": [
+        {
+          "offset": [
+            60,
+            0
+          ],
+          "damage": 38,
+          "vx": 21.601952,
+          "vy": 0,
+          "vz": 7.09223424
+        },
+        {
+          "offset": [
+            120,
+            0
+          ],
+          "damage": 38,
+          "vx": 21.601952,
+          "vy": 0,
+          "vz": 7.09223424
+        },
+        {
+          "offset": [
+            200,
+            0
+          ],
+          "damage": 38,
+          "vx": 21.601952,
+          "vy": 0,
+          "vz": 7.09223424
+        },
+        {
+          "offset": [
+            280,
+            0
+          ],
+          "damage": 38,
+          "vx": 21.601952,
+          "vy": 0,
+          "vz": 7.09223424
+        },
+        {
+          "offset": [
+            500,
+            0
+          ],
+          "damage": 38,
+          "vx": 21.601952,
+          "vy": 0,
+          "vz": 7.09223424
+        }
+      ]
+    },
+    {
+      "classKey": "ninja",
+      "mode": "iso",
+      "targets": [
+        {
+          "offset": [
+            60,
+            0
+          ],
+          "damage": 34,
+          "vx": 21.362816000000002,
+          "vy": 0,
+          "vz": 7.06353792
+        }
+      ]
+    },
+    {
+      "classKey": "titan",
+      "mode": "iso",
+      "targets": [
+        {
+          "offset": [
+            60,
+            0
+          ],
+          "damage": 46,
+          "vx": 22.080224,
+          "vy": 0,
+          "vz": 7.14962688
+        },
+        {
+          "offset": [
+            120,
+            0
+          ],
+          "damage": 46,
+          "vx": 22.080224,
+          "vy": 0,
+          "vz": 7.14962688
+        },
+        {
+          "offset": [
+            -60,
+            0
+          ],
+          "damage": 46,
+          "vx": -22.080224,
+          "vy": 2.1091571003924124e-15,
+          "vz": 7.14962688
+        }
+      ]
+    },
+    {
+      "classKey": "trueno",
+      "mode": "iso",
+      "targets": [
+        {
+          "offset": [
+            60,
+            0
+          ],
+          "damage": 32,
+          "vx": 21.243248,
+          "vy": 0,
+          "vz": 7.04918976
+        },
+        {
+          "offset": [
+            120,
+            0
+          ],
+          "damage": 32,
+          "vx": 21.243248,
+          "vy": 0,
+          "vz": 7.04918976
+        },
+        {
+          "offset": [
+            -60,
+            0
+          ],
+          "damage": 32,
+          "vx": -21.243248,
+          "vy": 2.0292071020020866e-15,
+          "vz": 7.04918976
+        }
+      ]
+    },
+    {
+      "classKey": "esmeralda",
+      "mode": "iso",
+      "targets": [
+        {
+          "offset": [
+            60,
+            0
+          ],
+          "damage": 38,
+          "vx": 21.601952,
+          "vy": 0,
+          "vz": 7.09223424
+        }
+      ]
+    },
+    {
+      "classKey": "kame",
+      "mode": "1v1",
+      "targets": [
+        {
+          "offset": [
+            60,
+            0
+          ],
+          "damage": 38,
+          "vx": 21.601952,
+          "vy": -14.5,
+          "vz": 0
+        },
+        {
+          "offset": [
+            120,
+            0
+          ],
+          "damage": 38,
+          "vx": 21.601952,
+          "vy": -14.5,
+          "vz": 0
+        },
+        {
+          "offset": [
+            200,
+            0
+          ],
+          "damage": 38,
+          "vx": 21.601952,
+          "vy": -14.5,
+          "vz": 0
+        },
+        {
+          "offset": [
+            280,
+            0
+          ],
+          "damage": 38,
+          "vx": 21.601952,
+          "vy": -14.5,
+          "vz": 0
+        },
+        {
+          "offset": [
+            500,
+            0
+          ],
+          "damage": 38,
+          "vx": 21.601952,
+          "vy": -14.5,
+          "vz": 0
+        }
+      ]
+    },
+    {
+      "classKey": "ninja",
+      "mode": "1v1",
+      "targets": [
+        {
+          "offset": [
+            60,
+            0
+          ],
+          "damage": 34,
+          "vx": 21.362816000000002,
+          "vy": -14.5,
+          "vz": 0
+        }
+      ]
+    },
+    {
+      "classKey": "titan",
+      "mode": "1v1",
+      "targets": [
+        {
+          "offset": [
+            60,
+            0
+          ],
+          "damage": 46,
+          "vx": 22.080224,
+          "vy": -14.5,
+          "vz": 0
+        },
+        {
+          "offset": [
+            120,
+            0
+          ],
+          "damage": 46,
+          "vx": 22.080224,
+          "vy": -14.5,
+          "vz": 0
+        },
+        {
+          "offset": [
+            -60,
+            0
+          ],
+          "damage": 46,
+          "vx": -22.080224,
+          "vy": -14.5,
+          "vz": 0
+        }
+      ]
+    },
+    {
+      "classKey": "trueno",
+      "mode": "1v1",
+      "targets": [
+        {
+          "offset": [
+            60,
+            0
+          ],
+          "damage": 32,
+          "vx": 21.243248,
+          "vy": -14.5,
+          "vz": 0
+        },
+        {
+          "offset": [
+            120,
+            0
+          ],
+          "damage": 32,
+          "vx": 21.243248,
+          "vy": -14.5,
+          "vz": 0
+        },
+        {
+          "offset": [
+            -60,
+            0
+          ],
+          "damage": 32,
+          "vx": -21.243248,
+          "vy": -14.5,
+          "vz": 0
+        }
+      ]
+    },
+    {
+      "classKey": "esmeralda",
+      "mode": "1v1",
+      "targets": [
+        {
+          "offset": [
+            60,
+            0
+          ],
+          "damage": 38,
+          "vx": 21.601952,
+          "vy": -14.5,
+          "vz": 0
+        }
+      ]
+    }
+  ],
+  "evidence": {
+    "archive": "balance-v0.5-matches.csv.gz",
+    "rows": 33400,
+    "sha256": "81f66dec12275a8a07e17c79a8865522ea4a3410ca097c265bccecf23c754c70"
+  }
+}

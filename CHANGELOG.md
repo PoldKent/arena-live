@@ -1,5 +1,12 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-23 — Diagnóstico de equilibrio sobre v0.5
+
+- Analizador reproducible del motor real: semillas, lados/orden cruzados, tiempo virtual, telemetría de poderes y control de selección de blancos.
+- 33.400 partidas distintas: 16.000 duelos con poderes, 16.000 sin poderes, 800 arenas equilibradas y 600 controles de IA.
+- Informe por clase/modo, matriz de enfrentamientos, intervalos agrupados por semilla y archivo de resultados verificable.
+- Se añaden herramientas de análisis; el juego conserva el HTML y los poderes de v0.5. No hay ajustes de equilibrio aplicados todavía.
+
 ## 2026-10-23 — Arena Live v0.5 · rendimiento con 128 jugadores
 
 - Selección de objetivos con dos recorridos lineales y distancias al cuadrado; conserva las rivalidades, prioridades del Titán y desempates de las versiones anteriores.
