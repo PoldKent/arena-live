@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 
-test('release v0.3 is visible in Settings and the API', () => {
-  assert.match(html, /id="arenaSettingsVersion"[^>]*>Arena Live v0\.3/);
-  assert.match(html, /version: '0\.3\.0'/);
+test('release v0.4 is visible in Settings and the API', () => {
+  assert.match(html, /id="arenaSettingsVersion"[^>]*>Arena Live v0\.4/);
+  assert.match(html, /version: '0\.4\.0'/);
   assert.match(html, /function updateArenaObsGeometrySummary\(\)/);
 });
 test('lobby overlays have no redundant streaming format tags', () => {

@@ -1,4 +1,4 @@
-# Arena Live · v0.3
+# Arena Live · v0.4
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Esta rama incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
@@ -15,7 +15,7 @@ npm.cmd start
 
 Abre **http://127.0.0.1:4173/** y conserva abierta la consola. TikTok comienza desconectado; **📡 TikTok** conecta o desconecta según el estado real del puente.
 
-Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only`, `npm.cmd install` y `npm.cmd start`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.3** en Ajustes.
+Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only`, `npm.cmd install` y `npm.cmd start`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.4** en Ajustes.
 
 ## Inicio / Pruebas
 
@@ -36,13 +36,34 @@ La barra horizontal empieza por **Vista, Pantalla, Pruebas y Ajustes**. Incluye 
 
 **Prota** permite participar como jugador. **Modo Stream** abre la composición de emisión. Vista alterna la preparación entre 16:9 y 9:16; Pantalla abre una captura individual en pantalla completa.
 
-**Ajustes siempre pausa al abrir y reanuda al cerrar**, incluso si habías pausado manualmente. Sus opciones están en secciones plegables del mismo menú. En Inicio/Pruebas se aplican inmediatamente y el menú permanece abierto hasta cerrarlo. En Stream se oculta al confirmar cada acción. Un deslizador se confirma al terminar el gesto, no en cada movimiento.
+**Ajustes siempre pausa al abrir y reanuda al cerrar**, incluso si habías pausado manualmente. Sus opciones están en secciones plegables del mismo menú. Los cambios se aplican inmediatamente y el menú permanece abierto tanto en Inicio/Pruebas como en Stream. Cerrar Ajustes con ×, Continuar o Esc reanuda el juego.
 
 **Opacidad de la información del juego** afecta a textos y barras de ambas vistas; **100 % = totalmente visible**. Tiene una explicación visible y ayuda al pasar el cursor.
 
+## Reglas y parámetros de pelea
+
+En **Ajustes → Reglas y parámetros** puedes configurar:
+
+| Control | Opciones |
+| --- | --- |
+| Cupo de jugadores | De 2 a 128, incluyendo Prota y caídos inscritos en la ronda. |
+| Clase de la ronda | Todas, o solo Guerrero, Shinobi, Titán, Rayo o Espíritu. |
+| Poderes y apoyos | Permitidos; sin poderes de clase con apoyos sociales; o Solo golpes, sin poderes ni apoyos. |
+| Vida máxima | 50–1000 HP; conserva el porcentaje de vida al cambiarla. |
+| Daño | 0.25–3× para los ataques. |
+| Empuje recibido | 0–2×; cero permite golpes sin lanzamiento. |
+| Movimiento | 0.5–2× de la velocidad normal. |
+| Recarga pasiva de energía | 0–3×; los aportes instantáneos de energía son independientes. |
+
+El cupo bloquea nuevas identidades por TikTok, chat local, Prota, pruebas y lotes. Una identidad ya inscrita conserva su lugar para los reingresos permitidos por las reglas de vidas/tiempo. Reducir el cupo en el lobby ajusta los jugadores allí; reducirlo en combate conserva a quienes ya participan y limita la lista al preparar el próximo lobby. Los escenarios también respetan el cupo.
+
+La clase única afecta a jugadores actuales y nuevos, incluidos Prota y las pruebas. Volver a Todas recupera sus clases preferidas; los comandos de otra clase no saltan la restricción. Sin poderes de clase bloquea especiales de IA, teclado/táctil, chat y pruebas, y cancela cargas pendientes. Solo golpes también elimina bonificaciones y bloquea apoyos sociales y el boost de un !jugar repetido.
+
+Estas reglas se recuerdan en este navegador. **Restablecer reglas** recupera los valores originales sin borrar identidades, distribución de paneles ni calibración OBS. Las reglas de vidas y tiempo siguen en Partida.
+
 ## Modo Stream y OBS
 
-Stream conserva una sola simulación, 16:9 grande a la izquierda y 9:16 al extremo derecho. Herramientas y chats se abren en una columna reservada al extremo izquierdo, fuera de los juegos. El chat no queda abierto permanentemente. Cada acción oculta el panel; las pestañas y los títulos plegables permiten navegar antes de actuar.
+Stream conserva una sola simulación, 16:9 grande a la izquierda y 9:16 al extremo derecho. Herramientas y chats se abren en una columna reservada al extremo izquierdo, fuera de los juegos. El chat se abre bajo demanda. El panel elegido permanece abierto al actuar, enviar mensajes, modificar valores o hacer clic en el juego. Elegir otro menú lo reemplaza. Usa **×** o Esc para cerrarlo; pulsar de nuevo el mismo acceso mantiene su panel abierto.
 
 La columna puede ajustar su ancho. La barra superior oculta sus botones hasta acercar el cursor y también se muestra con el foco del teclado; conserva su espacio. Abrir/cerrar paneles o mostrar/ocultar la barra **no mueve ni reescala las capturas**. Los dispositivos táctiles mantienen accesible la barra.
 
@@ -74,10 +95,11 @@ npm.cmd run test:browser
 
 Las pruebas del navegador arrancan y cierran su servidor local y simulan las respuestas de TikTok. Cubren paneles, persistencia, escenarios, chats, pausa, capturas, idiomas y controles móviles; no conectan con una emisión real.
 
+- [Reglas y paneles persistentes de v0.4](docs/RELEASE-0.4-REGLAS.md).
 - [Decisiones de la reconstrucción v0.3](docs/RELEASE-0.3-INTERFAZ.md).
 - [Guía de operación y OBS](docs/DUAL-OPERADOR-TIKTOK.md).
 - [Puente TikTok y limitaciones](docs/TIKTOK-LIVE-MVP.md).
 - [Registro de cambios](CHANGELOG.md).
 - Historial: [v0.2](docs/RELEASE-0.2-OPERADOR.md), [v0.1](docs/RELEASE-0.1-OBS.md).
 
-`main` conserva la edición HTML independiente. La edición con servidor y TikTok está en `feature/tiktok-live-chat-mvp`.
+`main` conserva la edición HTML independiente v0.1; esta v0.4 está en la rama TikTok y todavía no se ha integrado en main. La edición con servidor y TikTok está en `feature/tiktok-live-chat-mvp`.

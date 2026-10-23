@@ -1,5 +1,16 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-22 — Arena Live v0.4 · reglas de combate y paneles persistentes
+
+- Ajustes → Reglas y parámetros: cupo compartido 2–128, clase única o todas, y modos con poderes, sin especiales o Solo golpes.
+- Vida máxima, daño, empuje recibido, movimiento y recarga pasiva ajustables y guardados por navegador.
+- Cupo aplicado a TikTok, chat local, Prota, escenarios y lotes; una reducción en combate se completa al preparar el próximo lobby, conservando los inscritos durante la pelea.
+- Clase única para jugadores actuales y nuevos; preferencias originales conservadas. Bloqueos compartidos para poderes de IA, Prota, chat y pruebas; Solo golpes también elimina/bloquea apoyos.
+- Stream mantiene el panel elegido al actuar y hacer clic fuera; otro menú lo reemplaza y la × o Esc lo cierran. Ajustes conserva su × visible.
+- Calibración y distribuciones de v0.3 conservadas. Versiones visibles/API/paquete 0.4/0.4.0.
+- 21 comprobaciones de contrato y 33 de navegador, incluidos efectos reales de las reglas y geometría estable.
+- Edición de TikTok actualizada en su rama; main conserva v0.1 independiente.
+
 ## 2026-10-22 — Arena Live v0.3 · espacios de trabajo reconstruidos
 
 - Inicio/Pruebas con juego central, chats con pestañas a la izquierda y paneles de prueba persistentes; solo sociales desplegados por defecto.
