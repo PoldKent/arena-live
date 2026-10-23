@@ -1,0 +1,76 @@
+{
+  "release": "0.7.0",
+  "date": "2026-10-23",
+  "sourceGitBlob": "a83565bc51792d633da670d98cb962df57cbe92e",
+  "previousSourceGitBlob": "77c48bf0d5a32894e931bd18f2f99ab4893a6d4e",
+  "node": {
+    "passed": 26,
+    "failed": 0
+  },
+  "browser": {
+    "passed": 41,
+    "errors": 0
+  },
+  "performance": {
+    "passed": 11,
+    "errors": 0,
+    "report": "performance-v0.7.json"
+  },
+  "balanceRegression": {
+    "comparedMatches": 200,
+    "exactMatches": 200,
+    "duels": 160,
+    "smash": 10,
+    "arena": 30,
+    "seedRanges": {
+      "duelsAndSmash": [
+        1000,
+        1001
+      ],
+      "arenas": [
+        2000,
+        2001
+      ]
+    },
+    "arenaPlayerCounts": [
+      5,
+      10,
+      25,
+      125
+    ],
+    "comparison": "Entire per-match result, including winner, time, damage, casts, interruptions, eliminations and fighter telemetry, equals the v0.6 measured records. Observational logging consumes no game randomness."
+  },
+  "commandHistory": {
+    "coverage": [
+      "automatic initial spectators",
+      "quick joins",
+      "128 silent preset admissions",
+      "first normal messages",
+      "join commands",
+      "class command auto-join",
+      "Prota joins",
+      "allowed re-entry",
+      "autonomous AI release",
+      "all five class powers in all three modes",
+      "manual command with a different selected caster",
+      "localized aliases",
+      "escaped player names",
+      "bounded local retention",
+      "TikTok received history unchanged"
+    ],
+    "noExecutionRecordsFor": [
+      "windup only",
+      "interrupted windup",
+      "wrong class",
+      "disabled powers",
+      "blocked new admission",
+      "exhausted lives",
+      "repeat join support boost"
+    ]
+  },
+  "limitations": [
+    "TikTok responses were simulated; no real LIVE was connected.",
+    "Performance measurements are from headless Chromium software rendering, not the user PC or OBS FPS.",
+    "The exact balance comparison is a 200-match regression sample, not a new full balancing study."
+  ]
+}

@@ -136,19 +136,27 @@ try {
         const result = await page.evaluate(() => {
           startCombatFromLobby(); autoAttackEnabled = true;
           for (const f of fighters) { f.hp = f.maxHp = 100000; f.aiSpecialCooldown = 0; f.energy = 100; }
-          updatePhysicsAndAI(); const charging = fighters.filter(f => f.castingSkill).length;
-          let maxEffects = 0, maxParticles = 0;
-          for (let i = 0; i < 180; i++) {
-            updatePhysicsAndAI();
-            maxEffects = Math.max(maxEffects, activeEffects.length); maxParticles = Math.max(maxParticles, particles.length);
-          }
+          const feed=document.getElementById('chatFeed');feed.replaceChildren();
+          const observer=new MutationObserver(()=>{});observer.observe(feed,{childList:true});
+          const execute=executeFighterSkill;let executed=0,charging=0,maxEffects=0,maxParticles=0;
+          executeFighterSkill=(...args)=>{executed++;return execute(...args);};
+          try {
+            updatePhysicsAndAI();charging=fighters.filter(f=>f.castingSkill).length;
+            for (let i = 0; i < 180; i++) {
+              updatePhysicsAndAI();
+              maxEffects = Math.max(maxEffects, activeEffects.length); maxParticles = Math.max(maxParticles, particles.length);
+            }
+          } finally {executeFighterSkill=execute;}
+          const logged=observer.takeRecords().flatMap(r=>[...r.addedNodes]).filter(n=>n.dataset?.chatEvent==='special');observer.disconnect();
           renderBothScreensSimultaneously();
           return { charging, maxEffects, maxParticles, capEffects: MAX_ACTIVE_EFFECTS, capParticles: MAX_PARTICLES,
+            executed,logged:logged.length,linked:logged.every(n=>fighters.some(f=>f.id===n.dataset.fighterId&&CLASS_COMMANDS[f.archetypeKey].powers[0]===n.dataset.command)),history:feed.childElementCount,retention:chatRetention,
             fired: fighters.some(f => f.energy < 100 && !f.castingSkill),
             finite: fighters.every(f => [f.x, f.y, f.hp, f.energy].every(Number.isFinite)) };
         });
         assert.ok(result.charging > 0); assert.equal(result.fired, true); assert.equal(result.finite, true);
         assert.ok(result.maxEffects <= result.capEffects); assert.ok(result.maxParticles <= result.capParticles);
+        assert.ok(result.executed>0);assert.equal(result.logged,result.executed);assert.equal(result.linked,true);assert.ok(result.history<=result.retention);
       });
       await check('expired KO notices release detached badges instead of accumulating through a stream', async () => {
         await page.evaluate(() => { addKillFeed('K.O. performance cleanup', 'ko'); });

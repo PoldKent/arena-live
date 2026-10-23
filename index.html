@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.6 — TikTok LIVE</title>
+    <title>Arena Live v0.7 — TikTok LIVE</title>
     <!--
       ARENA LIVE · MONOLITHIC DELIVERY
       All application code intentionally stays in this HTML file.
@@ -1396,7 +1396,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <h2 class="font-display font-black text-base sm:text-lg text-white tracking-wide">
                                 <span id="arenaSettingsTitle" data-operator-label="settingsTitle">Pausa y ajustes</span>
                             </h2>
-                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.6 · TikTok</span>
+                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.7 · TikTok</span>
                             <span id="settingsModeBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400/40">
                                 ⏸️ JUEGO EN PAUSA
                             </span>
@@ -3824,7 +3824,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     ? (existing.joinsUsed === MAX_OPPORTUNITIES ? `🔴 ¡ÚLTIMA VIDA (${MAX_OPPORTUNITIES}/${MAX_OPPORTUNITIES})!` : `❤️ VIDA ${existing.joinsUsed}/${MAX_OPPORTUNITIES}`)
                     : `♾️ REINGRESO #${existing.joinsUsed}`;
                 spawnFloatingText(existing.x, existing.y - 42, `🔄 ¡RE-INGRESÓ! ${oppTag}`, '#00f3ff', 15);
-                addKillFeed(`🔄 ${getFighterDisplayName(existing)} re-ingresó (${oppTag})`);
+                appendFighterCommand(existing, '!jugar', 'rejoin');
                 if (!silentBanner) {
                     playSound('powerup');
                     showDualBanner(`🔄 ¡${getFighterDisplayName(existing).toUpperCase()} RE-INGRESÓ A LA ARENA!`,
@@ -3841,9 +3841,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const f = new Fighter(username, platformKey, isStreamer, preferredClassKey);
             fighters.push(f);
             if (!isStreamer) rememberViewerProfile(username, platformKey, f.preferredArchetypeKey, false);
-            if (!silentBanner && !isStreamer) {
-                appendChatMessage('@ArenaSystem', platformKey, `👤 ${getFighterDisplayName(f)} · ${getFighterClassTitle(f)}`, 'normal');
-            }
+            // Silent presets suppress banners, never the operator's command history.
+            appendFighterCommand(f, '!jugar', 'join');
             totalParticipants = fighters.reduce((acc, item) => acc + item.coopCount, 0);
             evaluateArenaMode(silentBanner);
             arrangeFightersForCurrentState(f);
@@ -4637,7 +4636,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // Dramatic Skill Wind-up ("CARGANDO PODER...") before releasing attack
         function queueFighterSkillWindup(fighter, command, forceFree = false) {
             if (!arenaClassPowersAllowed() || !fighter || fighter.eliminated) return false;
-            const requiredClass=SKILL_REQUIRED_CLASS[getMatchedSkillCommand(command)||command];
+            const cmd = getMatchedSkillCommand(command);
+            const requiredClass=SKILL_REQUIRED_CLASS[cmd];
             if(!requiredClass||fighter.archetypeKey!==requiredClass)return false;
             const rule = getFighterSpecialRule(fighter);
             if (!rule) return false;
@@ -4647,7 +4647,6 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             }
             if (fighter.castingSkill) return;
 
-            const cmd = command.toLowerCase().trim();
             // Spending any available charge is allowed; partial charge weakens the result.
             const availableEnergy = Math.max(0, fighter.energy);
             const spentEnergy = Math.min(45, availableEnergy);
@@ -4668,9 +4667,13 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // MODULE BLOCK G: COMBAT ACTIONS + DAMAGE + K.O. (future js/combat.js).
         function executeFighterSkill(fighter, cmd) {
             if (!arenaClassPowersAllowed() || !fighter || fighter.eliminated) return false;
-            const requiredClass=SKILL_REQUIRED_CLASS[getMatchedSkillCommand(cmd)||cmd];
+            cmd = getMatchedSkillCommand(cmd);
+            const requiredClass=SKILL_REQUIRED_CLASS[cmd];
             if(!requiredClass||fighter.archetypeKey!==requiredClass)return false;
             if (!getFighterSpecialRule(fighter)) return false;
+            // Observe the real release once, for AI, chat, tools and Prota alike.
+            // Never route this history entry back through commands (which would execute it twice).
+            appendFighterCommand(fighter, cmd, 'special');
             // Clear special-charge burst with class-colored particles. Both canvases render it.
             const specialColors = { kame:'#00e5ff', ninja:'#a855f7', trueno:'#facc15', titan:'#fb7185', esmeralda:'#4ade80' };
             const burstColor = specialColors[fighter.archetypeKey] || fighter.color;
@@ -4695,7 +4698,6 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     maxTimer: 36
                 });
                 spawnFloatingText(fighter.x, fighter.y - 44, '☄️ ¡KAME!', '#00f3ff', 18);
-                addKillFeed(`☄️ ${getFighterDisplayName(fighter)} lanzó !kame`);
 
                 getFighterSpecialTargets(fighter, target =>
                     (dir === 1 ? target.x > fighter.x - 10 : target.x < fighter.x + 10)
@@ -4722,7 +4724,6 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     maxTimer: 32
                 });
                 spawnFloatingText(fighter.x, fighter.y - 44, '🌀 ¡RASEN!', '#38bdf8', 18);
-                addKillFeed(`🌀 ${getFighterDisplayName(fighter)} impactó con !rasen`);
 
                 const target = findPreferredCombatTarget(fighter, other =>
                     Math.hypot(other.x - fighter.x, other.y - fighter.y) < 170
@@ -4735,7 +4736,6 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 skyFlashTimer = 10;
                 skyFlashColor = '#c084fc';
                 spawnFloatingText(fighter.x, fighter.y - 44, '⚡ ¡TORMENTA ELÉCTRICA!', '#c084fc', 18);
-                addKillFeed(`⚡ ${getFighterDisplayName(fighter)} invocó !trueno`);
 
                 let struck = 0;
                 getFighterSpecialTargets(fighter, target =>
@@ -4789,26 +4789,22 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     }
                 }
                 spawnFloatingText(fighter.x, fighter.y - 44, '🌿', '#4ade80', 20);
-                addKillFeed(`🌿 ${getFighterDisplayName(fighter)} usó !enred${target ? ' (impacto)' : ''}`);
 
             } else if (cmd === '!coloso' || cmd === '!golpecolosal') {
                 playSound('hit');
                 screenShake = Math.max(screenShake, 14);
                 addActiveEffect({ type: 'titanQuake', x: fighter.x, y: fighter.y + fighter.radius, color: '#f43f5e', timer: 25, maxTimer: 25 });
-                let hits = 0;
                 getFighterSpecialTargets(fighter, target =>
                     Math.hypot(target.x - fighter.x, target.y - fighter.y) <= 135).forEach(target => {
                     if (!canFighterAttack(fighter, target)) return;
                     const distance = Math.hypot(target.x - fighter.x, target.y - fighter.y);
                     if (distance <= 135) {
-                        hits++;
                         target.vx += Math.sign(target.x - fighter.x || fighter.facing) * 16 * arenaCombatRules.knockback;
                         applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 14, 'special');
                     }
                 });
                 for (let i = 0; i < 22; i++) spawnParticle(fighter.x + (Math.random() - 0.5) * 150, fighter.y + fighter.radius, '#fb7185', 4.5, 24, 0.15);
                 spawnFloatingText(fighter.x, fighter.y - 45, '💥', '#fb7185', 21);
-                addKillFeed(`🗿 ${getFighterDisplayName(fighter)} usó !coloso (${hits})`);
 
             }
         }
@@ -6682,10 +6678,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const streamerName = existing ? existing.name : HOST_INTERNAL_NAME;
             // The protagonist's class is chosen explicitly in the selector, not assigned at random.
             if (existing) applyFighterArchetype(existing, selectedClassKey);
-            const joined = addOrBoostFighter(streamerName, 'twitch', true, selectedClassKey, false);
-            if (joined) {
-                appendChatMessage('@ArenaSystem', 'twitch', existing ? 'The streamer rejoined the arena.' : 'The streamer joined the arena.', 'command');
-            }
+            addOrBoostFighter(streamerName, 'twitch', true, selectedClassKey, false);
             updateStreamerJoinButton();
         }
 
@@ -7222,7 +7215,6 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             if (created && !created.isStreamer) {
                 manualSpectatorFighter = created;
                 manualSpectatorIdentity = newIdentity;
-                if (announce) appendChatMessage('@ArenaSystem', platformKey, `✅ Espectador unido automáticamente: ${name}`, 'normal');
             }
             return created;
         }
@@ -7338,6 +7330,38 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 feed.removeChild(feed.firstChild);
             }
             followArenaChat(feed);
+            return item;
+        }
+
+        const FIGHTER_COMMAND_CHAT_COPY = Object.freeze({
+            es: { game:'Juego', join:'Se unió', rejoin:'Reingresó', special:'Especial ejecutado' },
+            en: { game:'Game', join:'Joined', rejoin:'Rejoined', special:'Special executed' },
+            fr: { game:'Jeu', join:'A rejoint', rejoin:'De retour', special:'Spécial exécuté' },
+            de: { game:'Spiel', join:'Beigetreten', rejoin:'Wieder dabei', special:'Spezial ausgeführt' },
+            zh: { game:'游戏', join:'已加入', rejoin:'重新加入', special:'已释放技能' },
+            ja: { game:'ゲーム', join:'参加', rejoin:'再参加', special:'必殺技発動' },
+            pt: { game:'Jogo', join:'Entrou', rejoin:'Voltou', special:'Especial executado' },
+            it: { game:'Gioco', join:'Entrato', rejoin:'Rientrato', special:'Speciale eseguito' }
+        });
+
+        function appendFighterCommand(fighter, command, event) {
+            const copy = FIGHTER_COMMAND_CHAT_COPY[currentLanguage] || FIGHTER_COMMAND_CHAT_COPY.es;
+            const icon = event === 'join' ? '👤' : (event === 'rejoin' ? '🔄' : '⚡');
+            const item = appendChatMessage(getFighterDisplayName(fighter), fighter.platformKey,
+                `${icon} ${localizedChatCommand(command)} · ${copy[event]} · ${localizedClassName(fighter.archetypeKey)}`, 'command');
+            if (!item) return;
+            item.dataset.chatEvent = event;
+            item.dataset.command = command;
+            item.dataset.fighterId = String(fighter.id);
+            item.dataset.fighterName = fighter.name;
+            item.dataset.platformKey = fighter.platformKey;
+            // These are local game observations, never messages sent to TikTok.
+            // Keep the actual platform as context without impersonating a received comment.
+            const badge = item.firstElementChild;
+            badge.textContent = `🎮 ${copy.game}`;
+            badge.title = `${copy.game} · ${(PLATFORMS[fighter.platformKey] || PLATFORMS.tiktok).name}`;
+            badge.style.background = '#164e63';
+            badge.style.color = '#a5f3fc';
         }
 
         function localizeArenaNotice(source, language = currentLanguage) {
@@ -7356,8 +7380,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             if (!ko) {
                 // Mode changes are reflected by HUD labels alone (no central or chat duplicate).
                 if (/(?:Arena cambia|Duelo Final 1 vs 1|Escalado automático|Modo Smash Plataformas)/i.test(String(text))) return;
-                // Class switches, re-entry and skills are not K.O.s.
-                // Combat skills remain visual; system changes have one chat record.
+                // Skills use appendFighterCommand at the actual release, never this K.O. feed.
+                // Keep legacy skill notices from duplicating the structured command history.
                 if (!/(?:lanzó !|con !rasen|invocó !|usó !|us[oó] !)/i.test(String(text))) {
                     appendChatMessage('@ArenaSystem', 'tiktok', String(text), 'normal');
                 }
@@ -7743,7 +7767,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.6';
+        const ARENA_RELEASE_VERSION = '0.7';
         const ARENA_RELEASE_EDITION = 'tiktok';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:10, footer:76});
@@ -8490,7 +8514,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.6.0',
+            version: '0.7.0',
             edition: 'tiktok',
             getBalanceRules() {
                 return ARENA_CLASS_BALANCE;

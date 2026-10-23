@@ -1,5 +1,13 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-23 — Arena Live v0.7 · Comandos visibles de entradas y especiales
+
+- Entradas y reingresos reales vinculados a `!jugar`, nombre, clase e identidad del peleador en Chat de pruebas y comandos. Incluye inicio automático, escenarios silenciosos, botones rápidos, Prota y entradas por mensajes o elección de clase.
+- Especiales de IA, chat, Prota y herramientas registrados una sola vez al ejecutarse, con el comando y quien lo lanza. Las cargas interrumpidas y acciones rechazadas no se anuncian como ejecutadas.
+- Etiqueta 🎮 Juego para distinguir acciones locales observadas de comentarios recibidos. Los registros respetan la retención y el seguimiento del chat; no se publican en TikTok ni ejecutan comandos adicionales.
+- Alias de poderes normalizados antes de cargar y ejecutar, también en accesos directos. Se conservan daño, energía, efectos, reglas y el equilibrio medido.
+- Versión 0.7/0.7.0 en Ajustes, API, servidor y paquete. 26 pruebas de Node, 41 de navegador y 11 de carga aprobadas; 200 resultados completos de partidas idénticos a v0.6.
+
 ## 2026-10-23 — Arena Live v0.6 · TikTok y equilibrio unificados en main
 
 - Equilibrio nativo por Duelo, Smash y Arena, compartido por IA, Prota, chat y pruebas. Selección de rivales cercana para las cinco clases.

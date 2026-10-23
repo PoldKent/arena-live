@@ -1,10 +1,10 @@
-# Arena Live · v0.6
+# Arena Live · v0.7
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
 ## Versión principal
 
-`main` contiene TikTok LIVE y el equilibrio por modo integrados. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. Ajustes, la API del juego, el servidor y el paquete identifican la versión 0.6. [Cambios y validación](docs/RELEASE-0.6-UNIFICADA.md).
+`main` contiene TikTok LIVE, el equilibrio por modo y el registro de comandos de las acciones reales del juego. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. Ajustes, la API del juego, el servidor y el paquete identifican la versión 0.7. [Cambios y validación](docs/RELEASE-0.7-COMANDOS.md).
 
 ## Rendimiento con 128 jugadores
 
@@ -25,7 +25,7 @@ npm.cmd start
 
 Abre **http://127.0.0.1:4173/** y conserva abierta la consola. TikTok comienza desconectado; **📡 TikTok** conecta o desconecta según el estado real del puente.
 
-Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd install` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.6** en Ajustes.
+Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd install` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.7** en Ajustes.
 
 Para volver a `main` desde una rama anterior:
 
@@ -97,6 +97,10 @@ Se conservan la calibración y su clave de almacenamiento: desplazamiento **0–
 
 Los comandos se distinguen de los mensajes normales. Los mensajes nuevos vuelven automáticamente al más reciente, aunque estés leyendo anteriores. El historial recibido de TikTok conserva navegación y exportación TXT; ocultar el panel no borra mensajes ni cambia su recepción.
 
+En **Chat de pruebas y comandos**, cada entrada o reingreso real muestra el nombre del peleador, `!jugar` y su clase, incluso desde escenarios o botones rápidos. Cada especial ejecutado muestra su comando: `!kame`, `!rasen`, `!coloso`, `!trueno` o `!enred`. Incluye IA, Prota y herramientas; si eliges otro objetivo para una prueba, el registro identifica a quien lanza el poder.
+
+La etiqueta **🎮 Juego** distingue estas acciones observadas de los mensajes recibidos. Un comando escrito conserva su mensaje; al ejecutarse aparece además la confirmación del juego. Una carga interrumpida, un poder deshabilitado o una entrada rechazada no generan confirmación de ejecución. Un `!jugar` repetido de alguien que ya está activo sigue siendo un apoyo, sin anunciar otra entrada. El historial respeta el límite elegido en Ajustes y no envía estos registros a TikTok.
+
 **Pruebas → TikTok LIVE → Probar comando** comprueba el recorrido local con `!guerrero`. El formulario del chat de pruebas es local: no publica respuestas en TikTok.
 
 El conector de TikTok es no oficial. Una conexión real necesita un LIVE público activo y un comentario desde otra cuenta; sigue pendiente su validación durante una emisión real. La integración recibe texto. Regalos, likes y otros eventos sociales de las herramientas son simulaciones.
@@ -128,7 +132,8 @@ npm.cmd run test:performance
 
 Las pruebas del navegador arrancan y cierran su servidor local y simulan las respuestas de TikTok. Cubren paneles, persistencia, escenarios, chats, pausa, capturas, idiomas y controles móviles; no conectan con una emisión real.
 
-- [Versión unificada v0.6, equilibrio y validación](docs/RELEASE-0.6-UNIFICADA.md).
+- [Comandos visibles de entradas y especiales en v0.7](docs/RELEASE-0.7-COMANDOS.md).
+- [Integración del equilibrio en v0.6](docs/RELEASE-0.6-UNIFICADA.md).
 - [Rendimiento y depuración de v0.5](docs/RELEASE-0.5-RENDIMIENTO.md).
 - [Reglas y paneles persistentes de v0.4](docs/RELEASE-0.4-REGLAS.md).
 - [Decisiones de la reconstrucción v0.3](docs/RELEASE-0.3-INTERFAZ.md).
@@ -137,4 +142,4 @@ Las pruebas del navegador arrancan y cierran su servidor local y simulan las res
 - [Registro de cambios](CHANGELOG.md).
 - Historial: [v0.2](docs/RELEASE-0.2-OPERADOR.md), [v0.1](docs/RELEASE-0.1-OBS.md).
 
-El desarrollo y las actualizaciones continúan en `main`. Las versiones anteriores y la prueba separada quedan en el historial de Git; la entrega vigente es Arena Live v0.6 con TikTok, interfaz, reglas y equilibrio integrados.
+El desarrollo y las actualizaciones continúan en `main`. Las versiones anteriores y la prueba separada quedan en el historial de Git; la entrega vigente es Arena Live v0.7 con TikTok, interfaz, reglas, equilibrio y comandos de acciones integrados.

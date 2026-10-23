@@ -1,4 +1,4 @@
-// Browser regressions for the unified v0.6 release. Never connects to a real TikTok LIVE.
+// Browser regressions for the unified v0.7 release. Never connects to a real TikTok LIVE.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -43,14 +43,16 @@ const shot=async name=>{if(process.env.ARENA_TEST_SCREENSHOTS){await mkdir(proce
 async function unfold(id){const panel=page.locator('#'+id);if(!await panel.evaluate(n=>n.open))await panel.locator('> summary').click({noWaitAfter:true});}
 async function settingsSection(index){const section=page.locator('.arena-settings-section').nth(index);if(!await section.evaluate(n=>n.open))await section.locator('> summary').click({noWaitAfter:true});}
 async function streamClick(id){await page.mouse.move(600,20);await page.locator('#'+id).click({noWaitAfter:true});}
-await check('v0.6 starts with large game, left chat and only the social test group expanded',async()=>{
- assert.equal(await page.evaluate(()=>ArenaLive.version),'0.6.0');
+await check('v0.7 starts with large game, left chat and only the social test group expanded',async()=>{
+ assert.equal(await page.evaluate(()=>ArenaLive.version),'0.7.0');
  const panels=await page.locator('.arena-work-panel').evaluateAll(ns=>ns.map(n=>({id:n.id,open:n.open,parent:n.parentElement.id})));
  assert.equal(panels.find(n=>n.id==='arenaPanelChat').parent,'arenaDockLeft');
  assert.deepEqual(panels.filter(n=>n.open&&n.id!=='arenaPanelChat').map(n=>n.id),['arenaPanelSocial']);
  const order=await page.locator('#arenaHeaderActions>button').evaluateAll(ns=>ns.slice(0,4).map(n=>n.id));assert.deepEqual(order,['arenaViewMenuBtn','arenaFullscreenMenuBtn','arenaDualTestsToggle','arenaDualSettingsBtn']);
  for(const id of ['arenaDualPauseBtn','arenaDualLobbyBtn','arenaDualRematchBtn','btnStreamerJoin','btnQuickSound','arenaDualTikTokConnectBtn'])assert.equal(await page.locator('#arenaHeaderActions #'+id).count(),1);
  assert.equal(await page.locator('#arenaMobileMoreBtn').isVisible(),false);
+ const joins=await page.evaluate(()=>fighters.map(f=>({id:f.id,count:[...document.querySelectorAll('#chatFeed>[data-chat-event="join"]')].filter(n=>n.dataset.fighterId===String(f.id)&&n.dataset.command==='!jugar').length})));
+ assert.ok(joins.length>0&&joins.every(f=>f.count===1),'initial automatic participants have one visible !jugar each');
  await shot('preparation');
 });
 await check('Player test actions stay open in preparation and still create participants',async()=>{
@@ -288,10 +290,10 @@ await check('Mobile special action follows the no-powers rule while movement and
  await page.locator('#arenaPowerMode').selectOption('noSpecials');await page.keyboard.press('Escape');assert.equal(await page.locator('#arenaMobilePower').isDisabled(),true);assert.equal(await page.locator('#arenaMobileAttack').isEnabled(),true);assert.equal(await page.locator('#arenaMobileJump').isEnabled(),true);
 });
  await check('Unified release uses native clock, randomness, animation and the TikTok bridge',async()=>{
-  const status=await (await page.request.get(`http://127.0.0.1:${port}/api/status`)).json();assert.equal(status.version,'0.6.0');
+  const status=await (await page.request.get(`http://127.0.0.1:${port}/api/status`)).json();assert.equal(status.version,'0.7.0');
   const native=await page.evaluate(()=>({clock:Date.now.toString().includes('[native code]'),random:Math.random.toString().includes('[native code]'),raf:requestAnimationFrame.toString().includes('[native code]'),harness:typeof window.ArenaBalanceHarness}));
   assert.deepEqual(native,{clock:true,random:true,raf:true,harness:'undefined'});
-  assert.match(await page.locator('#arenaSettingsVersion').textContent(),/v0\.6/);
+  assert.match(await page.locator('#arenaSettingsVersion').textContent(),/v0\.7/);
   assert.equal(await page.evaluate(()=>Object.isFrozen(ArenaLive.getBalanceRules())&&Object.isFrozen(ArenaLive.getBalanceRules().iso.ninja)),true);
  });
  await check('Playable powers apply the measured damage, windup and target caps in all three modes',async()=>{
@@ -304,13 +306,15 @@ await check('Mobile special action follows the no-powers rule while movement and
     const targets=Array.from({length:6},(_,i)=>{const f=new Fighter('@preview_'+i,'tiktok',false,'ninja');f.x=270+i*8;f.y=250;return f;});fighters=[actor,...targets];
     const command=CLASS_COMMANDS[key].powers[0];queueFighterSkillWindup(actor,command);const windup=actor.castingSkill.timer;
     actor.castingSkill=null;actor.activeSpecialFactor=1;executeFighterSkill(actor,command);
-    rows.push({mode,key,windup,damage:targets.map(f=>180-f.hp).filter(d=>d>0)});
+    const event=document.querySelector('#chatFeed>[data-chat-event="special"]:last-child');
+    rows.push({mode,key,windup,damage:targets.map(f=>180-f.hp).filter(d=>d>0),logged:!!event&&event.dataset.command===command&&event.dataset.fighterId===actor.id});
    }return rows;
   });
   for(const p of probes){
    const rule=tuning[p.mode][p.key];assert.equal(p.windup,rule.windup||34);
    const hits=p.key==='ninja'||p.key==='esmeralda'?1:p.key==='trueno'?(rule.targets||3):(rule.targets||6);
    assert.equal(p.damage.length,hits,p.mode+'/'+p.key+' target cap');assert.ok(p.damage.every(d=>d===rule.damage),p.mode+'/'+p.key+' damage');
+   assert.equal(p.logged,true,p.mode+'/'+p.key+' actual special has its command and caster');
   }
  });
  await check('All five playable classes select the closest rival instead of health/class priorities',async()=>{
@@ -319,5 +323,96 @@ await check('Mobile special action follows the no-powers rule while movement and
    actor.x=240;actor.y=250;near.x=280;near.y=250;weak.x=305;weak.y=250;weak.hp=1;fighters=[actor,near,weak];return findPreferredCombatTarget(actor)?.id===near.id;
   }));assert.ok(matches.every(Boolean));
  });
-assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:'0.6.0'}));
+await check('All 128 silent scenario joins emit !jugar once, with bounded local history and no TikTok impersonation',async()=>{
+ const result=await page.evaluate(()=>{
+  arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};gameState='LOBBY';koSequenceActive=false;isGamePaused=true;soundEnabled=false;autoChatEnabled=false;
+  const feed=document.getElementById('chatFeed');feed.replaceChildren();setChatRetention(40);
+  const received=document.getElementById('arenaTikTokChatFeed').childElementCount;
+  const observer=new MutationObserver(()=>{});observer.observe(feed,{childList:true});
+  applyPlayerCountPreset(128);
+  const events=observer.takeRecords().flatMap(r=>[...r.addedNodes]).filter(n=>n.dataset?.chatEvent==='join');observer.disconnect();
+  return {count:events.length,unique:new Set(events.map(n=>n.dataset.fighterId)).size,
+   valid:events.every(n=>n.dataset.command==='!jugar'&&n.firstElementChild.textContent.includes('🎮')&&n.textContent.includes('!jugar')&&n.textContent.includes('Se unió')),
+   retained:feed.childElementCount,limit:chatRetention,receivedUnchanged:received===document.getElementById('arenaTikTokChatFeed').childElementCount};
+ });
+ assert.deepEqual(result,{count:128,unique:128,valid:true,retained:40,limit:40,receivedUnchanged:true});
+});
+await check('Quick join, first messages, class commands, Prota and valid re-entry share real join records; boosts and refusals do not',async()=>{
+ const result=await page.evaluate(()=>{
+  gameState='LOBBY';applyPlayerCountPreset(0);setRejoinRuleMode('free');document.getElementById('chatFeed').replaceChildren();
+  const quick=triggerQuickJoin();
+  processChatCommand('@chat_join','tiktok','!jugar',null,true);
+  processChatCommand('@first_message','youtube','hola',null,true);
+  processChatCommand('@class_join','kick','!shinobi',null,true);
+  joinAsStreamer();
+  const entries=[...document.querySelectorAll('#chatFeed>[data-chat-event="join"]')];
+  const joined=fighters.length,all=fighters.every(f=>entries.filter(n=>n.dataset.fighterId===f.id&&n.dataset.command==='!jugar').length===1);
+  quick.hp=100;quick.energy=20;const likes=quick.likesReceived;
+  addOrBoostFighter(quick.name,quick.platformKey,false,null,true);
+  const boosted={hp:quick.hp,energy:quick.energy,likes:quick.likesReceived-likes};
+  quick.eliminated=true;addOrBoostFighter(quick.name,quick.platformKey,false,null,true);
+  const reentries=document.querySelectorAll('#chatFeed>[data-chat-event="rejoin"]').length;
+  arenaCombatRules.maxPlayers=fighters.length;
+  const blocked=addOrBoostFighter('@over_limit','tiktok',false,null,true)===null;
+  setRejoinRuleMode('3_lives');quick.eliminated=true;quick.joinsUsed=MAX_OPPORTUNITIES;
+  const exhausted=addOrBoostFighter(quick.name,quick.platformKey,false,null,true)===null;
+  setRejoinRuleMode('free');arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};
+  return {joined,all,boosted,reentries,blocked,exhausted,joinCount:document.querySelectorAll('#chatFeed>[data-chat-event="join"]').length,rejoinCount:document.querySelectorAll('#chatFeed>[data-chat-event="rejoin"]').length};
+ });
+ assert.deepEqual(result,{joined:5,all:true,boosted:{hp:135,energy:55,likes:1},reentries:1,blocked:true,exhausted:true,joinCount:5,rejoinCount:1});
+});
+await check('Autonomous AI logs one special on release; charging, interruptions, wrong classes and disabled powers never claim execution',async()=>{
+ const result=await page.evaluate(()=>{
+  gameState='LOBBY';applyPlayerCountPreset(2);startCombatFromLobby();isGamePaused=true;gamePace=1;slowMoFactor=1;autoAttackEnabled=true;
+  const [actor,target]=fighters;applyFighterArchetype(actor,'kame');
+  fighters.forEach((f,i)=>{f.x=400+i*80;f.y=WORLD_H*.79-f.radius;f.z=0;f.vx=0;f.vy=0;f.knockbackTimer=0;f.attackCooldown=100000;f.aiSpecialCooldown=100000;f.energy=100;});
+  actor.aiSpecialCooldown=0;document.getElementById('chatFeed').replaceChildren();
+  const count=()=>document.querySelectorAll('#chatFeed>[data-chat-event="special"]').length;
+  const queued=tryAutonomousFighterSpecial(actor,target),charging=count();
+  isGamePaused=false;
+  for(let i=0;i<100&&actor.castingSkill;i++)updatePhysicsAndAI();
+  const released=count(),event=document.querySelector('#chatFeed>[data-chat-event="special"]'),damage=target.maxHp-target.hp;
+  autoAttackEnabled=false;actor.knockbackTimer=0;actor.castingSkill=null;
+  queueFighterSkillWindup(actor,'!kame');applyDamage(actor,1,target,false,0,'normal');
+  for(let i=0;i<50;i++)updatePhysicsAndAI();
+  const interrupted=count();
+  queueFighterSkillWindup(actor,'!rasen');executeFighterSkill(actor,'!rasen');
+  queueFighterSkillWindup(actor,'!kame');setArenaCombatRule('powerMode','noSpecials');executeFighterSkill(actor,'!kame');
+  const final=count(),cancelled=actor.castingSkill===null;
+  setArenaCombatRule('powerMode','full');isGamePaused=true;
+  return {queued,charging,released,damage,command:event?.dataset.command,caster:event?.dataset.fighterId===actor.id,interrupted,final,cancelled};
+ });
+ assert.deepEqual(result,{queued:true,charging:0,released:1,damage:43,command:'!kame',caster:true,interrupted:1,final:1,cancelled:true});
+});
+await check('A manual command targeting another fighter records the real caster, canonical alias and a single damage application',async()=>{
+ const result=await page.evaluate(()=>{
+  gameState='LOBBY';applyPlayerCountPreset(4);startCombatFromLobby();isGamePaused=true;autoAttackEnabled=false;
+  const actor=fighters[0];applyFighterArchetype(actor,'titan');
+  fighters.forEach((f,i)=>{f.x=400+i*25;f.y=300;f.z=0;f.vx=0;f.vy=0;f.knockbackTimer=0;f.attackCooldown=100000;f.aiSpecialCooldown=100000;});
+  updateTargetSelectDropdown();document.getElementById('targetFighterSelect').value=actor.id;
+  document.getElementById('chatMessageInput').value='!golpecolosal';document.getElementById('chatFeed').replaceChildren();
+  handleManualChatSubmit();
+  const charging=!!actor.castingSkill,pending=document.querySelectorAll('#chatFeed>[data-chat-event="special"]').length;
+  isGamePaused=false;
+  const target=fighters[1];for(let i=0;i<100&&actor.castingSkill;i++)updatePhysicsAndAI();
+  isGamePaused=true;
+  const records=[...document.querySelectorAll('#chatFeed>[data-chat-event="special"]')];
+  const row=records[0];
+  return {charging,pending,count:records.length,command:row?.dataset.command,caster:row?.dataset.fighterId===actor.id,name:row?.textContent.includes(getFighterDisplayName(actor)),damage:target.maxHp-target.hp,request:[...document.querySelectorAll('#chatFeed>[data-chat-kind="command"]:not([data-chat-event])')].some(n=>n.textContent.includes('!coloso'))};
+ });
+ assert.deepEqual(result,{charging:true,pending:0,count:1,command:'!coloso',caster:true,name:true,damage:38,request:true});
+});
+await check('Direct localized aliases execute and show accepted commands; fighter names remain escaped',async()=>{
+ const result=await page.evaluate(()=>{
+  currentLanguage='en';gameState='COMBAT';activeMode='smash';
+  const actor=new Fighter('@<img src=x onerror=alert(1)>','tiktok',false,'titan');actor.x=400;actor.y=300;actor.energy=100;
+  const target=new Fighter('@alias_target','tiktok',false,'ninja');target.x=420;target.y=300;fighters=[actor,target];
+  document.getElementById('chatFeed').replaceChildren();queueFighterSkillWindup(actor,'!colossus');
+  const command=actor.castingSkill?.cmd;actor.castingSkill=null;executeFighterSkill(actor,'!colossus');
+  const row=document.querySelector('#chatFeed>[data-chat-event="special"]');
+  const result={command,logged:row?.dataset.command,localized:row?.textContent.includes('!colossus')&&row.textContent.includes('Special executed'),safe:!row?.querySelector('img'),damage:target.maxHp-target.hp};currentLanguage='es';return result;
+ });
+ assert.deepEqual(result,{command:'!coloso',logged:'!coloso',localized:true,safe:true,damage:38});
+});
+assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:'0.7.0'}));
 } finally {await browser?.close();server.kill('SIGKILL');}
