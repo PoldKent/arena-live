@@ -43,6 +43,9 @@ try {
       const setup = await page.evaluate(count => {
         soundEnabled = false; autoChatEnabled = false; countdownsEnabled = false;
         isGamePaused = false; gameState = 'LOBBY';
+        // Constant-population CPU comparison: HP alone no longer prevents real ring-outs.
+        // Use the same no-knockback control in both sources; full launches run below.
+        setArenaCombatRule('knockback', 0);
         const start = performance.now();
         applyPlayerCountPreset(count); startCombatFromLobby(); autoAttackEnabled = true; setMonitorFocus('dual');
         // Keep a constant population while measuring normal pursuit/separation;
@@ -79,6 +82,7 @@ try {
       console.log('MEASURE', JSON.stringify(measurements.at(-1)));
     }
     if (source === 'current') {
+      await page.evaluate(()=>setArenaCombatRule('knockback',1));
       await check('128-player scenario also loads during combat; mode transitions and capacity remain correct', async () => {
         const result = await page.evaluate(() => {
           applyPlayerCountPreset(8); const smash = [fighters.length, activeMode];
@@ -217,7 +221,8 @@ try {
       gitBlob: createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex') };
   });
   const report = { passed: checks.length, errors: errors.length, checks, measurements, sourceHashes,
-    environment: { node: process.version, browser: await browser.version(), gpu: 'disabled; software raster and readback included', viewport: '1720x720', simulationHz: 60 } };
+    environment: { node: process.version, browser: await browser.version(), gpu: 'disabled; software raster and readback included', viewport: '1720x720', simulationHz: 60,
+      workload: 'Constant-population timings disable knockback in both sources and suppress autonomous specials; subsequent stress checks restore full knockback and specials.' } };
   if (process.env.ARENA_PERF_REPORT) await writeFile(process.env.ARENA_PERF_REPORT, JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report));
 } finally {

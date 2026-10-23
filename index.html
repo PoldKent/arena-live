@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.7 — TikTok LIVE</title>
+    <title>Arena Live v0.8 — TikTok LIVE</title>
     <!--
       ARENA LIVE · MONOLITHIC DELIVERY
       All application code intentionally stays in this HTML file.
@@ -1396,7 +1396,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <h2 class="font-display font-black text-base sm:text-lg text-white tracking-wide">
                                 <span id="arenaSettingsTitle" data-operator-label="settingsTitle">Pausa y ajustes</span>
                             </h2>
-                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.7 · TikTok</span>
+                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.8 · TikTok</span>
                             <span id="settingsModeBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400/40">
                                 ⏸️ JUEGO EN PAUSA
                             </span>
@@ -1572,6 +1572,11 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                         <span data-operator-label="opacity">Opacidad de la información del juego</span>: <output id="hudOpacityValue">85 %</output>
                         <input id="hudOpacityRange" type="range" min="35" max="100" value="85" step="5" oninput="setArenaHudOpacity(this.value)" class="w-full accent-cyan-400 mt-2" aria-label="Opacidad de la información del juego" aria-describedby="arenaHudOpacityHelp" title="Opacidad de textos y barras del juego en ambas vistas; 100 % es totalmente visible">
                         <small id="arenaHudOpacityHelp" class="block text-[10px] text-slate-400" data-operator-label="opacityHelp">Afecta a textos y barras de ambas vistas. 100 % = totalmente visible.</small>
+                    </label>
+                    <label id="arenaCameraSettings" data-no-translate class="block text-xs text-slate-300 border-t border-slate-800/80 pt-3" for="arenaShakeRange">
+                        <span id="arenaShakeLabel">Vibración de cámara</span>: <output id="arenaShakeValue">25 %</output>
+                        <input id="arenaShakeRange" type="range" min="0" max="100" value="25" step="5" oninput="setArenaScreenShake(this.value)" class="w-full accent-cyan-400 mt-2" aria-describedby="arenaShakeHelp" title="Intensidad de la vibración en ambas vistas. 0 % la desactiva; no cambia los golpes ni el empuje.">
+                        <small id="arenaShakeHelp" class="block text-[10px] text-slate-400">0 % = sin vibración. Solo afecta a la cámara; no cambia los golpes ni el empuje.</small>
                     </label>
                 </div>
                 <div class="bg-slate-900/75 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
@@ -2522,6 +2527,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             refreshArenaExtraControls();
             refreshPresentationLabels();
             refreshArenaFullscreenLabels();
+            refreshArenaCameraSettings();
             syncChatDisclosureState();
             refreshArenaOperatorToolbar();
             document.querySelectorAll('#killFeed16 [data-original-notice], #killFeed9 [data-original-notice]').forEach(badge => {
@@ -2754,6 +2760,15 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // Main Floating Stage Bounds for Smash & 1v1 (Left & Right Abyss Blast Zones outside these bounds)
         const STAGE_LEFT = 125;
         const STAGE_RIGHT = 835;
+        // One visible floor shared by drawing, spawns, falling and recovery.
+        // About 7% larger in each axis than the original colosseum.
+        const ISOMETRIC_ARENA = Object.freeze({
+            centerX: WORLD_W * 0.5, centerY: WORLD_H * 0.56,
+            radiusX: WORLD_W * 0.47, radiusY: WORLD_H * 0.32,
+            gravity: 0.38, jumpSpeed: 6.2, rescueSpeed: 8.2,
+            returnSpeed: 9.5, rescueDepth: 60, deathDepth: 150,
+            maxAirFrames: 120
+        });
 
         const canvas16 = document.getElementById('canvas16x9');
         const ctx16 = canvas16.getContext('2d');
@@ -2834,6 +2849,48 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let simulatedViewers = 1420;
         let simulatedTapsPerSec = 28;
         let screenShake = 0;
+        const ARENA_CAMERA_SETTINGS_KEY = 'arenaLiveCameraV1';
+        const ARENA_DEFAULT_SCREEN_SHAKE = 25;
+        let arenaScreenShake = ARENA_DEFAULT_SCREEN_SHAKE;
+        const ARENA_CAMERA_COPY = Object.freeze({
+            es: ['Vibración de cámara', '0 % = sin vibración. Solo afecta a la cámara; no cambia los golpes ni el empuje.'],
+            en: ['Camera shake', '0% = no shake. Camera only; attacks and knockback stay the same.'],
+            fr: ['Vibration de la caméra', '0 % = sans vibration. Caméra uniquement ; les coups et la projection restent identiques.'],
+            de: ['Kamerawackeln', '0 % = kein Wackeln. Nur die Kamera; Angriffe und Rückstoß bleiben gleich.'],
+            zh: ['镜头震动', '0% = 关闭震动。仅影响镜头，不改变攻击或击退。'],
+            ja: ['画面の揺れ', '0% = 揺れなし。カメラのみで、攻撃や吹き飛ばしは変わりません。'],
+            pt: ['Vibração da câmera', '0% = sem vibração. Só a câmera; golpes e empurrões não mudam.'],
+            it: ['Vibrazione della camera', '0% = nessuna vibrazione. Solo la camera; colpi e respinta non cambiano.']
+        });
+        function refreshArenaCameraSettings() {
+            const copy = ARENA_CAMERA_COPY[currentLanguage] || ARENA_CAMERA_COPY.es;
+            const label = document.getElementById('arenaShakeLabel');
+            const help = document.getElementById('arenaShakeHelp');
+            const range = document.getElementById('arenaShakeRange');
+            if (label) label.textContent = copy[0];
+            if (help) help.textContent = copy[1];
+            if (range) { range.value = String(arenaScreenShake); range.title = copy[1]; range.setAttribute('aria-label', copy[0]); }
+            const output = document.getElementById('arenaShakeValue');
+            if (output) output.textContent = `${arenaScreenShake} %`;
+        }
+        function setArenaScreenShake(value, remember = true) {
+            const parsed = Number(value);
+            const numeric = typeof value === 'number' || (typeof value === 'string' && value.trim() !== '');
+            arenaScreenShake = numeric && Number.isFinite(parsed)
+                ? Math.max(0, Math.min(100, Math.round(parsed / 5) * 5)) : ARENA_DEFAULT_SCREEN_SHAKE;
+            if (remember) try { localStorage.setItem(ARENA_CAMERA_SETTINGS_KEY, JSON.stringify({shake: arenaScreenShake})); } catch (_) {}
+            refreshArenaCameraSettings();
+        }
+        function loadArenaCameraSettings() {
+            try { setArenaScreenShake(JSON.parse(localStorage.getItem(ARENA_CAMERA_SETTINGS_KEY) || 'null')?.shake, false); }
+            catch (_) { setArenaScreenShake(ARENA_DEFAULT_SCREEN_SHAKE, false); }
+        }
+        function sampleArenaScreenShake(time = performance.now()) {
+            const amplitude = !isGamePaused && screenShake > 0.4 ? Math.min(14, screenShake) * arenaScreenShake / 100 : 0;
+            if (!amplitude) return {x:0, y:0};
+            // Visual motion never consumes combat randomness, and both captures use one sample.
+            return {x: Math.sin(time * 0.071) * amplitude, y: Math.sin(time * 0.093 + 1) * amplitude * 0.7};
+        }
         let skyFlashTimer = 0;
         let skyFlashColor = '#ffffff';
 
@@ -3251,7 +3308,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             if (isTyping || isGamePaused || isSettingsOpen) return;
             const k = e.key.toLowerCase();
             if (k === 'w' || k === 'arrowup') {
-                if (!keys.w) keys.jumpPressed = true;
+                if (activeMode !== 'iso' && !keys.w) keys.jumpPressed = true;
                 keys.w = true;
             }
             if (k === 'a' || k === 'arrowleft') keys.a = true;
@@ -3586,15 +3643,14 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         // ==================== COMBAT / EDGE RECOVERY ====================
-        // Every rescue is measured from the actual platform rim, not when a
+        // Platform rescues are measured from the actual platform rim, not when a
         // fighter first approaches it. 1.25 normal-jump horizontal ranges.
         const SPECTATOR_RECOVERY = Object.freeze({
             normalJumpHorizontalRange: 1.95 * (2 * 9.4 / 0.36),
             rescueDistanceMultiplier: 1.25,
             minimumOutwardSpeed: 0.5,
             recoveryKnockbackFrames: 3,
-            maximumLateHeight: 125,
-            isometricExtraFallMargin: 145
+            maximumLateHeight: 125
         });
         const SPECTATOR_RECOVERY_DISTANCE = SPECTATOR_RECOVERY.normalJumpHorizontalRange
             * SPECTATOR_RECOVERY.rescueDistanceMultiplier;
@@ -3605,35 +3661,82 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 && !fighter.recoveryJumpUsed && (fighter.jumpsLeft > 0 || !fighter.extraRecoveryUsed));
         }
 
-        function tryIsometricSpectatorRecovery(fighter, centerX, centerY, radiusX, radiusY) {
-            if (!isSpectatorLaunchRecoverable(fighter)) return false;
-            const offsetX = fighter.x - centerX;
-            const offsetY = fighter.y - centerY;
-            const normalizedRadius = Math.hypot(offsetX / radiusX, offsetY / radiusY);
-            if (normalizedRadius <= 1) return false;
-            // Physical distance beyond the ellipse along the same outward ray.
-            const outsideDistance = Math.hypot(offsetX, offsetY) * (1 - 1 / normalizedRadius);
-            if (outsideDistance <= SPECTATOR_RECOVERY_DISTANCE) return false;
-            const outwardDot = (fighter.vx * offsetX + fighter.vy * offsetY)
-                / Math.max(1, Math.hypot(offsetX, offsetY));
-            if (outwardDot < SPECTATOR_RECOVERY.minimumOutwardSpeed && fighter.knockbackTimer <= 0 && fighter.vz > 0) return false;
+        function getIsometricArenaPosition(fighter) {
+            // The ellipse supports the visible foot/shadow point, not the head or jump height.
+            const dx = fighter.x - ISOMETRIC_ARENA.centerX;
+            const dy = fighter.y + fighter.radius * 0.85 - ISOMETRIC_ARENA.centerY;
+            const radius = Math.hypot(dx / ISOMETRIC_ARENA.radiusX, dy / ISOMETRIC_ARENA.radiusY);
+            const distance = Math.hypot(dx, dy);
+            const outside = radius > 1 + 1e-9; // Floating-point tolerance, less than a millionth of a pixel.
+            return {dx, dy, radius, distance, outside,
+                outsideDistance: outside ? distance * (1 - 1 / radius) : 0};
+        }
 
-            const normal = Math.max(1, Math.hypot(offsetX, offsetY));
-            if (fighter.jumpsLeft <= 0) fighter.extraRecoveryUsed = true;
-            fighter.jumpsLeft = 0;
-            fighter.recoveryJumpUsed = true;
-            fighter.edgeRecoveryPending = false;
-            fighter.fallDrop = 0; // Airborne again after leaving the abyss lip.
-            fighter.z = Math.max(2, fighter.z);
-            fighter.vz = 8.2;
-            // Strong return impulse without teleporting the fighter to safety.
-            fighter.vx = -(offsetX / normal) * 9.5;
-            fighter.vy = -(offsetY / normal) * 9.5;
-            fighter.facing = fighter.vx >= 0 ? 1 : -1;
-            fighter.knockbackTimer = Math.min(fighter.knockbackTimer, SPECTATOR_RECOVERY.recoveryKnockbackFrames);
-            playSound('doublejump');
+        function performIsometricJump(fighter, returnToArena = false) {
+            if (!fighter || fighter.eliminated || fighter.castingSkill || fighter.doubleJumpCooldown > 0
+                || fighter.z < -ISOMETRIC_ARENA.rescueDepth) return false;
+            const position = getIsometricArenaPosition(fighter);
+            const grounded = !position.outside && fighter.z === 0 && fighter.vz <= 0;
+            if (grounded) fighter.jumpsLeft = fighter.maxJumps;
+            else fighter.jumpsLeft = Math.min(1, fighter.jumpsLeft); // Stepping off uses the ground jump.
+            if (fighter.jumpsLeft <= 0) return false;
+            fighter.jumpsLeft--;
+            fighter.onGround = false;
+            fighter.vz = grounded ? ISOMETRIC_ARENA.jumpSpeed : ISOMETRIC_ARENA.rescueSpeed;
+            fighter.doubleJumpCooldown = grounded ? 8 : 22;
+            if (!grounded && (position.outside || fighter.fallDrop > 0)) {
+                fighter.recoveryJumpUsed = true;
+                fighter.edgeRecoveryPending = false;
+                if (returnToArena && position.outside) {
+                    const distance = Math.max(1, position.distance);
+                    fighter.vx = -position.dx / distance * ISOMETRIC_ARENA.returnSpeed;
+                    fighter.vy = -position.dy / distance * ISOMETRIC_ARENA.returnSpeed;
+                    fighter.facing = fighter.vx >= 0 ? 1 : -1;
+                    fighter.knockbackTimer = Math.min(fighter.knockbackTimer, SPECTATOR_RECOVERY.recoveryKnockbackFrames);
+                }
+            }
+            playSound(grounded ? 'jump' : 'doublejump');
             addActiveEffect({type:'doubleJump', x:fighter.x, y:fighter.y, color:fighter.color, timer:22, maxTimer:22});
             return true;
+        }
+
+        function tryIsometricSpectatorRecovery(fighter) {
+            if (!isSpectatorLaunchRecoverable(fighter)) return false;
+            const position = getIsometricArenaPosition(fighter);
+            if (!position.outside || fighter.vz > 0) return false;
+            // Attempt one rescue while descending; a strong launch can still travel too far.
+            if (fighter.z >= 0 && (position.outsideDistance < 8 || fighter.knockbackTimer > 6)) return false;
+            return performIsometricJump(fighter, true);
+        }
+
+        function updateIsometricFloor(fighter, dt) {
+            const position = getIsometricArenaPosition(fighter);
+            const previousHeight = fighter.z;
+            fighter.z += fighter.vz * dt;
+            fighter.vz -= ISOMETRIC_ARENA.gravity * dt;
+            if (!position.outside && previousHeight >= 0 && fighter.z <= 0) {
+                // Only a real landing from above restores support and jump charges.
+                fighter.z = 0; fighter.vz = 0; fighter.fallDrop = 0; fighter.ringOutTimer = 0;
+                fighter.onGround = true; fighter.jumpsLeft = fighter.maxJumps;
+                fighter.doubleJumpCooldown = 0;
+                fighter.recoveryJumpUsed = false; fighter.extraRecoveryUsed = false;
+                fighter.edgeRecoveryPending = false;
+                return false;
+            }
+            fighter.onGround = false;
+            if (position.outside) {
+                fighter.jumpsLeft = Math.min(1, fighter.jumpsLeft);
+                fighter.edgeRecoveryPending = true;
+            }
+            if ((position.outside || fighter.z < 0) && fighter.ringOutTimer <= 0) {
+                fighter.ringOutTimer = ISOMETRIC_ARENA.maxAirFrames;
+            }
+            if (fighter.ringOutTimer > 0) fighter.ringOutTimer -= dt;
+            fighter.fallDrop = Math.max(0, -fighter.z);
+            if (fighter.fallDrop > 0) fighter.castingSkill = null;
+            // No invisible floor or safe walking below the rim. A jump must clear the floor.
+            return fighter.fallDrop >= ISOMETRIC_ARENA.deathDepth
+                || (fighter.ringOutTimer <= 0 && (position.outside || fighter.z < 0));
         }
 
         function trySpectatorEdgeRecovery(fighter, floorY) {
@@ -3803,6 +3906,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 existing.vx = 0;
                 existing.vy = 0;
                 existing.jumpsLeft = existing.maxJumps;
+                existing.doubleJumpCooldown = 0;
                 existing.recoveryJumpUsed = false;
                 existing.extraRecoveryUsed = false;
                 existing.edgeRecoveryPending = false;
@@ -3860,8 +3964,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             // Golden-angle spiral spreads all 128 possible fighters across the arena ellipse.
             const angle = index * (Math.PI * (3 - Math.sqrt(5)));
             const radial = Math.sqrt((index + 0.5) / Math.max(1, count));
-            fighter.x = WORLD_W * 0.5 + Math.cos(angle) * WORLD_W * 0.44 * maxRadius * radial;
-            fighter.y = WORLD_H * 0.56 + Math.sin(angle) * WORLD_H * 0.30 * maxRadius * radial;
+            fighter.x = ISOMETRIC_ARENA.centerX + Math.cos(angle) * ISOMETRIC_ARENA.radiusX * maxRadius * radial;
+            fighter.y = ISOMETRIC_ARENA.centerY + Math.sin(angle) * ISOMETRIC_ARENA.radiusY * maxRadius * radial - fighter.radius * 0.85;
             fighter.z = 0;
             fighter.facing = fighter.x <= WORLD_W * 0.5 ? 1 : -1;
         }
@@ -3890,8 +3994,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     // Safe randomized spawn inside the circular floor, never beyond its rim.
                     const angle = Math.random() * Math.PI * 2;
                     const r = Math.sqrt(Math.random()) * 0.72;
-                    newFighter.x = WORLD_W * 0.5 + Math.cos(angle) * WORLD_W * 0.44 * r;
-                    newFighter.y = WORLD_H * 0.56 + Math.sin(angle) * WORLD_H * 0.30 * r;
+                    newFighter.x = ISOMETRIC_ARENA.centerX + Math.cos(angle) * ISOMETRIC_ARENA.radiusX * r;
+                    newFighter.y = ISOMETRIC_ARENA.centerY + Math.sin(angle) * ISOMETRIC_ARENA.radiusY * r - newFighter.radius * 0.85;
                 } else {
                     newFighter.x = WORLD_W * (0.18 + Math.random() * 0.64);
                     newFighter.y = groundY - 60;
@@ -4154,6 +4258,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 f.smashDropTimer = 0;
                 f.aiJumpCooldown = 0;
                 f.jumpsLeft = 2;
+                f.doubleJumpCooldown = 0;
                 f.knockbackTimer = 0;
                 f.edgeRecoveryPending = false;
                 f.recoveryJumpUsed = false;
@@ -4415,6 +4520,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         // Safely transitions surviving fighters when the Arena morphs mid-fight (Iso -> Smash at 8 alive, Smash -> 1v1 at 2 alive)
         function triggerMidMatchModeTransition(fromMode, toMode, aliveFighters) {
+            keys.jumpPressed = false;
             playSound('transition');
             screenShake = 14;
             skyFlashTimer = 14;
@@ -4435,7 +4541,10 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 f.ringOutTimer = 0;
                 f.fallDrop = 0;
                 f.jumpsLeft = 2;
+                f.doubleJumpCooldown = 0;
                 f.recoveryJumpUsed = false;
+                f.extraRecoveryUsed = false;
+                f.edgeRecoveryPending = false;
                 f.onGround = false;
                 f.shieldTimer = Math.max(f.shieldTimer, 95); // Brief transition protection
                 f.shieldHP = Math.min(180, (f.shieldHP || 0) + 35);
@@ -4454,8 +4563,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     f.vx = 0;
                     f.vy = -6.2;
                 } else if (toMode === 'iso') {
-                    f.x = WORLD_W * (0.22 + Math.random() * 0.56);
-                    f.y = WORLD_H * (0.38 + (idx % 5) * 0.08);
+                    positionFighterOnIsometricArena(f, idx, aliveFighters.length);
                     f.vx = 0;
                     f.vy = 0;
                 }
@@ -4579,6 +4687,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         function canFighterAttack(attacker, target) {
             return !!(attacker && target && attacker.id !== target.id && !attacker.eliminated && !target.eliminated
+                && !(attacker.fallDrop > 0) && !(target.fallDrop > 0)
                 );
         }
 
@@ -4635,7 +4744,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         // Dramatic Skill Wind-up ("CARGANDO PODER...") before releasing attack
         function queueFighterSkillWindup(fighter, command, forceFree = false) {
-            if (!arenaClassPowersAllowed() || !fighter || fighter.eliminated) return false;
+            if (!arenaClassPowersAllowed() || !fighter || fighter.eliminated || fighter.fallDrop > 0) return false;
             const cmd = getMatchedSkillCommand(command);
             const requiredClass=SKILL_REQUIRED_CLASS[cmd];
             if(!requiredClass||fighter.archetypeKey!==requiredClass)return false;
@@ -4666,7 +4775,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         // MODULE BLOCK G: COMBAT ACTIONS + DAMAGE + K.O. (future js/combat.js).
         function executeFighterSkill(fighter, cmd) {
-            if (!arenaClassPowersAllowed() || !fighter || fighter.eliminated) return false;
+            if (!arenaClassPowersAllowed() || !fighter || fighter.eliminated || fighter.fallDrop > 0) return false;
             cmd = getMatchedSkillCommand(cmd);
             const requiredClass=SKILL_REQUIRED_CLASS[cmd];
             if(!requiredClass||fighter.archetypeKey!==requiredClass)return false;
@@ -5105,6 +5214,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 f.energy = Math.min(100, f.energy + (f.energyRegenerationTimer > 0 ? 0.32 : 0.065) * dt * arenaCombatRules.energyRegen);
                 f.radius = 17.5 * (f.berserkTimer > 0 ? 1.28 : 1) * Math.min(1.35, 1 + (f.coopCount - 1) * 0.06);
 
+                // Isometric charges still obey movement, gravity and the real floor edge.
+                if (activeMode === 'iso' && f.fallDrop > 0) f.castingSkill = null;
+                const castingAtStart = !!f.castingSkill;
                 // Process Skill Wind-up Charge if casting
                 if (f.castingSkill) {
                     f.vx *= 0.7;
@@ -5124,39 +5236,28 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                         try { executeFighterSkill(f, skillToFire); }
                         finally { f.activeSpecialFactor = 1; }
                     }
-                    return;
+                    if (activeMode !== 'iso') return;
                 }
 
                 // Auto-attack OFF means passive AI: no pursuit, jumps or offensive AI.
                 // Gravity, collision and received knockback ALWAYS continue.
                 const passiveSpectator = !autoAttackEnabled && !f.isStreamer;
-                const target = passiveSpectator ? null : findPreferredCombatTarget(f);
+                const target = passiveSpectator || (activeMode === 'iso' && (castingAtStart || f.fallDrop > 0)) ? null : findPreferredCombatTarget(f);
                 // Each spectator evaluates its own special once per tick. Casting
                 // requires energy, an eligible target, range and a real cooldown.
-                if (target && tryAutonomousFighterSpecial(f, target)) return;
+                if (target && tryAutonomousFighterSpecial(f, target) && activeMode !== 'iso') return;
 
                 const maxSpeed = (f.berserkTimer > 0 ? 2.65 : 1.95)
                     * getFighterMoveSpeedMultiplier(f);
 
                 // CASE A: ISOMETRIC 2.5D ARENA PHYSICS (9+ Players)
                 if (activeMode === 'iso') {
-                    // Falling fighters sink away for a short beat before the normal KO/re-entry flow runs.
-                    if (f.ringOutTimer > 0) {
-                        f.ringOutTimer -= dt;
-                        f.fallDrop = Math.min(115, f.fallDrop + 1.7 * dt);
-                        f.x += f.vx * dt * 0.35;
-                        f.y += f.vy * dt * 0.35;
-                        f.vx *= Math.pow(0.96, dt);
-                        f.vy *= Math.pow(0.96, dt);
-                        if (f.ringOutTimer <= 0) {
-                            f.ringOutTimer = 0;
-                            appendChatMessage('@ArenaSystem', f.platformKey,
-                                `💥 ${getFighterDisplayName(f)} cayó al abismo.`, 'normal');
-                            handleFighterKO(f, f.lastAttacker);
-                        }
-                        return;
+                    if (f.doubleJumpCooldown > 0) f.doubleJumpCooldown -= dt;
+                    if (f.isStreamer && streamerManualControl && keys.jumpPressed) {
+                        keys.jumpPressed = false;
+                        performIsometricJump(f, true);
                     }
-                    if (f.knockbackTimer > 0) {
+                    if (f.knockbackTimer > 0 || castingAtStart || f.castingSkill) {
                         // Respect the impulse before resuming pursuit or manual movement.
                     } else if (f.isStreamer && streamerManualControl) {
                         let mx = 0, my = 0;
@@ -5171,7 +5272,6 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             f.facing = mx >= 0 ? 1 : -1;
                             f.walkCycle += 0.16 * dt;
                         }
-                        if (keys.space && f.z <= 0) f.vz = 6.2;
                     } else if (f.isStreamer || passiveSpectator) {
                         // Passive spectator drifts to rest, but still flies when hit.
                         f.vx *= Math.pow(0.8, dt);
@@ -5201,71 +5301,22 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                         // Off-stage jumps use radial recovery rather than platform physics.
                     }
 
-                    // Recovery happens only AFTER 1.25 full jump ranges past the rim.
-                    // The vertical impulse is z-based in this mode, not y-based.
-                    if (!f.isStreamer && !passiveSpectator) tryIsometricSpectatorRecovery(f, W * 0.5, H * 0.56, W * 0.44, H * 0.30);
-
                     const launchDrag = f.knockbackTimer > 0 ? 0.94 : 0.84;
                     f.vx *= Math.pow(launchDrag, dt);
                     f.vy *= Math.pow(launchDrag, dt);
                     f.x += f.vx * dt;
                     f.y += f.vy * dt;
 
-                    if (f.z > 0 || f.vz !== 0) {
-                        f.z += f.vz * dt;
-                        f.vz -= 0.38 * dt;
-                        if (f.z <= 0) {
-                            f.z = 0;
-                            f.vz = 0;
-                        }
-                    }
-
-                    // The playable floor is an ellipse, matching the visible colosseum.
-                    // Knockback or an edge chase can carry a fighter off the rim; there is no invisible wall.
-                    const arenaCx = W * 0.5;
-                    const arenaCy = H * 0.56;
-                    const arenaRx = W * 0.44;
-                    const arenaRy = H * 0.30;
-                    const nx = (f.x - arenaCx) / arenaRx;
-                    const ny = (f.y - arenaCy) / arenaRy;
-                    const radiusFromCenter = Math.hypot(nx, ny);
-
-                    const rimDistance = Math.hypot(f.x - arenaCx, f.y - arenaCy)
-                        * Math.max(0, 1 - 1 / Math.max(0.001, radiusFromCenter));
-                    const launchGrace = !f.isStreamer && !passiveSpectator && !f.recoveryJumpUsed
-                        && (f.jumpsLeft > 0 || !f.extraRecoveryUsed)
-                        && rimDistance <= SPECTATOR_RECOVERY_DISTANCE + SPECTATOR_RECOVERY.isometricExtraFallMargin;
-                    const returningFromRescue = !f.isStreamer && f.recoveryJumpUsed && f.z > 0
-                        && rimDistance <= SPECTATOR_RECOVERY_DISTANCE + SPECTATOR_RECOVERY.isometricExtraFallMargin;
-                    if (radiusFromCenter > 1.015 && launchGrace && !returningFromRescue) {
-                        f.fallDrop = Math.min(54, rimDistance * 0.42);
-                    } else if (radiusFromCenter <= 1 && f.ringOutTimer <= 0) {
-                        f.fallDrop = 0;
-                    }
-                    if (radiusFromCenter > 1.015 && !launchGrace && !returningFromRescue) {
-                        // The circular floor has no invisible wall: off-rim fighters visibly
-                        // sink into the abyss before being eliminated, even without damage.
-                        f.ringOutTimer = 30;
-                        f.fallDrop = Math.max(f.fallDrop, 3);
+                    if (updateIsometricFloor(f, dt)) {
                         f.castingSkill = null;
-                        f.z = 0;
-                        f.vz = 0;
-                        f.knockbackTimer = 0;
-                        addActiveEffect({ type: 'ringOutPillar', x: Math.max(40, Math.min(W - 40, f.x)), y: f.y, color: f.color, timer: 32, maxTimer: 32 });
-                        screenShake = Math.max(screenShake, 9);
+                        addActiveEffect({type:'ringOutPillar', x:Math.max(40, Math.min(W - 40, f.x)), y:f.y, color:f.color, timer:32, maxTimer:32});
+                        appendChatMessage('@ArenaSystem', f.platformKey, `💥 ${getFighterDisplayName(f)} cayó al abismo.`, 'normal');
+                        handleFighterKO(f, f.lastAttacker);
                         return;
-                    } else if (radiusFromCenter <= 0.76 && f.z <= 0 && f.recoveryJumpUsed) {
-                        // A safe landing completes this single recovery attempt.
-                        f.recoveryJumpUsed = false;
-                        f.extraRecoveryUsed = false;
-                        f.edgeRecoveryPending = false;
-                        f.jumpsLeft = f.maxJumps;
-                    } else if (radiusFromCenter > 0.78) {
-                        // Gentle inward pull near the rim prevents accidental walk-offs but not strong hits.
-                        const edgePull = (radiusFromCenter - 0.78) * 0.22;
-                        f.vx -= (nx / Math.max(0.001, radiusFromCenter)) * edgePull * dt;
-                        f.vy -= (ny / Math.max(0.001, radiusFromCenter)) * edgePull * dt;
                     }
+                    if (!f.isStreamer && !passiveSpectator) tryIsometricSpectatorRecovery(f);
+                    // Sinking bodies cannot stand on, collide with or attack fighters on the floor.
+                    if (f.fallDrop > 0) return;
                 }
                 // CASE B: SMASH (8..3 Alive) & 1v1 (2 Alive) WITH STAGE EDGES & DOUBLE JUMP RECOVERY
                 else {
@@ -5414,7 +5465,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
                 // Soft Fighter-to-Fighter Separation
                 fighters.forEach(other => {
-                    if (other.id === f.id || other.eliminated) return;
+                    if (other.id === f.id || other.eliminated || other.fallDrop > 0) return;
                     const dx = f.x - other.x;
                     const dy = f.y - other.y;
                     const minSep = (f.radius + other.radius) * 0.9;
@@ -5519,12 +5570,13 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 || (fullscreenId !== 'card-16x9' && monitorFocus !== '16:9');
             // Both captures share one depth order from the same simulation snapshot.
             const orderedFighters = fighters.filter(f => !f.eliminated).sort((a, b) => a.y - b.y);
+            const shake = sampleArenaScreenShake();
             // 1. Render 16:9 Horizontal Broadcast Canvas (960x540)
             const zoom16 = (gameState === 'COMBAT' && activeMode === '1v1') ? 1.12 : 1.0;
-            if (draw16) renderWorldToViewport(ctx16, 960, 540, WORLD_W * 0.5, WORLD_H * 0.54, zoom16, orderedFighters);
+            if (draw16) renderWorldToViewport(ctx16, 960, 540, WORLD_W * 0.5, WORLD_H * 0.54, zoom16, orderedFighters, shake);
 
             // 2. Render 9:16 Vertical Mobile Broadcast Canvas (540x960) with Smart Camera
-            if (draw9) renderWorldToViewport(ctx9, 540, 960, camera9x16.x, camera9x16.y, camera9x16.zoom, orderedFighters);
+            if (draw9) renderWorldToViewport(ctx9, 540, 960, camera9x16.x, camera9x16.y, camera9x16.zoom, orderedFighters, shake);
 
             // 3. Synchronize 1v1 Top Health Bars on Both Screens when in 1v1 Combat
             if (gameState === 'COMBAT' && activeMode === '1v1') {
@@ -5567,10 +5619,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             // 3. Render Stage Geometry in World Coordinates
             if (activeMode === 'iso' && (gameState === 'COMBAT' || (gameState === 'LOBBY' && fighters.length >= 9))) {
                 // ISOMETRIC 2.5D COLOSSEUM FLOOR
-                const cx = W * 0.5;
-                const cy = H * 0.56;
-                const rx = W * 0.44;
-                const ry = H * 0.30;
+                const {centerX:cx, centerY:cy, radiusX:rx, radiusY:ry} = ISOMETRIC_ARENA;
 
                 targetCtx.save();
                 // Surrounding dark void and rim shadow make the drop readable on both crops.
@@ -5682,7 +5731,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         }
 
-        function renderWorldToViewport(targetCtx, viewW, viewH, camX, camY, camZoom, orderedFighters = null) {
+        function renderWorldToViewport(targetCtx, viewW, viewH, camX, camY, camZoom, orderedFighters = null, shake = sampleArenaScreenShake()) {
             targetCtx.save();
 
             // 1. Viewport Background Sky Gradient (Covers full 16:9 or 9:16 frame)
@@ -5713,11 +5762,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             }
 
             // 2. Apply Camera Transform (Pan, Zoom & Screen Shake)
-            if (screenShake > 0.4) {
-                const sx = (Math.random() - 0.5) * screenShake * 2;
-                const sy = (Math.random() - 0.5) * screenShake * 2;
-                targetCtx.translate(sx, sy);
-            }
+            if (shake.x || shake.y) targetCtx.translate(shake.x, shake.y);
 
             targetCtx.translate(viewW * 0.5, viewH * 0.56);
             targetCtx.scale(camZoom, camZoom);
@@ -5813,8 +5858,15 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         function drawFighterOnCtx(targetCtx, f) {
             targetCtx.save();
+            if (activeMode === 'iso' && f.fallDrop > 0) {
+                // The floor occludes bodies below it, including a failed return under the rim.
+                targetCtx.beginPath();
+                targetCtx.rect(-WORLD_W * 2, -WORLD_H * 2, WORLD_W * 5, WORLD_H * 5);
+                targetCtx.ellipse(ISOMETRIC_ARENA.centerX, ISOMETRIC_ARENA.centerY, ISOMETRIC_ARENA.radiusX, ISOMETRIC_ARENA.radiusY, 0, 0, Math.PI * 2);
+                targetCtx.clip('evenodd');
+            }
             const drawX = f.x;
-            const drawY = f.y - (f.z || 0) + (f.fallDrop || 0);
+            const drawY = f.y - Math.max(0, f.z || 0) + (f.fallDrop || 0);
             const r = f.radius;
             if (f.fallDrop > 0) targetCtx.globalAlpha = Math.max(0.18, 1 - f.fallDrop / 140);
 
@@ -5828,7 +5880,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 targetCtx.fill();
                 targetCtx.stroke();
                 targetCtx.restore();
-            } else if (f.fallDrop <= 0) {
+            } else if (f.fallDrop <= 0 && (activeMode !== 'iso' || !getIsometricArenaPosition(f).outside)) {
                 // A fighter falling off the isometric floor no longer casts a floor shadow.
                 targetCtx.fillStyle = 'rgba(0, 0, 0, 0.45)';
                 targetCtx.beginPath();
@@ -6390,7 +6442,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const protagonist = fighters.find(f => f.isStreamer && !f.eliminated);
             if (!protagonist) return;
             if (activeMode === 'iso') {
-                if (protagonist.z <= 0) protagonist.vz = 6.2;
+                performIsometricJump(protagonist, true);
                 return;
             }
             const isOffStage = protagonist.x < STAGE_LEFT + 6 || protagonist.x > STAGE_RIGHT - 6;
@@ -7600,6 +7652,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 if (savedLanguage && Object.prototype.hasOwnProperty.call(LANGUAGE_LABELS, savedLanguage)) preferredLanguage = savedLanguage;
             } catch (_e) { /* Continue with Spanish when storage is unavailable. */ }
             loadArenaCombatRules();
+            loadArenaCameraSettings();
             setLanguage(preferredLanguage);
             toggleAutoChat(false);
             installTouchControls();
@@ -7767,7 +7820,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.7';
+        const ARENA_RELEASE_VERSION = '0.8';
         const ARENA_RELEASE_EDITION = 'tiktok';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:10, footer:76});
@@ -8514,7 +8567,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.7.0',
+            version: '0.8.0',
             edition: 'tiktok',
             getBalanceRules() {
                 return ARENA_CLASS_BALANCE;
@@ -8533,6 +8586,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     maxFighters: getArenaPlayerLimit(),
                     hardMaxFighters: MAX_INDIVIDUAL_FIGHTERS,
                     combatRules: Object.freeze({...arenaCombatRules}),
+                    cameraShake: arenaScreenShake,
                     botRosterSize: BOT_ROSTER.length,
                     totalParticipants,
                     autoAudienceEnabled: autoChatEnabled,

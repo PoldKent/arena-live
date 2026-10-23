@@ -1,5 +1,16 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-23 — Arena Live v0.8 · Borde isométrico, caída y rescate
+
+- Coliseo aproximadamente un 7 % mayor en cada eje. Dibujo, puntos de apoyo bajo los pies, aparición y transiciones comparten una sola elipse.
+- Retirada la tolerancia que permitía caminar fuera del círculo. Fuera no hay suelo: comienza la caída y termina en K.O. si no se logra regresar.
+- Salto de rescate para Prota por teclado/táctil y para la IA, con cargas limitadas, límite de profundidad y aterrizaje real para recargarlas. Entrar por debajo de la arena no crea un apoyo invisible.
+- Las cargas de poderes isométricos ya no congelan movimiento ni gravedad, y se cancelan al hundirse. Los cuerpos bajo el suelo no golpean ni separan a los que siguen sobre él; el suelo los oculta.
+- Espacio actúa por pulsación y W mueve en el plano isométrico. Aterrizajes, reingresos y cambios de modo limpian las cargas y estados de recuperación correspondientes.
+- Vibración de cámara al 25 % de forma predeterminada, ajustable de 0 a 100 % en Pantallas y OBS y persistente. Ambas capturas usan el mismo movimiento y la vibración no consume azar del combate.
+- Conservados TikTok, comandos, potencias, paneles, proporciones de las capturas y calibración OBS. La nueva física puede cambiar los resultados en Arena; los informes de equilibrio anteriores conservan su versión histórica.
+- Versión 0.8/0.8.0 en Ajustes, API, servidor y paquete. Validación detallada en `docs/RELEASE-0.8-ARENA.md`.
+
 ## 2026-10-23 — Arena Live v0.7 · Comandos visibles de entradas y especiales
 
 - Entradas y reingresos reales vinculados a `!jugar`, nombre, clase e identidad del peleador en Chat de pruebas y comandos. Incluye inicio automático, escenarios silenciosos, botones rápidos, Prota y entradas por mensajes o elección de clase.

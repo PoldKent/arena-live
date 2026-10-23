@@ -1,0 +1,99 @@
+{
+  "release": "0.8.0",
+  "date": "2026-10-23",
+  "sourceGitBlob": "1c8ca3be88e64b52cfa4ba795182e894bcf6b9c3",
+  "previousSourceGitBlob": "a83565bc51792d633da670d98cb962df57cbe92e",
+  "node": {
+    "passed": 36,
+    "failed": 0
+  },
+  "browser": {
+    "passed": 49,
+    "errors": 0,
+    "completeFallCases": 40,
+    "manualAndAIRescues": 8
+  },
+  "performance": {
+    "passed": 11,
+    "errors": 0,
+    "report": "performance-v0.8.json",
+    "workload": "Constant-population timings disable knockback in both sources and suppress autonomous specials; subsequent stress checks restore full knockback and specials."
+  },
+  "geometry": {
+    "center": [
+      480,
+      302.4
+    ],
+    "radii": [
+      451.2,
+      172.8
+    ],
+    "oldRadii": [
+      422.4,
+      162
+    ],
+    "unitBoundaryDirections": 72,
+    "unitRescueDirections": 36,
+    "rescueDepth": 60,
+    "fatalDepth": 150
+  },
+  "camera": {
+    "defaultPercent": 25,
+    "rangePercent": [
+      0,
+      100
+    ],
+    "persistedSeparately": true,
+    "sharedOffsetForBothCaptures": true,
+    "cameraMotionConsumesCombatRandomness": false
+  },
+  "combatRegression": {
+    "matches": 240,
+    "duelsExactlyReproduced": 160,
+    "multiplayerMatches": 80,
+    "multiplayerFullResultsChanged": 60,
+    "multiplayerWinnersChanged": 49,
+    "timeouts": 0,
+    "fallEliminations": 2274,
+    "unchangedPowerProfile": true,
+    "seedRanges": {
+      "duels": [
+        1000,
+        1001
+      ],
+      "smash": [
+        1000,
+        1003
+      ],
+      "arenas": [
+        2000,
+        2003
+      ]
+    },
+    "playerCounts": [
+      2,
+      5,
+      10,
+      25,
+      125
+    ],
+    "interpretation": "Direct duels reproduce the previous complete results. Multiplayer results may change because the isometric floor, gravity, spawning, rescue and transition resets were corrected. This sample validates execution, determinism and finite matches; it is not a new statistical balance certification."
+  },
+  "verified": [
+    "actual foot boundary equals the drawn floor",
+    "no unsupported walking or under-floor landing",
+    "limited rescue and late/exhausted rescue refusal",
+    "40 lethal falls across all classes, Prota and four sides",
+    "one kill credit and existing re-entry flow",
+    "charging obeys gravity and cancels below the plane",
+    "Space held does not chain jumps; W stays planar",
+    "below-floor occlusion and separation",
+    "Arena to Smash and back transition state cleanup",
+    "TikTok routing, command records, panel persistence, OBS and mobile regressions"
+  ],
+  "limitations": [
+    "TikTok was simulated, not connected to a real LIVE.",
+    "Headless Chromium timings use software rendering and are not user-machine or OBS FPS.",
+    "Historical v0.6/v0.7 arena win rates do not describe the corrected v0.8 physics."
+  ]
+}

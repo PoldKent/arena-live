@@ -1,4 +1,4 @@
-// Browser regressions for the unified v0.7 release. Never connects to a real TikTok LIVE.
+// Browser regressions for the unified v0.8 release. Never connects to a real TikTok LIVE.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -43,8 +43,8 @@ const shot=async name=>{if(process.env.ARENA_TEST_SCREENSHOTS){await mkdir(proce
 async function unfold(id){const panel=page.locator('#'+id);if(!await panel.evaluate(n=>n.open))await panel.locator('> summary').click({noWaitAfter:true});}
 async function settingsSection(index){const section=page.locator('.arena-settings-section').nth(index);if(!await section.evaluate(n=>n.open))await section.locator('> summary').click({noWaitAfter:true});}
 async function streamClick(id){await page.mouse.move(600,20);await page.locator('#'+id).click({noWaitAfter:true});}
-await check('v0.7 starts with large game, left chat and only the social test group expanded',async()=>{
- assert.equal(await page.evaluate(()=>ArenaLive.version),'0.7.0');
+await check('v0.8 starts with large game, left chat and only the social test group expanded',async()=>{
+ assert.equal(await page.evaluate(()=>ArenaLive.version),'0.8.0');
  const panels=await page.locator('.arena-work-panel').evaluateAll(ns=>ns.map(n=>({id:n.id,open:n.open,parent:n.parentElement.id})));
  assert.equal(panels.find(n=>n.id==='arenaPanelChat').parent,'arenaDockLeft');
  assert.deepEqual(panels.filter(n=>n.open&&n.id!=='arenaPanelChat').map(n=>n.id),['arenaPanelSocial']);
@@ -274,6 +274,19 @@ await check('Resetting the current layout preserves OBS calibration and the othe
  assert.equal((await state()).settingsOpen,true);assert.equal((await state()).paused,true);assert.equal(await page.evaluate(()=>arenaWorkspace.layouts.preparation.leftWidth),260);assert.equal(await page.evaluate(()=>arenaWorkspace.layouts.stream.leftWidth),320);assert.equal(await page.evaluate(()=>arenaObsCalibration.offset),8);
  assert.deepEqual(await page.locator('.arena-work-panel[open]').evaluateAll(ns=>ns.map(n=>n.id).sort()),['arenaPanelChat','arenaPanelSocial']);await page.keyboard.press('Escape');
 });
+await check('Camera shake defaults to 25%, can be disabled in Settings, persists independently and leaves captures unchanged',async()=>{
+ assert.equal((await state()).cameraShake,25);
+ await page.locator('#arenaDualSettingsBtn').click();await settingsSection(2);
+ const calibration=await page.evaluate(()=>JSON.stringify(arenaObsCalibration)),before=await rects();
+ assert.equal(await page.locator('#arenaShakeLabel').innerText(),'Vibración de cámara');
+ assert.match(await page.locator('#arenaShakeRange').getAttribute('title'),/golpes ni el empuje/);
+ await page.locator('#arenaShakeRange').evaluate(n=>{n.value='0';n.dispatchEvent(new Event('input',{bubbles:true}));});
+ assert.equal(await page.locator('#arenaShakeValue').innerText(),'0 %');assert.equal((await state()).paused,true);assert.equal((await state()).settingsOpen,true);
+ assert.deepEqual(await rects(),before);assert.equal(await page.evaluate(()=>JSON.stringify(arenaObsCalibration)),calibration);
+ await page.keyboard.press('Escape');await page.reload({waitUntil:'load'});await page.waitForFunction(()=>arenaLiveInitialized);
+ assert.equal((await state()).cameraShake,0);assert.equal(await page.evaluate(()=>JSON.stringify(arenaObsCalibration)),calibration);
+ await page.evaluate(()=>{setArenaScreenShake(25);countdownsEnabled=false;});
+});
 await check('Mobile prioritizes 9:16, exposes only the bottom action bar and preserves all tools in Menu',async()=>{
  await page.setViewportSize({width:390,height:844});const cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:5});await page.reload({waitUntil:'load'});await page.waitForFunction(()=>arenaLiveInitialized);await page.evaluate(()=>countdownsEnabled=false);
  assert.equal(await page.evaluate(()=>monitorFocus),'9:16');assert.equal(await page.locator('#arenaDockRight').isHidden(),true);assert.equal(await page.locator('#arenaHeaderActions').evaluate(n=>n.getBoundingClientRect().bottom),844);assert.equal(await page.locator('#arenaMobileMoreBtn').isVisible(),true);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
@@ -290,10 +303,10 @@ await check('Mobile special action follows the no-powers rule while movement and
  await page.locator('#arenaPowerMode').selectOption('noSpecials');await page.keyboard.press('Escape');assert.equal(await page.locator('#arenaMobilePower').isDisabled(),true);assert.equal(await page.locator('#arenaMobileAttack').isEnabled(),true);assert.equal(await page.locator('#arenaMobileJump').isEnabled(),true);
 });
  await check('Unified release uses native clock, randomness, animation and the TikTok bridge',async()=>{
-  const status=await (await page.request.get(`http://127.0.0.1:${port}/api/status`)).json();assert.equal(status.version,'0.7.0');
+  const status=await (await page.request.get(`http://127.0.0.1:${port}/api/status`)).json();assert.equal(status.version,'0.8.0');
   const native=await page.evaluate(()=>({clock:Date.now.toString().includes('[native code]'),random:Math.random.toString().includes('[native code]'),raf:requestAnimationFrame.toString().includes('[native code]'),harness:typeof window.ArenaBalanceHarness}));
   assert.deepEqual(native,{clock:true,random:true,raf:true,harness:'undefined'});
-  assert.match(await page.locator('#arenaSettingsVersion').textContent(),/v0\.7/);
+  assert.match(await page.locator('#arenaSettingsVersion').textContent(),/v0\.8/);
   assert.equal(await page.evaluate(()=>Object.isFrozen(ArenaLive.getBalanceRules())&&Object.isFrozen(ArenaLive.getBalanceRules().iso.ninja)),true);
  });
  await check('Playable powers apply the measured damage, windup and target caps in all three modes',async()=>{
@@ -414,5 +427,102 @@ await check('Direct localized aliases execute and show accepted commands; fighte
  });
  assert.deepEqual(result,{command:'!coloso',logged:'!coloso',localized:true,safe:true,damage:38});
 });
-assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:'0.7.0'}));
+const prepareIso=()=>page.evaluate(()=>{
+ arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};gameState='LOBBY';koSequenceActive=false;isGamePaused=true;
+ gamePace=1;slowMoFactor=1;autoAttackEnabled=false;autoChatEnabled=false;soundEnabled=false;countdownsEnabled=false;streamerManualControl=true;
+ Object.keys(keys).forEach(k=>keys[k]=false);applyPlayerCountPreset(10);startCombatFromLobby();
+ fighters.forEach(f=>{f.attackCooldown=100000;f.aiSpecialCooldown=100000;});
+});
+await check('The larger drawn ellipse, feet boundary, all 128 spawn points and both camera shake offsets agree',async()=>{
+ await prepareIso();
+ const result=await page.evaluate(()=>{
+  const canvas=document.createElement('canvas');canvas.width=960;canvas.height=540;const ctx=canvas.getContext('2d'),ellipses=[],ellipse=ctx.ellipse.bind(ctx);
+  ctx.ellipse=(...args)=>{ellipses.push(args.slice(0,4));return ellipse(...args);};paintArenaStageGeometry(ctx);
+  gameState='LOBBY';applyPlayerCountPreset(128);const spawns=fighters.every(f=>getIsometricArenaPosition(f).radius<=.821);
+  const render=renderWorldToViewport,offsets=[];renderWorldToViewport=(...args)=>offsets.push(args[7]);
+  const focus=monitorFocus;monitorFocus='dual';isGamePaused=false;screenShake=14;
+  try{renderBothScreensSimultaneously();}finally{renderWorldToViewport=render;monitorFocus=focus;isGamePaused=true;}
+  return {floor:ellipses[1],expected:[ISOMETRIC_ARENA.centerX,ISOMETRIC_ARENA.centerY,ISOMETRIC_ARENA.radiusX,ISOMETRIC_ARENA.radiusY],spawns,sameOffset:offsets.length===2&&offsets[0]===offsets[1],larger:ISOMETRIC_ARENA.radiusX>960*.44&&ISOMETRIC_ARENA.radiusY>540*.30};
+ });
+ assert.deepEqual(result.floor,result.expected);assert.equal(result.spawns,true);assert.equal(result.sameOffset,true);assert.equal(result.larger,true);
+});
+await check('All classes and Prota fall outside the exact ellipse, die once, credit the launcher and consume the normal life flow',async()=>{
+ await prepareIso();
+ const rows=await page.evaluate(()=>{
+  const rows=[];
+  for(const key of ['kame','ninja','titan','trueno','esmeralda'])for(const prota of [false,true])for(const angle of [0,Math.PI/2,Math.PI,Math.PI*1.5]){
+   gameState='LOBBY';applyPlayerCountPreset(10);startCombatFromLobby();autoAttackEnabled=false;streamerManualControl=false;gamePace=[.75,1,1.25][rows.length%3];slowMoFactor=1;isGamePaused=false;
+   const victim=fighters[0],launcher=fighters[1];applyFighterArchetype(victim,key);victim.isStreamer=prota;
+   victim.x=ISOMETRIC_ARENA.centerX+Math.cos(angle)*ISOMETRIC_ARENA.radiusX*1.001;
+   victim.y=ISOMETRIC_ARENA.centerY+Math.sin(angle)*ISOMETRIC_ARENA.radiusY*1.001-victim.radius*.85;
+   victim.lastAttacker=launcher;let ticks=0;
+   while(!victim.eliminated&&ticks++<200)updatePhysicsAndAI();
+   rows.push({key,prota,dead:victim.eliminated&&victim.hp===0,once:eliminationOrder.filter(f=>f.id===victim.id).length===1,credit:launcher.kills===1,finite:ticks<200});
+  }isGamePaused=true;gamePace=1;return rows;
+ });
+ assert.equal(rows.length,40);for(const row of rows)for(const field of ['dead','once','credit','finite'])assert.equal(row[field],true,row.key+'/'+row.prota+'/'+field);
+});
+await check('Prota can jump back from a real fall and AI gets one automatic rescue at every side instead of invisible ground',async()=>{
+ const results=[];
+ for(const prota of [true,false])for(const angle of [0,Math.PI/2,Math.PI,Math.PI*1.5]){
+  await prepareIso();
+  results.push(await page.evaluate(({prota,angle})=>{
+   const f=fighters[0];f.isStreamer=prota;f.x=ISOMETRIC_ARENA.centerX+Math.cos(angle)*ISOMETRIC_ARENA.radiusX*1.02;f.y=ISOMETRIC_ARENA.centerY+Math.sin(angle)*ISOMETRIC_ARENA.radiusY*1.02-f.radius*.85;
+   isGamePaused=false;autoAttackEnabled=false;
+   for(let i=0;i<8;i++)updatePhysicsAndAI();
+   const sinking=f.fallDrop>0&&f.z<0&&!f.onGround;
+   if(prota)triggerManualJump();else{autoAttackEnabled=true;updatePhysicsAndAI();}
+   const attempted=f.recoveryJumpUsed&&f.jumpsLeft===0&&f.vz>0;
+   let landed=false;for(let i=0;i<100&&!f.eliminated;i++){updatePhysicsAndAI();if(f.onGround&&f.fallDrop===0){landed=true;break;}}
+   isGamePaused=true;return {sinking,attempted,landed,alive:!f.eliminated,charges:f.jumpsLeft,falling:f.fallDrop,clock:f.ringOutTimer};
+  },{prota,angle}));
+ }
+ for(const row of results)assert.deepEqual(row,{sinking:true,attempted:true,landed:true,alive:true,charges:2,falling:0,clock:0});
+});
+await check('Holding Space cannot produce repeated jumps in isometric mode, and W moves without jumping',async()=>{
+ await prepareIso();await page.evaluate(()=>{
+  const f=fighters[0];f.isStreamer=true;f.x=ISOMETRIC_ARENA.centerX;f.y=ISOMETRIC_ARENA.centerY-f.radius*.85;isGamePaused=false;document.activeElement?.blur();
+ });
+ await page.keyboard.down('w');
+ const move=await page.evaluate(()=>{for(let i=0;i<10;i++)updatePhysicsAndAI();return {z:fighters[0].z,jumps:fighters[0].jumpsLeft};});
+ await page.keyboard.up('w');assert.deepEqual(move,{z:0,jumps:2});
+ await page.keyboard.down('Space');
+ const jump=await page.evaluate(()=>{for(let i=0;i<5;i++)updatePhysicsAndAI();return fighters[0].z;});assert.ok(jump>0);
+ const held=await page.evaluate(()=>{for(let i=0;i<75;i++)updatePhysicsAndAI();return {z:fighters[0].z,jumps:fighters[0].jumpsLeft,held:keys.space};});
+ await page.keyboard.up('Space');await page.evaluate(()=>isGamePaused=true);assert.deepEqual(held,{z:0,jumps:2,held:true});
+});
+await check('An off-rim charge obeys gravity, cancels in the abyss and cannot freeze the fighter outside',async()=>{
+ await prepareIso();
+ const result=await page.evaluate(()=>{
+  const f=fighters[0];applyFighterArchetype(f,'kame');f.x=ISOMETRIC_ARENA.centerX+ISOMETRIC_ARENA.radiusX*1.02;f.y=ISOMETRIC_ARENA.centerY-f.radius*.85;
+  f.castingSkill={cmd:'!kame',timer:1000,maxTimer:1000,powerFactor:1};document.getElementById('chatFeed').replaceChildren();
+  isGamePaused=false;for(let i=0;i<100&&!f.eliminated;i++)updatePhysicsAndAI();isGamePaused=true;
+  return {dead:f.eliminated,casting:f.castingSkill,executions:document.querySelectorAll('#chatFeed>[data-chat-event="special"]').length};
+ });assert.deepEqual(result,{dead:true,casting:null,executions:0});
+});
+await check('The floor hides fighters underneath it while visible falling bodies remain outside the rim',async()=>{
+ await prepareIso();
+ const result=await page.evaluate(()=>{
+  const canvas=document.createElement('canvas');canvas.width=960;canvas.height=540;const ctx=canvas.getContext('2d');
+  const f=fighters[0];f.x=ISOMETRIC_ARENA.centerX;f.y=ISOMETRIC_ARENA.centerY-f.radius*.85;f.z=-15;f.fallDrop=15;
+  const visible=()=>ctx.getImageData(0,0,960,540).data.some((value,index)=>index%4===3&&value>0);
+  drawFighterOnCtx(ctx,f);const hidden=!visible();ctx.clearRect(0,0,960,540);
+  f.x=ISOMETRIC_ARENA.centerX+ISOMETRIC_ARENA.radiusX+15;drawFighterOnCtx(ctx,f);
+  return {hidden,visibleFall:visible()};
+ });assert.deepEqual(result,{hidden:true,visibleFall:true});
+});
+await check('A ring-out at nine survivors switches to Smash and a new arrival returns everyone safely to the shared isometric floor',async()=>{
+ await prepareIso();
+ const result=await page.evaluate(()=>{
+  gameState='LOBBY';applyPlayerCountPreset(9);startCombatFromLobby();autoAttackEnabled=false;isGamePaused=false;
+  const f=fighters[0];f.x=ISOMETRIC_ARENA.centerX+ISOMETRIC_ARENA.radiusX*1.02;f.y=ISOMETRIC_ARENA.centerY-f.radius*.85;
+  for(let i=0;i<100&&!f.eliminated;i++)updatePhysicsAndAI();
+  const smash=activeMode==='smash'&&fighters.filter(f=>!f.eliminated).length===8;
+  const clean=fighters.filter(f=>!f.eliminated).every(f=>f.fallDrop===0&&f.ringOutTimer===0&&!f.recoveryJumpUsed&&!f.extraRecoveryUsed&&!f.edgeRecoveryPending);
+  addOrBoostFighter('@iso_transition_arrival','tiktok',false,'ninja',true);
+  const returned=activeMode==='iso'&&fighters.filter(f=>!f.eliminated).every(f=>!getIsometricArenaPosition(f).outside);
+  isGamePaused=true;return {smash,clean,returned};
+ });assert.deepEqual(result,{smash:true,clean:true,returned:true});
+});
+assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:'0.8.0'}));
 } finally {await browser?.close();server.kill('SIGKILL');}

@@ -1,16 +1,16 @@
-# Arena Live · v0.7
+# Arena Live · v0.8
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
 ## Versión principal
 
-`main` contiene TikTok LIVE, el equilibrio por modo y el registro de comandos de las acciones reales del juego. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. Ajustes, la API del juego, el servidor y el paquete identifican la versión 0.7. [Cambios y validación](docs/RELEASE-0.7-COMANDOS.md).
+`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. Ajustes, la API del juego, el servidor y el paquete identifican la versión 0.8. [Cambios y validación](docs/RELEASE-0.8-ARENA.md).
 
 ## Rendimiento con 128 jugadores
 
 La selección de rivales usa un recorrido lineal por luchador y las colisiones descartan cuerpos lejanos antes de calcular distancias. Ambas capturas comparten el orden de dibujo, las medidas de los nombres se reutilizan y el HUD solo cambia los valores que variaron. Los escenarios actualizan sus controles una vez al completar la lista; los chats agrupan scroll y contadores por cuadro.
 
-Se mantiene el cupo de 128, todos los poderes, los efectos y las dos vistas sincronizadas. [Mediciones de v0.6](docs/performance-v0.6.json). Las cifras de este entorno no sustituyen una prueba en tu equipo con OBS.
+Se mantiene el cupo de 128, todos los poderes, los efectos y las dos vistas sincronizadas. [Mediciones de v0.8](docs/performance-v0.8.json). Las cifras de este entorno no sustituyen una prueba en tu equipo con OBS.
 
 ## Instalar y arrancar en Windows
 
@@ -25,7 +25,7 @@ npm.cmd start
 
 Abre **http://127.0.0.1:4173/** y conserva abierta la consola. TikTok comienza desconectado; **📡 TikTok** conecta o desconecta según el estado real del puente.
 
-Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd install` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.7** en Ajustes.
+Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd install` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.8** en Ajustes.
 
 Para volver a `main` desde una rama anterior:
 
@@ -63,6 +63,8 @@ La barra horizontal empieza por **Vista, Pantalla, Pruebas y Ajustes**. Incluye 
 **Ajustes siempre pausa al abrir y reanuda al cerrar**, incluso si habías pausado manualmente. Sus opciones están en secciones plegables del mismo menú. Los cambios se aplican inmediatamente y el menú permanece abierto tanto en Inicio/Pruebas como en Stream. Cerrar Ajustes con ×, Continuar o Esc reanuda el juego.
 
 **Opacidad de la información del juego** afecta a textos y barras de ambas vistas; **100 % = totalmente visible**. Tiene una explicación visible y ayuda al pasar el cursor.
+
+**Vibración de cámara**, en **Ajustes → Pantallas y OBS**, comienza al **25 %** y admite **0–100 %**; **0 %** la apaga. Afecta a ambas vistas y se recuerda en este navegador. Conserva el daño, el empuje, las reglas y la calibración de OBS.
 
 ## Reglas y parámetros de pelea
 
@@ -111,11 +113,19 @@ En móvil se prioriza 9:16 y una barra inferior con **Prota, Pausa, Saltar, Golp
 
 En escritorio: **WASD** mueve a Prota, **Espacio** salta, **E** golpea y **R** activa su especial. **Esc / P** abre o cierra Pausa/Ajustes cuando no estás escribiendo. Esc cierra primero el panel abierto y conserva Stream o la captura individual en pantalla completa.
 
+## Arena isométrica, salto y caída
+
+La arena es aproximadamente un 7 % mayor en ambos ejes. Su borde visible es también el límite del suelo, calculado bajo los pies del peleador. Fuera empieza la caída: ya no hay una franja invisible donde seguir caminando. Si no consigue regresar al suelo, el peleador queda eliminado y se aplican las reglas de vidas y reingreso habituales.
+
+Prota puede intentar salvarse con **Espacio** o **↑ Saltar** mientras no haya caído demasiado. Tiene un salto desde el suelo y un salto aéreo; al salir caminando solo conserva el aéreo. El rescate dirige el impulso hacia la arena. Debe volver por encima del borde y aterrizar: pasar por debajo del suelo no lo salva. La IA intenta un rescate con las mismas cargas y límites; un golpe fuerte puede alejarla demasiado para regresar. Las cargas se recuperan al aterrizar y al preparar una nueva partida.
+
+En este modo **WASD** mueve en el plano, y mantener Espacio pulsado no encadena saltos. Cargar un poder sigue respetando la gravedad y se cancela al hundirse bajo el suelo. El círculo, sus posiciones iniciales, los cambios de modo y el rescate usan la misma geometría en ambas capturas.
+
 ## Equilibrio de clases
 
 Todas las clases eligen al rival cercano. Daño, carga y objetivos de los poderes se definen en `ARENA_CLASS_BALANCE` dentro de `index.html`, compartido por IA, Prota, chat y herramientas. En Arena, Kame y Coloso alcanzan hasta tres objetivos; Trueno alcanza tres en Arena y dos en Smash. Shinobi y Espíritu cargan antes en partidas con varios jugadores.
 
-La integración reproduce 33.000 casos del candidato: 16.000 duelos con poderes, 16.000 controles y 1.000 partidas con varios jugadores. [Resultados actuales e intervalos](docs/balance-v0.6-summary.json). El [diagnóstico v0.5](docs/BALANCE-CLASES-v0.5.md) se conserva como antecedente histórico.
+La integración de v0.6 reprodujo 33.000 casos del candidato: 16.000 duelos con poderes, 16.000 controles y 1.000 partidas con varios jugadores. [Resultados de esa geometría e intervalos](docs/balance-v0.6-summary.json). v0.8 conserva esas potencias, pero corrige el suelo, las caídas y las cargas en movimiento de Arena: sus resultados con varios jugadores pueden cambiar y las tasas históricas no deben atribuirse a la arena actual. El [diagnóstico v0.5](docs/BALANCE-CLASES-v0.5.md) también se conserva como antecedente.
 
 `npm.cmd run analyze:balance` evalúa la versión actual con 4.800 casos y genera `reports/balance/latest.json`, `latest-summary.json` y `latest-matches.csv.gz`. Requiere Chromium de Playwright. `ARENA_BALANCE_PILOT=1` reduce la muestra para comprobar el recorrido; `ARENA_BALANCE_DUEL_SEEDS`, `ARENA_BALANCE_ARENA_SEEDS`, `ARENA_BALANCE_SEED_START`, `ARENA_BALANCE_COUNTS` y `ARENA_BALANCE_OUTPUT` permiten ampliar o guardar otra muestra. El analizador sirve el mismo juego publicado y no conecta con un LIVE.
 
@@ -132,6 +142,7 @@ npm.cmd run test:performance
 
 Las pruebas del navegador arrancan y cierran su servidor local y simulan las respuestas de TikTok. Cubren paneles, persistencia, escenarios, chats, pausa, capturas, idiomas y controles móviles; no conectan con una emisión real.
 
+- [Arena ampliada, caída, rescate y vibración de v0.8](docs/RELEASE-0.8-ARENA.md).
 - [Comandos visibles de entradas y especiales en v0.7](docs/RELEASE-0.7-COMANDOS.md).
 - [Integración del equilibrio en v0.6](docs/RELEASE-0.6-UNIFICADA.md).
 - [Rendimiento y depuración de v0.5](docs/RELEASE-0.5-RENDIMIENTO.md).
@@ -142,4 +153,4 @@ Las pruebas del navegador arrancan y cierran su servidor local y simulan las res
 - [Registro de cambios](CHANGELOG.md).
 - Historial: [v0.2](docs/RELEASE-0.2-OPERADOR.md), [v0.1](docs/RELEASE-0.1-OBS.md).
 
-El desarrollo y las actualizaciones continúan en `main`. Las versiones anteriores y la prueba separada quedan en el historial de Git; la entrega vigente es Arena Live v0.7 con TikTok, interfaz, reglas, equilibrio y comandos de acciones integrados.
+El desarrollo y las actualizaciones continúan en `main`. La entrega vigente es Arena Live v0.8, con TikTok, interfaz, reglas, potencias por modo, comandos y caída isométrica integrados. Las entregas anteriores quedan como historial.
