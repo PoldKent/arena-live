@@ -1,0 +1,89 @@
+{
+  "release": "0.13.0",
+  "date": "2026-10-24",
+  "sourceGitBlob": "2afcd3a017ca902e11847d6fa3e76aef9d86a650",
+  "previousSourceGitBlob": "4af3c4a86c59c88a82803f8ac7eac56641635dc9",
+  "node": {
+    "passed": 52,
+    "failed": 0
+  },
+  "browser": {
+    "passed": 64,
+    "errors": 0,
+    "locales": [
+      "es",
+      "en",
+      "fr",
+      "de",
+      "zh",
+      "ja",
+      "pt",
+      "it"
+    ],
+    "coverage": [
+      "five class axes and two HP polygons",
+      "actual basic and special damage encoded in polygon radius for 75 class/rival/mode combinations",
+      "zero damage for blocked specials and excluded classes",
+      "common mode scale",
+      "native keyboard class selection and retained focus",
+      "labels inside SVG and exact power values in narrow columns",
+      "read-only inspection without combat RNG",
+      "single Settings footer release and stable OBS rectangles"
+    ],
+    "viewports": [
+      "1366x900 desktop",
+      "320x800 mobile",
+      "1720x900 Stream with 180px tool column"
+    ]
+  },
+  "performance": {
+    "passed": 12,
+    "errors": 0,
+    "report": "performance-v0.13.json",
+    "conditions": {
+      "node": "v24.22.1",
+      "browser": "153.0.8010.0",
+      "gpu": "disabled; software raster and readback included",
+      "viewport": "1720x720",
+      "simulationHz": 60,
+      "workload": "Constant-population timings disable knockback in both sources and suppress autonomous specials; subsequent stress checks restore full knockback and specials."
+    }
+  },
+  "radar": {
+    "axes": [
+      "kame",
+      "ninja",
+      "titan",
+      "trueno",
+      "esmeralda"
+    ],
+    "series": [
+      "basic",
+      "special"
+    ],
+    "unit": "HP per target",
+    "nominalMax": 70,
+    "referenceRings": [
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "compactAxes": "Numbers 1-5 map to the native class/value buttons below the chart.",
+    "selection": "Highlights selected axis and both data points; preserves existing per-mode detail."
+  },
+  "unchangedEngine": {
+    "equal": true,
+    "normalizedSha256": "191d43dc0f718621dbddc387c76525481cac9f65fed5548949e343c09eef25a7",
+    "method": "Compare all nonempty lines of the inline engine after excluding inspector rendering/localization functions, new inspector resize state and release labels.",
+    "priorBalanceReport": "balance-v0.12-summary.json",
+    "newBalanceSimulationRun": false
+  },
+  "limitations": [
+    "HP comparison is per target at full energy, without critical hits, shields or audience support.",
+    "The radar is a read-only inspector; it does not edit per-class attack parameters.",
+    "Changing the chart does not alter class win rates or complete the remaining balance work.",
+    "TikTok tests are simulated, with no real LIVE connection.",
+    "Software-raster timings are not user-PC or OBS FPS."
+  ]
+}

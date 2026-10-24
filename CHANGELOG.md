@@ -1,5 +1,12 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-24 — Arena Live v0.13 · Radar pentagonal de equilibrio
+
+- El inspector de equilibrio sustituye las barras por un radar pentagonal: un eje por clase, dos polígonos en HP para daño básico (discontinuo) y especial (continuo), anillos de referencia y escala compartida entre modos.
+- Conservados los selectores de modo, perfil y rival; botones con valores exactos, clase, poder y afinidad; selección con foco de teclado y detalle por modo. Los puntos representan los mismos daños que ejecuta el motor.
+- Etiquetas completas en escritorio y ejes numerados vinculados a la lista en columnas estrechas. Ajuste al ancho con un solo observador, ocho idiomas, descripción accesible y polígonos válidos con poderes bloqueados o clases restringidas.
+- La actualización cambia la presentación del inspector. Combate, prioridades, cadena A, potencias, TikTok, capturas y calibración OBS conservan su código; versión 0.13/0.13.0 en pie de Ajustes, API, servidor y paquete.
+
 ## 2026-10-24 — Arena Live v0.12 · Cercanía de los Shinobi
 
 - Shinobi enfrenta al rival cercano y prefiere otra clase solo hasta un 15 % más lejos, dentro del alcance de cada acción. La misma regla sirve para persecución, golpes y Rasen; los compañeros pueden dañarse y disputar la final.

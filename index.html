@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.12 — TikTok LIVE</title>
+    <title>Arena Live v0.13 — TikTok LIVE</title>
     <!--
       ARENA LIVE · MONOLITHIC DELIVERY
       All application code intentionally stays in this HTML file.
@@ -766,16 +766,30 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 .arena-balance-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
 .arena-balance-controls label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#cbd5e1}
 .arena-balance-controls select{min-width:0;width:100%;padding:7px;border:1px solid #475569;border-radius:6px;background:#0b1422;color:#e2e8f0;font-size:12px}
-.arena-balance-chart{display:grid;gap:6px}
-.arena-balance-row{display:block;width:100%;text-align:left;background:#0c1624;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:8px}
+.arena-balance-chart{display:grid;gap:8px;min-width:0}
+.arena-balance-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 16px;font-size:11px;color:#e2e8f0}
+.arena-balance-legend>span{display:flex;align-items:center;gap:6px}
+.arena-balance-swatch{width:22px;border-top:2px dashed #cbd5e1}
+.arena-balance-swatch.is-special{border-top:2px solid #22d3ee}
+.arena-balance-radar{display:block;width:100%;max-width:360px;margin-inline:auto;overflow:visible}
+.arena-radar-grid{fill:none;stroke:#475569;stroke-width:1}
+.arena-radar-axis{stroke:#475569;stroke-width:1}
+.arena-radar-axis.is-selected{stroke:#94a3b8;stroke-width:1.5}
+.arena-balance-radar text{font:500 11px Inter,system-ui,sans-serif;fill:#e2e8f0}
+.arena-balance-radar .arena-radar-tick{font-weight:400;fill:#94a3b8}
+.arena-radar-special{fill:#22d3ee;fill-opacity:.12;stroke:#22d3ee;stroke-width:2;stroke-linejoin:round}
+.arena-radar-basic{fill:#cbd5e1;fill-opacity:.07;stroke:#cbd5e1;stroke-width:2;stroke-dasharray:5 3;stroke-linejoin:round}
+.arena-radar-point{stroke:#0c1624;stroke-width:1.5}
+.arena-radar-point.is-selected{stroke:#f8fafc;stroke-width:2}
+.arena-balance-table-head,.arena-balance-row{display:grid;grid-template-columns:minmax(0,1fr) 44px 44px;align-items:center;gap:5px;min-width:0;padding:7px}
+.arena-balance-table-head{font-size:11px;color:#cbd5e1;overflow-wrap:anywhere}
+.arena-balance-table-head>span:not(:first-child){text-align:right}
+.arena-balance-row{width:100%;text-align:left;background:#0c1624;color:#e2e8f0;border:1px solid #334155;border-radius:6px}
 .arena-balance-row[aria-pressed="true"]{border-color:#22d3ee;background:#122735}
-.arena-balance-row .arena-balance-name{display:flex;justify-content:space-between;gap:6px;font-size:12px;margin-bottom:5px}
-.arena-balance-row code{font-size:11px;color:#94dbea}
-.arena-balance-line{display:grid;grid-template-columns:48px minmax(0,1fr) 36px;align-items:center;gap:5px;font-size:11px;margin-top:3px}
-.arena-balance-track{display:block;height:7px;background:#243141;border-radius:3px;overflow:hidden}
-.arena-balance-track>span{display:block;height:100%;background:#94a3b8}
-.arena-balance-track>.is-special{background:#22d3ee}
-.arena-balance-line output{text-align:right;font-variant-numeric:tabular-nums}
+.arena-balance-name{display:grid;gap:2px;min-width:0;font-size:11px;overflow-wrap:anywhere}
+.arena-balance-name small{font-size:11px;color:#a9b9ca}
+.arena-balance-row output{text-align:right;font-size:12px;font-variant-numeric:tabular-nums}
+.arena-balance-row output[data-balance-value="special"]{color:#67e8f9}
 .arena-balance-detail{font-size:11px;color:#cbd5e1;overflow-wrap:anywhere}
 .arena-balance-detail table{width:100%;table-layout:fixed;margin:8px 0;border-collapse:collapse;font-size:11px}
 .arena-balance-detail th,.arena-balance-detail td{padding:6px 3px;text-align:right;border-bottom:1px solid #334155;font-variant-numeric:tabular-nums}
@@ -1688,7 +1702,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.12 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.13 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
@@ -4746,18 +4760,20 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         const ARENA_BALANCE_COPY = Object.freeze({
-            es: ["Equilibrio por clase","Modo","Modo actual","Duelo","Smash","Arena","Valores","Perfil de clase","Reglas de esta ronda","Básico","Especial","HP por objetivo, con energía completa y sin críticos, escudos ni apoyos.","Carga (f)","Cupo","Rango","Bloqueado","Guerreros: priorizan otros Guerreros. Shinobi: el rival cercano; prefieren otra clase hasta un {distance} % más lejos. Pueden dañarse entre sí y disputan la final. Titanes: atacan a cualquiera.","Consulta: elegir un modo o una clase aquí no cambia la partida.","60 f ≈ 1 s a ritmo 1×. Cupo configurado; en Duelo solo hay un rival. Rango = sin cupo extra, dentro del alcance.","Rival del gráfico","Sin rivalidad","Ventaja al atacar a","Desventaja al atacar a","Afinidad de daño","Cadena A","Cada flecha indica +10 % de daño; en sentido contrario, −10 %. Los otros enfrentamientos son neutros. Se aplica a golpes y poderes antes de redondear a HP enteros."],
-            en: ["Class balance","Mode","Current mode","Duel","Smash","Arena","Values","Class profile","Current round rules","Basic","Special","HP per target at full energy, without critical hits, shields or support.","Charge (f)","Cap","Range","Blocked","Warriors prioritize Warriors. Shinobi choose the nearest rival, preferring another class up to {distance}% farther away. They can hurt each other and fight the final. Titans attack anyone.","View only: choosing a mode or class here does not change the match.","60 f ≈ 1 s at 1× pace. Configured cap; a Duel has one rival. Range = no extra cap, within attack reach.","Chart opponent","No rivalry","Advantage attacking","Disadvantage attacking","Damage affinity","Chain A","Each arrow means +10% damage; the reverse means −10%. Other matchups are neutral. Applies to basic and special attacks before rounding to whole HP."],
-            fr: ["Équilibre des classes","Mode","Mode actuel","Duel","Smash","Arène","Valeurs","Profil de classe","Règles de la manche","Base","Spécial","PV par cible à énergie pleine, sans critiques, boucliers ni soutien.","Charge (f)","Limite","Portée","Bloqué","Les Guerriers privilégient les Guerriers. Les Shinobi choisissent le plus proche, préférant une autre classe jusqu’à {distance} % plus loin. Ils peuvent se blesser et disputent la finale. Les Titans attaquent tous.","Consultation : choisir un mode ou une classe ici ne modifie pas la partie.","60 f ≈ 1 s à 1×. Limite configurée ; un duel compte un adversaire. Portée = sans limite supplémentaire.","Adversaire du graphique","Sans rivalité","Avantage contre","Désavantage contre","Affinité de dégâts","Chaîne A","Chaque flèche indique +10 % de dégâts ; en sens inverse, −10 %. Les autres duels sont neutres. Coups et pouvoirs sont arrondis aux PV entiers après application."],
-            de: ["Klassenbalance","Modus","Aktueller Modus","Duell","Smash","Arena","Werte","Klassenprofil","Rundenregeln","Basis","Spezial","HP pro Ziel bei voller Energie, ohne kritische Treffer, Schilde oder Hilfe.","Ladung (f)","Limit","Reichw.","Gesperrt","Krieger bevorzugen Krieger. Shinobi wählen den nächsten Gegner und bevorzugen andere Klassen bis zu {distance} % weiter entfernt. Sie können einander verletzen und kämpfen im Finale. Titanen greifen jeden an.","Nur Ansicht: Modus- und Klassenwahl hier ändern den Kampf nicht.","60 f ≈ 1 s bei 1×. Konfiguriertes Limit; im Duell ein Gegner. Reichweite = kein zusätzliches Limit.","Gegner im Diagramm","Ohne Rivalität","Vorteil gegen","Nachteil gegen","Schadensfaktor","Kette A","Jeder Pfeil bedeutet +10 % Schaden; umgekehrt −10 %. Andere Paarungen sind neutral. Gilt für normale und Spezialangriffe vor dem Runden auf ganze HP."],
-            zh: ["职业平衡","模式","当前模式","决斗","平台战","竞技场","数值","职业配置","本轮规则","普通","技能","每个目标的生命伤害：满能量，无暴击、护盾或支援。","蓄力(f)","上限","范围","禁用","战士优先攻击战士。忍者选择最近的对手，若其他职业只比最近对手远不超过{distance}%，则优先攻击其他职业。忍者可互相伤害并在最后决出胜负。泰坦攻击任何人。","仅查看：在此选择模式或职业不会改变比赛。","1×速度下60f约为1秒。决斗仅有一名对手；范围表示射程内无额外目标上限。","图表对手","无克制","攻击优势目标","攻击劣势目标","伤害克制","克制链A","顺箭头伤害+10%，逆箭头−10%，其他对阵中立。适用于普通攻击和技能，然后四舍五入为整数生命值。"],
-            ja: ["クラスバランス","モード","現在のモード","決闘","スマッシュ","アリーナ","数値","クラス設定","ラウンドルール","通常","必殺","各対象のHPダメージ。満タンのエネルギーで、クリティカル・シールド・支援なし。","溜め(f)","上限","範囲","無効","戦士は戦士を優先。忍者は最寄りの相手を選び、距離が{distance}%増以内なら他クラスを優先します。仲間にもダメージが入り、最後は忍者同士で決着。タイタンは全員を攻撃。","表示のみ：ここでモードやクラスを選んでも試合は変わりません。","1×速度で60f ≈ 1秒。決闘の相手は1人。範囲＝射程内に追加の対象上限なし。","グラフの対戦相手","相性なし","攻撃有利","攻撃不利","ダメージ相性","相性チェーンA","矢印方向はダメージ+10%、逆方向は−10%。他は中立。通常・必殺技に適用してからHPを整数に丸めます。"],
-            pt: ["Equilíbrio por classe","Modo","Modo atual","Duelo","Smash","Arena","Valores","Perfil da classe","Regras da rodada","Básico","Especial","HP por alvo, energia cheia, sem críticos, escudos ou apoios.","Carga (f)","Limite","Alcance","Bloqueado","Guerreiros priorizam Guerreiros. Shinobi escolhem o mais próximo, preferindo outra classe até {distance}% mais longe. Podem ferir uns aos outros e disputam a final. Titãs atacam qualquer um.","Consulta: escolher modo ou classe aqui não altera a partida.","60 f ≈ 1 s a 1×. Limite configurado; no duelo há um rival. Alcance = sem limite extra dentro do alcance.","Rival do gráfico","Sem rivalidade","Vantagem contra","Desvantagem contra","Afinidade de dano","Cadeia A","Cada seta indica +10% de dano; no sentido inverso, −10%. Os outros confrontos são neutros. Vale para golpes e poderes antes do arredondamento para HP inteiros."],
-            it: ["Equilibrio delle classi","Modalità","Modalità attuale","Duello","Smash","Arena","Valori","Profilo classe","Regole del round","Base","Speciale","HP per bersaglio, energia piena, senza critici, scudi o supporti.","Carica (f)","Limite","Portata","Bloccato","I Guerrieri preferiscono Guerrieri. Gli Shinobi scelgono il più vicino, preferendo un’altra classe fino al {distance}% più lontano. Possono ferirsi e disputano la finale. I Titani attaccano chiunque.","Solo consultazione: scegliere modalità o classe qui non cambia la partita.","60 f ≈ 1 s a 1×. Limite configurato; un rivale nel duello. Portata = nessun limite aggiuntivo nel raggio.","Rivale del grafico","Senza rivalità","Vantaggio contro","Svantaggio contro","Affinità danno","Catena A","Ogni freccia indica +10% di danno; al contrario, −10%. Gli altri scontri sono neutri. Vale per colpi e poteri prima di arrotondare agli HP interi."]
+            es: ["Equilibrio por clase","Modo","Modo actual","Duelo","Smash","Arena","Valores","Perfil de clase","Reglas de esta ronda","Básico","Especial","HP por objetivo, con energía completa y sin críticos, escudos ni apoyos.","Carga (f)","Cupo","Rango","Bloqueado","Guerreros: priorizan otros Guerreros. Shinobi: el rival cercano; prefieren otra clase hasta un {distance} % más lejos. Pueden dañarse entre sí y disputan la final. Titanes: atacan a cualquiera.","Consulta: elegir un modo o una clase aquí no cambia la partida.","60 f ≈ 1 s a ritmo 1×. Cupo configurado; en Duelo solo hay un rival. Rango = sin cupo extra, dentro del alcance.","Rival del gráfico","Sin rivalidad","Ventaja al atacar a","Desventaja al atacar a","Afinidad de daño","Cadena A","Cada flecha indica +10 % de daño; en sentido contrario, −10 %. Los otros enfrentamientos son neutros. Se aplica a golpes y poderes antes de redondear a HP enteros.","Clase","Radar pentagonal de daño","Los ejes 1–5 corresponden a las clases de la lista."],
+            en: ["Class balance","Mode","Current mode","Duel","Smash","Arena","Values","Class profile","Current round rules","Basic","Special","HP per target at full energy, without critical hits, shields or support.","Charge (f)","Cap","Range","Blocked","Warriors prioritize Warriors. Shinobi choose the nearest rival, preferring another class up to {distance}% farther away. They can hurt each other and fight the final. Titans attack anyone.","View only: choosing a mode or class here does not change the match.","60 f ≈ 1 s at 1× pace. Configured cap; a Duel has one rival. Range = no extra cap, within attack reach.","Chart opponent","No rivalry","Advantage attacking","Disadvantage attacking","Damage affinity","Chain A","Each arrow means +10% damage; the reverse means −10%. Other matchups are neutral. Applies to basic and special attacks before rounding to whole HP.","Class","Pentagonal damage radar","Axes 1–5 match the classes in the list."],
+            fr: ["Équilibre des classes","Mode","Mode actuel","Duel","Smash","Arène","Valeurs","Profil de classe","Règles de la manche","Base","Spécial","PV par cible à énergie pleine, sans critiques, boucliers ni soutien.","Charge (f)","Limite","Portée","Bloqué","Les Guerriers privilégient les Guerriers. Les Shinobi choisissent le plus proche, préférant une autre classe jusqu’à {distance} % plus loin. Ils peuvent se blesser et disputent la finale. Les Titans attaquent tous.","Consultation : choisir un mode ou une classe ici ne modifie pas la partie.","60 f ≈ 1 s à 1×. Limite configurée ; un duel compte un adversaire. Portée = sans limite supplémentaire.","Adversaire du graphique","Sans rivalité","Avantage contre","Désavantage contre","Affinité de dégâts","Chaîne A","Chaque flèche indique +10 % de dégâts ; en sens inverse, −10 %. Les autres duels sont neutres. Coups et pouvoirs sont arrondis aux PV entiers après application.","Classe","Radar pentagonal de dégâts","Les axes 1–5 correspondent aux classes de la liste."],
+            de: ["Klassenbalance","Modus","Aktueller Modus","Duell","Smash","Arena","Werte","Klassenprofil","Rundenregeln","Basis","Spezial","HP pro Ziel bei voller Energie, ohne kritische Treffer, Schilde oder Hilfe.","Ladung (f)","Limit","Reichw.","Gesperrt","Krieger bevorzugen Krieger. Shinobi wählen den nächsten Gegner und bevorzugen andere Klassen bis zu {distance} % weiter entfernt. Sie können einander verletzen und kämpfen im Finale. Titanen greifen jeden an.","Nur Ansicht: Modus- und Klassenwahl hier ändern den Kampf nicht.","60 f ≈ 1 s bei 1×. Konfiguriertes Limit; im Duell ein Gegner. Reichweite = kein zusätzliches Limit.","Gegner im Diagramm","Ohne Rivalität","Vorteil gegen","Nachteil gegen","Schadensfaktor","Kette A","Jeder Pfeil bedeutet +10 % Schaden; umgekehrt −10 %. Andere Paarungen sind neutral. Gilt für normale und Spezialangriffe vor dem Runden auf ganze HP.","Klasse","Fünfeck-Schadensradar","Die Achsen 1–5 entsprechen den Klassen in der Liste."],
+            zh: ["职业平衡","模式","当前模式","决斗","平台战","竞技场","数值","职业配置","本轮规则","普通","技能","每个目标的生命伤害：满能量，无暴击、护盾或支援。","蓄力(f)","上限","范围","禁用","战士优先攻击战士。忍者选择最近的对手，若其他职业只比最近对手远不超过{distance}%，则优先攻击其他职业。忍者可互相伤害并在最后决出胜负。泰坦攻击任何人。","仅查看：在此选择模式或职业不会改变比赛。","1×速度下60f约为1秒。决斗仅有一名对手；范围表示射程内无额外目标上限。","图表对手","无克制","攻击优势目标","攻击劣势目标","伤害克制","克制链A","顺箭头伤害+10%，逆箭头−10%，其他对阵中立。适用于普通攻击和技能，然后四舍五入为整数生命值。","职业","五边形伤害雷达图","轴1–5对应下方列表中的职业。"],
+            ja: ["クラスバランス","モード","現在のモード","決闘","スマッシュ","アリーナ","数値","クラス設定","ラウンドルール","通常","必殺","各対象のHPダメージ。満タンのエネルギーで、クリティカル・シールド・支援なし。","溜め(f)","上限","範囲","無効","戦士は戦士を優先。忍者は最寄りの相手を選び、距離が{distance}%増以内なら他クラスを優先します。仲間にもダメージが入り、最後は忍者同士で決着。タイタンは全員を攻撃。","表示のみ：ここでモードやクラスを選んでも試合は変わりません。","1×速度で60f ≈ 1秒。決闘の相手は1人。範囲＝射程内に追加の対象上限なし。","グラフの対戦相手","相性なし","攻撃有利","攻撃不利","ダメージ相性","相性チェーンA","矢印方向はダメージ+10%、逆方向は−10%。他は中立。通常・必殺技に適用してからHPを整数に丸めます。","クラス","五角形ダメージレーダー","軸1〜5は下のリストのクラスに対応します。"],
+            pt: ["Equilíbrio por classe","Modo","Modo atual","Duelo","Smash","Arena","Valores","Perfil da classe","Regras da rodada","Básico","Especial","HP por alvo, energia cheia, sem críticos, escudos ou apoios.","Carga (f)","Limite","Alcance","Bloqueado","Guerreiros priorizam Guerreiros. Shinobi escolhem o mais próximo, preferindo outra classe até {distance}% mais longe. Podem ferir uns aos outros e disputam a final. Titãs atacam qualquer um.","Consulta: escolher modo ou classe aqui não altera a partida.","60 f ≈ 1 s a 1×. Limite configurado; no duelo há um rival. Alcance = sem limite extra dentro do alcance.","Rival do gráfico","Sem rivalidade","Vantagem contra","Desvantagem contra","Afinidade de dano","Cadeia A","Cada seta indica +10% de dano; no sentido inverso, −10%. Os outros confrontos são neutros. Vale para golpes e poderes antes do arredondamento para HP inteiros.","Classe","Radar pentagonal de dano","Os eixos 1–5 correspondem às classes da lista."],
+            it: ["Equilibrio delle classi","Modalità","Modalità attuale","Duello","Smash","Arena","Valori","Profilo classe","Regole del round","Base","Speciale","HP per bersaglio, energia piena, senza critici, scudi o supporti.","Carica (f)","Limite","Portata","Bloccato","I Guerrieri preferiscono Guerrieri. Gli Shinobi scelgono il più vicino, preferendo un’altra classe fino al {distance}% più lontano. Possono ferirsi e disputano la finale. I Titani attaccano chiunque.","Solo consultazione: scegliere modalità o classe qui non cambia la partita.","60 f ≈ 1 s a 1×. Limite configurato; un rivale nel duello. Portata = nessun limite aggiuntivo nel raggio.","Rivale del grafico","Senza rivalità","Vantaggio contro","Svantaggio contro","Affinità danno","Catena A","Ogni freccia indica +10% di danno; al contrario, −10%. Gli altri scontri sono neutri. Vale per colpi e poteri prima di arrotondare agli HP interi.","Classe","Radar pentagonale dei danni","Gli assi 1–5 corrispondono alle classi della lista."]
         });
-        const ARENA_BALANCE_WORDS = ['title','mode','current','duel','smash','iso','profile','nominal','round','basic','special','assumption','windup','targets','range','blocked','policy','readOnly','note','target','neutral','prey','counter','affinity','chain','rivalryHelp'];
+        const ARENA_BALANCE_WORDS = ['title','mode','current','duel','smash','iso','profile','nominal','round','basic','special','assumption','windup','targets','range','blocked','policy','readOnly','note','target','neutral','prey','counter','affinity','chain','rivalryHelp','class','radar','axesHint'];
         let arenaBalanceSelectedClass = 'kame';
         let arenaBalanceRenderKey = '';
+        let arenaBalanceRenderWidth = 0;
+        let arenaBalanceResizeObserver = null;
         function arenaBalanceText(key) {
             const text = (ARENA_BALANCE_COPY[currentLanguage] || ARENA_BALANCE_COPY.es)[ARENA_BALANCE_WORDS.indexOf(key)] || key;
             return text.replace('{distance}', ARENA_COMBAT_TARGET_RULES.shinobiSimilarDistancePercent);
@@ -4785,6 +4801,45 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             arenaBalanceSelectedClass = key;
             refreshArenaBalancePanel(true);
         }
+        function renderArenaBalanceRadar(snapshot, max, width) {
+            const chart = document.getElementById('arenaBalanceChart');
+            const namedAxes = width >= 340;
+            const radius = Math.max(20, Math.min(namedAxes ? width * .27 : (width - 60) / 2, 112));
+            const cx = width / 2, cy = radius + (namedAxes ? 42 : 30);
+            const height = cy + radius + (namedAxes ? 44 : 30);
+            const point = (index, fraction = 1) => {
+                const angle = -Math.PI / 2 + index * Math.PI * 2 / 5;
+                return [cx + Math.cos(angle) * radius * fraction, cy + Math.sin(angle) * radius * fraction];
+            };
+            const pair = coordinates => coordinates.map(n => n.toFixed(3)).join(',');
+            const polygon = fraction => snapshot.rows.map((row,index) => pair(point(index,fraction))).join(' ');
+            const series = [['special','arena-radar-special','#22d3ee'],['basic','arena-radar-basic','#cbd5e1']];
+            const description = snapshot.rows.map(row => `${localizedClassName(row.key)}: ${arenaBalanceText('basic')} ${row.base} HP; ${arenaBalanceText('special')} ${row.special} HP`).join('. ');
+            chart.innerHTML = `<div class="arena-balance-legend"><span><span class="arena-balance-swatch" aria-hidden="true"></span>${escapeHTML(arenaBalanceText('basic'))}</span><span><span class="arena-balance-swatch is-special" aria-hidden="true"></span>${escapeHTML(arenaBalanceText('special'))}</span></div>
+                <svg id="arenaBalanceRadar" class="arena-balance-radar" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-labelledby="arenaBalanceRadarTitle arenaBalanceRadarDescription" data-radar-max="${max}" data-radar-named-axes="${namedAxes}">
+                    <title id="arenaBalanceRadarTitle">${escapeHTML(arenaBalanceText('radar'))} · ${escapeHTML(arenaBalanceText(snapshot.mode==='1v1'?'duel':snapshot.mode))} · 0–${max} HP</title>
+                    <desc id="arenaBalanceRadarDescription">${escapeHTML(description)}</desc>
+                    ${[.25,.5,.75,1].map(fraction=>`<polygon class="arena-radar-grid" points="${polygon(fraction)}"/>`).join('')}
+                    ${snapshot.rows.map((row,index)=>{
+                        const end=point(index),label=point(index,1+18/radius);
+                        const anchor=namedAxes?(index===0?'middle':index<3?'start':'end'):'middle';
+                        return `<line class="arena-radar-axis ${row.key===arenaBalanceSelectedClass?'is-selected':''}" data-radar-axis="${row.key}" x1="${cx}" y1="${cy}" x2="${end[0]}" y2="${end[1]}"/>
+                            <text x="${label[0]}" y="${label[1]+4}" text-anchor="${anchor}">${index+1}${namedAxes?' · '+escapeHTML(localizedClassName(row.key)):''}</text>`;
+                    }).join('')}
+                    ${[.5,1].map(fraction=>`<text class="arena-radar-tick" x="${cx-10}" y="${cy-radius*fraction+4}" text-anchor="end">${max*fraction}</text>`).join('')}
+                    ${series.map(([metric,style])=>`<polygon class="${style}" data-radar-series="${metric}" points="${snapshot.rows.map((row,index)=>pair(point(index,row[metric==='basic'?'base':'special']/max))).join(' ')}"/>`).join('')}
+                    ${series.map(([metric,style,color])=>snapshot.rows.map((row,index)=>{
+                        const value=row[metric==='basic'?'base':'special'],p=point(index,value/max);
+                        return `<circle class="arena-radar-point ${row.key===arenaBalanceSelectedClass?'is-selected':''}" cx="${p[0]}" cy="${p[1]}" r="${row.key===arenaBalanceSelectedClass?5:3}" fill="${color}"><title>${escapeHTML(localizedClassName(row.key))} · ${escapeHTML(arenaBalanceText(metric))}: ${value} HP</title></circle>`;
+                    }).join('')).join('')}
+                </svg>
+                ${namedAxes?'':`<p class="arena-balance-hint">${escapeHTML(arenaBalanceText('axesHint'))}</p>`}
+                <div class="arena-balance-table-head" aria-hidden="true"><span>${escapeHTML(arenaBalanceText('class'))}</span><span>${escapeHTML(arenaBalanceText('basic'))}</span><span>${escapeHTML(arenaBalanceText('special'))}</span></div>
+                ${snapshot.rows.map((row,index)=>`<button type="button" class="arena-balance-row" data-operator-keep-open data-balance-class="${row.key}" aria-pressed="${arenaBalanceSelectedClass===row.key}" onclick="selectArenaBalanceClass('${row.key}')">
+                    <span class="arena-balance-name"><span>${index+1} · ${CLASS_COMMANDS[row.key].icon} ${escapeHTML(localizedClassName(row.key))}</span><small>${escapeHTML(arenaPowerName(row.command))} · <span data-balance-matchup>${Math.round((row.matchupMultiplier-1)*100)>0?'+':''}${Math.round((row.matchupMultiplier-1)*100)} %</span></small></span>
+                    ${[['basic',row.base],['special',row.special]].map(([metric,value])=>`<output data-balance-value="${metric}" aria-label="${escapeHTML(arenaBalanceText(metric))}: ${value} HP">${value}</output>`).join('')}
+                </button>`).join('')}`;
+        }
         function refreshArenaBalancePanel(force = false) {
             const panel = document.getElementById('arenaBalancePanel');
             if (!panel) return;
@@ -4794,7 +4849,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const profileSelect = document.getElementById('arenaBalanceProfile');
             const targetSelect = document.getElementById('arenaBalanceTarget');
             const snapshot = getArenaBalanceSnapshot(modeSelect.value, profileSelect.value, targetSelect.value);
-            const key = JSON.stringify([snapshot, currentLanguage, arenaBalanceSelectedClass]);
+            const chart = document.getElementById('arenaBalanceChart');
+            arenaBalanceRenderWidth = Math.round(chart.clientWidth);
+            const chartWidth = Math.min(360, arenaBalanceRenderWidth || 360);
+            if (!arenaBalanceResizeObserver) {
+                arenaBalanceResizeObserver = new ResizeObserver(() => {
+                    const width = Math.round(chart.clientWidth);
+                    if (width > 0 && width !== arenaBalanceRenderWidth) refreshArenaBalancePanel(true);
+                });
+                arenaBalanceResizeObserver.observe(chart);
+            }
+            const key = JSON.stringify([snapshot, currentLanguage, arenaBalanceSelectedClass, chartWidth]);
             if (!force && key === arenaBalanceRenderKey) return;
             arenaBalanceRenderKey = key;
             document.getElementById('arenaBalanceTitle').textContent = `⚖️ ${arenaBalanceText('title')}`;
@@ -4806,13 +4871,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const referenceMax = Math.max(ARENA_BASE_MELEE_DAMAGE, ...Object.values(ARENA_CLASS_BALANCE).flatMap(mode => Object.values(mode).map(rule => rule.damage)));
             const max = Math.max(10, Math.ceil(referenceMax * snapshot.multiplier * ARENA_CLASS_RIVALRIES.advantage / 10) * 10);
             document.getElementById('arenaBalanceScale').textContent = `0–${max} HP`;
-            const chart = document.getElementById('arenaBalanceChart');
             const focusedClass = chart.contains(document.activeElement) ? document.activeElement.dataset.balanceClass : null;
-            chart.innerHTML = snapshot.rows.map(row => `<button type="button" class="arena-balance-row" data-operator-keep-open data-balance-class="${row.key}" aria-pressed="${arenaBalanceSelectedClass === row.key}" onclick="selectArenaBalanceClass('${row.key}')">
-                <span class="arena-balance-name"><span>${CLASS_COMMANDS[row.key].icon} ${escapeHTML(localizedClassName(row.key))}</span><code>${escapeHTML(localizedChatCommand(row.command))}</code></span>
-                <span class="arena-balance-hint" data-balance-matchup>${escapeHTML(arenaBalanceText('affinity'))}: ${Math.round((row.matchupMultiplier - 1) * 100) > 0 ? '+' : ''}${Math.round((row.matchupMultiplier - 1) * 100)} %</span>
-                ${[['basic',row.base],['special',row.special]].map(([metric,value])=>`<span class="arena-balance-line"><span>${escapeHTML(arenaBalanceText(metric))}</span><span class="arena-balance-track" aria-hidden="true"><span class="${metric==='special'?'is-special':''}" style="width:${value/max*100}%"></span></span><output data-balance-value="${metric}" aria-label="${escapeHTML(arenaBalanceText(metric))}: ${value} HP">${value}</output></span>`).join('')}
-            </button>`).join('');
+            renderArenaBalanceRadar(snapshot, max, chartWidth);
             if (focusedClass) chart.querySelector(`[data-balance-class="${focusedClass}"]`)?.focus({preventScroll:true});
             const selected = snapshot.rows.find(row => row.key === arenaBalanceSelectedClass);
             const prey = ARENA_CLASS_RIVALRIES.beats[selected.key];
@@ -8045,7 +8105,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.12';
+        const ARENA_RELEASE_VERSION = '0.13';
         const ARENA_RELEASE_EDITION = 'tiktok';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:10, footer:76});
@@ -8794,7 +8854,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.12.0',
+            version: '0.13.0',
             edition: 'tiktok',
             getBalanceRules() {
                 return ARENA_CLASS_BALANCE;
