@@ -1,0 +1,178 @@
+{
+  "passed": 12,
+  "errors": 0,
+  "checks": [
+    "32 fighters simulate and render both captures with finite state",
+    "64 fighters simulate and render both captures with finite state",
+    "128 fighters simulate and render both captures with finite state",
+    "128-player scenario also loads during combat; mode transitions and capacity remain correct",
+    "preparation skips its hidden capture and switching or dual view repaints fresh game state",
+    "label metric cache follows renamed fighters, life counters and loaded fonts",
+    "unchanged duel HUD values do not recreate text or trigger localization each frame",
+    "128 autonomous fighters still charge/fire specials and keep transient effects bounded",
+    "128-player powers retain real text and damage labels while transient history remains bounded",
+    "expired KO notices release detached badges instead of accumulating through a stream",
+    "replacing a scenario clears old powers and a pending victory cannot overwrite the new match",
+    "500 received comments keep history and automatic follow without rebuilding toolbar state per message"
+  ],
+  "measurements": [
+    {
+      "source": "baseline",
+      "count": 32,
+      "setupMs": 23.100000000093132,
+      "bodies": 32,
+      "targeting": {
+        "mean": 0.15666666666511447,
+        "median": 0.10000000009313226,
+        "p95": 0.6000000000931323
+      },
+      "simulation": {
+        "mean": 0.23916666666821887,
+        "median": 0.10000000009313226,
+        "p95": 0.7000000001862645
+      },
+      "drawing": {
+        "mean": 30.02222222221705,
+        "median": 29.40000000037253,
+        "p95": 47.10000000009313
+      },
+      "alive": 32,
+      "finite": true
+    },
+    {
+      "source": "baseline",
+      "count": 64,
+      "setupMs": 18.199999999720603,
+      "bodies": 64,
+      "targeting": {
+        "mean": 0.06333333333798995,
+        "median": 0.09999999962747097,
+        "p95": 0.20000000018626451
+      },
+      "simulation": {
+        "mean": 0.21916666666899498,
+        "median": 0.20000000018626451,
+        "p95": 0.5
+      },
+      "drawing": {
+        "mean": 36.405555555545206,
+        "median": 37.200000000186265,
+        "p95": 50.89999999990687
+      },
+      "alive": 64,
+      "finite": true
+    },
+    {
+      "source": "baseline",
+      "count": 128,
+      "setupMs": 25.899999999906868,
+      "bodies": 128,
+      "targeting": {
+        "mean": 0.24833333333178112,
+        "median": 0.20000000018626451,
+        "p95": 0.5
+      },
+      "simulation": {
+        "mean": 0.6758333333302289,
+        "median": 0.6000000000931323,
+        "p95": 1.2999999998137355
+      },
+      "drawing": {
+        "mean": 58.97222222222222,
+        "median": 57.799999999813735,
+        "p95": 69.89999999990687
+      },
+      "alive": 128,
+      "finite": true
+    },
+    {
+      "source": "current",
+      "count": 32,
+      "setupMs": 19.100000000093132,
+      "bodies": 32,
+      "targeting": {
+        "mean": 0.08166666666511446,
+        "median": 0,
+        "p95": 0.20000000018626451
+      },
+      "simulation": {
+        "mean": 0.1849999999976717,
+        "median": 0.10000000009313226,
+        "p95": 0.6000000000931323
+      },
+      "drawing": {
+        "mean": 36.138888888888886,
+        "median": 33.3000000002794,
+        "p95": 57.799999999813735
+      },
+      "alive": 32,
+      "finite": true
+    },
+    {
+      "source": "current",
+      "count": 64,
+      "setupMs": 23.299999999813735,
+      "bodies": 64,
+      "targeting": {
+        "mean": 0.11166666666977107,
+        "median": 0.10000000009313226,
+        "p95": 0.3000000002793968
+      },
+      "simulation": {
+        "mean": 0.31083333333566165,
+        "median": 0.20000000018626451,
+        "p95": 0.7000000001862645
+      },
+      "drawing": {
+        "mean": 36.28888888889924,
+        "median": 37.299999999813735,
+        "p95": 42.10000000009313
+      },
+      "alive": 64,
+      "finite": true
+    },
+    {
+      "source": "current",
+      "count": 128,
+      "setupMs": 16.800000000279397,
+      "bodies": 128,
+      "targeting": {
+        "mean": 0.2700000000031044,
+        "median": 0.20000000018626451,
+        "p95": 0.7000000001862645
+      },
+      "simulation": {
+        "mean": 0.5841666666635622,
+        "median": 0.5,
+        "p95": 1.1000000000931323
+      },
+      "drawing": {
+        "mean": 74.25,
+        "median": 71.90000000037253,
+        "p95": 98.60000000009313
+      },
+      "alive": 128,
+      "finite": true
+    }
+  ],
+  "sourceHashes": [
+    {
+      "source": "baseline",
+      "version": "0.9.0",
+      "gitBlob": "a700406e547925709e2984effe10950be37ce4be"
+    },
+    {
+      "source": "current",
+      "version": "0.10.0",
+      "gitBlob": "c157f301b3193570a05c552b47a2ad661eedf37d"
+    }
+  ],
+  "environment": {
+    "node": "v24.19.0",
+    "browser": "153.0.8010.0",
+    "gpu": "disabled; software raster and readback included",
+    "viewport": "1720x720",
+    "simulationHz": 60,
+    "workload": "Constant-population timings disable knockback in both sources and suppress autonomous specials; subsequent stress checks restore full knockback and specials."
+  }
+}

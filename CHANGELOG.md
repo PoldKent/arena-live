@@ -1,5 +1,15 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-23 — Arena Live v0.10 · Ajustes e inspector de equilibrio
+
+- Versión actual únicamente en el pie de Ajustes; retiradas la etiqueta superior y la versión redundante de la calibración OBS. El pie usa la misma versión de entrega y conserva su texto al cambiar de idioma.
+- Corregida la clave que vaciaba etiquetas de interfaz y el reemplazo de nombres de poderes por nombres de clases. Kame, Rasen, Trueno, Enredadera y Coloso vuelven a identificarse correctamente.
+- Las opciones de números y texto de poderes respetan su estado, reconocen el signo menos de los daños reales y restauran textos o iconos sin eliminar las animaciones. Se guardan de forma independiente en `arenaLiveCombatDisplayV1`.
+- Nuevo menú plegable de equilibrio: barras por clase/modo con daño básico y especial, perfil nominal o reglas de la ronda, carga y cupo de blancos. Comparte las constantes del combate y conserva una escala entre modos.
+- El inspector es de consulta; se preservan potencias y selección actual del rival más cercano. Las alianzas y ventajas entre clases quedan pendientes de las decisiones de diseño del usuario.
+- Los ajustes plegables conservan identificadores y protección de idioma al organizarse, y el inspector mantiene foco, menú seleccionado y capturas estables en Stream.
+- Versión 0.10/0.10.0 en pie, API, servidor y paquete. 45 pruebas de Node, 58 de navegador y 12 de carga aprobadas; 240 resultados completos de combate reproducen v0.9.
+
 ## 2026-10-23 — Arena Live v0.9 · Full HD y efectos en toda la vista
 
 - Lienzos nativos de 1920 × 1080 para 16:9 y 1080 × 1920 para 9:16. Vectores y textos se dibujan al doble de resolución, conservando el mundo, la física y las dimensiones de las capturas en OBS.

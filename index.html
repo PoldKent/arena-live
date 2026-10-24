@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.9 — TikTok LIVE</title>
+    <title>Arena Live v0.10 — TikTok LIVE</title>
     <!--
       ARENA LIVE · MONOLITHIC DELIVERY
       All application code intentionally stays in this HTML file.
@@ -763,6 +763,24 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 .arena-settings-section>summary {padding:11px;cursor:pointer;color:#dae3ef;font:650 12px Inter,system-ui}
 .arena-settings-section>summary h3 {display:inline;font:inherit!important;color:inherit!important;letter-spacing:0!important;text-transform:none!important}
 .arena-settings-section>.arena-settings-content {padding:4px 11px 12px;display:flex;flex-direction:column;gap:11px}
+.arena-balance-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.arena-balance-controls label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#cbd5e1}
+.arena-balance-controls select{min-width:0;width:100%;padding:7px;border:1px solid #475569;border-radius:6px;background:#0b1422;color:#e2e8f0;font-size:12px}
+.arena-balance-chart{display:grid;gap:6px}
+.arena-balance-row{display:block;width:100%;text-align:left;background:#0c1624;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:8px}
+.arena-balance-row[aria-pressed="true"]{border-color:#22d3ee;background:#122735}
+.arena-balance-row .arena-balance-name{display:flex;justify-content:space-between;gap:6px;font-size:12px;margin-bottom:5px}
+.arena-balance-row code{font-size:11px;color:#94dbea}
+.arena-balance-line{display:grid;grid-template-columns:48px minmax(0,1fr) 36px;align-items:center;gap:5px;font-size:11px;margin-top:3px}
+.arena-balance-track{display:block;height:7px;background:#243141;border-radius:3px;overflow:hidden}
+.arena-balance-track>span{display:block;height:100%;background:#94a3b8}
+.arena-balance-track>.is-special{background:#22d3ee}
+.arena-balance-line output{text-align:right;font-variant-numeric:tabular-nums}
+.arena-balance-detail{font-size:11px;color:#cbd5e1;overflow-wrap:anywhere}
+.arena-balance-detail table{width:100%;table-layout:fixed;margin:8px 0;border-collapse:collapse;font-size:11px}
+.arena-balance-detail th,.arena-balance-detail td{padding:6px 3px;text-align:right;border-bottom:1px solid #334155;font-variant-numeric:tabular-nums}
+.arena-balance-detail th:first-child,.arena-balance-detail td:first-child{text-align:left}
+.arena-balance-hint{font-size:11px;color:#a9b9ca;line-height:1.5;margin:0}
 #settingsPauseModal #btnViewDual {display:flex!important}
 #settingsPauseModal .arena-option-hint {display:none}
 #settingsPauseModal button {box-shadow:none!important}
@@ -799,7 +817,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 #arenaStreamLeftColumn>#settingsPauseModal>div {width:100%;height:100%;max-height:100%;border:0!important;border-radius:7px!important;box-shadow:none!important}
 #arenaStreamLeftColumn #settingsPauseModal .grid {grid-template-columns:1fr!important}
 #arenaStreamLeftColumn #settingsPauseModal>div>div:first-child {padding:9px!important;gap:5px;align-items:flex-start}
-#arenaStreamLeftColumn #settingsPauseModal #arenaSettingsVersion,#arenaStreamLeftColumn #settingsPauseModal #settingsModeBadge,#arenaStreamLeftColumn #settingsPauseModal #arenaSettingsDescription {display:none}
+#arenaStreamLeftColumn #settingsPauseModal #settingsModeBadge,#arenaStreamLeftColumn #settingsPauseModal #arenaSettingsDescription {display:none}
 #arenaStreamLeftColumn .arena-settings-resume {font-size:10px;padding:5px!important}
 #arenaStreamLeftColumn #settingsPauseModal>div>div:last-child {padding:8px!important;font-size:9px}
 #arenaStreamPanelHost>.arena-work-panel[data-dock="float"] {position:static;resize:none;width:100%!important;max-width:none;max-height:none;height:auto!important;box-shadow:none}
@@ -1396,7 +1414,6 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <h2 class="font-display font-black text-base sm:text-lg text-white tracking-wide">
                                 <span id="arenaSettingsTitle" data-operator-label="settingsTitle">Pausa y ajustes</span>
                             </h2>
-                            <span id="arenaSettingsVersion" data-no-translate aria-label="Versión del juego" class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 text-[10px] font-bold shrink-0">Arena Live v0.9 · TikTok</span>
                             <span id="settingsModeBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400/40">
                                 ⏸️ JUEGO EN PAUSA
                             </span>
@@ -1554,7 +1571,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     <!-- Ajustes de calibración específicos del operador. No modifica la lógica de la partida. -->
                     <section id="arenaObsCalibrationPanel" data-no-translate class="rounded-xl border border-cyan-800/50 bg-slate-950/70 p-3 flex flex-col gap-2" aria-label="Calibración OBS">
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <strong class="text-[11px] text-cyan-200" id="arenaObsCalibrationTitle">📐 Calibración para OBS · v0.5</strong>
+                            <strong class="text-[11px] text-cyan-200" id="arenaObsCalibrationTitle">📐 Calibración para OBS</strong>
                             <button type="button" id="arenaObsResetCalibration" onclick="resetArenaObsCalibration()" class="rounded-md px-2 py-1 border border-slate-700 bg-slate-900 text-slate-200 text-[10px]">Restablecer</button>
                         </div>
                         <p class="text-[10px] text-slate-400" id="arenaObsCalibrationHint">Ajusta esto antes de emitir; los recortes de OBS deben configurarse después. Abrir las herramientas no modificará las dimensiones.</p>
@@ -1651,11 +1668,24 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 <label for="arenaClassRule" class="flex flex-col gap-1 text-xs"><span data-combat-rule-copy="class">Clase de la ronda</span><select id="arenaClassRule" data-combat-rule="classRule" onchange="setArenaCombatRule('classRule',this.value)" class="rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs"><option value="any">Todas las clases</option><option value="kame">Solo Guerrero</option><option value="ninja">Solo Shinobi</option><option value="titan">Solo Titán</option><option value="trueno">Solo Rayo</option><option value="esmeralda">Solo Espíritu</option></select></label>
 <label for="arenaPowerMode" class="flex flex-col gap-1 text-xs"><span data-combat-rule-copy="powerMode">Poderes y apoyos</span><select id="arenaPowerMode" data-combat-rule="powerMode" onchange="setArenaCombatRule('powerMode',this.value)" class="rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs"><option value="full" data-combat-rule-copy="full">Permitidos</option><option value="noSpecials" data-combat-rule-copy="noSpecials">Sin poderes de clase · con apoyos sociales</option><option value="melee" data-combat-rule-copy="melee">Solo golpes · sin poderes ni apoyos</option></select></label>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><label class="flex flex-col gap-1 text-[11px] text-slate-300" for="arenaRuleMaxHp"><span><span data-combat-rule-copy="maxHp">maxHp</span>: <output data-combat-rule-value="maxHp" id="arenaRuleMaxHpValue">180</output></span><input type="range" id="arenaRuleMaxHp" data-combat-rule="maxHp" min="50" max="1000" step="10" value="180" oninput="setArenaCombatRule('maxHp',this.value)" aria-describedby="arenaCombatRuleHelp" class="w-full accent-cyan-400" /></label><label class="flex flex-col gap-1 text-[11px] text-slate-300" for="arenaRuleDamage"><span><span data-combat-rule-copy="damage">damage</span>: <output data-combat-rule-value="damage" id="arenaRuleDamageValue">1</output></span><input type="range" id="arenaRuleDamage" data-combat-rule="damage" min="0.25" max="3" step="0.25" value="1" oninput="setArenaCombatRule('damage',this.value)" aria-describedby="arenaCombatRuleHelp" class="w-full accent-cyan-400" /></label><label class="flex flex-col gap-1 text-[11px] text-slate-300" for="arenaRuleKnockback"><span><span data-combat-rule-copy="knockback">knockback</span>: <output data-combat-rule-value="knockback" id="arenaRuleKnockbackValue">1</output></span><input type="range" id="arenaRuleKnockback" data-combat-rule="knockback" min="0" max="2" step="0.25" value="1" oninput="setArenaCombatRule('knockback',this.value)" aria-describedby="arenaCombatRuleHelp" class="w-full accent-cyan-400" /></label><label class="flex flex-col gap-1 text-[11px] text-slate-300" for="arenaRuleMovement"><span><span data-combat-rule-copy="movement">movement</span>: <output data-combat-rule-value="movement" id="arenaRuleMovementValue">1</output></span><input type="range" id="arenaRuleMovement" data-combat-rule="movement" min="0.5" max="2" step="0.25" value="1" oninput="setArenaCombatRule('movement',this.value)" aria-describedby="arenaCombatRuleHelp" class="w-full accent-cyan-400" /></label><label class="flex flex-col gap-1 text-[11px] text-slate-300" for="arenaRuleEnergyRegen"><span><span data-combat-rule-copy="energyRegen">energyRegen</span>: <output data-combat-rule-value="energyRegen" id="arenaRuleEnergyRegenValue">1</output></span><input type="range" id="arenaRuleEnergyRegen" data-combat-rule="energyRegen" min="0" max="3" step="0.25" value="1" oninput="setArenaCombatRule('energyRegen',this.value)" aria-describedby="arenaCombatRuleHelp" class="w-full accent-cyan-400" /></label></div><p id="arenaCombatRuleHelp" data-combat-rule-copy="help" class="text-[10px] text-slate-400">Los parámetros se aplican al instante.</p><small class="text-[10px] text-slate-400" data-combat-rule-copy="saved">Reglas guardadas en este navegador.</small><button type="button" id="arenaResetCombatRules" onclick="resetArenaCombatRules()" data-combat-rule-copy="reset" class="rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-xs">Restablecer reglas</button></div>
+                <div id="arenaBalancePanel" data-no-translate class="bg-slate-900/75 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
+                    <h3 id="arenaBalanceTitle" class="font-bold text-xs">⚖️ Equilibrio por clase</h3>
+                    <div class="arena-balance-controls">
+                        <label for="arenaBalanceMode"><span data-balance-copy="mode">Modo</span><select id="arenaBalanceMode" onchange="refreshArenaBalancePanel(true)" data-operator-keep-open><option value="current" data-balance-copy="current">Modo actual</option><option value="1v1" data-balance-copy="duel">Duelo</option><option value="smash" data-balance-copy="smash">Smash</option><option value="iso" data-balance-copy="iso">Arena</option></select></label>
+                        <label for="arenaBalanceProfile"><span data-balance-copy="profile">Valores</span><select id="arenaBalanceProfile" onchange="refreshArenaBalancePanel(true)" data-operator-keep-open><option value="nominal" data-balance-copy="nominal">Perfil de clase</option><option value="round" data-balance-copy="round">Reglas de esta ronda</option></select></label>
+                    </div>
+                    <p class="arena-balance-hint" data-balance-copy="assumption">HP por objetivo, con energía completa y sin críticos, escudos ni apoyos.</p>
+                    <div id="arenaBalanceChart" class="arena-balance-chart" role="group" aria-labelledby="arenaBalanceTitle"></div>
+                    <p id="arenaBalanceScale" class="arena-balance-hint"></p>
+                    <div id="arenaBalanceDetail" class="arena-balance-detail" aria-live="polite"></div>
+                    <p class="arena-balance-hint" data-balance-copy="policy">IA actual: rival más cercano. Alianzas y ventajas entre clases pendientes de definir.</p>
+                    <p class="arena-balance-hint" data-balance-copy="readOnly">Consulta: elegir un modo o una clase aquí no cambia la partida.</p>
+                </div>
             </div>
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo">Arena Live v0.5 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.10 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
@@ -1770,6 +1800,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         function refreshPauseMenuLabels() {
+            const version = document.getElementById('arenaVersionInfo');
+            if (version) version.textContent = `Arena Live v${ARENA_RELEASE_VERSION} · TikTok`;
             const copy = PAUSE_MENU_LABELS[currentLanguage] || PAUSE_MENU_LABELS.es;
             document.querySelectorAll('[data-menu-key]').forEach(element => {
                 const value = copy[element.dataset.menuKey];
@@ -2453,23 +2485,16 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         function presentationText(key) { return (PRESENTATION_UI_COPY[currentLanguage] || PRESENTATION_UI_COPY.es)[key] || key; }
         function refreshPresentationLabels() {
             document.querySelectorAll('[data-ui-label]').forEach(node => {
-                const key = node.dataset.phase3Copy;
+                const key = node.dataset.uiLabel;
+                if (!key) return;
                 node.textContent = presentationText(key === 'expand' && document.getElementById('chatSimulatorSidebar')?.classList.contains('mobile-chat-expanded') ? 'collapse' : key);
             });
             const classMenu = document.getElementById('btnProtaClassMenu');
             if (classMenu) classMenu.setAttribute('aria-label', presentationText('classLabel'));
             const toolTitle = document.querySelector('#audienceSimulatorPanel h2');
             if (toolTitle) toolTitle.textContent = presentationText('testTools');
-            const labels = {
-                '!kame':{es:'Guerrero',en:'Warrior',fr:'Guerrier',de:'Krieger',zh:'战士',ja:'戦士',pt:'Guerreiro',it:'Guerriero'},
-                '!rasen':{es:'Shinobi',en:'Shinobi',fr:'Shinobi',de:'Shinobi',zh:'忍者',ja:'忍者',pt:'Shinobi',it:'Shinobi'},
-                '!trueno':{es:'Rayo',en:'Lightning',fr:'Éclair',de:'Blitz',zh:'雷电',ja:'雷',pt:'Raio',it:'Fulmine'},
-                '!enred':{es:'Espíritu',en:'Spirit',fr:'Esprit',de:'Geist',zh:'精灵',ja:'精霊',pt:'Espírito',it:'Spirito'},
-                '!coloso':{es:'Titán',en:'Titan',fr:'Titan',de:'Titan',zh:'泰坦',ja:'巨人',pt:'Titã',it:'Titano'}
-            };
             document.querySelectorAll('[data-command-label]').forEach(node => {
-                const map = labels[node.dataset.commandLabel];
-                if (map) node.textContent = map[currentLanguage] || map.es;
+                node.textContent = arenaPowerName(node.dataset.commandLabel);
             });
         }
         document.addEventListener('click', event => {
@@ -2529,6 +2554,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             refreshPresentationLabels();
             refreshArenaFullscreenLabels();
             refreshArenaCameraSettings();
+            refreshArenaBalancePanel(true);
             syncChatDisclosureState();
             refreshArenaOperatorToolbar();
             document.querySelectorAll('#killFeed16 [data-original-notice], #killFeed9 [data-original-notice]').forEach(badge => {
@@ -2758,6 +2784,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // Canonical World Coordinate Space (Used by physics & rendered to both canvases simultaneously)
         const WORLD_W = 960;
         const WORLD_H = 540;
+        const ARENA_BASE_MELEE_DAMAGE = 12;
         // Main Floating Stage Bounds for Smash & 1v1 (Left & Right Abyss Blast Zones outside these bounds)
         const STAGE_LEFT = 125;
         const STAGE_RIGHT = 835;
@@ -3038,6 +3065,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 button.title=!arenaClassPowersAllowed()?arenaCombatRuleText('powersOff'):button.dataset.ruleBaseTitle;
             }
             for(const button of document.querySelectorAll('#arenaPanelSocial button'))button.disabled=!arenaSocialPowersAllowed();
+            refreshArenaBalancePanel();
         }
 
         let coopGroupFighterId = null;
@@ -3047,12 +3075,27 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let floatingTexts = [];
         let showCombatNumbers = false;
         let showPowerText = false;
+        const ARENA_COMBAT_DISPLAY_KEY = 'arenaLiveCombatDisplayV1';
 
-        function setCombatDisplayOption(option, enabled) {
+        function setCombatDisplayOption(option, enabled, remember = true) {
+            if (!['numbers', 'powerText'].includes(option)) return;
             if (option === 'numbers') showCombatNumbers = !!enabled;
             if (option === 'powerText') showPowerText = !!enabled;
-            // Remove currently visible text immediately when the user turns labels off.
-            floatingTexts = floatingTexts.filter(ft => ft.kind === 'effect' || (ft.kind === 'number' && showCombatNumbers) || (ft.kind === 'power' && showPowerText));
+            for (const ft of floatingTexts) {
+                const visible = (ft.kind === 'number' && showCombatNumbers) || (ft.kind === 'power' && showPowerText);
+                ft.text = visible ? ft.labelText : ft.iconText;
+            }
+            const numbers = document.getElementById('showCombatNumbersToggle');
+            const power = document.getElementById('showPowerTextToggle');
+            if (numbers) numbers.checked = showCombatNumbers;
+            if (power) power.checked = showPowerText;
+            if (remember) try { localStorage.setItem(ARENA_COMBAT_DISPLAY_KEY, JSON.stringify({numbers:showCombatNumbers, powerText:showPowerText})); } catch (_) {}
+        }
+        function loadCombatDisplayOptions() {
+            let saved;
+            try { saved = JSON.parse(localStorage.getItem(ARENA_COMBAT_DISPLAY_KEY) || 'null'); } catch (_) {}
+            setCombatDisplayOption('numbers', saved?.numbers === true, false);
+            setCombatDisplayOption('powerText', saved?.powerText === true, false);
         }
         let activeEffects = [];
 
@@ -3197,6 +3240,13 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         function getMatchedSkillCommand(value) {
             return findSkillCommandInCanonicalText(canonicalizeChatCommandText(value));
+        }
+
+        function arenaPowerName(command, language = currentLanguage) {
+            const canonical = getMatchedSkillCommand(command) || command;
+            if (canonical === '!enred' && language === 'es') return 'Enredadera';
+            const name = localizedChatCommand(canonical, language).replace(/^!/, '');
+            return name.charAt(0).toLocaleUpperCase(language) + name.slice(1);
         }
 
         const PLATFORMS = {
@@ -3513,7 +3563,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 this.maxHp = arenaCombatRules.maxHp;
                 this.hp = this.maxHp;
                 this.energy = 50;
-                this.baseDamage = 12; // Equal base combat stats for every class, including host.
+                this.baseDamage = ARENA_BASE_MELEE_DAMAGE; // Equal base stats for every class, including host.
                 this.critChance = 0.14;
                 this.coopCount = 1;
                 // Knockback grows as a fighter accumulates damage, Smash-style.
@@ -4674,6 +4724,79 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         });
         const COMBAT_TARGET_POLICY = 'nearest';
 
+        const ARENA_BALANCE_COPY = Object.freeze({
+            es: ['Equilibrio por clase','Modo','Modo actual','Duelo','Smash','Arena','Valores','Perfil de clase','Reglas de esta ronda','Básico','Especial','HP por objetivo, con energía completa y sin críticos, escudos ni apoyos.','Carga (f)','Cupo','Rango','Bloqueado','IA actual: rival más cercano. Alianzas y ventajas entre clases pendientes de definir.','Consulta: elegir un modo o una clase aquí no cambia la partida.','60 f ≈ 1 s a ritmo 1×. Cupo configurado; en Duelo solo hay un rival. Rango = sin cupo extra, dentro del alcance.'],
+            en: ['Class balance','Mode','Current mode','Duel','Smash','Arena','Values','Class profile','Current round rules','Basic','Special','HP per target at full energy, without critical hits, shields or support.','Charge (f)','Cap','Range','Blocked','Current AI: nearest rival. Class alliances and advantages await decisions.','View only: choosing a mode or class here does not change the match.','60 f ≈ 1 s at 1× pace. Configured cap; a Duel has one rival. Range = no extra cap, within attack reach.'],
+            fr: ['Équilibre des classes','Mode','Mode actuel','Duel','Smash','Arène','Valeurs','Profil de classe','Règles de la manche','Base','Spécial','PV par cible à énergie pleine, sans critiques, boucliers ni soutien.','Charge (f)','Limite','Portée','Bloqué','IA actuelle : adversaire le plus proche. Alliances et avantages de classe à définir.','Consultation : choisir un mode ou une classe ici ne modifie pas la partie.','60 f ≈ 1 s à 1×. Limite configurée ; un duel compte un adversaire. Portée = sans limite supplémentaire.'],
+            de: ['Klassenbalance','Modus','Aktueller Modus','Duell','Smash','Arena','Werte','Klassenprofil','Rundenregeln','Basis','Spezial','HP pro Ziel bei voller Energie, ohne kritische Treffer, Schilde oder Hilfe.','Ladung (f)','Limit','Reichw.','Gesperrt','Aktuelle KI: nächster Gegner. Klassenallianzen und Vorteile sind noch festzulegen.','Nur Ansicht: Modus- und Klassenwahl hier ändern den Kampf nicht.','60 f ≈ 1 s bei 1×. Konfiguriertes Limit; im Duell ein Gegner. Reichweite = kein zusätzliches Limit.'],
+            zh: ['职业平衡','模式','当前模式','决斗','平台战','竞技场','数值','职业配置','本轮规则','普通','技能','每个目标的生命伤害：满能量，无暴击、护盾或支援。','蓄力(f)','上限','范围','禁用','当前AI攻击最近的敌人。职业联盟与克制关系尚待决定。','仅查看：在此选择模式或职业不会改变比赛。','1×速度下60f约为1秒。决斗仅有一名对手；范围表示射程内无额外目标上限。'],
+            ja: ['クラスバランス','モード','現在のモード','決闘','スマッシュ','アリーナ','数値','クラス設定','ラウンドルール','通常','必殺','各対象のHPダメージ。満タンのエネルギーで、クリティカル・シールド・支援なし。','溜め(f)','上限','範囲','無効','現在のAIは最も近い敵を選択。同盟とクラス相性は未設定です。','表示のみ：ここでモードやクラスを選んでも試合は変わりません。','1×速度で60f ≈ 1秒。決闘の相手は1人。範囲＝射程内に追加の対象上限なし。'],
+            pt: ['Equilíbrio por classe','Modo','Modo atual','Duelo','Smash','Arena','Valores','Perfil da classe','Regras da rodada','Básico','Especial','HP por alvo, energia cheia, sem críticos, escudos ou apoios.','Carga (f)','Limite','Alcance','Bloqueado','IA atual: rival mais próximo. Alianças e vantagens entre classes ainda por definir.','Consulta: escolher modo ou classe aqui não altera a partida.','60 f ≈ 1 s a 1×. Limite configurado; no duelo há um rival. Alcance = sem limite extra dentro do alcance.'],
+            it: ['Equilibrio delle classi','Modalità','Modalità attuale','Duello','Smash','Arena','Valori','Profilo classe','Regole del round','Base','Speciale','HP per bersaglio, energia piena, senza critici, scudi o supporti.','Carica (f)','Limite','Portata','Bloccato','IA attuale: rivale più vicino. Alleanze e vantaggi tra classi da definire.','Solo consultazione: scegliere modalità o classe qui non cambia la partita.','60 f ≈ 1 s a 1×. Limite configurato; un rivale nel duello. Portata = nessun limite aggiuntivo nel raggio.']
+        });
+        const ARENA_BALANCE_WORDS = ['title','mode','current','duel','smash','iso','profile','nominal','round','basic','special','assumption','windup','targets','range','blocked','policy','readOnly','note'];
+        let arenaBalanceSelectedClass = 'kame';
+        let arenaBalanceRenderKey = '';
+        function arenaBalanceText(key) {
+            return (ARENA_BALANCE_COPY[currentLanguage] || ARENA_BALANCE_COPY.es)[ARENA_BALANCE_WORDS.indexOf(key)] || key;
+        }
+        function getArenaBalanceSnapshot(mode = activeMode, profile = 'nominal') {
+            const selectedMode = Object.hasOwn(ARENA_CLASS_BALANCE, mode) ? mode : activeMode;
+            const useRound = profile === 'round';
+            const multiplier = useRound ? arenaCombatRules.damage : 1;
+            const rows = CLASS_KEY_ORDER.map(key => {
+                const rule = ARENA_CLASS_BALANCE[selectedMode][key];
+                const allowed = !useRound || arenaCombatRules.classRule === 'any' || arenaCombatRules.classRule === key;
+                const powers = allowed && (!useRound || arenaClassPowersAllowed());
+                return Object.freeze({key, base: allowed ? Math.max(1, Math.round(ARENA_BASE_MELEE_DAMAGE * multiplier)) : 0,
+                    special: powers ? Math.max(1, Math.round(rule.damage * multiplier)) : 0,
+                    nominalBase:ARENA_BASE_MELEE_DAMAGE, nominalSpecial:rule.damage,
+                    windup:rule.windup, targets:rule.targets, allowed, powers,
+                    command:CLASS_COMMANDS[key].powers[0]});
+            });
+            return Object.freeze({mode:selectedMode, profile:useRound?'round':'nominal', multiplier, rows:Object.freeze(rows)});
+        }
+        function selectArenaBalanceClass(key) {
+            if (!CLASS_KEY_ORDER.includes(key)) return;
+            arenaBalanceSelectedClass = key;
+            refreshArenaBalancePanel(true);
+        }
+        function refreshArenaBalancePanel(force = false) {
+            const panel = document.getElementById('arenaBalancePanel');
+            if (!panel) return;
+            const section = panel.closest('.arena-settings-section');
+            if (section && !section.open && !force) return;
+            const modeSelect = document.getElementById('arenaBalanceMode');
+            const profileSelect = document.getElementById('arenaBalanceProfile');
+            const snapshot = getArenaBalanceSnapshot(modeSelect.value, profileSelect.value);
+            const key = JSON.stringify([snapshot, currentLanguage, arenaBalanceSelectedClass]);
+            if (!force && key === arenaBalanceRenderKey) return;
+            arenaBalanceRenderKey = key;
+            document.getElementById('arenaBalanceTitle').textContent = `⚖️ ${arenaBalanceText('title')}`;
+            panel.querySelectorAll('[data-balance-copy]').forEach(node => node.textContent = arenaBalanceText(node.dataset.balanceCopy));
+            modeSelect.querySelector('[value="current"]').textContent = `${arenaBalanceText('current')} · ${arenaBalanceText(activeMode === '1v1' ? 'duel' : activeMode)}`;
+            // All modes share a scale so switching Duel/Smash/Arena cannot disguise a damage change.
+            const referenceMax = Math.max(ARENA_BASE_MELEE_DAMAGE, ...Object.values(ARENA_CLASS_BALANCE).flatMap(mode => Object.values(mode).map(rule => rule.damage)));
+            const max = Math.max(10, Math.ceil(referenceMax * snapshot.multiplier / 10) * 10);
+            document.getElementById('arenaBalanceScale').textContent = `0–${max} HP`;
+            const chart = document.getElementById('arenaBalanceChart');
+            const focusedClass = chart.contains(document.activeElement) ? document.activeElement.dataset.balanceClass : null;
+            chart.innerHTML = snapshot.rows.map(row => `<button type="button" class="arena-balance-row" data-operator-keep-open data-balance-class="${row.key}" aria-pressed="${arenaBalanceSelectedClass === row.key}" onclick="selectArenaBalanceClass('${row.key}')">
+                <span class="arena-balance-name"><span>${CLASS_COMMANDS[row.key].icon} ${escapeHTML(localizedClassName(row.key))}</span><code>${escapeHTML(localizedChatCommand(row.command))}</code></span>
+                ${[['basic',row.base],['special',row.special]].map(([metric,value])=>`<span class="arena-balance-line"><span>${escapeHTML(arenaBalanceText(metric))}</span><span class="arena-balance-track" aria-hidden="true"><span class="${metric==='special'?'is-special':''}" style="width:${value/max*100}%"></span></span><output data-balance-value="${metric}" aria-label="${escapeHTML(arenaBalanceText(metric))}: ${value} HP">${value}</output></span>`).join('')}
+            </button>`).join('');
+            if (focusedClass) chart.querySelector(`[data-balance-class="${focusedClass}"]`)?.focus({preventScroll:true});
+            const selected = snapshot.rows.find(row => row.key === arenaBalanceSelectedClass);
+            const comparison = ['1v1','smash','iso'].map(mode => {
+                const rule = ARENA_CLASS_BALANCE[mode][selected.key];
+                return `<tr><th scope="row">${escapeHTML(arenaBalanceText(mode==='1v1'?'duel':mode))}</th><td>${rule.damage}</td><td>${rule.windup}</td><td>${rule.targets ?? escapeHTML(arenaBalanceText('range'))}</td></tr>`;
+            }).join('');
+            document.getElementById('arenaBalanceDetail').innerHTML = `<strong>${escapeHTML(localizedClassName(selected.key))} · ${escapeHTML(arenaPowerName(selected.command))}</strong>
+                <p>${snapshot.multiplier}× · ${escapeHTML(arenaBalanceText('basic'))}: ${selected.base} HP · ${escapeHTML(arenaBalanceText('special'))}: ${selected.special} HP${selected.allowed && selected.powers?'':' · '+escapeHTML(arenaBalanceText('blocked'))}</p>
+                <table aria-label="${escapeHTML(arenaBalanceText('nominal'))}"><thead><tr><th>${escapeHTML(arenaBalanceText('mode'))}</th><th>${escapeHTML(arenaBalanceText('special'))}</th><th>${escapeHTML(arenaBalanceText('windup'))}</th><th>${escapeHTML(arenaBalanceText('targets'))}</th></tr></thead><tbody>${comparison}</tbody></table>
+                <p class="arena-balance-hint">${escapeHTML(arenaBalanceText('note'))}</p>`;
+        }
+
         function getFighterSpecialRule(fighter) {
             return ARENA_CLASS_BALANCE[activeMode]?.[fighter?.archetypeKey] || null;
         }
@@ -4807,7 +4930,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     timer: 36,
                     maxTimer: 36
                 });
-                spawnFloatingText(fighter.x, fighter.y - 44, '☄️ ¡KAME!', '#00f3ff', 18);
+                spawnFloatingText(fighter.x, fighter.y - 44, `☄️ ${arenaPowerName('!kame')}`, '#00f3ff', 18, 'power');
 
                 getFighterSpecialTargets(fighter, target =>
                     (dir === 1 ? target.x > fighter.x - 10 : target.x < fighter.x + 10)
@@ -4833,7 +4956,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     timer: 32,
                     maxTimer: 32
                 });
-                spawnFloatingText(fighter.x, fighter.y - 44, '🌀 ¡RASEN!', '#38bdf8', 18);
+                spawnFloatingText(fighter.x, fighter.y - 44, `🌀 ${arenaPowerName('!rasen')}`, '#38bdf8', 18, 'power');
 
                 const target = findPreferredCombatTarget(fighter, other =>
                     Math.hypot(other.x - fighter.x, other.y - fighter.y) < 170
@@ -4845,7 +4968,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 screenShake = 11;
                 skyFlashTimer = 10;
                 skyFlashColor = '#c084fc';
-                spawnFloatingText(fighter.x, fighter.y - 44, '⚡ ¡TORMENTA ELÉCTRICA!', '#c084fc', 18);
+                spawnFloatingText(fighter.x, fighter.y - 44, `⚡ ${arenaPowerName('!trueno')}`, '#c084fc', 18, 'power');
 
                 let struck = 0;
                 getFighterSpecialTargets(fighter, target =>
@@ -4898,7 +5021,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                         spawnParticle(fighter.x + dir * step * 22, fighter.y - 6, '#4ade80', 2.8, 18, 0.05);
                     }
                 }
-                spawnFloatingText(fighter.x, fighter.y - 44, '🌿', '#4ade80', 20);
+                spawnFloatingText(fighter.x, fighter.y - 44, `🌿 ${arenaPowerName('!enred')}`, '#4ade80', 20, 'power');
 
             } else if (cmd === '!coloso' || cmd === '!golpecolosal') {
                 playSound('hit');
@@ -4914,7 +5037,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     }
                 });
                 for (let i = 0; i < 22; i++) spawnParticle(fighter.x + (Math.random() - 0.5) * 150, fighter.y + fighter.radius, '#fb7185', 4.5, 24, 0.15);
-                spawnFloatingText(fighter.x, fighter.y - 45, '💥', '#fb7185', 21);
+                spawnFloatingText(fighter.x, fighter.y - 45, `💥 ${arenaPowerName('!coloso')}`, '#fb7185', 21, 'power');
 
             }
         }
@@ -6204,14 +6327,14 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             });
         }
 
-        function spawnFloatingText(x, y, text, color = '#ffffff', size = 13) {
+        function spawnFloatingText(x, y, text, color = '#ffffff', size = 13, kindHint = null) {
             // On-stage text is intentionally minimal: visual effects + optional numbers/power labels only.
             const raw = String(text ?? '');
             let label = raw;
             let kind = 'effect';
             const lower = raw.toLocaleLowerCase();
-            const powerMatch = /kamehameha|rasengan|tormenta el[eé]ctrica|electric storm|ninja|tit[aá]n|trueno|thunder|skill|poder|habilidad|ready:|cargando|charging/i.test(raw);
-            const numberMatch = /-\s*\d+|\+\s*\d+|\b\d+\s*(?:vida|hp|energ[ií]a|energy)|energ[ií]a\s*\d+/i.test(raw);
+            const powerMatch = kindHint === 'power' || /kame|rasen|coloso|enred|tormenta el[eé]ctrica|electric storm|ninja|tit[aá]n|trueno|thunder|skill|poder|habilidad|ready:|cargando|charging/i.test(raw);
+            const numberMatch = /[-−]\s*\d+|\+\s*\d+|\b\d+\s*(?:vida|hp|energ[ií]a|energy)|energ[ií]a\s*\d+/i.test(raw);
             if (powerMatch) {
                 kind = 'power';
                 if (!showPowerText) {
@@ -6258,12 +6381,16 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     label = emoji ? emoji[0] : '✨';
                 }
             }
-            // Phase 3: in-arena text is icon-only. Any descriptive copy belongs in chat.
+            // Retain the textual form so settings can reveal existing labels immediately.
+            const labelText = kind === 'effect' ? label : (kind === 'number' && showCombatNumbers ? label : raw);
             const symbols = {number:'💥', power:'✨'};
-            const recognizable = String(label).match(/(?:[\p{Extended_Pictographic}][\uFE0F\u200D\p{Extended_Pictographic}]*)/u);
-            label = recognizable ? recognizable[0] : (symbols[kind] || '✨');
+            const iconPattern = /(?:[\p{Extended_Pictographic}][\uFE0F\u200D\p{Extended_Pictographic}]*)/u;
+            const recognizable = raw.match(iconPattern) || String(label).match(iconPattern);
+            const iconText = recognizable ? recognizable[0] : (symbols[kind] || '✨');
+            const visible = (kind === 'number' && showCombatNumbers) || (kind === 'power' && showPowerText);
+            label = visible ? labelText : iconText;
             if (floatingTexts.length >= MAX_FLOATING_TEXTS) floatingTexts.splice(0, floatingTexts.length - MAX_FLOATING_TEXTS + 1);
-            floatingTexts.push({ x, y, text: label, color, size: kind === 'effect' ? Math.min(size, 18) : size, life: 48, kind });
+            floatingTexts.push({ x, y, text: label, labelText, iconText, color, size: kind === 'effect' ? Math.min(size, 18) : size, life: 48, kind });
         }
 
         /*************************************************************************
@@ -7096,7 +7223,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             fighter.color = fighter.isStreamer ? '#ffbe0b' : archetype.color;
             fighter.secondary = archetype.secondary;
             fighter.headband = archetype.headband;
-            fighter.baseDamage = 12; // Class changes modify visuals and signature special only.
+            fighter.baseDamage = ARENA_BASE_MELEE_DAMAGE; // Class changes modify visuals and signature special only.
             return true;
         }
 
@@ -7706,6 +7833,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             } catch (_e) { /* Continue with Spanish when storage is unavailable. */ }
             loadArenaCombatRules();
             loadArenaCameraSettings();
+            loadCombatDisplayOptions();
             setLanguage(preferredLanguage);
             toggleAutoChat(false);
             installTouchControls();
@@ -7873,7 +8001,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.9';
+        const ARENA_RELEASE_VERSION = '0.10';
         const ARENA_RELEASE_EDITION = 'tiktok';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:10, footer:76});
@@ -7946,7 +8074,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
         function refreshArenaObsCalibrationLabels() {
           const c=ARENA_OBS_COPY[currentLanguage]||ARENA_OBS_COPY.es;
-          const translated={arenaObsCalibrationTitle:`📐 ${c[0]} · v${ARENA_RELEASE_VERSION}`,arenaObsResetCalibration:c[1],arenaObsCalibrationHint:c[2]};
+          const translated={arenaObsCalibrationTitle:`📐 ${c[0]}`,arenaObsResetCalibration:c[1],arenaObsCalibrationHint:c[2]};
           for(const [id,value] of Object.entries(translated)){const element=document.getElementById(id);if(element)element.textContent=value;}
           const n=document.getElementById('arenaObsVerticalOffsetLabel');
           if(n){n.firstChild.textContent=c[3]+': ';}
@@ -8546,12 +8674,14 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             [...settings.children].forEach((card,index)=>{
                 const h=card.querySelector('h3');if(!h)return;
                 const section=document.createElement('details');section.className='arena-settings-section';section.open=index===0;
+                if(card.id)section.id=card.id;
+                if(card.hasAttribute('data-no-translate'))section.setAttribute('data-no-translate','');
                 const heading=card.firstElementChild;
                 const summary=document.createElement('summary');summary.appendChild(h);
                 const body=document.createElement('div');body.className='arena-settings-content';
                 if(heading!==h && !heading.querySelector('input,select,button'))heading.remove();
                 body.append(...card.childNodes);section.append(summary,body);card.replaceWith(section);
-                section.addEventListener('toggle',()=>{if(arenaWorkspace.restoring)return;arenaWorkspace.layouts[arenaWorkspace.mode].settings[index]=section.open;scheduleArenaWorkspaceSave();});
+                section.addEventListener('toggle',()=>{if(section.contains(document.getElementById('arenaBalancePanel'))&&section.open)refreshArenaBalancePanel(true);if(arenaWorkspace.restoring)return;arenaWorkspace.layouts[arenaWorkspace.mode].settings[index]=section.open;scheduleArenaWorkspaceSave();});
             });
             for(const args of [['arenaLeftResizer','leftWidth'],['arenaRightResizer','rightWidth'],['arenaStreamResizer','leftWidth']])installArenaDockResizer(...args);
             document.getElementById('arenaStreamClose').addEventListener('click',()=>{closeArenaOperatorPopover();if(isSettingsOpen)toggleSettingsModal(false);});
@@ -8620,7 +8750,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.9.0',
+            version: '0.10.0',
             edition: 'tiktok',
             getBalanceRules() {
                 return ARENA_CLASS_BALANCE;

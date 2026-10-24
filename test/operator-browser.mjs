@@ -1,4 +1,4 @@
-// Browser regressions for the unified v0.9 release. Never connects to a real TikTok LIVE.
+// Browser regressions for the unified v0.10 release. Never connects to a real TikTok LIVE.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -43,8 +43,8 @@ const shot=async name=>{if(process.env.ARENA_TEST_SCREENSHOTS){await mkdir(proce
 async function unfold(id){const panel=page.locator('#'+id);if(!await panel.evaluate(n=>n.open))await panel.locator('> summary').click({noWaitAfter:true});}
 async function settingsSection(index){const section=page.locator('.arena-settings-section').nth(index);if(!await section.evaluate(n=>n.open))await section.locator('> summary').click({noWaitAfter:true});}
 async function streamClick(id){await page.mouse.move(600,20);await page.locator('#'+id).click({noWaitAfter:true});}
-await check('v0.9 starts with large game, left chat and only the social test group expanded',async()=>{
- assert.equal(await page.evaluate(()=>ArenaLive.version),'0.9.0');
+await check('v0.10 starts with large game, left chat and only the social test group expanded',async()=>{
+ assert.equal(await page.evaluate(()=>ArenaLive.version),'0.10.0');
  const panels=await page.locator('.arena-work-panel').evaluateAll(ns=>ns.map(n=>({id:n.id,open:n.open,parent:n.parentElement.id})));
  assert.equal(panels.find(n=>n.id==='arenaPanelChat').parent,'arenaDockLeft');
  assert.deepEqual(panels.filter(n=>n.open&&n.id!=='arenaPanelChat').map(n=>n.id),['arenaPanelSocial']);
@@ -303,10 +303,10 @@ await check('Mobile special action follows the no-powers rule while movement and
  await page.locator('#arenaPowerMode').selectOption('noSpecials');await page.keyboard.press('Escape');assert.equal(await page.locator('#arenaMobilePower').isDisabled(),true);assert.equal(await page.locator('#arenaMobileAttack').isEnabled(),true);assert.equal(await page.locator('#arenaMobileJump').isEnabled(),true);
 });
  await check('Unified release uses native clock, randomness, animation and the TikTok bridge',async()=>{
-  const status=await (await page.request.get(`http://127.0.0.1:${port}/api/status`)).json();assert.equal(status.version,'0.9.0');
+  const status=await (await page.request.get(`http://127.0.0.1:${port}/api/status`)).json();assert.equal(status.version,'0.10.0');
   const native=await page.evaluate(()=>({clock:Date.now.toString().includes('[native code]'),random:Math.random.toString().includes('[native code]'),raf:requestAnimationFrame.toString().includes('[native code]'),harness:typeof window.ArenaBalanceHarness}));
   assert.deepEqual(native,{clock:true,random:true,raf:true,harness:'undefined'});
-  assert.match(await page.locator('#arenaSettingsVersion').textContent(),/v0\.9/);
+  assert.match(await page.locator('#arenaVersionInfo').textContent(),/v0\.10/);
   assert.equal(await page.evaluate(()=>Object.isFrozen(ArenaLive.getBalanceRules())&&Object.isFrozen(ArenaLive.getBalanceRules().iso.ninja)),true);
  });
  await check('Playable powers apply the measured damage, windup and target caps in all three modes',async()=>{
@@ -579,5 +579,82 @@ await check('Static Full HD layers are bounded, refresh with scene changes and n
   return {reused,fresh,victory,lobby,floorSize:[floor.width,floor.height],nativeBackground:[arenaBackgroundCache.get(ctx16).layer.width,arenaBackgroundCache.get(ctx16).layer.height]};
  });assert.deepEqual(result,{reused:true,fresh:true,victory:true,lobby:true,floorSize:[2176,1336],nativeBackground:[1920,1080]});
 });
-assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:'0.9.0'}));
+await check('Settings shows the release only in its footer and retains UI/power names through all eight languages',async()=>{
+ await page.setViewportSize({width:1720,height:900});const cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.setTouchEmulationEnabled',{enabled:false});
+ await page.evaluate(()=>{toggleSettingsModal(true);countdownsEnabled=false;});
+ assert.equal(await page.locator('#arenaSettingsVersion').count(),0);assert.equal(await page.locator('#arenaVersionInfo').isVisible(),true);
+ assert.equal(await page.locator('#arenaVersionInfo').textContent(),'Arena Live v0.10 · TikTok');
+ assert.equal(await page.locator('#settingsPauseModal').evaluate(n=>(n.textContent.match(/v0\.10/g)||[]).length),1);
+ for(const language of ['es','en','fr','de','zh','ja','pt','it']){
+  await page.evaluate(language=>setLanguage(language),language);
+  assert.equal(await page.locator('#arenaVersionInfo').textContent(),'Arena Live v0.10 · TikTok');
+  assert.equal(await page.locator('[data-ui-label]').evaluateAll(ns=>ns.every(n=>n.textContent.trim()&&!/undefined|null/.test(n.textContent))),true);
+  assert.equal(await page.locator('[data-command-label]').evaluateAll(ns=>ns.every(n=>n.textContent.trim())),true);
+ }
+ await page.evaluate(()=>setLanguage('es'));
+ assert.deepEqual(await page.locator('[data-command-label]').evaluateAll(ns=>Object.fromEntries(ns.map(n=>[n.dataset.commandLabel,n.textContent]))),{'!kame':'Kame','!rasen':'Rasen','!trueno':'Trueno','!enred':'Enredadera','!coloso':'Coloso'});
+});
+await check('Display settings reveal real attack names and damage numbers immediately, persist, and preserve OBS/layout preferences',async()=>{
+ const section=page.locator('.arena-settings-section').filter({has:page.locator('#showPowerTextToggle')});if(!await section.evaluate(n=>n.open))await section.locator('summary').click();
+ const calibration=await page.evaluate(()=>localStorage.getItem(ARENA_OBS_CALIBRATION_KEY));
+ await page.locator('#showPowerTextToggle').check();await page.locator('#showCombatNumbersToggle').check();assert.equal((await state()).paused,true);
+ const labels=await page.evaluate(()=>{
+  arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};gameState='COMBAT';activeMode='smash';isGamePaused=true;soundEnabled=false;
+  return ['kame','ninja','titan','trueno','esmeralda'].map(key=>{
+   const actor=new Fighter('@display_'+key,'tiktok',false,key),target=new Fighter('@display_target','tiktok',false,'ninja');
+   actor.x=300;actor.y=300;actor.facing=1;target.x=330;target.y=300;target.hp=target.maxHp=100000;fighters=[actor,target];floatingTexts=[];
+   executeFighterSkill(actor,CLASS_COMMANDS[key].powers[0]);
+   return {power:floatingTexts.some(ft=>ft.kind==='power'&&ft.text.includes(arenaPowerName(CLASS_COMMANDS[key].powers[0]))),damage:floatingTexts.some(ft=>ft.kind==='number'&&/\d/.test(ft.text))};
+  });
+ });assert.ok(labels.every(row=>row.power&&row.damage));
+ await page.locator('#showPowerTextToggle').uncheck();await page.locator('#showCombatNumbersToggle').uncheck();
+ assert.equal(await page.evaluate(()=>floatingTexts.every(ft=>!/[\p{L}\p{N}]/u.test(ft.text))),true);
+ await page.locator('#showPowerTextToggle').check();await page.locator('#showCombatNumbersToggle').check();
+ assert.equal(await page.evaluate(()=>floatingTexts.some(ft=>ft.text.includes('Enredadera'))),true);
+ await page.reload({waitUntil:'load'});await page.waitForFunction(()=>arenaLiveInitialized);await page.evaluate(()=>countdownsEnabled=false);
+ assert.equal(await page.evaluate(()=>showPowerText&&showCombatNumbers),true);assert.equal(await page.evaluate(()=>localStorage.getItem(ARENA_OBS_CALIBRATION_KEY)),calibration);
+});
+const openBalance=async()=>{
+ if(!(await state()).settingsOpen)await page.evaluate(()=>toggleSettingsModal(true));
+ const section=page.locator('#arenaBalancePanel');if(!await section.evaluate(n=>n.open))await section.locator('> summary').click();
+};
+await check('Balance inspection compares actual damage in all modes on a common scale without changing the match',async()=>{
+ await openBalance();
+ const before=await state(),beforeRects=await rects();
+ const expected={'1v1':[43,38,38,37,37],smash:[44,50,38,28,44],iso:[38,60,38,32,60]};
+ for(const [mode,values] of Object.entries(expected)){
+  await page.locator('#arenaBalanceMode').selectOption(mode);
+  assert.deepEqual(await page.locator('[data-balance-value="special"]').evaluateAll(ns=>ns.map(n=>Number(n.textContent))),values);
+  assert.deepEqual(await page.locator('[data-balance-value="basic"]').evaluateAll(ns=>ns.map(n=>Number(n.textContent))),[12,12,12,12,12]);
+  assert.equal(await page.locator('#arenaBalanceScale').textContent(),'0–60 HP');
+ }
+ await page.locator('[data-balance-class="esmeralda"]').click();
+ assert.equal(await page.locator('.arena-balance-row[aria-pressed="true"]').count(),1);assert.match(await page.locator('#arenaBalanceDetail').innerText(),/Enredadera/);
+ assert.equal(await page.evaluate(()=>document.activeElement?.dataset.balanceClass),'esmeralda');
+ assert.deepEqual(await state(),before);assert.deepEqual(await rects(),beforeRects);assert.match(await page.locator('#arenaBalancePanel').innerText(),/rival más cercano/);
+});
+await check('Balance bars reflect round damage, blocked specials and class restrictions while the nominal profile stays available',async()=>{
+ await page.locator('#arenaBalanceProfile').selectOption('round');
+ await page.evaluate(()=>setArenaCombatRule('damage',1.25));
+ assert.equal(await page.locator('[data-balance-class="kame"] [data-balance-value="basic"]').textContent(),'15');
+ assert.equal(await page.locator('[data-balance-class="kame"] [data-balance-value="special"]').textContent(),'48');
+ await page.evaluate(()=>setArenaCombatRule('powerMode','noSpecials'));
+ assert.equal(await page.locator('[data-balance-value="special"]').evaluateAll(ns=>ns.every(n=>n.textContent==='0')),true);
+ await page.evaluate(()=>setArenaCombatRule('classRule','kame'));
+ assert.equal(await page.locator('[data-balance-class="ninja"] [data-balance-value="basic"]').textContent(),'0');
+ await page.locator('#arenaBalanceProfile').selectOption('nominal');
+ assert.equal(await page.locator('[data-balance-class="ninja"] [data-balance-value="special"]').textContent(),'60');
+ await page.evaluate(()=>resetArenaCombatRules());
+});
+await check('The balance menu stays readable in Stream, retains the selected menu and leaves both OBS crops stable',async()=>{
+ await page.evaluate(()=>toggleSettingsModal(false));await page.setViewportSize({width:3440,height:1440});
+ await page.locator('#btnFullscreenDual').click();await page.waitForFunction(()=>document.fullscreenElement?.id==='broadcastStageSection');
+ await streamClick('arenaDualSettingsBtn');await openBalance();const before=await rects();
+ await page.locator('#arenaBalanceMode').selectOption('smash');await page.locator('[data-balance-class="titan"]').click();
+ assert.equal((await state()).settingsOpen,true);assert.deepEqual(await rects(),before);
+ assert.equal(await page.locator('#arenaBalancePanel').evaluate(n=>n.scrollWidth<=n.clientWidth+1),true);
+ assert.equal(await page.locator('#arenaVersionInfo').isVisible(),true);await shot('balance-stream');
+ await page.locator('#arenaStreamClose').click();assert.equal((await state()).paused,false);assert.deepEqual(await rects(),before);
+});
+assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:'0.10.0'}));
 } finally {await browser?.close();server.kill('SIGKILL');}

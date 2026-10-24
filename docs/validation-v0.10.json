@@ -1,0 +1,94 @@
+{
+  "release": "0.10.0",
+  "date": "2026-10-23",
+  "sourceGitBlob": "c157f301b3193570a05c552b47a2ad661eedf37d",
+  "previousSourceGitBlob": "a700406e547925709e2984effe10950be37ce4be",
+  "node": {
+    "passed": 45,
+    "failed": 0
+  },
+  "browser": {
+    "passed": 58,
+    "errors": 0,
+    "locales": [
+      "es",
+      "en",
+      "fr",
+      "de",
+      "zh",
+      "ja",
+      "pt",
+      "it"
+    ]
+  },
+  "performance": {
+    "passed": 12,
+    "errors": 0,
+    "report": "performance-v0.10.json",
+    "conditions": {
+      "node": "v24.19.0",
+      "browser": "153.0.8010.0",
+      "gpu": "disabled; software raster and readback included",
+      "viewport": "1720x720",
+      "simulationHz": 60,
+      "workload": "Constant-population timings disable knockback in both sources and suppress autonomous specials; subsequent stress checks restore full knockback and specials."
+    }
+  },
+  "settings": {
+    "versionLocation": "One version in the Settings footer; no header or calibration duplicate.",
+    "powerNames": [
+      "Kame",
+      "Rasen",
+      "Coloso",
+      "Trueno",
+      "Enredadera"
+    ],
+    "displayOptionsStorageKey": "arenaLiveCombatDisplayV1",
+    "liveLabelsAndIcons": true,
+    "unicodeDamageRecognized": true,
+    "OBSAndWorkspaceStoragePreserved": true
+  },
+  "balanceInspector": {
+    "classCount": 5,
+    "modes": [
+      "1v1",
+      "smash",
+      "iso"
+    ],
+    "sharedBaseDamage": 12,
+    "profiles": [
+      "nominal",
+      "round"
+    ],
+    "commonModeScale": true,
+    "readsNativePowerRules": true,
+    "readOnly": true,
+    "roundRulesReflected": [
+      "damage",
+      "classRule",
+      "powerMode"
+    ],
+    "retainsStreamSelectionAndCropRectangles": true
+  },
+  "combatRegression": {
+    "matches": 240,
+    "exactMatches": 240,
+    "duels": 160,
+    "smash": 20,
+    "arena": 60,
+    "errors": [],
+    "comparison": "Complete per-match winner, time, damage, special, interruption and elimination telemetry exactly reproduces v0.9."
+  },
+  "pendingDesign": [
+    "Shinobi protection/final victory rule",
+    "Warrior and Titan narrative targeting priorities",
+    "Directed class-rivalry cycle",
+    "Class matchup damage factors and basic/special scope"
+  ],
+  "limitations": [
+    "New class alliances and rival damage modifiers are not activated by this inspector.",
+    "Damage bars describe configuration; they do not certify equal win rates.",
+    "TikTok was simulated; no real LIVE connection was made.",
+    "Software-rendered browser timings are not user-PC or OBS FPS."
+  ]
+}

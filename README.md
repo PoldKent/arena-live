@@ -1,16 +1,16 @@
-# Arena Live · v0.9
+# Arena Live · v0.10
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
 ## Versión principal
 
-`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. Ajustes, la API del juego, el servidor y el paquete identifican la versión 0.9. [Cambios y validación](docs/RELEASE-0.9-FULL-HD.md).
+`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API, el servidor y el paquete identifican la versión 0.10. [Cambios y validación](docs/RELEASE-0.10-AJUSTES-EQUILIBRIO.md).
 
 ## Rendimiento con 128 jugadores
 
 La selección de rivales usa un recorrido lineal por luchador y las colisiones descartan cuerpos lejanos antes de calcular distancias. Ambas capturas comparten el orden de dibujo, las medidas de los nombres se reutilizan y el HUD solo cambia los valores que variaron. Los escenarios actualizan sus controles una vez al completar la lista; los chats agrupan scroll y contadores por cuadro.
 
-Se mantiene el cupo de 128, todos los poderes, los efectos y las dos vistas sincronizadas. Los fondos y el suelo isométrico reutilizan capas estáticas para reducir el coste de dibujar Full HD; jugadores, textos y efectos se actualizan en cada cuadro. [Mediciones de v0.9](docs/performance-v0.9.json). Las cifras de este entorno no sustituyen una prueba en tu equipo con OBS.
+Se mantiene el cupo de 128, todos los poderes, los efectos y las dos vistas sincronizadas. Los fondos y el suelo isométrico reutilizan capas estáticas para reducir el coste de dibujar Full HD; jugadores, textos y efectos se actualizan en cada cuadro. [Mediciones de v0.10](docs/performance-v0.10.json). Las cifras de este entorno no sustituyen una prueba en tu equipo con OBS.
 
 ## Instalar y arrancar en Windows
 
@@ -25,7 +25,7 @@ npm.cmd start
 
 Abre **http://127.0.0.1:4173/** y conserva abierta la consola. TikTok comienza desconectado; **📡 TikTok** conecta o desconecta según el estado real del puente.
 
-Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd install` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.9** en Ajustes.
+Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd install` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.10 en el pie de Ajustes**.
 
 Para volver a `main` desde una rama anterior:
 
@@ -65,6 +65,8 @@ La barra horizontal empieza por **Vista, Pantalla, Pruebas y Ajustes**. Incluye 
 **Opacidad de la información del juego** afecta a textos y barras de ambas vistas; **100 % = totalmente visible**. Tiene una explicación visible y ayuda al pasar el cursor.
 
 **Vibración de cámara**, en **Ajustes → Pantallas y OBS**, comienza al **25 %** y admite **0–100 %**; **0 %** la apaga. Afecta a ambas vistas y se recuerda en este navegador. Conserva el daño, el empuje, las reglas y la calibración de OBS.
+
+La versión aparece únicamente abajo, en el pie de Ajustes. **Mostrar números de daño/curación** y **Mostrar texto de los poderes**, en Audiencia y chat, revelan u ocultan los textos inmediatamente, incluso en animaciones ya visibles. Las opciones se recuerdan en este navegador y conservan los iconos al apagar las letras. Los botones de poderes muestran Kame, Rasen, Trueno, Enredadera y Coloso, con sus nombres adaptados al idioma.
 
 ## Reglas y parámetros de pelea
 
@@ -127,7 +129,13 @@ En este modo **WASD** mueve en el plano, y mantener Espacio pulsado no encadena 
 
 ## Equilibrio de clases
 
+**Ajustes → Equilibrio por clase** muestra barras de daño básico y especial para las cinco clases. Elige Duelo, Smash, Arena o el modo actual. La escala es común entre modos para comparar valores. **Perfil de clase** muestra las potencias nominales; **Reglas de esta ronda** aplica el multiplicador global, las restricciones de clase y los poderes deshabilitados. El daño es por objetivo, con energía completa, sin críticos, escudos ni apoyos.
+
+Pulsa una clase para consultar el nombre del poder, su carga y cupo configurado en los tres modos. El inspector lee las mismas constantes del combate. Estas selecciones son de consulta: conservan la partida y sus reglas. En Stream permanecen en Ajustes, dentro de la columna izquierda.
+
 Todas las clases eligen al rival cercano. Daño, carga y objetivos de los poderes se definen en `ARENA_CLASS_BALANCE` dentro de `index.html`, compartido por IA, Prota, chat y herramientas. En Arena, Kame y Coloso alcanzan hasta tres objetivos; Trueno alcanza tres en Arena y dos en Smash. Shinobi y Espíritu cargan antes en partidas con varios jugadores.
+
+La siguiente decisión de diseño debe preservar Guerreros que se enfrentan entre sí, Shinobi que se protegen y Titanes que atacan a todos. Las alianzas, su condición de victoria y las nuevas ventajas circulares todavía requieren elección. No se activan al consultar las barras. El daño, la carga, el alcance, el número de blancos y la cooperación deben evaluarse juntos mediante partidas; las barras por sí solas no garantizan tasas de victoria iguales.
 
 La integración de v0.6 reprodujo 33.000 casos del candidato: 16.000 duelos con poderes, 16.000 controles y 1.000 partidas con varios jugadores. [Resultados de esa geometría e intervalos](docs/balance-v0.6-summary.json). v0.8 conserva esas potencias, pero corrige el suelo, las caídas y las cargas en movimiento de Arena: sus resultados con varios jugadores pueden cambiar y las tasas históricas no deben atribuirse a la arena actual. El [diagnóstico v0.5](docs/BALANCE-CLASES-v0.5.md) también se conserva como antecedente.
 
@@ -146,6 +154,7 @@ npm.cmd run test:performance
 
 Las pruebas del navegador arrancan y cierran su servidor local y simulan las respuestas de TikTok. Cubren paneles, persistencia, escenarios, chats, pausa, capturas, idiomas y controles móviles; no conectan con una emisión real.
 
+- [Ajustes corregidos e inspector de equilibrio en v0.10](docs/RELEASE-0.10-AJUSTES-EQUILIBRIO.md).
 - [Full HD y efectos de toda la vista en v0.9](docs/RELEASE-0.9-FULL-HD.md).
 - [Arena ampliada, caída, rescate y vibración de v0.8](docs/RELEASE-0.8-ARENA.md).
 - [Comandos visibles de entradas y especiales en v0.7](docs/RELEASE-0.7-COMANDOS.md).
@@ -158,4 +167,4 @@ Las pruebas del navegador arrancan y cierran su servidor local y simulan las res
 - [Registro de cambios](CHANGELOG.md).
 - Historial: [v0.2](docs/RELEASE-0.2-OPERADOR.md), [v0.1](docs/RELEASE-0.1-OBS.md).
 
-El desarrollo y las actualizaciones continúan en `main`. La entrega vigente es Arena Live v0.9, con ambas capturas Full HD, efectos adaptados a cada vista, TikTok, reglas, potencias, comandos y caída isométrica integrados. Las entregas anteriores quedan como historial.
+El desarrollo y las actualizaciones continúan en `main`. La entrega vigente es Arena Live v0.10, con ambas capturas Full HD, textos de poderes configurables, inspector de equilibrio, TikTok, reglas, potencias, comandos y caída isométrica integrados. Las entregas anteriores quedan como historial.

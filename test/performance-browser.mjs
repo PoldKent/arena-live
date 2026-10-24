@@ -162,6 +162,20 @@ try {
         assert.ok(result.maxEffects <= result.capEffects); assert.ok(result.maxParticles <= result.capParticles);
         assert.ok(result.executed>0);assert.equal(result.logged,result.executed);assert.equal(result.linked,true);assert.ok(result.history<=result.retention);
       });
+      await check('128-player powers retain real text and damage labels while transient history remains bounded',async()=>{
+        const result=await page.evaluate(()=>{
+          gameState='LOBBY';applyPlayerCountPreset(128);startCombatFromLobby();autoAttackEnabled=true;
+          setCombatDisplayOption('powerText',true);setCombatDisplayOption('numbers',true);
+          for(const f of fighters){f.hp=f.maxHp=100000;f.aiSpecialCooldown=0;f.energy=100;}
+          for(let i=0;i<90;i++)updatePhysicsAndAI();
+          // Include a dense burst after real autonomous casts; old animations must be discarded.
+          for(let i=0;i<300;i++)spawnFloatingText(200,300,i%2?'☄️ Kame':'−12');
+          renderBothScreensSimultaneously();
+          const result={count:floatingTexts.length,cap:MAX_FLOATING_TEXTS,names:floatingTexts.some(ft=>ft.text.includes('Kame')),numbers:floatingTexts.some(ft=>ft.text.includes('12')),finite:fighters.every(f=>[f.x,f.y,f.hp,f.energy].every(Number.isFinite))};
+          setCombatDisplayOption('powerText',false);setCombatDisplayOption('numbers',false);return result;
+        });
+        assert.equal(result.count,result.cap);assert.equal(result.names,true);assert.equal(result.numbers,true);assert.equal(result.finite,true);
+      });
       await check('expired KO notices release detached badges instead of accumulating through a stream', async () => {
         await page.evaluate(() => { addKillFeed('K.O. performance cleanup', 'ko'); });
         await page.waitForFunction(() => !koFeedBatch.has('K.O. performance cleanup'), null, { timeout: 5000 });
