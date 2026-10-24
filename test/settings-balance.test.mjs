@@ -46,7 +46,7 @@ function balance(){
  const commands=['!kame','!rasen','!coloso','!trueno','!enred'];
  const e=vm.createContext({CLASS_KEY_ORDER:keys,CLASS_COMMANDS:Object.fromEntries(keys.map((k,i)=>[k,{powers:[commands[i]]}])),
   ARENA_BASE_MELEE_DAMAGE:12,activeMode:'iso',arenaCombatRules:{damage:1,classRule:'any',powerMode:'full'}});
- vm.runInContext([constant('ARENA_CLASS_BALANCE'),source('arenaClassPowersAllowed'),source('getArenaBalanceSnapshot')].join('\n'),e);return e;
+ vm.runInContext([constant('ARENA_CLASS_BALANCE'),constant('ARENA_CLASS_RIVALRIES'),source('getArenaClassDamageMultiplier'),source('arenaClassPowersAllowed'),source('getArenaBalanceSnapshot')].join('\n'),e);return e;
 }
 test('all 15 class/mode inspection rows read the native engine profile and the shared base damage',()=>{
  const e=balance(),expected={'1v1':[43,38,38,37,37],smash:[44,50,38,28,44],iso:[38,60,38,32,60]};
@@ -64,9 +64,18 @@ test('round inspection applies damage, disabled powers and allowed classes witho
  e.arenaCombatRules.classRule='kame';data=e.getArenaBalanceSnapshot('iso','round');assert.equal(data.rows[0].base,15);assert.ok(data.rows.slice(1).every(row=>row.base===0&&!row.allowed));
  const before=JSON.stringify(e.arenaCombatRules);data=e.getArenaBalanceSnapshot('iso','nominal');assert.equal(data.rows[1].special,60);assert.equal(JSON.stringify(e.arenaCombatRules),before);
 });
+test('the inspector includes each counter and prey while neutral inspection preserves the native profile',()=>{
+ const e=balance();
+ let data=e.getArenaBalanceSnapshot('iso','nominal','titan');
+ assert.equal(data.targetClass,'titan');assert.equal(data.rows[0].base,13);assert.equal(data.rows[0].special,42);assert.equal(data.rows[0].matchupMultiplier,1.1);
+ assert.equal(data.rows[3].base,11);assert.equal(data.rows[3].special,29);assert.equal(data.rows[3].matchupMultiplier,.9);
+ assert.equal(data.rows[2].special,38);assert.equal(data.rows[2].matchupMultiplier,1);
+ e.arenaCombatRules.damage=1.25;data=e.getArenaBalanceSnapshot('smash','round','titan');assert.equal(data.rows[0].special,61);
+ data=e.getArenaBalanceSnapshot('iso','nominal','neutral');assert.equal(data.targetClass,null);assert.equal(data.rows[1].special,60);
+});
 test('Settings has one footer version and no header version; the balance vocabulary covers all eight locales',()=>{
- assert.doesNotMatch(html,/id="arenaSettingsVersion"/);assert.match(html,/id="arenaVersionInfo" data-no-translate[^>]*>Arena Live v0\.10/);
+ assert.doesNotMatch(html,/id="arenaSettingsVersion"/);assert.match(html,/id="arenaVersionInfo" data-no-translate[^>]*>Arena Live v0\.11/);
  assert.doesNotMatch(html,/id="arenaObsCalibrationTitle"[^>]*>[^<]*v0\./);
  const e=vm.createContext({});vm.runInContext(constant('ARENA_BALANCE_COPY')+'\nglobalThis.copy=ARENA_BALANCE_COPY;',e);
- assert.equal(Object.keys(e.copy).length,8);for(const words of Object.values(e.copy)){assert.equal(words.length,19);assert.ok(words.every(w=>typeof w==='string'&&w.length>0));}
+ assert.equal(Object.keys(e.copy).length,8);for(const words of Object.values(e.copy)){assert.equal(words.length,26);assert.ok(words.every(w=>typeof w==='string'&&w.length>0));}
 });

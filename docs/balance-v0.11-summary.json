@@ -1,0 +1,579 @@
+{
+  "version": "0.11.0",
+  "engineGitBlob": "59887979c02e82d6c20a235effe05d7607e0fa65",
+  "balance": {
+    "1v1": {
+      "kame": {
+        "damage": 43,
+        "windup": 34,
+        "targets": null
+      },
+      "ninja": {
+        "damage": 38,
+        "windup": 34,
+        "targets": 1
+      },
+      "titan": {
+        "damage": 38,
+        "windup": 34,
+        "targets": null
+      },
+      "trueno": {
+        "damage": 37,
+        "windup": 34,
+        "targets": 3
+      },
+      "esmeralda": {
+        "damage": 37,
+        "windup": 34,
+        "targets": 1
+      }
+    },
+    "smash": {
+      "kame": {
+        "damage": 44,
+        "windup": 34,
+        "targets": null
+      },
+      "ninja": {
+        "damage": 50,
+        "windup": 18,
+        "targets": 1
+      },
+      "titan": {
+        "damage": 38,
+        "windup": 34,
+        "targets": null
+      },
+      "trueno": {
+        "damage": 28,
+        "windup": 34,
+        "targets": 2
+      },
+      "esmeralda": {
+        "damage": 44,
+        "windup": 22,
+        "targets": 1
+      }
+    },
+    "iso": {
+      "kame": {
+        "damage": 38,
+        "windup": 34,
+        "targets": 3
+      },
+      "ninja": {
+        "damage": 60,
+        "windup": 20,
+        "targets": 1
+      },
+      "titan": {
+        "damage": 38,
+        "windup": 34,
+        "targets": 3
+      },
+      "trueno": {
+        "damage": 32,
+        "windup": 34,
+        "targets": 3
+      },
+      "esmeralda": {
+        "damage": 60,
+        "windup": 20,
+        "targets": 1
+      }
+    }
+  },
+  "targeting": "class-priority-nearest",
+  "rivalries": {
+    "advantage": 1.1,
+    "disadvantage": 0.9,
+    "beats": {
+      "kame": "titan",
+      "titan": "trueno",
+      "trueno": "esmeralda",
+      "esmeralda": "ninja",
+      "ninja": "kame"
+    }
+  },
+  "sampling": {
+    "matches": 2400,
+    "duelSeeds": 25,
+    "arenaSeeds": 20,
+    "seedStart": 3000,
+    "seedRanges": null,
+    "maxSeconds": 180,
+    "browser": "153.0.8010.0"
+  },
+  "provenance": null,
+  "method": "Seeded AI; mirrored duel side/update order; balanced arena classes and five rotations. Actual mode transitions, no audience bonuses/re-entry. 2000 bootstrap resamples of whole seed clusters. Rates describe full matches and include unfinished cases in the denominator; timeouts are reported separately.",
+  "duels": {
+    "matches": 1000,
+    "timeouts": 0,
+    "classes": [
+      {
+        "classKey": "kame",
+        "name": "Guerrero",
+        "matches": 400,
+        "wins": 182,
+        "winPct": 45.5,
+        "ci95": {
+          "seedClusters": 25,
+          "low": 38.5,
+          "high": 52
+        },
+        "meanHpDamage": 120.925,
+        "meanKills": 0.455
+      },
+      {
+        "classKey": "ninja",
+        "name": "Shinobi",
+        "matches": 400,
+        "wins": 220,
+        "winPct": 55,
+        "ci95": {
+          "seedClusters": 25,
+          "low": 47.5,
+          "high": 62.5
+        },
+        "meanHpDamage": 126.565,
+        "meanKills": 0.55
+      },
+      {
+        "classKey": "titan",
+        "name": "Titán",
+        "matches": 400,
+        "wins": 184,
+        "winPct": 46,
+        "ci95": {
+          "seedClusters": 25,
+          "low": 40.5,
+          "high": 51
+        },
+        "meanHpDamage": 131.615,
+        "meanKills": 0.46
+      },
+      {
+        "classKey": "trueno",
+        "name": "Rayo",
+        "matches": 400,
+        "wins": 202,
+        "winPct": 50.5,
+        "ci95": {
+          "seedClusters": 25,
+          "low": 46,
+          "high": 55
+        },
+        "meanHpDamage": 122.32,
+        "meanKills": 0.505
+      },
+      {
+        "classKey": "esmeralda",
+        "name": "Espíritu",
+        "matches": 400,
+        "wins": 212,
+        "winPct": 53,
+        "ci95": {
+          "seedClusters": 25,
+          "low": 47.5,
+          "high": 59
+        },
+        "meanHpDamage": 127.5,
+        "meanKills": 0.53
+      }
+    ]
+  },
+  "noSpecials": {
+    "matches": 1000,
+    "timeouts": 0,
+    "classes": [
+      {
+        "classKey": "kame",
+        "name": "Guerrero",
+        "matches": 400,
+        "wins": 200,
+        "winPct": 50,
+        "ci95": {
+          "seedClusters": 25,
+          "low": 50,
+          "high": 50
+        },
+        "meanHpDamage": 121.905,
+        "meanKills": 0.5
+      },
+      {
+        "classKey": "ninja",
+        "name": "Shinobi",
+        "matches": 400,
+        "wins": 200,
+        "winPct": 50,
+        "ci95": {
+          "seedClusters": 25,
+          "low": 50,
+          "high": 50
+        },
+        "meanHpDamage": 121.905,
+        "meanKills": 0.5
+      },
+      {
+        "classKey": "titan",
+        "name": "Titán",
+        "matches": 400,
+        "wins": 200,
+        "winPct": 50,
+        "ci95": {
+          "seedClusters": 25,
+          "low": 50,
+          "high": 50
+        },
+        "meanHpDamage": 121.905,
+        "meanKills": 0.5
+      },
+      {
+        "classKey": "trueno",
+        "name": "Rayo",
+        "matches": 400,
+        "wins": 200,
+        "winPct": 50,
+        "ci95": {
+          "seedClusters": 25,
+          "low": 50,
+          "high": 50
+        },
+        "meanHpDamage": 121.905,
+        "meanKills": 0.5
+      },
+      {
+        "classKey": "esmeralda",
+        "name": "Espíritu",
+        "matches": 400,
+        "wins": 200,
+        "winPct": 50,
+        "ci95": {
+          "seedClusters": 25,
+          "low": 50,
+          "high": 50
+        },
+        "meanHpDamage": 121.905,
+        "meanKills": 0.5
+      }
+    ]
+  },
+  "arenas": {
+    "5": {
+      "matches": 100,
+      "timeouts": 0,
+      "classes": [
+        {
+          "classKey": "kame",
+          "name": "Guerrero",
+          "matches": 100,
+          "wins": 16,
+          "winPct": 16,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 9,
+            "high": 23
+          },
+          "meanHpDamage": 152.95,
+          "meanKills": 0.74
+        },
+        {
+          "classKey": "ninja",
+          "name": "Shinobi",
+          "matches": 100,
+          "wins": 18,
+          "winPct": 18,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 11,
+            "high": 25
+          },
+          "meanHpDamage": 157.87,
+          "meanKills": 0.76
+        },
+        {
+          "classKey": "titan",
+          "name": "Titán",
+          "matches": 100,
+          "wins": 19,
+          "winPct": 19,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 13,
+            "high": 26
+          },
+          "meanHpDamage": 144.19,
+          "meanKills": 0.77
+        },
+        {
+          "classKey": "trueno",
+          "name": "Rayo",
+          "matches": 100,
+          "wins": 25,
+          "winPct": 25,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 17,
+            "high": 34
+          },
+          "meanHpDamage": 147.5,
+          "meanKills": 1.06
+        },
+        {
+          "classKey": "esmeralda",
+          "name": "Espíritu",
+          "matches": 100,
+          "wins": 22,
+          "winPct": 22,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 15,
+            "high": 29
+          },
+          "meanHpDamage": 147.67,
+          "meanKills": 0.67
+        }
+      ]
+    },
+    "10": {
+      "matches": 100,
+      "timeouts": 0,
+      "classes": [
+        {
+          "classKey": "kame",
+          "name": "Guerrero",
+          "matches": 100,
+          "wins": 16,
+          "winPct": 16,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 9,
+            "high": 22
+          },
+          "meanHpDamage": 144.18,
+          "meanKills": 0.83
+        },
+        {
+          "classKey": "ninja",
+          "name": "Shinobi",
+          "matches": 100,
+          "wins": 24,
+          "winPct": 24,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 15,
+            "high": 33
+          },
+          "meanHpDamage": 175.715,
+          "meanKills": 0.96
+        },
+        {
+          "classKey": "titan",
+          "name": "Titán",
+          "matches": 100,
+          "wins": 23,
+          "winPct": 23,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 16,
+            "high": 30
+          },
+          "meanHpDamage": 154.33,
+          "meanKills": 0.895
+        },
+        {
+          "classKey": "trueno",
+          "name": "Rayo",
+          "matches": 100,
+          "wins": 19,
+          "winPct": 19,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 12,
+            "high": 27
+          },
+          "meanHpDamage": 164.79,
+          "meanKills": 1.04
+        },
+        {
+          "classKey": "esmeralda",
+          "name": "Espíritu",
+          "matches": 100,
+          "wins": 18,
+          "winPct": 18,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 11,
+            "high": 25
+          },
+          "meanHpDamage": 153.47,
+          "meanKills": 0.77
+        }
+      ]
+    },
+    "25": {
+      "matches": 100,
+      "timeouts": 0,
+      "classes": [
+        {
+          "classKey": "kame",
+          "name": "Guerrero",
+          "matches": 100,
+          "wins": 3,
+          "winPct": 3,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 0,
+            "high": 6
+          },
+          "meanHpDamage": 95.494,
+          "meanKills": 0.604
+        },
+        {
+          "classKey": "ninja",
+          "name": "Shinobi",
+          "matches": 100,
+          "wins": 45,
+          "winPct": 45,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 38,
+            "high": 53
+          },
+          "meanHpDamage": 185.518,
+          "meanKills": 1.26
+        },
+        {
+          "classKey": "titan",
+          "name": "Titán",
+          "matches": 100,
+          "wins": 22,
+          "winPct": 22,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 14,
+            "high": 31
+          },
+          "meanHpDamage": 151.23,
+          "meanKills": 1.028
+        },
+        {
+          "classKey": "trueno",
+          "name": "Rayo",
+          "matches": 100,
+          "wins": 25,
+          "winPct": 25,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 18,
+            "high": 33
+          },
+          "meanHpDamage": 162.586,
+          "meanKills": 1.22
+        },
+        {
+          "classKey": "esmeralda",
+          "name": "Espíritu",
+          "matches": 100,
+          "wins": 5,
+          "winPct": 5,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 2,
+            "high": 9
+          },
+          "meanHpDamage": 131.71,
+          "meanKills": 0.684
+        }
+      ]
+    },
+    "125": {
+      "matches": 100,
+      "timeouts": 0,
+      "classes": [
+        {
+          "classKey": "kame",
+          "name": "Guerrero",
+          "matches": 100,
+          "wins": 0,
+          "winPct": 0,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 0,
+            "high": 0
+          },
+          "meanHpDamage": 87.0708,
+          "meanKills": 0.5956
+        },
+        {
+          "classKey": "ninja",
+          "name": "Shinobi",
+          "matches": 100,
+          "wins": 93,
+          "winPct": 93,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 88,
+            "high": 97
+          },
+          "meanHpDamage": 199.7656,
+          "meanKills": 1.5496
+        },
+        {
+          "classKey": "titan",
+          "name": "Titán",
+          "matches": 100,
+          "wins": 4,
+          "winPct": 4,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 1,
+            "high": 8
+          },
+          "meanHpDamage": 152.894,
+          "meanKills": 1.0888
+        },
+        {
+          "classKey": "trueno",
+          "name": "Rayo",
+          "matches": 100,
+          "wins": 3,
+          "winPct": 3,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 0,
+            "high": 6
+          },
+          "meanHpDamage": 137.3856,
+          "meanKills": 1.0292
+        },
+        {
+          "classKey": "esmeralda",
+          "name": "Espíritu",
+          "matches": 100,
+          "wins": 0,
+          "winPct": 0,
+          "ci95": {
+            "seedClusters": 20,
+            "low": 0,
+            "high": 0
+          },
+          "meanHpDamage": 124.372,
+          "meanKills": 0.696
+        }
+      ]
+    }
+  },
+  "checks": {
+    "deterministic": true,
+    "telemetryParity": true,
+    "crossScenarioParity": true,
+    "errors": []
+  },
+  "evidence": {
+    "archive": "balance-v0.11-matches.csv.gz",
+    "rows": 2400,
+    "sha256": "c460e6e58be12741bb5d56754ae27476f67d2bcf7facceb9f861407e2c85b036"
+  }
+}

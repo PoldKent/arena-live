@@ -1,5 +1,13 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-24 — Arena Live v0.11 · Cadena A y preferencias de clase
+
+- Rivalidades Guerrero → Titán → Rayo → Espíritu → Shinobi → Guerrero: +10 % al atacar a su presa, −10 % contra su contrarrival, tres enfrentamientos neutros. Una sola aplicación en golpes y poderes, con redondeo y defensas conservados.
+- Guerrero prefiere otros Guerreros; Shinobi prefiere otras clases, puede dañar a compañeros y disputa la final; Titán ataca a cualquiera. Preferencia entre blancos válidos dentro del alcance, cercanía y orden estable para empates; búsqueda lineal.
+- Inspector de equilibrio con rival seleccionable, barras reales por clase/modo, afinidad, presa, contrarrival y cadena. Conserva perfil nominal y reglas de la ronda, ocho idiomas, menú seleccionado en Stream y geometría OBS.
+- Versión 0.11/0.11.0 en pie de Ajustes, API, servidor y paquete. 51 pruebas de Node, 60 de navegador y 12 de carga aprobadas.
+- Estudio inicial de 2.400 partidas completas: conserva determinismo y telemetría; detecta dominio Shinobi en Arena numerosa (93 de 100 victorias con 125), por lo que esta entrega no se presenta como equilibrio definitivo. Datos y límites en `docs/RELEASE-0.11-RIVALIDADES.md`.
+
 ## 2026-10-23 — Arena Live v0.10 · Ajustes e inspector de equilibrio
 
 - Versión actual únicamente en el pie de Ajustes; retiradas la etiqueta superior y la versión redundante de la calibración OBS. El pie usa la misma versión de entrega y conserva su texto al cambiar de idioma.

@@ -1,4 +1,4 @@
-// Browser regressions for the unified v0.10 release. Never connects to a real TikTok LIVE.
+// Browser regressions for the unified v0.11 release. Never connects to a real TikTok LIVE.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { readFile, mkdir } from 'node:fs/promises';
@@ -43,8 +43,8 @@ const shot=async name=>{if(process.env.ARENA_TEST_SCREENSHOTS){await mkdir(proce
 async function unfold(id){const panel=page.locator('#'+id);if(!await panel.evaluate(n=>n.open))await panel.locator('> summary').click({noWaitAfter:true});}
 async function settingsSection(index){const section=page.locator('.arena-settings-section').nth(index);if(!await section.evaluate(n=>n.open))await section.locator('> summary').click({noWaitAfter:true});}
 async function streamClick(id){await page.mouse.move(600,20);await page.locator('#'+id).click({noWaitAfter:true});}
-await check('v0.10 starts with large game, left chat and only the social test group expanded',async()=>{
- assert.equal(await page.evaluate(()=>ArenaLive.version),'0.10.0');
+await check('v0.11 starts with large game, left chat and only the social test group expanded',async()=>{
+ assert.equal(await page.evaluate(()=>ArenaLive.version),'0.11.0');
  const panels=await page.locator('.arena-work-panel').evaluateAll(ns=>ns.map(n=>({id:n.id,open:n.open,parent:n.parentElement.id})));
  assert.equal(panels.find(n=>n.id==='arenaPanelChat').parent,'arenaDockLeft');
  assert.deepEqual(panels.filter(n=>n.open&&n.id!=='arenaPanelChat').map(n=>n.id),['arenaPanelSocial']);
@@ -240,7 +240,8 @@ await check('Health, damage, shield absorption, zero knockback, movement and pas
  assert.equal(await page.evaluate(()=>fighters.every(f=>f.maxHp===300)),true);assert.equal(await page.evaluate(()=>fighters[0].hp),Math.max(1,Math.round(ratio*300)));
  await ruleRange('damage',2);await ruleRange('knockback',0);await ruleRange('movement',2);await ruleRange('energyRegen',0);
  const hit=await page.evaluate(()=>{
-  const a=fighters[0],b=fighters[1];a.likeBoostTimer=0;b.hp=300;b.shieldHP=10;b.shieldTimer=100;b.immunityTimer=0;b.damageTaken=0;b.knockbackTimer=0;b.vx=0;b.vy=0;b.vz=0;b.edgeRecoveryPending=false;
+  const a=fighters[0],b=fighters[1];b.archetypeKey=a.archetypeKey; // Neutral pairing isolates the configured round multiplier.
+  a.likeBoostTimer=0;b.hp=300;b.shieldHP=10;b.shieldTimer=100;b.immunityTimer=0;b.damageTaken=0;b.knockbackTimer=0;b.vx=0;b.vy=0;b.vz=0;b.edgeRecoveryPending=false;
   applyDamage(b,20,a,false,6.5,'normal');return {hp:b.hp,shield:b.shieldHP,vx:b.vx,vy:b.vy,knockback:b.knockbackTimer,movement:getFighterMoveSpeedMultiplier(a)};
  });
  assert.deepEqual(hit,{hp:270,shield:0,vx:0,vy:0,knockback:0,movement:2});
@@ -303,10 +304,10 @@ await check('Mobile special action follows the no-powers rule while movement and
  await page.locator('#arenaPowerMode').selectOption('noSpecials');await page.keyboard.press('Escape');assert.equal(await page.locator('#arenaMobilePower').isDisabled(),true);assert.equal(await page.locator('#arenaMobileAttack').isEnabled(),true);assert.equal(await page.locator('#arenaMobileJump').isEnabled(),true);
 });
  await check('Unified release uses native clock, randomness, animation and the TikTok bridge',async()=>{
-  const status=await (await page.request.get(`http://127.0.0.1:${port}/api/status`)).json();assert.equal(status.version,'0.10.0');
+  const status=await (await page.request.get(`http://127.0.0.1:${port}/api/status`)).json();assert.equal(status.version,'0.11.0');
   const native=await page.evaluate(()=>({clock:Date.now.toString().includes('[native code]'),random:Math.random.toString().includes('[native code]'),raf:requestAnimationFrame.toString().includes('[native code]'),harness:typeof window.ArenaBalanceHarness}));
   assert.deepEqual(native,{clock:true,random:true,raf:true,harness:'undefined'});
-  assert.match(await page.locator('#arenaVersionInfo').textContent(),/v0\.10/);
+  assert.match(await page.locator('#arenaVersionInfo').textContent(),/v0\.11/);
   assert.equal(await page.evaluate(()=>Object.isFrozen(ArenaLive.getBalanceRules())&&Object.isFrozen(ArenaLive.getBalanceRules().iso.ninja)),true);
  });
  await check('Playable powers apply the measured damage, windup and target caps in all three modes',async()=>{
@@ -316,7 +317,7 @@ await check('Mobile special action follows the no-powers rule while movement and
    const rows=[];
    for(const mode of ['1v1','smash','iso'])for(const key of ['kame','ninja','titan','trueno','esmeralda']){
     activeMode=mode;const actor=new Fighter('@preview_actor','tiktok',false,key);actor.x=240;actor.y=250;actor.facing=1;actor.energy=100;
-    const targets=Array.from({length:6},(_,i)=>{const f=new Fighter('@preview_'+i,'tiktok',false,'ninja');f.x=270+i*8;f.y=250;return f;});fighters=[actor,...targets];
+    const targets=Array.from({length:6},(_,i)=>{const f=new Fighter('@preview_'+i,'tiktok',false,key);f.x=270+i*8;f.y=250;return f;});fighters=[actor,...targets];
     const command=CLASS_COMMANDS[key].powers[0];queueFighterSkillWindup(actor,command);const windup=actor.castingSkill.timer;
     actor.castingSkill=null;actor.activeSpecialFactor=1;executeFighterSkill(actor,command);
     const event=document.querySelector('#chatFeed>[data-chat-event="special"]:last-child');
@@ -330,9 +331,9 @@ await check('Mobile special action follows the no-powers rule while movement and
    assert.equal(p.logged,true,p.mode+'/'+p.key+' actual special has its command and caster');
   }
  });
- await check('All five playable classes select the closest rival instead of health/class priorities',async()=>{
+ await check('All five playable classes use proximity within their narrative priority instead of low health',async()=>{
   const matches=await page.evaluate(()=>['kame','ninja','titan','trueno','esmeralda'].map(key=>{
-   const actor=new Fighter('@actor','tiktok',false,key),near=new Fighter('@near','tiktok',false,'ninja'),weak=new Fighter('@weak','tiktok',false,key);
+   const actor=new Fighter('@actor','tiktok',false,key),near=new Fighter('@near','tiktok',false,key==='ninja'?'titan':key),weak=new Fighter('@weak','tiktok',false,key);
    actor.x=240;actor.y=250;near.x=280;near.y=250;weak.x=305;weak.y=250;weak.hp=1;fighters=[actor,near,weak];return findPreferredCombatTarget(actor)?.id===near.id;
   }));assert.ok(matches.every(Boolean));
  });
@@ -377,7 +378,7 @@ await check('Quick join, first messages, class commands, Prota and valid re-entr
 await check('Autonomous AI logs one special on release; charging, interruptions, wrong classes and disabled powers never claim execution',async()=>{
  const result=await page.evaluate(()=>{
   gameState='LOBBY';applyPlayerCountPreset(2);startCombatFromLobby();isGamePaused=true;gamePace=1;slowMoFactor=1;autoAttackEnabled=true;
-  const [actor,target]=fighters;applyFighterArchetype(actor,'kame');
+  const [actor,target]=fighters;applyFighterArchetype(actor,'kame');applyFighterArchetype(target,'kame');
   fighters.forEach((f,i)=>{f.x=400+i*80;f.y=WORLD_H*.79-f.radius;f.z=0;f.vx=0;f.vy=0;f.knockbackTimer=0;f.attackCooldown=100000;f.aiSpecialCooldown=100000;f.energy=100;});
   actor.aiSpecialCooldown=0;document.getElementById('chatFeed').replaceChildren();
   const count=()=>document.querySelectorAll('#chatFeed>[data-chat-event="special"]').length;
@@ -400,7 +401,7 @@ await check('Autonomous AI logs one special on release; charging, interruptions,
 await check('A manual command targeting another fighter records the real caster, canonical alias and a single damage application',async()=>{
  const result=await page.evaluate(()=>{
   gameState='LOBBY';applyPlayerCountPreset(4);startCombatFromLobby();isGamePaused=true;autoAttackEnabled=false;
-  const actor=fighters[0];applyFighterArchetype(actor,'titan');
+  const actor=fighters[0];applyFighterArchetype(actor,'titan');applyFighterArchetype(fighters[1],'titan');
   fighters.forEach((f,i)=>{f.x=400+i*25;f.y=300;f.z=0;f.vx=0;f.vy=0;f.knockbackTimer=0;f.attackCooldown=100000;f.aiSpecialCooldown=100000;});
   updateTargetSelectDropdown();document.getElementById('targetFighterSelect').value=actor.id;
   document.getElementById('chatMessageInput').value='!golpecolosal';document.getElementById('chatFeed').replaceChildren();
@@ -583,11 +584,11 @@ await check('Settings shows the release only in its footer and retains UI/power 
  await page.setViewportSize({width:1720,height:900});const cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.setTouchEmulationEnabled',{enabled:false});
  await page.evaluate(()=>{toggleSettingsModal(true);countdownsEnabled=false;});
  assert.equal(await page.locator('#arenaSettingsVersion').count(),0);assert.equal(await page.locator('#arenaVersionInfo').isVisible(),true);
- assert.equal(await page.locator('#arenaVersionInfo').textContent(),'Arena Live v0.10 · TikTok');
- assert.equal(await page.locator('#settingsPauseModal').evaluate(n=>(n.textContent.match(/v0\.10/g)||[]).length),1);
+ assert.equal(await page.locator('#arenaVersionInfo').textContent(),'Arena Live v0.11 · TikTok');
+ assert.equal(await page.locator('#settingsPauseModal').evaluate(n=>(n.textContent.match(/v0\.11/g)||[]).length),1);
  for(const language of ['es','en','fr','de','zh','ja','pt','it']){
   await page.evaluate(language=>setLanguage(language),language);
-  assert.equal(await page.locator('#arenaVersionInfo').textContent(),'Arena Live v0.10 · TikTok');
+  assert.equal(await page.locator('#arenaVersionInfo').textContent(),'Arena Live v0.11 · TikTok');
   assert.equal(await page.locator('[data-ui-label]').evaluateAll(ns=>ns.every(n=>n.textContent.trim()&&!/undefined|null/.test(n.textContent))),true);
   assert.equal(await page.locator('[data-command-label]').evaluateAll(ns=>ns.every(n=>n.textContent.trim())),true);
  }
@@ -626,12 +627,12 @@ await check('Balance inspection compares actual damage in all modes on a common 
   await page.locator('#arenaBalanceMode').selectOption(mode);
   assert.deepEqual(await page.locator('[data-balance-value="special"]').evaluateAll(ns=>ns.map(n=>Number(n.textContent))),values);
   assert.deepEqual(await page.locator('[data-balance-value="basic"]').evaluateAll(ns=>ns.map(n=>Number(n.textContent))),[12,12,12,12,12]);
-  assert.equal(await page.locator('#arenaBalanceScale').textContent(),'0–60 HP');
+  assert.equal(await page.locator('#arenaBalanceScale').textContent(),'0–70 HP');
  }
  await page.locator('[data-balance-class="esmeralda"]').click();
  assert.equal(await page.locator('.arena-balance-row[aria-pressed="true"]').count(),1);assert.match(await page.locator('#arenaBalanceDetail').innerText(),/Enredadera/);
  assert.equal(await page.evaluate(()=>document.activeElement?.dataset.balanceClass),'esmeralda');
- assert.deepEqual(await state(),before);assert.deepEqual(await rects(),beforeRects);assert.match(await page.locator('#arenaBalancePanel').innerText(),/rival más cercano/);
+ assert.deepEqual(await state(),before);assert.deepEqual(await rects(),beforeRects);assert.match(await page.locator('#arenaBalancePanel').innerText(),/pueden dañarse entre sí/);
 });
 await check('Balance bars reflect round damage, blocked specials and class restrictions while the nominal profile stays available',async()=>{
  await page.locator('#arenaBalanceProfile').selectOption('round');
@@ -656,5 +657,52 @@ await check('The balance menu stays readable in Stream, retains the selected men
  assert.equal(await page.locator('#arenaVersionInfo').isVisible(),true);await shot('balance-stream');
  await page.locator('#arenaStreamClose').click();assert.equal((await state()).paused,false);assert.deepEqual(await rects(),before);
 });
-assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:'0.10.0'}));
+await check('Every rival and mode in the chart agrees with real basic and special damage for all five classes',async()=>{
+ await page.evaluate(()=>{toggleSettingsModal(true);isGamePaused=true;arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};soundEnabled=false;});await openBalance();
+ await page.locator('#arenaBalanceProfile').selectOption('nominal');
+ const before=await rects();
+ for(const mode of ['1v1','smash','iso'])for(const rival of ['kame','ninja','titan','trueno','esmeralda']){
+  await page.locator('#arenaBalanceMode').selectOption(mode);await page.locator('#arenaBalanceTarget').selectOption(rival);
+  const measured=await page.evaluate(({mode,rival})=>{
+   activeMode=mode;gameState='COMBAT';isGamePaused=true;
+   return CLASS_KEY_ORDER.map(key=>{
+    const actor=new Fighter('@rival_'+key,'tiktok',false,key),target=new Fighter('@opponent','tiktok',false,rival);
+    actor.x=300;actor.y=250;actor.facing=1;actor.critChance=0;actor.activeSpecialFactor=1;actor.attackCooldown=0;target.x=330;target.y=250;target.hp=target.maxHp=10000;
+    fighters=[actor,target];performMeleeAttack(actor);const base=10000-target.hp;
+    target.hp=10000;executeFighterSkill(actor,CLASS_COMMANDS[key].powers[0]);
+    return {base,special:10000-target.hp};
+   });
+  },{mode,rival});
+  assert.deepEqual(await page.locator('[data-balance-value="basic"]').evaluateAll(ns=>ns.map(n=>Number(n.textContent))),measured.map(r=>r.base));
+  assert.deepEqual(await page.locator('[data-balance-value="special"]').evaluateAll(ns=>ns.map(n=>Number(n.textContent))),measured.map(r=>r.special));
+  assert.equal(await page.locator('#arenaBalanceScale').textContent(),'0–70 HP');
+  assert.equal((await state()).settingsOpen,true);assert.deepEqual(await rects(),before);
+ }
+ await page.locator('#arenaBalanceTarget').selectOption('titan');await page.locator('[data-balance-class="kame"]').click();
+ assert.match(await page.locator('[data-balance-class="kame"] [data-balance-matchup]').innerText(),/\+10 %/);
+ assert.match(await page.locator('[data-balance-class="trueno"] [data-balance-matchup]').innerText(),/-10 %/);
+ assert.match(await page.locator('#arenaBalanceDetail').innerText(),/Titán \(\+10 %\)/);
+ assert.match(await page.locator('#arenaBalanceRivalries').innerText(),/Guerrero.*Titán.*Rayo.*Espíritu.*Shinobi.*Guerrero/);
+ for(const lang of ['es','en','fr','de','zh','ja','pt','it']){
+  await page.evaluate(lang=>setLanguage(lang),lang);
+  assert.equal(await page.locator('#arenaBalanceTarget option').evaluateAll(ns=>ns.every(n=>n.textContent.trim()&&!/undefined|null/.test(n.textContent))),true);
+  assert.equal(await page.locator('[data-balance-copy]').evaluateAll(ns=>ns.every(n=>n.textContent.trim())),true);
+ }
+ await page.evaluate(()=>setLanguage('es'));await shot('rivalries-stream');
+});
+await check('Shinobi prioritize outsiders but damage fellow Shinobi with melee and Rasen, then finish their final',async()=>{
+ const result=await page.evaluate(()=>{
+  gameState='COMBAT';activeMode='smash';isGamePaused=true;arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};
+  const actor=new Fighter('@shinobi_a','tiktok',false,'ninja'),ally=new Fighter('@shinobi_b','tiktok',false,'ninja'),outsider=new Fighter('@outsider','tiktok',false,'titan');
+  actor.x=300;actor.y=250;actor.facing=1;actor.critChance=0;actor.activeSpecialFactor=1;actor.attackCooldown=0;ally.x=320;ally.y=250;outsider.x=340;outsider.y=250;
+  fighters=[actor,ally,outsider];const preferred=findPreferredCombatTarget(actor).id===outsider.id;
+  executeFighterSkill(actor,'!rasen');const allySpared=ally.hp===180,outsiderHit=outsider.hp===130;
+  outsider.eliminated=true;const finalTarget=findPreferredCombatTarget(actor).id===ally.id;
+  performMeleeAttack(actor);const basic=180-ally.hp;
+  executeFighterSkill(actor,'!rasen');const special=180-basic-ally.hp;
+  ally.hp=1;executeFighterSkill(actor,'!rasen');
+  return {preferred,allySpared,outsiderHit,finalTarget,basic,special,ended:ally.eliminated&&fighters.filter(f=>!f.eliminated).length===1};
+ });assert.deepEqual(result,{preferred:true,allySpared:true,outsiderHit:true,finalTarget:true,basic:12,special:50,ended:true});
+});
+assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:'0.11.0'}));
 } finally {await browser?.close();server.kill('SIGKILL');}

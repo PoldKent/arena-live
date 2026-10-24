@@ -14,17 +14,18 @@ vm.runInContext([
   functionSource('canFighterAttack'), functionSource('findPreferredCombatTarget')
 ].join('\n'), context);
 
-// Independent stable-sort reference for the v0.6 nearest-target contract.
-// Every class uses distance, including when weak or same-class rivals are farther.
+// Independent stable-sort oracle: class preference first, then distance.
 function nearestTarget(attacker, roster, inRange = () => true) {
   const candidates = roster.filter(other => other.id !== attacker.id
-    && !attacker.eliminated && !other.eliminated && inRange(other));
+    && !attacker.eliminated && !other.eliminated && !(attacker.fallDrop > 0) && !(other.fallDrop > 0) && inRange(other));
   const distance = other => Math.hypot(other.x - attacker.x, other.y - attacker.y);
-  candidates.sort((a, b) => distance(a) - distance(b));
+  const priority = other => attacker.archetypeKey === 'kame' ? (other.archetypeKey === 'kame' ? 0 : 1)
+    : attacker.archetypeKey === 'ninja' ? (other.archetypeKey === 'ninja' ? 1 : 0) : 0;
+  candidates.sort((a, b) => priority(a) - priority(b) || distance(a) - distance(b));
   return candidates[0] || null;
 }
 
-test('all classes choose the nearest eligible rival from 2 through 128 fighters', () => {
+test('class priorities and nearest ties match a stable-sort oracle from 2 through 128 fighters', () => {
   let seed = 20261023;
   const random = () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296);
   const classes = ['kame', 'ninja', 'titan', 'trueno', 'esmeralda'];
@@ -33,7 +34,7 @@ test('all classes choose the nearest eligible rival from 2 through 128 fighters'
       const roster = Array.from({ length: count }, (_, id) => ({
         id, x: Math.floor(random() * 900), y: Math.floor(random() * 500),
         hp: 1 + Math.floor(random() * 180), maxHp: 180,
-        archetypeKey: classes[id % classes.length], eliminated: random() < 0.12
+        archetypeKey: classes[id % classes.length], eliminated: random() < 0.12, fallDrop:random()<0.08?10:0
       }));
       context.fighters = roster;
       for (const attacker of roster) {
@@ -45,6 +46,24 @@ test('all classes choose the nearest eligible rival from 2 through 128 fighters'
       assert.deepEqual(roster.map(f => f.id), Array.from({ length: count }, (_, id) => id));
     }
   }
+});
+
+test('Shinobi preference is not immunity and automatically becomes a final between Shinobi', () => {
+  const actor={id:0,x:0,y:0,archetypeKey:'ninja'},ally={id:1,x:10,y:0,archetypeKey:'ninja'},outsider={id:2,x:100,y:0,archetypeKey:'titan'};
+  context.fighters=[actor,ally,outsider];
+  assert.equal(context.findPreferredCombatTarget(actor),outsider);
+  assert.equal(context.canFighterAttack(actor,ally),true);
+  assert.equal(context.findPreferredCombatTarget(actor,f=>f.x<20),ally,'out-of-reach preference must not stop an available attack');
+  outsider.eliminated=true;assert.equal(context.findPreferredCombatTarget(actor),ally);
+  outsider.eliminated=false;outsider.fallDrop=1;assert.equal(context.findPreferredCombatTarget(actor),ally,'sinking outsiders are not valid targets');
+  ally.eliminated=true;assert.equal(context.findPreferredCombatTarget(actor),null);
+});
+
+test('Warriors prefer Warriors while Titans attack the nearest of any class',()=>{
+  const actor={id:0,x:0,y:0,archetypeKey:'kame'},warrior={id:1,x:90,y:0,archetypeKey:'kame'},titan={id:2,x:10,y:0,archetypeKey:'titan'};
+  context.fighters=[actor,warrior,titan];assert.equal(context.findPreferredCombatTarget(actor),warrior);
+  assert.equal(context.findPreferredCombatTarget(actor,f=>f.x<20),titan);
+  actor.archetypeKey='titan';assert.equal(context.findPreferredCombatTarget(actor),titan,'a Titan can attack another Titan');
 });
 
 test('targeting preserves roster order for ties and evaluates range only once per eligible rival', () => {

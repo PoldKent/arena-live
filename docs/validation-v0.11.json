@@ -1,0 +1,85 @@
+{
+  "release": "0.11.0",
+  "date": "2026-10-24",
+  "sourceGitBlob": "59887979c02e82d6c20a235effe05d7607e0fa65",
+  "previousSourceGitBlob": "c157f301b3193570a05c552b47a2ad661eedf37d",
+  "node": {
+    "passed": 51,
+    "failed": 0
+  },
+  "browser": {
+    "passed": 60,
+    "errors": 0,
+    "locales": [
+      "es",
+      "en",
+      "fr",
+      "de",
+      "zh",
+      "ja",
+      "pt",
+      "it"
+    ],
+    "actualDamageChartCombinations": 75,
+    "singleSettingsFooterVersion": true,
+    "ShinobiFinalAndSameClassDamage": true,
+    "OBSAndWorkspaceStoragePreserved": true
+  },
+  "performance": {
+    "passed": 12,
+    "errors": 0,
+    "report": "performance-v0.11.json",
+    "conditions": {
+      "node": "v24.22.1",
+      "browser": "153.0.8010.0",
+      "gpu": "disabled; software raster and readback included",
+      "viewport": "1720x720",
+      "simulationHz": 60,
+      "workload": "Constant-population timings disable knockback in both sources and suppress autonomous specials; subsequent stress checks restore full knockback and specials."
+    }
+  },
+  "rivalries": {
+    "advantage": 1.1,
+    "disadvantage": 0.9,
+    "beats": {
+      "kame": "titan",
+      "titan": "trueno",
+      "trueno": "esmeralda",
+      "esmeralda": "ninja",
+      "ninja": "kame"
+    }
+  },
+  "targeting": "class-priority-nearest",
+  "balanceStudy": {
+    "matches": 2400,
+    "duelsWithPowers": 1000,
+    "duelsWithoutPowers": 1000,
+    "initialCounts": [
+      5,
+      10,
+      25,
+      125
+    ],
+    "matchesPerInitialCount": 100,
+    "duelSeeds": 25,
+    "arenaSeeds": 20,
+    "seedStart": 3000,
+    "maxSimulatedSeconds": 180,
+    "timeouts": 0,
+    "deterministic": true,
+    "telemetryParity": true,
+    "crossScenarioParity": true,
+    "errors": [],
+    "report": "balance-v0.11-summary.json",
+    "archive": "balance-v0.11-matches.csv.gz",
+    "sha256": "c460e6e58be12741bb5d56754ae27476f67d2bcf7facceb9f861407e2c85b036",
+    "finding": "Shinobi won 45/100 at 25 fighters and 93/100 at 125 fighters. This first configuration does not provide equal class win rates."
+  },
+  "limitations": [
+    "Full-match rates include transitions from Arena to Smash and Duel; they are not isolated per-mode hit probabilities.",
+    "Class targeting preferences remain stronger at high populations; distance policy needs a further design decision.",
+    "Damage bars describe HP per target at full charge without critical hits or defense; integer rounding applies.",
+    "TikTok tests are simulated, with no real LIVE connection.",
+    "Software-rendered browser timings are not user-PC or OBS FPS."
+  ]
+}
