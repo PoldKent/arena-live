@@ -11,17 +11,21 @@ const functionSource = name => {
 };
 const context = vm.createContext({ fighters: [] });
 vm.runInContext([
+  html.match(/        const ARENA_COMBAT_TARGET_RULES = Object\.freeze\([\s\S]*?\n        \}\);/)[0],
   functionSource('canFighterAttack'), functionSource('findPreferredCombatTarget')
 ].join('\n'), context);
 
-// Independent stable-sort oracle: class preference first, then distance.
+// Independent oracle: sort by Euclidean distance, then apply each class's rule.
 function nearestTarget(attacker, roster, inRange = () => true) {
   const candidates = roster.filter(other => other.id !== attacker.id
     && !attacker.eliminated && !other.eliminated && !(attacker.fallDrop > 0) && !(other.fallDrop > 0) && inRange(other));
   const distance = other => Math.hypot(other.x - attacker.x, other.y - attacker.y);
-  const priority = other => attacker.archetypeKey === 'kame' ? (other.archetypeKey === 'kame' ? 0 : 1)
-    : attacker.archetypeKey === 'ninja' ? (other.archetypeKey === 'ninja' ? 1 : 0) : 0;
-  candidates.sort((a, b) => priority(a) - priority(b) || distance(a) - distance(b));
+  candidates.sort((a, b) => distance(a) - distance(b));
+  if(attacker.archetypeKey==='kame')return candidates.find(f=>f.archetypeKey==='kame')||candidates[0]||null;
+  if(attacker.archetypeKey==='ninja'&&candidates.length){
+    const local=candidates.filter(f=>distance(f)<=distance(candidates[0])*1.15);
+    return local.find(f=>f.archetypeKey!=='ninja')||candidates[0];
+  }
   return candidates[0] || null;
 }
 
@@ -51,12 +55,27 @@ test('class priorities and nearest ties match a stable-sort oracle from 2 throug
 test('Shinobi preference is not immunity and automatically becomes a final between Shinobi', () => {
   const actor={id:0,x:0,y:0,archetypeKey:'ninja'},ally={id:1,x:10,y:0,archetypeKey:'ninja'},outsider={id:2,x:100,y:0,archetypeKey:'titan'};
   context.fighters=[actor,ally,outsider];
-  assert.equal(context.findPreferredCombatTarget(actor),outsider);
+  assert.equal(context.findPreferredCombatTarget(actor),ally,'a far outsider cannot displace a nearby Shinobi');
+  outsider.x=11;assert.equal(context.findPreferredCombatTarget(actor),outsider,'another class wins at a similar distance');
+  outsider.x=100;
   assert.equal(context.canFighterAttack(actor,ally),true);
   assert.equal(context.findPreferredCombatTarget(actor,f=>f.x<20),ally,'out-of-reach preference must not stop an available attack');
   outsider.eliminated=true;assert.equal(context.findPreferredCombatTarget(actor),ally);
   outsider.eliminated=false;outsider.fallDrop=1;assert.equal(context.findPreferredCombatTarget(actor),ally,'sinking outsiders are not valid targets');
   ally.eliminated=true;assert.equal(context.findPreferredCombatTarget(actor),null);
+});
+
+test('Shinobi preference includes exactly 15 percent farther, works in every direction and stays local to the action range',()=>{
+  const actor={id:0,x:0,y:0,archetypeKey:'ninja'},ally={id:1,x:100,y:0,archetypeKey:'ninja'},outsider={id:2,x:115,y:0,archetypeKey:'titan'};
+  context.fighters=[actor,ally,outsider];
+  assert.equal(context.findPreferredCombatTarget(actor),outsider);
+  outsider.x=115.001;assert.equal(context.findPreferredCombatTarget(actor),ally);
+  outsider.x=0;outsider.y=-115;assert.equal(context.findPreferredCombatTarget(actor),outsider);
+  assert.equal(context.findPreferredCombatTarget(actor,f=>f.y>=0),ally);
+  outsider.y=-116;assert.equal(context.findPreferredCombatTarget(actor),ally);
+  ally.x=0;outsider.y=0;assert.equal(context.findPreferredCombatTarget(actor),outsider,'same-position ties still prefer the other class');
+  outsider.y=0.001;assert.equal(context.findPreferredCombatTarget(actor),ally);
+  ally.eliminated=true;assert.equal(context.findPreferredCombatTarget(actor),outsider);
 });
 
 test('Warriors prefer Warriors while Titans attack the nearest of any class',()=>{
@@ -75,4 +94,7 @@ test('targeting preserves roster order for ties and evaluates range only once pe
   assert.equal(checks, 2);
   assert.equal(context.findPreferredCombatTarget(null), null);
   assert.equal(context.findPreferredCombatTarget(actor, () => false), null);
+  actor.archetypeKey='ninja';rivals[0].archetypeKey='titan';rivals[1].archetypeKey='kame';
+  assert.equal(context.findPreferredCombatTarget(actor),rivals[0],'equal outsiders retain roster order');
+  context.fighters=[actor,rivals[1],rivals[0]];assert.equal(context.findPreferredCombatTarget(actor),rivals[1]);
 });

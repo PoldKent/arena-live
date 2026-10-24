@@ -1,5 +1,12 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-24 — Arena Live v0.12 · Cercanía de los Shinobi
+
+- Shinobi enfrenta al rival cercano y prefiere otra clase solo hasta un 15 % más lejos, dentro del alcance de cada acción. La misma regla sirve para persecución, golpes y Rasen; los compañeros pueden dañarse y disputar la final.
+- Búsqueda lineal sin ordenar listas, empates estables y comparación del límite exacto. El margen comparte constante con el texto del inspector en ocho idiomas, la API de consulta y la metadata del analizador.
+- Conservados cadena A, +10 % / −10 % de daño, perfiles de poderes, TikTok, comandos, Full HD y OBS. Versión 0.12/0.12.0 en pie de Ajustes, API, servidor y paquete.
+- 52 comprobaciones de Node, 62 de navegador y 12 de carga. Se repiten 2.400 partidas: 2.000 duelos y 100 partidas con cinco peleadores idénticos a v0.11. En las muestras de 25 y 125, las victorias Shinobi bajan de 45 a 19 y de 93 a 23 sobre 100. Guerrero y Espíritu siguen débiles en Arena numerosa; no se presenta como equilibrio definitivo.
+
 ## 2026-10-24 — Arena Live v0.11 · Cadena A y preferencias de clase
 
 - Rivalidades Guerrero → Titán → Rayo → Espíritu → Shinobi → Guerrero: +10 % al atacar a su presa, −10 % contra su contrarrival, tres enfrentamientos neutros. Una sola aplicación en golpes y poderes, con redondeo y defensas conservados.

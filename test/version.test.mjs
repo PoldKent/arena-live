@@ -2,11 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+const visibleVersion = pkg.version.split('.').slice(0, 2).join('.');
+const escapedVersion = pkg.version.replaceAll('.', '\\.');
+const escapedVisibleVersion = visibleVersion.replaceAll('.', '\\.');
 
-test('release v0.11 is visible in Settings and the API', () => {
-  assert.match(html, /<title>Arena Live v0\.11/);
-  assert.match(html, /id="arenaVersionInfo"[^>]*>Arena Live v0\.11/);
-  assert.match(html, /version: '0\.11\.0'/);
+test('the published package, title, Settings footer and API share one release', () => {
+  assert.match(html, new RegExp('<title>Arena Live v' + escapedVisibleVersion));
+  assert.match(html, new RegExp('id="arenaVersionInfo"[^>]*>Arena Live v' + escapedVisibleVersion));
+  assert.match(html, new RegExp("version: '" + escapedVersion + "'"));
+  assert.match(html, new RegExp("const ARENA_RELEASE_VERSION = '" + escapedVisibleVersion + "'"));
   assert.match(html, /function updateArenaObsGeometrySummary\(\)/);
 });
 test('lobby overlays have no redundant streaming format tags', () => {

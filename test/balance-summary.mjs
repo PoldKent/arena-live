@@ -42,6 +42,7 @@ export async function summarizeBalance(study, prefix) {
   const archive=gzipSync(Buffer.from(csv),{level:9});
   const summary={version:study.metadata.version,engineGitBlob:study.metadata.engineGitBlob,balance:study.metadata.balance,targeting:study.metadata.targeting,
     rivalries:study.metadata.rivalries||null,
+    targetingRules:study.metadata.targetingRules||null,
     sampling:{matches:rows.length,duelSeeds:study.metadata.duelSeeds,arenaSeeds:study.metadata.arenaSeeds,seedStart:study.metadata.seedStart,seedRanges:study.metadata.seedRanges||null,maxSeconds:study.metadata.maxSeconds,browser:study.metadata.browser},
     provenance:study.provenance||null,
     method:'Seeded AI; mirrored duel side/update order; balanced arena classes and five rotations. Actual mode transitions, no audience bonuses/re-entry. 2000 bootstrap resamples of whole seed clusters. Rates describe full matches and include unfinished cases in the denominator; timeouts are reported separately.',

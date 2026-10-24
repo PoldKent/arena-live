@@ -1,0 +1,141 @@
+{
+  "release": "0.12.0",
+  "date": "2026-10-24",
+  "sourceGitBlob": "4af3c4a86c59c88a82803f8ac7eac56641635dc9",
+  "previousSourceGitBlob": "59887979c02e82d6c20a235effe05d7607e0fa65",
+  "node": {
+    "passed": 52,
+    "failed": 0
+  },
+  "browser": {
+    "passed": 62,
+    "errors": 0,
+    "locales": [
+      "es",
+      "en",
+      "fr",
+      "de",
+      "zh",
+      "ja",
+      "pt",
+      "it"
+    ],
+    "coverage": [
+      "actual Shinobi pursuit in all three modes",
+      "local-distance preference in basic and Rasen targeting",
+      "75 actual damage/chart comparisons",
+      "single Settings footer version",
+      "same-class damage and Shinobi final",
+      "OBS and workspace state preserved"
+    ]
+  },
+  "performance": {
+    "passed": 12,
+    "errors": 0,
+    "report": "performance-v0.12.json",
+    "conditions": {
+      "node": "v24.22.1",
+      "browser": "153.0.8010.0",
+      "gpu": "disabled; software raster and readback included",
+      "viewport": "1720x720",
+      "simulationHz": 60,
+      "workload": "Constant-population timings disable knockback in both sources and suppress autonomous specials; subsequent stress checks restore full knockback and specials."
+    }
+  },
+  "targeting": "class-priority-shinobi-local",
+  "targetingRules": {
+    "shinobiSimilarDistancePercent": 15
+  },
+  "rivalries": {
+    "advantage": 1.1,
+    "disadvantage": 0.9,
+    "beats": {
+      "kame": "titan",
+      "titan": "trueno",
+      "trueno": "esmeralda",
+      "esmeralda": "ninja",
+      "ninja": "kame"
+    }
+  },
+  "balanceStudy": {
+    "matches": 2400,
+    "duelsWithPowers": 1000,
+    "duelsWithoutPowers": 1000,
+    "initialCounts": [
+      5,
+      10,
+      25,
+      125
+    ],
+    "matchesPerInitialCount": 100,
+    "duelSeeds": 25,
+    "arenaSeeds": 20,
+    "seedStart": 3000,
+    "maxSimulatedSeconds": 180,
+    "timeouts": 0,
+    "deterministic": true,
+    "telemetryParity": true,
+    "crossScenarioParity": true,
+    "errors": [],
+    "report": "balance-v0.12-summary.json",
+    "archive": "balance-v0.12-matches.csv.gz",
+    "sha256": "aebea484690ac8aa4b344605fcd3c2c4f3d8d39b6568de190b41130966d1a372"
+  },
+  "comparison": {
+    "baselineVersion": "0.11.0",
+    "currentVersion": "0.12.0",
+    "baselineSource": "59887979c02e82d6c20a235effe05d7607e0fa65",
+    "currentSource": "4af3c4a86c59c88a82803f8ac7eac56641635dc9",
+    "comparedMatches": 2400,
+    "exactCompleteRecords": {
+      "duels": 2000,
+      "fivePlayers": 100
+    },
+    "multiShinobiScenarios": {
+      "10": {
+        "matches": 100,
+        "changedCompleteRecords": 67,
+        "changedWinnerClass": 43
+      },
+      "25": {
+        "matches": 100,
+        "changedCompleteRecords": 99,
+        "changedWinnerClass": 85
+      },
+      "125": {
+        "matches": 100,
+        "changedCompleteRecords": 100,
+        "changedWinnerClass": 77
+      }
+    },
+    "errors": []
+  },
+  "findings": {
+    "ShinobiWinsPer100": {
+      "5": {
+        "before": 18,
+        "after": 18
+      },
+      "10": {
+        "before": 24,
+        "after": 24
+      },
+      "25": {
+        "before": 45,
+        "after": 19
+      },
+      "125": {
+        "before": 93,
+        "after": 23
+      }
+    },
+    "remaining": "At 125 initial fighters, Warrior won 6 and Spirit won 7 per 100. The new targeting rule improves Shinobi dominance but does not establish equal class win probabilities."
+  },
+  "limitations": [
+    "Full-match statistics include real mode transitions and are not isolated hit probabilities per mode.",
+    "The 15 percent parameter changes target distance preference, not damage. Chain A and its 10 percent damage modifiers are preserved.",
+    "Study uses seeded AI without audience support or re-entry. Bootstrap intervals are grouped by seed.",
+    "TikTok tests are simulated; no real LIVE connection.",
+    "Software-raster timings are not user-PC or OBS FPS."
+  ]
+}
