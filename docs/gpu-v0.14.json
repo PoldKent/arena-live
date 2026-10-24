@@ -1,0 +1,175 @@
+{
+  "passed": 18,
+  "errors": 0,
+  "checks": [
+    "32 fighters simulate and render both captures with finite state",
+    "64 fighters simulate and render both captures with finite state",
+    "128 fighters simulate and render both captures with finite state",
+    "128-player full-power burst retains finite state, bounded effects and baseline parity when provided",
+    "Full HD captures are opaque and remain eligible for automatic hardware rasterization",
+    "target options retain existing DOM nodes and selection while only eliminated options disappear",
+    "reevaluating an unchanged arena mode does not rebuild its HUD or badges",
+    "both captures share one animation clock and rendering consumes no combat randomness",
+    "active bonus symbols do not shift the name and class text baseline",
+    "128-player scenario also loads during combat; mode transitions and capacity remain correct",
+    "preparation skips its hidden capture and switching or dual view repaints fresh game state",
+    "label metric cache follows renamed fighters, life counters and loaded fonts",
+    "unchanged duel HUD values do not recreate text or trigger localization each frame",
+    "128 autonomous fighters still charge/fire specials and keep transient effects bounded",
+    "128-player powers retain real text and damage labels while transient history remains bounded",
+    "expired KO notices release detached badges instead of accumulating through a stream",
+    "replacing a scenario clears old powers and a pending victory cannot overwrite the new match",
+    "500 received comments keep history and automatic follow without rebuilding toolbar state per message"
+  ],
+  "measurements": [
+    {
+      "source": "current",
+      "count": 32,
+      "setupMs": 10.5,
+      "bodies": 32,
+      "targeting": {
+        "mean": 0.0799999999968956,
+        "median": 0,
+        "p95": 0.2999999998137355
+      },
+      "simulation": {
+        "mean": 0.25666666666511445,
+        "median": 0.20000000018626451,
+        "p95": 0.7000000001862645
+      },
+      "drawing": {
+        "mean": 1.3277777777726039,
+        "median": 1.2000000001862645,
+        "p95": 2.6000000000931323
+      },
+      "alive": 32,
+      "finite": true,
+      "stateSHA256": "aa9ba44d4066807c4511b2cb10beed48e049eb8de7a3b8e7d4784f7439fb08a9"
+    },
+    {
+      "source": "current",
+      "count": 64,
+      "setupMs": 8.5,
+      "bodies": 64,
+      "targeting": {
+        "mean": 0.04833333333178113,
+        "median": 0,
+        "p95": 0.10000000009313226
+      },
+      "simulation": {
+        "mean": 0.1649999999984478,
+        "median": 0.10000000009313226,
+        "p95": 0.6999999997206032
+      },
+      "drawing": {
+        "mean": 39.933333333348855,
+        "median": 2.6999999997206032,
+        "p95": 667.8999999999069
+      },
+      "alive": 64,
+      "finite": true,
+      "stateSHA256": "df2d28cf1fde612a8786657594bb72e10e5cd6dd754bc0b811f012377affd6c4"
+    },
+    {
+      "source": "current",
+      "count": 128,
+      "setupMs": 13,
+      "bodies": 128,
+      "targeting": {
+        "mean": 0.16666666666666666,
+        "median": 0.19999999972060323,
+        "p95": 0.3000000002793968
+      },
+      "simulation": {
+        "mean": 0.37166666666744275,
+        "median": 0.3000000002793968,
+        "p95": 0.7000000001862645
+      },
+      "drawing": {
+        "mean": 58.01111111112146,
+        "median": 4.5,
+        "p95": 535.1000000000931
+      },
+      "alive": 128,
+      "finite": true,
+      "stateSHA256": "21f8a73a34ad196efce4e02d2db81a873a3bdc239b69375d0fd52b07a7e2849b"
+    }
+  ],
+  "burstMeasurements": [
+    {
+      "source": "current",
+      "count": 128,
+      "frames": 180,
+      "drawnFrames": 30,
+      "simulation": {
+        "mean": 2.0555555555581426,
+        "median": 0.7000000001862645,
+        "p95": 5.5
+      },
+      "drawing": {
+        "mean": 57.67000000000311,
+        "median": 10,
+        "p95": 411
+      },
+      "maxParticles": 1800,
+      "maxEffects": 91,
+      "maxTexts": 120,
+      "caps": [
+        1800,
+        240,
+        120
+      ],
+      "alive": 93,
+      "finite": true,
+      "stateSHA256": "9272d71c1f0b1251f7a6893083040b018ddb464936bbda6984dcc569016d2e97"
+    }
+  ],
+  "sourceHashes": [
+    {
+      "source": "current",
+      "version": "0.14.0",
+      "gitBlob": "70838c8c834dfc45d192b80d32204c4fd4ee50eb"
+    }
+  ],
+  "environment": {
+    "node": "v24.22.1",
+    "browser": "153.0.8010.0",
+    "gpu": "browser default; consult graphics featureStatus for actual acceleration",
+    "drawTiming": "CPU command submission only; excludes GPU completion and presentation",
+    "graphics": {
+      "featureStatus": {
+        "2d_canvas": "unavailable_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "raw_draw": "disabled_off_ok",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "vulkan": "disabled_off",
+        "webgl": "unavailable_software",
+        "webgpu": "unavailable_software",
+        "webgpu_on_vk_via_gl_interop": "disabled_off",
+        "webnn": "unavailable_software"
+      },
+      "devices": [
+        {
+          "vendorId": 65535,
+          "deviceId": 65535,
+          "vendorString": "Google Inc. (Google)",
+          "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "driverVendor": "SwANGLE",
+          "driverVersion": "5.0.0"
+        }
+      ],
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+      "driverVendor": "Google Inc. (Google)"
+    },
+    "viewport": "1720x720",
+    "simulationHz": 60,
+    "workload": "Constant-population timings disable knockback and suppress automatic specials; paired 128-player bursts restore normal HP, full knockback and all automatic specials for 180 ticks, rendering every sixth tick. Clock/RNG initialization is identical."
+  }
+}

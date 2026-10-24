@@ -1,10 +1,10 @@
-# Arena Live · v0.13
+# Arena Live · v0.14
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
 ## Versión principal
 
-`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API, el servidor y el paquete identifican la versión 0.13. [Cambios y validación](docs/RELEASE-0.13-RADAR.md).
+`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API, el servidor y el paquete identifican la versión 0.14. [Cambios y validación](docs/RELEASE-0.14-DEPURACION.md).
 
 ## Rivalidades de clase
 
@@ -16,9 +16,13 @@ Las [2.400 simulaciones de v0.12](docs/balance-v0.12-summary.json) repiten la mu
 
 ## Rendimiento con 128 jugadores
 
-La selección de rivales usa un recorrido lineal por luchador y las colisiones descartan cuerpos lejanos antes de calcular distancias. Ambas capturas comparten el orden de dibujo, las medidas de los nombres se reutilizan y el HUD solo cambia los valores que variaron. Los escenarios actualizan sus controles una vez al completar la lista; los chats agrupan scroll y contadores por cuadro.
+La interfaz sirve sus estilos ya generados desde `styles/arena-ui.css`: el navegador deja de compilar Tailwind y de vigilar el chat para generar CSS. El selector de objetivo conserva sus opciones y retira solo las de los eliminados. El HUD actualiza únicamente los valores que cambiaron.
 
-Se mantiene el cupo de 128, todos los poderes, los efectos y las dos vistas sincronizadas. Los fondos y el suelo isométrico reutilizan capas estáticas para reducir el coste de dibujar Full HD; jugadores, textos y efectos se actualizan en cada cuadro. [Mediciones de v0.12](docs/performance-v0.12.json). Las cifras de este entorno no sustituyen una prueba en tu equipo con OBS.
+La física conserva el orden secuencial de los peleadores y evita las llamadas de una función por cada par de cuerpos. Los poderes limitados eligen los mismos uno, dos o tres blancos con distancias calculadas una sola vez. La retirada de partículas, textos y efectos usa un recorrido estable, y los símbolos de estado reutilizan listas acotadas. Las dos capturas comparten orden y tiempo de animación; los fondos estáticos y las medidas de nombres siguen reutilizándose.
+
+Se mantienen el cupo de 128, los poderes, los límites de efectos, la simulación de 60 Hz y las capturas **1920 × 1080** y **1080 × 1920**. [Mediciones y condiciones de v0.14](docs/performance-v0.14.json). Las cifras de este entorno no representan los FPS de tu equipo con OBS.
+
+Los lienzos opacos usan Canvas 2D con `willReadFrequently:false`; el navegador puede rasterizarlos con GPU cuando tiene aceleración gráfica disponible. El juego no lee píxeles durante la emisión. `npm.cmd run test:gpu` deja habilitada la configuración gráfica predeterminada del navegador de pruebas e informa de `2d_canvas`, composición y renderer reales. No fuerza una GPU ni confirma la configuración de tu navegador habitual. El control `test:performance` desactiva la GPU para conservar una medición por software comparable; sus tiempos incluyen lectura de píxeles, y los de `test:gpu` miden envío de comandos, sin esperar a que la GPU termine.
 
 ## Instalar y arrancar en Windows
 
@@ -33,7 +37,7 @@ npm.cmd start
 
 Abre **http://127.0.0.1:4173/** y conserva abierta la consola. TikTok comienza desconectado; **📡 TikTok** conecta o desconecta según el estado real del puente.
 
-Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd install` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.13 en el pie de Ajustes**.
+Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd install` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.14 en el pie de Ajustes**.
 
 Para volver a `main` desde una rama anterior:
 
@@ -158,10 +162,14 @@ npm.cmd test
 npx.cmd playwright install chromium
 npm.cmd run test:browser
 npm.cmd run test:performance
+npm.cmd run test:gpu
 ```
+
+Para modificar clases de la interfaz, ejecuta `npm.cmd run build:styles` y guarda también `styles/arena-ui.css`. El CSS ya está incluido para jugar; `npm.cmd start` no ejecuta un compilador. `npm.cmd test` verifica que coincida con las clases actuales.
 
 Las pruebas del navegador arrancan y cierran su servidor local y simulan las respuestas de TikTok. Cubren paneles, persistencia, escenarios, chats, pausa, capturas, idiomas y controles móviles; no conectan con una emisión real.
 
+- [Depuración, carga de 128 peleadores y diagnóstico gráfico de v0.14](docs/RELEASE-0.14-DEPURACION.md).
 - [Radar pentagonal de daño en v0.13](docs/RELEASE-0.13-RADAR.md).
 - [Cercanía Shinobi y comparación de v0.12](docs/RELEASE-0.12-CERCANIA-SHINOBI.md).
 - [Cadena A, prioridades y resultados de v0.11](docs/RELEASE-0.11-RIVALIDADES.md).
@@ -178,4 +186,4 @@ Las pruebas del navegador arrancan y cierran su servidor local y simulan las res
 - [Registro de cambios](CHANGELOG.md).
 - Historial: [v0.2](docs/RELEASE-0.2-OPERADOR.md), [v0.1](docs/RELEASE-0.1-OBS.md).
 
-El desarrollo y las actualizaciones continúan en `main`. La entrega vigente es Arena Live v0.13, con ambas capturas Full HD, textos de poderes configurables, inspector de equilibrio, TikTok, reglas, potencias, comandos y caída isométrica integrados. Las entregas anteriores quedan como historial.
+El desarrollo y las actualizaciones continúan en `main`. La entrega vigente es Arena Live v0.14, con ambas capturas Full HD, textos de poderes configurables, inspector de equilibrio, TikTok, reglas, potencias, comandos y caída isométrica integrados. Las entregas anteriores quedan como historial.

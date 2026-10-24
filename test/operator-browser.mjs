@@ -1,10 +1,12 @@
-// Browser regressions for the unified v0.13 release. Never connects to a real TikTok LIVE.
+// Browser regressions for the unified main release. Never connects to a real TikTok LIVE.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { readFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { chromium } from 'playwright';
+const release=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8')).version;
+const visibleVersion=release.split('.').slice(0,2).join('.');
 const root=fileURLToPath(new URL('../',import.meta.url));
 const port=process.env.ARENA_TEST_PORT || '4175';
 const server=spawn(process.execPath,['bridge/server.mjs'],{cwd:root,env:{...process.env,PORT:port}});
@@ -43,8 +45,14 @@ const shot=async name=>{if(process.env.ARENA_TEST_SCREENSHOTS){await mkdir(proce
 async function unfold(id){const panel=page.locator('#'+id);if(!await panel.evaluate(n=>n.open))await panel.locator('> summary').click({noWaitAfter:true});}
 async function settingsSection(index){const section=page.locator('.arena-settings-section').nth(index);if(!await section.evaluate(n=>n.open))await section.locator('> summary').click({noWaitAfter:true});}
 async function streamClick(id){await page.mouse.move(600,20);await page.locator('#'+id).click({noWaitAfter:true});}
-await check('v0.13 starts with large game, left chat and only the social test group expanded',async()=>{
- assert.equal(await page.evaluate(()=>ArenaLive.version),'0.13.0');
+await check('UI styles are served locally without a browser Tailwind compiler',async()=>{
+ const response=await page.request.get(`http://127.0.0.1:${port}/styles/arena-ui.css?v=0.14`);
+ assert.equal(response.status(),200);assert.match(response.headers()['content-type'],/^text\/css/);
+ assert.ok((await response.body()).length>10000);
+ assert.equal(await page.locator('script[src*="tailwindcss"]').count(),0);
+});
+await check(`v${visibleVersion} starts with large game, left chat and only the social test group expanded`,async()=>{
+ assert.equal(await page.evaluate(()=>ArenaLive.version),release);
  const panels=await page.locator('.arena-work-panel').evaluateAll(ns=>ns.map(n=>({id:n.id,open:n.open,parent:n.parentElement.id})));
  assert.equal(panels.find(n=>n.id==='arenaPanelChat').parent,'arenaDockLeft');
  assert.deepEqual(panels.filter(n=>n.open&&n.id!=='arenaPanelChat').map(n=>n.id),['arenaPanelSocial']);
@@ -90,12 +98,15 @@ await check('Tabbed chats distinguish commands and always follow new messages',a
  await page.locator('#arenaChatTabTikTok').click();assert.ok(await page.locator('.arena-tiktok-chat-line.is-command').count()>0);
  await page.locator('#arenaTikTokChatFeed').evaluate(n=>n.scrollTop=0);
  await page.evaluate(()=>window.arenaTestSocket.dispatchEvent(new MessageEvent('message',{data:JSON.stringify({type:'chat',platformKey:'tiktok',username:'qa_chat',message:'mensaje más reciente'})})));
+ await page.waitForFunction(()=>{const n=document.getElementById('arenaTikTokChatFeed');return n.scrollHeight-n.scrollTop-n.clientHeight<3;});
  assert.equal(await page.locator('#arenaTikTokChatFeed').evaluate(n=>n.scrollHeight-n.scrollTop-n.clientHeight<3),true);
  await page.locator('#arenaTikTokChatOlder').click();assert.equal(await page.locator('#arenaTikTokChatLatest').isDisabled(),false);
  await page.evaluate(()=>window.arenaTestSocket.dispatchEvent(new MessageEvent('message',{data:JSON.stringify({type:'chat',platformKey:'tiktok',username:'qa_chat',message:'volver al directo'})})));
  assert.equal(await page.locator('#arenaTikTokChatLatest').isDisabled(),true);
  await page.locator('#arenaChatTabLocal').click();assert.ok(await page.locator('#chatFeed>[data-chat-kind="command"]').count()>0);
- await page.locator('#chatFeed').evaluate(n=>n.scrollTop=0);await page.locator('#chatMessageInput').fill('último mensaje');await page.locator('#chatForm button[type=submit]').click();assert.equal(await page.locator('#chatFeed').evaluate(n=>n.scrollHeight-n.scrollTop-n.clientHeight<3),true);
+ await page.locator('#chatFeed').evaluate(n=>n.scrollTop=0);await page.locator('#chatMessageInput').fill('último mensaje');await page.locator('#chatForm button[type=submit]').click();
+ await page.waitForFunction(()=>{const n=document.getElementById('chatFeed');return n.scrollHeight-n.scrollTop-n.clientHeight<3;});
+ assert.equal(await page.locator('#chatFeed').evaluate(n=>n.scrollHeight-n.scrollTop-n.clientHeight<3),true);
 });
 await check('Preparation settings apply multiple changes without closing and resume on explicit close',async()=>{
  await page.locator('#arenaDualSettingsBtn').click();assert.equal((await state()).paused,true);
@@ -304,10 +315,10 @@ await check('Mobile special action follows the no-powers rule while movement and
  await page.locator('#arenaPowerMode').selectOption('noSpecials');await page.keyboard.press('Escape');assert.equal(await page.locator('#arenaMobilePower').isDisabled(),true);assert.equal(await page.locator('#arenaMobileAttack').isEnabled(),true);assert.equal(await page.locator('#arenaMobileJump').isEnabled(),true);
 });
  await check('Unified release uses native clock, randomness, animation and the TikTok bridge',async()=>{
-  const status=await (await page.request.get(`http://127.0.0.1:${port}/api/status`)).json();assert.equal(status.version,'0.13.0');
+  const status=await (await page.request.get(`http://127.0.0.1:${port}/api/status`)).json();assert.equal(status.version,release);
   const native=await page.evaluate(()=>({clock:Date.now.toString().includes('[native code]'),random:Math.random.toString().includes('[native code]'),raf:requestAnimationFrame.toString().includes('[native code]'),harness:typeof window.ArenaBalanceHarness}));
   assert.deepEqual(native,{clock:true,random:true,raf:true,harness:'undefined'});
-  assert.match(await page.locator('#arenaVersionInfo').textContent(),/v0\.13/);
+  assert.equal(await page.locator('#arenaVersionInfo').textContent(),`Arena Live v${visibleVersion} · TikTok`);
   assert.equal(await page.evaluate(()=>Object.isFrozen(ArenaLive.getBalanceRules())&&Object.isFrozen(ArenaLive.getBalanceRules().iso.ninja)),true);
  });
  await check('Playable powers apply the measured damage, windup and target caps in all three modes',async()=>{
@@ -584,11 +595,11 @@ await check('Settings shows the release only in its footer and retains UI/power 
  await page.setViewportSize({width:1720,height:900});const cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.setTouchEmulationEnabled',{enabled:false});
  await page.evaluate(()=>{toggleSettingsModal(true);countdownsEnabled=false;});
  assert.equal(await page.locator('#arenaSettingsVersion').count(),0);assert.equal(await page.locator('#arenaVersionInfo').isVisible(),true);
- assert.equal(await page.locator('#arenaVersionInfo').textContent(),'Arena Live v0.13 · TikTok');
- assert.equal(await page.locator('#settingsPauseModal').evaluate(n=>(n.textContent.match(/v0\.13/g)||[]).length),1);
+ assert.equal(await page.locator('#arenaVersionInfo').textContent(),`Arena Live v${visibleVersion} · TikTok`);
+ assert.equal(await page.locator('#settingsPauseModal').evaluate((n,version)=>n.textContent.split('v'+version).length-1,visibleVersion),1);
  for(const language of ['es','en','fr','de','zh','ja','pt','it']){
   await page.evaluate(language=>setLanguage(language),language);
-  assert.equal(await page.locator('#arenaVersionInfo').textContent(),'Arena Live v0.13 · TikTok');
+  assert.equal(await page.locator('#arenaVersionInfo').textContent(),`Arena Live v${visibleVersion} · TikTok`);
   assert.equal(await page.locator('[data-ui-label]').evaluateAll(ns=>ns.every(n=>n.textContent.trim()&&!/undefined|null/.test(n.textContent))),true);
   assert.equal(await page.locator('[data-command-label]').evaluateAll(ns=>ns.every(n=>n.textContent.trim())),true);
  }
@@ -803,5 +814,5 @@ await check('Radar axes and power names stay readable across eight languages, mo
  const before=await rects();await page.locator('[data-balance-class="esmeralda"]').click();assert.deepEqual(await rects(),before);assert.equal((await state()).settingsOpen,true);await shot('radar-stream-narrow');
  await page.evaluate(()=>document.getElementById('broadcastStageSection').style.removeProperty('--arena-stream-width'));
 });
-assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:'0.13.0'}));
+assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:release}));
 } finally {await browser?.close();server.kill('SIGKILL');}

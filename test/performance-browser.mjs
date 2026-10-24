@@ -10,20 +10,35 @@ const current = await readFile(new URL('../index.html', import.meta.url), 'utf8'
 const sources = [['current', current]];
 if (process.env.ARENA_PERF_BASELINE) sources.unshift(['baseline', await readFile(process.env.ARENA_PERF_BASELINE, 'utf8')]);
 const css = process.env.ARENA_TEST_CSS ? await readFile(process.env.ARENA_TEST_CSS, 'utf8') : null;
+const localStyles = await readFile(new URL('../styles/arena-ui.css', import.meta.url));
 const server = createServer((req, res) => {
+  if (new URL(req.url, 'http://localhost').pathname === '/styles/arena-ui.css') {
+    res.writeHead(200, {'content-type':'text/css; charset=utf-8'}); res.end(localStyles); return;
+  }
   const name = new URL(req.url, 'http://localhost').searchParams.get('source');
   res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
   res.end(sources.find(([key]) => key === name)?.[1] || current);
 });
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-const launch = { headless: true, args: ['--disable-gpu'] };
+const gpuMode = process.argv.includes('--gpu');
+const launch = { headless: true, args: gpuMode ? [] : ['--disable-gpu'] };
 if (process.env.ARENA_BROWSER_EXECUTABLE) launch.executablePath = process.env.ARENA_BROWSER_EXECUTABLE;
 if (process.env.ARENA_BROWSER_LIBRARY_PATH) launch.env = { ...process.env, LD_LIBRARY_PATH: process.env.ARENA_BROWSER_LIBRARY_PATH };
 let browser;
-const checks = [], errors = [], measurements = [];
+const checks = [], errors = [], measurements = [], burstMeasurements = [];
+const referenceStates = new Map();
 const check = async (name, fn) => { await fn(); checks.push(name); console.log('PASS', name); };
 try {
   browser = await chromium.launch(launch);
+  let graphics;
+  const diagnostics = await browser.newBrowserCDPSession();
+  try {
+    const {gpu} = await diagnostics.send('SystemInfo.getInfo');
+    graphics = {featureStatus:gpu.featureStatus, devices:gpu.devices,
+      renderer:gpu.auxAttributes?.glRenderer, driverVendor:gpu.auxAttributes?.glVendor};
+  } finally { await diagnostics.detach(); }
+  console.log('GRAPHICS', JSON.stringify({canvas2d:graphics.featureStatus?.['2d_canvas'],
+    compositing:graphics.featureStatus?.gpu_compositing, renderer:graphics.renderer}));
   for (const [source] of sources) {
     const page = await browser.newPage({ viewport: { width: 1720, height: 720 } });
     page.on('pageerror', error => errors.push(error.stack));
@@ -33,6 +48,9 @@ try {
       // Only the automatic simulation loop is held. Layout/focus callbacks still run.
       const raf = window.requestAnimationFrame.bind(window);
       window.requestAnimationFrame = callback => callback.name === 'gameLoop' ? 0 : raf(callback);
+      // Remove wall-clock audience/RNG drift from the paired measurements.
+      window.setInterval = () => 0;
+      Date.now = () => 1800000000000;
     });
     if (css) {
       await page.route(/https:\/\/cdn\.tailwindcss\.com/, route => route.fulfill({ contentType: 'text/javascript', body: 'const style=document.createElement("style");style.textContent=' + JSON.stringify(css) + ';document.head.appendChild(style);' }));
@@ -55,7 +73,7 @@ try {
       }, count);
       assert.equal(setup.bodies, count);
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
-      const metrics = await page.evaluate(() => {
+      const metrics = await page.evaluate(gpuMode => {
         const sample = (fn, iterations) => {
           for (let i = 0; i < 12; i++) fn();
           const values = [];
@@ -68,20 +86,125 @@ try {
         };
         const targeting = sample(() => { for (const f of fighters) findPreferredCombatTarget(f); }, 60);
         const simulation = sample(updatePhysicsAndAI, 120);
-        // Flush each capture so deferred Canvas raster work is included in draw time.
+        // The software control flushes raster work. GPU mode times command
+        // submission only: reading pixels back would distort the normal path.
         const drawing = sample(() => {
           renderBothScreensSimultaneously();
-          ctx16.getImageData(0, 0, 1, 1); ctx9.getImageData(0, 0, 1, 1);
+          if (!gpuMode) { ctx16.getImageData(0, 0, 1, 1); ctx9.getImageData(0, 0, 1, 1); }
         }, 18);
         return { targeting, simulation, drawing, alive: fighters.filter(f => !f.eliminated).length,
-          finite: fighters.every(f => [f.x, f.y, f.hp, f.energy].every(Number.isFinite)) };
-      });
-      measurements.push({ source, count, ...setup, ...metrics });
+          finite: fighters.every(f => [f.x, f.y, f.hp, f.energy].every(Number.isFinite)),
+          snapshot:JSON.stringify({fighters,particles,floatingTexts,activeEffects,camera9x16,activeMode,gameState,slowMoFactor},
+            (key,value) => key === 'lastAttacker' ? value?.id || null : value) };
+      }, gpuMode);
+      const {snapshot, ...timings} = metrics;
+      const stateSHA256 = createHash('sha256').update(snapshot).digest('hex');
+      if (source === 'baseline') referenceStates.set(count, stateSHA256);
+      if (source === 'current' && referenceStates.has(count)) assert.equal(stateSHA256, referenceStates.get(count), `${count} fighters must match the baseline state exactly`);
+      measurements.push({ source, count, ...setup, ...timings, stateSHA256 });
       assert.equal(metrics.alive, count); assert.equal(metrics.finite, true);
       if (source === 'current') checks.push(`${count} fighters simulate and render both captures with finite state`);
       console.log('MEASURE', JSON.stringify(measurements.at(-1)));
     }
+    const burst = await page.evaluate(gpuMode => {
+      setArenaCombatRule('knockback',1); gameState='LOBBY'; applyPlayerCountPreset(128); startCombatFromLobby();
+      for (const f of fighters) { f.energy=100; f.aiSpecialCooldown=0; }
+      const simulation=[], drawing=[];
+      let maxParticles=0, maxEffects=0, maxTexts=0;
+      for (let frame=0; frame<180; frame++) {
+        const start=performance.now(); updatePhysicsAndAI(); simulation.push(performance.now()-start);
+        maxParticles=Math.max(maxParticles,particles.length); maxEffects=Math.max(maxEffects,activeEffects.length); maxTexts=Math.max(maxTexts,floatingTexts.length);
+        if (frame%6===0) {
+          const start=performance.now(); renderBothScreensSimultaneously();
+          if (!gpuMode) {ctx16.getImageData(0,0,1,1);ctx9.getImageData(0,0,1,1);}
+          drawing.push(performance.now()-start);
+        }
+      }
+      const summarize=values=>{values.sort((a,b)=>a-b);return {mean:values.reduce((a,b)=>a+b,0)/values.length,median:values[Math.floor(values.length/2)],p95:values[Math.floor(values.length*.95)]};};
+      return {simulation:summarize(simulation),drawing:summarize(drawing),maxParticles,maxEffects,maxTexts,
+        caps:[MAX_PARTICLES,MAX_ACTIVE_EFFECTS,MAX_FLOATING_TEXTS], alive:fighters.filter(f=>!f.eliminated).length,
+        finite:fighters.every(f=>[f.x,f.y,f.hp,f.energy].every(Number.isFinite)),
+        snapshot:JSON.stringify({fighters,particles,floatingTexts,activeEffects,camera9x16,activeMode,gameState,slowMoFactor},
+          (key,value)=>key==='lastAttacker'?value?.id||null:value)};
+    },gpuMode);
+    const {snapshot:burstSnapshot,...burstTimings}=burst;
+    const burstSHA256=createHash('sha256').update(burstSnapshot).digest('hex');
+    if(source==='baseline')referenceStates.set('burst',burstSHA256);
+    if(source==='current'&&referenceStates.has('burst'))assert.equal(burstSHA256,referenceStates.get('burst'),'full knockback, powers and effects must match baseline state exactly');
+    assert.equal(burst.finite,true); assert.ok(burst.maxParticles<=burst.caps[0]&&burst.maxEffects<=burst.caps[1]&&burst.maxTexts<=burst.caps[2]);
+    burstMeasurements.push({source,count:128,frames:180,drawnFrames:30,...burstTimings,stateSHA256:burstSHA256});
+    if(source==='current')checks.push('128-player full-power burst retains finite state, bounded effects and baseline parity when provided');
+    console.log('BURST',JSON.stringify(burstMeasurements.at(-1)));
+    await page.evaluate(()=>{gameState='LOBBY';applyPlayerCountPreset(128);startCombatFromLobby();});
     if (source === 'current') {
+      await check('Full HD captures are opaque and remain eligible for automatic hardware rasterization', async () => {
+        const attributes = await page.evaluate(() => [ctx16,ctx9].map(ctx => ctx.getContextAttributes()));
+        for (const context of attributes) {
+          assert.equal(context.alpha, false);
+          assert.equal(context.willReadFrequently, false);
+        }
+      });
+      await check('target options retain existing DOM nodes and selection while only eliminated options disappear', async () => {
+        const result = await page.evaluate(() => {
+          const select = document.getElementById('targetFighterSelect');
+          updateTargetSelectDropdown();
+          const options = Array.from(select.options);
+          const target = fighters[1]; select.value = String(target.id);
+          const observer = new MutationObserver(() => {});
+          observer.observe(select, {childList:true, subtree:true, characterData:true});
+          updateTargetSelectDropdown(); const unchanged = observer.takeRecords().length;
+          fighters[0].eliminated = true; updateTargetSelectDropdown();
+          const retained = Array.from(select.options).every(option => options.includes(option));
+          const chosen = select.value === String(target.id);
+          const removed = !Array.from(select.options).some(option => option.value === String(fighters[0].id));
+          fighters[0].eliminated = false; updateTargetSelectDropdown();
+          observer.disconnect();
+          return {unchanged, retained, chosen, removed, size:select.options.length};
+        });
+        assert.deepEqual(result, {unchanged:0, retained:true, chosen:true, removed:true, size:129});
+      });
+      await check('reevaluating an unchanged arena mode does not rebuild its HUD or badges', async () => {
+        const mutations = await page.evaluate(() => {
+          evaluateArenaMode(true);
+          const observer = new MutationObserver(() => {});
+          for (const id of ['autoBadge-1v1','autoBadge-smash','autoBadge-iso',
+            'hudModeIcon16','hudModeTitle16','hudFighterCount16','hudFighterCount9']) {
+            observer.observe(document.getElementById(id), {subtree:true, childList:true, attributes:true, characterData:true});
+          }
+          evaluateArenaMode(true);
+          const count = observer.takeRecords().length; observer.disconnect(); return count;
+        });
+        assert.equal(mutations, 0);
+      });
+      await check('both captures share one animation clock and rendering consumes no combat randomness', async () => {
+        const result = await page.evaluate(() => {
+          const clock=Date.now, random=Math.random;
+          let clockCalls=0, randomCalls=0;
+          Date.now=()=>1800000000000+clockCalls++;
+          Math.random=()=>{randomCalls++;return random();};
+          const before=JSON.stringify(ArenaLive.getFighters());
+          try {
+            renderBothScreensSimultaneously();
+            return {clockCalls,randomCalls,unchanged:before===JSON.stringify(ArenaLive.getFighters())};
+          } finally {Date.now=clock;Math.random=random;}
+        });
+        assert.deepEqual(result,{clockCalls:1,randomCalls:0,unchanged:true});
+      });
+      await check('active bonus symbols do not shift the name and class text baseline', async () => {
+        const result = await page.evaluate(() => {
+          const fighter=fighters[0], boost=fighter.likeBoostTimer;
+          const fill=CanvasRenderingContext2D.prototype.fillText, baselines=[];
+          const classTitle=ARCHETYPES.find(a=>a.key===fighter.archetypeKey).title;
+          fighter.likeBoostTimer=100;
+          CanvasRenderingContext2D.prototype.fillText=function(text,...args){
+            if(text===classTitle||String(text).includes(fighter.name.slice(0,7)))baselines.push(this.textBaseline);
+            return fill.call(this,text,...args);
+          };
+          try {drawFighterOnCtx(ctx16,fighter);return baselines;}
+          finally {fighter.likeBoostTimer=boost;CanvasRenderingContext2D.prototype.fillText=fill;}
+        });
+        assert.ok(result.length>=2); assert.ok(result.every(value=>value==='alphabetic'));
+      });
       await page.evaluate(()=>setArenaCombatRule('knockback',1));
       await check('128-player scenario also loads during combat; mode transitions and capacity remain correct', async () => {
         const result = await page.evaluate(() => {
@@ -234,9 +357,12 @@ try {
     return { source, version: content.match(/version: '([\d.]+)'/)?.[1],
       gitBlob: createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex') };
   });
-  const report = { passed: checks.length, errors: errors.length, checks, measurements, sourceHashes,
-    environment: { node: process.version, browser: await browser.version(), gpu: 'disabled; software raster and readback included', viewport: '1720x720', simulationHz: 60,
-      workload: 'Constant-population timings disable knockback in both sources and suppress autonomous specials; subsequent stress checks restore full knockback and specials.' } };
+  const report = { passed: checks.length, errors: errors.length, checks, measurements, burstMeasurements, sourceHashes,
+    environment: { node: process.version, browser: await browser.version(),
+      gpu: gpuMode ? 'browser default; consult graphics featureStatus for actual acceleration' : 'disabled by test; software raster and readback included',
+      drawTiming:gpuMode ? 'CPU command submission only; excludes GPU completion and presentation' : 'command submission and software raster readback',
+      graphics, viewport: '1720x720', simulationHz: 60,
+      workload: 'Constant-population timings disable knockback and suppress automatic specials; paired 128-player bursts restore normal HP, full knockback and all automatic specials for 180 ticks, rendering every sixth tick. Clock/RNG initialization is identical.' } };
   if (process.env.ARENA_PERF_REPORT) await writeFile(process.env.ARENA_PERF_REPORT, JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report));
 } finally {

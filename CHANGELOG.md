@@ -1,5 +1,14 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-24 — Arena Live v0.14 · Depuración y carga con 128 peleadores
+
+- Retiradas doce funciones heredadas, rutas cooperativas inactivas, tarjetas/leyendas de HUD ocultas, descripción de modo sin elemento, constantes sin referencias y 32 selectores CSS anteriores.
+- Estilos de utilidades precompilados y servidos localmente: el compilador Tailwind deja de ejecutarse y observar cambios del chat durante la emisión. CSS verificable con `build:styles`, incluido en la entrega.
+- Bucles de física directos, selección estable de uno a tres blancos con una distancia por candidato y caducidad de efectos en un recorrido, conservando orden, RNG, potencias y límites.
+- Menos listas temporales de estado/dibujo, tiempo de animación compartido, selector de objetivo incremental y HUD sin reescrituras innecesarias. Corregida la línea base de nombres/clases al mostrar bonificaciones.
+- Canvas 2D opaco compatible con aceleración automática del navegador y diagnóstico `test:gpu` con estado real del renderer. Capturas Full HD, OBS, controles y almacenamiento conservados.
+- 57 pruebas de Node, 65 de navegador, 18 de carga y 18 de diagnóstico aprobadas; estados de carga idénticos a v0.13 y 200 partidas idénticas a la muestra v0.12. Validación por software, sin GPU física ni LIVE real; no se promete una mejora general de FPS.
+
 ## 2026-10-24 — Arena Live v0.13 · Radar pentagonal de equilibrio
 
 - El inspector de equilibrio sustituye las barras por un radar pentagonal: un eje por clase, dos polígonos en HP para daño básico (discontinuo) y especial (continuo), anillos de referencia y escala compartida entre modos.

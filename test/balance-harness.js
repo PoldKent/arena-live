@@ -30,7 +30,7 @@ window.ArenaBalanceHarness = (() => {
   };
   localizationObserver.disconnect();
   appendChatMessage = addKillFeed = showDualBanner = playSound = spawnFloatingText = () => {};
-  updateTargetSelectDropdown = updateHudFighterCards = updateStreamerJoinButton = updatePhaseUI = () => {};
+  updateTargetSelectDropdown = updateStreamerJoinButton = updatePhaseUI = () => {};
   refreshArenaCombatRuleControls = () => {};
   triggerFinalKOSequence = value => { winner = value; koSequenceActive = true; };
 

@@ -1,0 +1,68 @@
+{
+  "release": "0.14.0",
+  "previousSourceGitBlob": "2afcd3a017ca902e11847d6fa3e76aef9d86a650",
+  "sourceGitBlob": "70838c8c834dfc45d192b80d32204c4fd4ee50eb",
+  "removedFunctions": [
+    "toggleProtaClassMenu",
+    "openLiveSettings",
+    "pauseWithSettingsOpen",
+    "formatOpportunitiesBadge",
+    "showSettingsSection",
+    "clearCoopRoundState",
+    "getCoopGroupFighter",
+    "isCoopGroupMember",
+    "boostCoopGroupFighter",
+    "platformKeyForFighter",
+    "updateHudFighterCards",
+    "arenaOpenOperatorDrawer"
+  ],
+  "addedFunctions": [
+    "writeArenaLocalizedHudText",
+    "getArenaFighterStatusIcons"
+  ],
+  "removedCSSSelectors": [
+    "#settingsPauseModal.settings-live-mode",
+    "#settingsPauseModal.settings-live-mode .settings-paused-copy",
+    "#settingsPauseModal.settings-live-mode .settings-live-copy",
+    ".settings-live-copy",
+    ".settings-pause-action",
+    "#settingsPauseModal.settings-live-mode .settings-pause-action",
+    ".animate-ticker",
+    ".animate-ticker:hover",
+    "#viewport16x9 .hud-viewer-glass",
+    "#viewport9x16 .hud-viewer-glass",
+    "#viewport16x9 .bottom-stage-legend",
+    "#viewport9x16 .bottom-stage-legend",
+    ".arena-header-group",
+    ".arena-group-label",
+    ".arena-header-group-prota",
+    ".arena-header-group-audio",
+    ".arena-header-group-settings",
+    ".arena-test-group",
+    ".arena-test-group-title",
+    ".arena-test-groups",
+    ".arena-test-group button",
+    ".arena-header-group-audio #btnQuickSound",
+    "#hudFighterCards16",
+    "#hudFighterCards9",
+    "#viewport16x9 .animate-ticker",
+    "#viewport9x16 .text-pink-300.truncate",
+    "#viewport16x9 .relative.z-10.p-1.flex.flex-col.gap-0\\.5:has(#hudFighterCards16)",
+    "#viewport9x16 .relative.z-10.p-1.flex.flex-col.gap-0\\.5:has(#hudFighterCards9)",
+    ".arena-monitor-fullscreen-actions",
+    ".arena-monitor-fullscreen-actions button",
+    ".arena-monitor-fullscreen-actions button:hover",
+    ".arena-monitor-fullscreen-actions button:focus-visible"
+  ],
+  "unreferencedNamedFunctions": [],
+  "htmlBytes": {
+    "before": 688463,
+    "after": 677829
+  },
+  "htmlLines": {
+    "before": 8927,
+    "after": 8765
+  },
+  "shippedStylesBytes": 31331,
+  "scope": "Named declarations and literal CSS references in runtime entry points; dynamic entry points, the stable API schema and historical documentation are retained. This is not proof that every possible unreachable branch has been eliminated."
+}

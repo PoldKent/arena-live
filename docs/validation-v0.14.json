@@ -1,0 +1,280 @@
+{
+  "release": "0.14.0",
+  "date": "2026-10-24",
+  "sourceGitBlob": "70838c8c834dfc45d192b80d32204c4fd4ee50eb",
+  "previousSourceGitBlob": "2afcd3a017ca902e11847d6fa3e76aef9d86a650",
+  "inlineScriptSHA256": "e9de5810fd9dd50c15e6dc24ef02b19bbd1700cbb448a74853282ecb4f65905a",
+  "node": {
+    "passed": 57,
+    "failed": 0
+  },
+  "browser": {
+    "passed": 65,
+    "errors": 0,
+    "locales": [
+      "es",
+      "en",
+      "fr",
+      "de",
+      "zh",
+      "ja",
+      "pt",
+      "it"
+    ],
+    "viewports": [
+      "1720x720 preparation/Stream",
+      "3440x1440 ultrawide",
+      "1366x900 desktop radar",
+      "320x800 mobile",
+      "1720x900 Stream with 180px tool column"
+    ],
+    "coverage": [
+      "local compiled stylesheet with no browser Tailwind compiler",
+      "operator controls, docking and persistence",
+      "TikTok simulated connection and 500-message bursts",
+      "capacity, rules, powers, target selection and visible commands",
+      "isometric floor, jumps, rescue and ring-outs",
+      "Full HD captures, edge-to-edge powers and stable OBS calibration",
+      "five-axis radar with exact HP for 75 class/rival/mode combinations"
+    ]
+  },
+  "softwareLoad": {
+    "passed": 18,
+    "errors": 0,
+    "report": "performance-v0.14.json",
+    "identicalBaselineStates": {
+      "32": "aa9ba44d4066807c4511b2cb10beed48e049eb8de7a3b8e7d4784f7439fb08a9",
+      "64": "df2d28cf1fde612a8786657594bb72e10e5cd6dd754bc0b811f012377affd6c4",
+      "128": "21f8a73a34ad196efce4e02d2db81a873a3bdc239b69375d0fd52b07a7e2849b",
+      "128 full-power burst": "9272d71c1f0b1251f7a6893083040b018ddb464936bbda6984dcc569016d2e97"
+    },
+    "conditions": {
+      "node": "v24.22.1",
+      "browser": "153.0.8010.0",
+      "gpu": "disabled by test; software raster and readback included",
+      "drawTiming": "command submission and software raster readback",
+      "graphics": {
+        "featureStatus": {
+          "2d_canvas": "unavailable_software",
+          "direct_rendering_display_compositor": "disabled_off_ok",
+          "gpu_compositing": "disabled_software",
+          "multiple_raster_threads": "enabled_on",
+          "opengl": "disabled_off",
+          "rasterization": "disabled_software",
+          "raw_draw": "disabled_off_ok",
+          "skia_graphite": "disabled_off",
+          "trees_in_viz": "disabled_off",
+          "video_decode": "disabled_software",
+          "video_encode": "disabled_software",
+          "vulkan": "disabled_off",
+          "webgl": "unavailable_software",
+          "webgpu": "unavailable_software",
+          "webgpu_on_vk_via_gl_interop": "disabled_off",
+          "webnn": "unavailable_software"
+        },
+        "devices": [
+          {
+            "vendorId": 65535,
+            "deviceId": 65535,
+            "vendorString": "Google Inc. (Google)",
+            "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "driverVendor": "SwANGLE",
+            "driverVersion": "5.0.0"
+          }
+        ],
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "driverVendor": "Google Inc. (Google)"
+      },
+      "viewport": "1720x720",
+      "simulationHz": 60,
+      "workload": "Constant-population timings disable knockback and suppress automatic specials; paired 128-player bursts restore normal HP, full knockback and all automatic specials for 180 ticks, rendering every sixth tick. Clock/RNG initialization is identical."
+    }
+  },
+  "defaultGraphicsDiagnostic": {
+    "passed": 18,
+    "errors": 0,
+    "report": "gpu-v0.14.json",
+    "canvas2d": "unavailable_software",
+    "physicalGPUValidated": false,
+    "timing": "Command submission only; completion/presentation not timed. Not comparable to the software-readback timing."
+  },
+  "combatParity": {
+    "matches": 200,
+    "identical": 200,
+    "duels": 160,
+    "arenas": 40,
+    "seeds": [
+      3000,
+      3001
+    ],
+    "counts": [
+      5,
+      10,
+      25,
+      125
+    ],
+    "referenceReport": "balance-v0.12-summary.json",
+    "referenceSourceGitBlob": "4af3c4a86c59c88a82803f8ac7eac56641635dc9",
+    "resultsSHA256": "db4517ab038228a19ff3b0318c7b4a3f344e78ce6c3e54c3cd3bdbf1d1e5fbf6",
+    "canonicalization": "UTF-8 JSON of ordered results, sorted object keys, compact separators, unescaped Unicode.",
+    "maxSimulationSeconds": 180,
+    "telemetryParity": true,
+    "determinism": true,
+    "metadata": {
+      "version": "0.14.0",
+      "defaults": {
+        "maxPlayers": 128,
+        "classRule": "any",
+        "powerMode": "full",
+        "maxHp": 180,
+        "damage": 1,
+        "knockback": 1,
+        "movement": 1,
+        "energyRegen": 1
+      },
+      "ai": {
+        "minEnergy": 25,
+        "cooldownFrames": 480,
+        "maxRangeByClass": {
+          "kame": 260,
+          "ninja": 155,
+          "titan": 135,
+          "trueno": 300,
+          "esmeralda": 300
+        }
+      },
+      "targeting": "class-priority-shinobi-local",
+      "targetingRules": {
+        "shinobiSimilarDistancePercent": 15
+      },
+      "balance": {
+        "1v1": {
+          "kame": {
+            "damage": 43,
+            "windup": 34,
+            "targets": null
+          },
+          "ninja": {
+            "damage": 38,
+            "windup": 34,
+            "targets": 1
+          },
+          "titan": {
+            "damage": 38,
+            "windup": 34,
+            "targets": null
+          },
+          "trueno": {
+            "damage": 37,
+            "windup": 34,
+            "targets": 3
+          },
+          "esmeralda": {
+            "damage": 37,
+            "windup": 34,
+            "targets": 1
+          }
+        },
+        "smash": {
+          "kame": {
+            "damage": 44,
+            "windup": 34,
+            "targets": null
+          },
+          "ninja": {
+            "damage": 50,
+            "windup": 18,
+            "targets": 1
+          },
+          "titan": {
+            "damage": 38,
+            "windup": 34,
+            "targets": null
+          },
+          "trueno": {
+            "damage": 28,
+            "windup": 34,
+            "targets": 2
+          },
+          "esmeralda": {
+            "damage": 44,
+            "windup": 22,
+            "targets": 1
+          }
+        },
+        "iso": {
+          "kame": {
+            "damage": 38,
+            "windup": 34,
+            "targets": 3
+          },
+          "ninja": {
+            "damage": 60,
+            "windup": 20,
+            "targets": 1
+          },
+          "titan": {
+            "damage": 38,
+            "windup": 34,
+            "targets": 3
+          },
+          "trueno": {
+            "damage": 32,
+            "windup": 34,
+            "targets": 3
+          },
+          "esmeralda": {
+            "damage": 60,
+            "windup": 20,
+            "targets": 1
+          }
+        }
+      },
+      "rivalries": {
+        "advantage": 1.1,
+        "disadvantage": 0.9,
+        "beats": {
+          "kame": "titan",
+          "titan": "trueno",
+          "trueno": "esmeralda",
+          "esmeralda": "ninja",
+          "ninja": "kame"
+        }
+      },
+      "hz": 60,
+      "variant": "published",
+      "productionGitBlob": "70838c8c834dfc45d192b80d32204c4fd4ee50eb",
+      "engineGitBlob": "70838c8c834dfc45d192b80d32204c4fd4ee50eb",
+      "browser": "153.0.8010.0",
+      "duelSeeds": 2,
+      "arenaSeeds": 2,
+      "seedStart": 3000,
+      "counts": [
+        5,
+        10,
+        25,
+        125
+      ],
+      "maxSeconds": 180,
+      "matches": 200,
+      "method": "Seeded AI, no audience boosts or re-entry, canonical spawns; crossed duel side/order and rotated arena assignments; virtual 60Hz timers; UI and rendering suppressed, combat/particle RNG preserved."
+    }
+  },
+  "cleanup": {
+    "report": "cleanup-v0.14.json",
+    "removedFunctions": 12,
+    "removedCSSSelectors": 32,
+    "unreferencedNamedFunctions": 0,
+    "statusCacheLimit": 64,
+    "labelMetricEntriesPerFighter": 2,
+    "prebuiltStyleBytes": 31331
+  },
+  "limitations": [
+    "Software timing variation does not establish an overall FPS improvement; rasterization remains the main cost.",
+    "This host reports SwiftShader and unavailable_software, so no physical GPU speedup is validated.",
+    "The GPU diagnostic does not inspect the user Chrome profile or OBS configuration.",
+    "The 200 matches verify parity rather than retune balance or estimate new win rates.",
+    "TikTok is simulated; no real LIVE connection was made.",
+    "Reference timings use offline compiled styles in both sources, so they do not measure the old CDN compiler overhead."
+  ]
+}

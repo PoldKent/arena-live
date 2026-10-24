@@ -143,6 +143,12 @@ const server = createServer(async (req, res) => {
       res.end(script);
       return;
     }
+    if (req.method === 'GET' && pathname === '/styles/arena-ui.css') {
+      const css = await readFile(resolve(ROOT, 'styles/arena-ui.css'));
+      res.writeHead(200, { ...noCache, 'Content-Type': 'text/css; charset=utf-8' });
+      res.end(css);
+      return;
+    }
     if (req.method === 'GET' && pathname === '/api/status') return json(res, 200, snapshot());
     if (req.method === 'POST' && pathname === '/api/connect') {
       void connectLive();

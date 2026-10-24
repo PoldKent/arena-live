@@ -1,0 +1,279 @@
+{
+  "passed": 18,
+  "errors": 0,
+  "checks": [
+    "32 fighters simulate and render both captures with finite state",
+    "64 fighters simulate and render both captures with finite state",
+    "128 fighters simulate and render both captures with finite state",
+    "128-player full-power burst retains finite state, bounded effects and baseline parity when provided",
+    "Full HD captures are opaque and remain eligible for automatic hardware rasterization",
+    "target options retain existing DOM nodes and selection while only eliminated options disappear",
+    "reevaluating an unchanged arena mode does not rebuild its HUD or badges",
+    "both captures share one animation clock and rendering consumes no combat randomness",
+    "active bonus symbols do not shift the name and class text baseline",
+    "128-player scenario also loads during combat; mode transitions and capacity remain correct",
+    "preparation skips its hidden capture and switching or dual view repaints fresh game state",
+    "label metric cache follows renamed fighters, life counters and loaded fonts",
+    "unchanged duel HUD values do not recreate text or trigger localization each frame",
+    "128 autonomous fighters still charge/fire specials and keep transient effects bounded",
+    "128-player powers retain real text and damage labels while transient history remains bounded",
+    "expired KO notices release detached badges instead of accumulating through a stream",
+    "replacing a scenario clears old powers and a pending victory cannot overwrite the new match",
+    "500 received comments keep history and automatic follow without rebuilding toolbar state per message"
+  ],
+  "measurements": [
+    {
+      "source": "baseline",
+      "count": 32,
+      "setupMs": 14.600000000093132,
+      "bodies": 32,
+      "targeting": {
+        "mean": 0.055000000004656616,
+        "median": 0,
+        "p95": 0.10000000009313226
+      },
+      "simulation": {
+        "mean": 0.17249999999767168,
+        "median": 0.10000000009313226,
+        "p95": 0.5
+      },
+      "drawing": {
+        "mean": 21.166666666666668,
+        "median": 20.100000000093132,
+        "p95": 27.800000000279397
+      },
+      "alive": 32,
+      "finite": true,
+      "stateSHA256": "aa9ba44d4066807c4511b2cb10beed48e049eb8de7a3b8e7d4784f7439fb08a9"
+    },
+    {
+      "source": "baseline",
+      "count": 64,
+      "setupMs": 7.2000000001862645,
+      "bodies": 64,
+      "targeting": {
+        "mean": 0.06333333333798995,
+        "median": 0,
+        "p95": 0.20000000018626451
+      },
+      "simulation": {
+        "mean": 0.15583333333100502,
+        "median": 0.10000000009313226,
+        "p95": 0.2999999998137355
+      },
+      "drawing": {
+        "mean": 26.48333333334368,
+        "median": 25.399999999906868,
+        "p95": 37.89999999990687
+      },
+      "alive": 64,
+      "finite": true,
+      "stateSHA256": "df2d28cf1fde612a8786657594bb72e10e5cd6dd754bc0b811f012377affd6c4"
+    },
+    {
+      "source": "baseline",
+      "count": 128,
+      "setupMs": 18.399999999906868,
+      "bodies": 128,
+      "targeting": {
+        "mean": 0.23500000000155222,
+        "median": 0.20000000018626451,
+        "p95": 0.39999999990686774
+      },
+      "simulation": {
+        "mean": 0.5300000000007761,
+        "median": 0.5,
+        "p95": 0.7000000001862645
+      },
+      "drawing": {
+        "mean": 39.99444444443927,
+        "median": 38.3000000002794,
+        "p95": 60.39999999990687
+      },
+      "alive": 128,
+      "finite": true,
+      "stateSHA256": "21f8a73a34ad196efce4e02d2db81a873a3bdc239b69375d0fd52b07a7e2849b"
+    },
+    {
+      "source": "current",
+      "count": 32,
+      "setupMs": 11.200000000186265,
+      "bodies": 32,
+      "targeting": {
+        "mean": 0.04500000000310441,
+        "median": 0,
+        "p95": 0.20000000018626451
+      },
+      "simulation": {
+        "mean": 0.23499999999767168,
+        "median": 0.10000000009313226,
+        "p95": 1
+      },
+      "drawing": {
+        "mean": 19.349999999989652,
+        "median": 18.90000000037253,
+        "p95": 23.09999999962747
+      },
+      "alive": 32,
+      "finite": true,
+      "stateSHA256": "aa9ba44d4066807c4511b2cb10beed48e049eb8de7a3b8e7d4784f7439fb08a9"
+    },
+    {
+      "source": "current",
+      "count": 64,
+      "setupMs": 9.399999999906868,
+      "bodies": 64,
+      "targeting": {
+        "mean": 0.14833333333178114,
+        "median": 0.10000000009313226,
+        "p95": 0.39999999990686774
+      },
+      "simulation": {
+        "mean": 0.1324999999992239,
+        "median": 0.10000000009313226,
+        "p95": 0.3000000002793968
+      },
+      "drawing": {
+        "mean": 27.688888888883714,
+        "median": 26.799999999813735,
+        "p95": 47.60000000009313
+      },
+      "alive": 64,
+      "finite": true,
+      "stateSHA256": "df2d28cf1fde612a8786657594bb72e10e5cd6dd754bc0b811f012377affd6c4"
+    },
+    {
+      "source": "current",
+      "count": 128,
+      "setupMs": 12.600000000093132,
+      "bodies": 128,
+      "targeting": {
+        "mean": 0.26166666666201005,
+        "median": 0.20000000018626451,
+        "p95": 0.5
+      },
+      "simulation": {
+        "mean": 0.6283333333325573,
+        "median": 0.40000000037252903,
+        "p95": 1.6000000000931323
+      },
+      "drawing": {
+        "mean": 38.28888888889924,
+        "median": 37.5,
+        "p95": 44.60000000009313
+      },
+      "alive": 128,
+      "finite": true,
+      "stateSHA256": "21f8a73a34ad196efce4e02d2db81a873a3bdc239b69375d0fd52b07a7e2849b"
+    }
+  ],
+  "burstMeasurements": [
+    {
+      "source": "baseline",
+      "count": 128,
+      "frames": 180,
+      "drawnFrames": 30,
+      "simulation": {
+        "mean": 1.2799999999943086,
+        "median": 0.7999999998137355,
+        "p95": 2.1999999997206032
+      },
+      "drawing": {
+        "mean": 53.63333333334886,
+        "median": 55,
+        "p95": 69.60000000009313
+      },
+      "maxParticles": 1800,
+      "maxEffects": 91,
+      "maxTexts": 120,
+      "caps": [
+        1800,
+        240,
+        120
+      ],
+      "alive": 93,
+      "finite": true,
+      "stateSHA256": "9272d71c1f0b1251f7a6893083040b018ddb464936bbda6984dcc569016d2e97"
+    },
+    {
+      "source": "current",
+      "count": 128,
+      "frames": 180,
+      "drawnFrames": 30,
+      "simulation": {
+        "mean": 1.9144444444346138,
+        "median": 0.7999999998137355,
+        "p95": 6.399999999906868
+      },
+      "drawing": {
+        "mean": 59.87333333335506,
+        "median": 58.5,
+        "p95": 81.70000000018626
+      },
+      "maxParticles": 1800,
+      "maxEffects": 91,
+      "maxTexts": 120,
+      "caps": [
+        1800,
+        240,
+        120
+      ],
+      "alive": 93,
+      "finite": true,
+      "stateSHA256": "9272d71c1f0b1251f7a6893083040b018ddb464936bbda6984dcc569016d2e97"
+    }
+  ],
+  "sourceHashes": [
+    {
+      "source": "baseline",
+      "version": "0.13.0",
+      "gitBlob": "2afcd3a017ca902e11847d6fa3e76aef9d86a650"
+    },
+    {
+      "source": "current",
+      "version": "0.14.0",
+      "gitBlob": "70838c8c834dfc45d192b80d32204c4fd4ee50eb"
+    }
+  ],
+  "environment": {
+    "node": "v24.22.1",
+    "browser": "153.0.8010.0",
+    "gpu": "disabled by test; software raster and readback included",
+    "drawTiming": "command submission and software raster readback",
+    "graphics": {
+      "featureStatus": {
+        "2d_canvas": "unavailable_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "raw_draw": "disabled_off_ok",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "vulkan": "disabled_off",
+        "webgl": "unavailable_software",
+        "webgpu": "unavailable_software",
+        "webgpu_on_vk_via_gl_interop": "disabled_off",
+        "webnn": "unavailable_software"
+      },
+      "devices": [
+        {
+          "vendorId": 65535,
+          "deviceId": 65535,
+          "vendorString": "Google Inc. (Google)",
+          "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "driverVendor": "SwANGLE",
+          "driverVersion": "5.0.0"
+        }
+      ],
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+      "driverVendor": "Google Inc. (Google)"
+    },
+    "viewport": "1720x720",
+    "simulationHz": 60,
+    "workload": "Constant-population timings disable knockback and suppress automatic specials; paired 128-player bursts restore normal HP, full knockback and all automatic specials for 180 ticks, rendering every sixth tick. Clock/RNG initialization is identical."
+  }
+}

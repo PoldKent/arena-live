@@ -35,7 +35,12 @@ for (const count of counts) for (let s = 0; s < arenaSeeds; s++) for (let rotati
   tasks.push({ kind: 'arena', count, powerMode: 'full', baseSeed: s + seedStart,
     seed: 91000 + (s + seedStart) * 7919, rotation, seconds });
 }
-const server = createServer((_, response) => { response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); response.end(html); });
+const localStyles = await readFile(new URL('../styles/arena-ui.css', import.meta.url));
+const server = createServer((request, response) => {
+  const isStyles = new URL(request.url, 'http://localhost').pathname === '/styles/arena-ui.css';
+  response.writeHead(200, {'content-type':isStyles ? 'text/css; charset=utf-8' : 'text/html; charset=utf-8'});
+  response.end(isStyles ? localStyles : html);
+});
 await new Promise(r => server.listen(0, '127.0.0.1', r));
 let browser;
 try {

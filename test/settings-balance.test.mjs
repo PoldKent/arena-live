@@ -74,7 +74,7 @@ test('the inspector includes each counter and prey while neutral inspection pres
  data=e.getArenaBalanceSnapshot('iso','nominal','neutral');assert.equal(data.targetClass,null);assert.equal(data.rows[1].special,60);
 });
 test('Settings has one footer version and no header version; the balance vocabulary covers all eight locales',()=>{
- assert.doesNotMatch(html,/id="arenaSettingsVersion"/);assert.match(html,/id="arenaVersionInfo" data-no-translate[^>]*>Arena Live v0\.13/);
+ assert.doesNotMatch(html,/id="arenaSettingsVersion"/);assert.match(html,/id="arenaVersionInfo" data-no-translate[^>]*>Arena Live v\d+\.\d+/);
  assert.doesNotMatch(html,/id="arenaObsCalibrationTitle"[^>]*>[^<]*v0\./);
  const e=vm.createContext({});vm.runInContext(constant('ARENA_BALANCE_COPY')+'\nglobalThis.copy=ARENA_BALANCE_COPY;',e);
  assert.equal(Object.keys(e.copy).length,8);for(const words of Object.values(e.copy)){assert.equal(words.length,29);assert.ok(words.every(w=>typeof w==='string'&&w.length>0));}
