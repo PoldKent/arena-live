@@ -26,7 +26,11 @@
   "tests": {
     "unit": {
       "passed": 80,
-      "failed": 0
+      "failed": 0,
+      "sourceLineEndingsVerified": [
+        "LF",
+        "CRLF"
+      ]
     },
     "operatorBrowser": {
       "passed": 65,
@@ -87,7 +91,8 @@
       "windows-latest"
     ],
     "node": 24,
-    "remoteRun": "Check GitHub Actions after publishing; local validation is Linux only."
+    "remoteRun": "Check GitHub Actions after publishing; local validation is Linux only.",
+    "windowsSourceCompatibility": "Source fixtures normalize CRLF; .gitattributes preserves canonical LF in fresh checkouts."
   },
   "limits": [
     "No real TikTok LIVE connection in this validation; local bridge and controlled session failures tested.",

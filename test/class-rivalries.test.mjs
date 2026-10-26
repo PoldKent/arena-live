@@ -1,8 +1,8 @@
+import {readEngineSource} from './read-engine-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
-const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
+const html=await readEngineSource();
 const source=name=>{const m=html.match(new RegExp(`        function ${name}\\([\\s\\S]*?\\n        }\\n`));assert.ok(m,name);return m[0];};
 const constant=name=>{const m=html.match(new RegExp(`        const ${name} = Object\\.freeze\\([\\s\\S]*?\\n        \\}\\);`));assert.ok(m,name);return m[0];};
 const keys=['kame','ninja','titan','trueno','esmeralda'];

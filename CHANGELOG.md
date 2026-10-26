@@ -9,6 +9,7 @@
 - TikTok: generaciones de conexión, timeout, reconexión gradual, descarte de eventos antiguos, cierre del servidor con sockets abiertos y traspaso explícito de ventana receptora. Historial circular de 50.000 mensajes; métricas sin datos ficticios.
 - Equilibrio: Guerrero prioriza su clase a distancia parecida (25 %); Arena limita Kame/Coloso/Trueno a dos blancos; Enredadera enlaza dos con daño 32 y carga 28. Duelo y Smash conservan sus perfiles. Radar pentagonal con resultados medidos e intervalos de 2.400 partidas de validación.
 - Ajustes: sesión/rendimiento en ocho idiomas, volumen, opacidad persistente, exportación/importación de configuración y diagnóstico; Stream conserva el panel hasta reemplazarlo o cerrarlo con ×.
+- Compatibilidad Windows: lectura de pruebas con LF/CRLF y finales de línea canónicos, verificados con las 80 pruebas en ambos formatos.
 - Mantenimiento: módulos de reglas/dibujo/audio/ajustes, eliminación de parámetros ignorados, dependencias exactas con shrinkwrap y CI para Windows/Linux. Historial documental y claves de almacenamiento conservados.
 
 

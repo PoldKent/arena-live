@@ -1,9 +1,9 @@
+import {readEngineSource} from './read-engine-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 
-const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+const html = await readEngineSource();
 const functionSource = name => {
   const match = html.match(new RegExp(`        function ${name}\\([\\s\\S]*?\\n        }\\n`));
   assert.ok(match, `Missing engine function ${name}`);

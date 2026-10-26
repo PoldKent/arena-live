@@ -1,8 +1,8 @@
+import {readEngineSource} from './read-engine-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 
-const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+const html = await readEngineSource();
 
 test('fullscreen hide rule excludes the right vertical stage', () => {
   assert.match(html, /#broadcastStageSection:fullscreen>:not\(#arenaDualOperatorDock\):not\(#arenaDualUltrawideVerticalStage\):not\(#arenaStreamLeftColumn\) \{display:none!important;?\}/);

@@ -97,6 +97,8 @@ La nueva clave es `arenaLiveRuntimeV1`; las claves existentes de perfiles, idiom
 
 Se extraen módulos clásicos de reglas puras, dibujo, audio, ajustes y evidencia sin romper las llamadas de la interfaz ni la API. Se retiran `forceFree` y el parámetro ignorado de impulso de `applyDamage`; el impulso real continúa calculándose con las reglas compartidas. Los documentos y datos de versiones anteriores permanecen como historial. La inspección de declaraciones no demuestra que toda rama posible del código sea alcanzable.
 
+Las pruebas que extraen funciones del HTML normalizan LF/CRLF, incluidas carpetas de Windows existentes. `.gitattributes` fija LF para las fuentes y mantiene binarios los archivos comprimidos. Se repitieron las 80 pruebas con el HTML convertido a CRLF y con sus bytes LF originales.
+
 Las dependencias directas son exactas y `npm-shrinkwrap.json` fija las transitivas con direcciones públicas del registro npm. `npm.cmd ci` no requiere eliminar el `package-lock.json` local del operador. CI ejecuta instalación, pruebas unitarias, navegador y carga en Node.js 24 sobre Windows y Linux. La validación de esta entrega está en [validation-v0.15.json](validation-v0.15.json); la ejecución remota de CI depende del estado del servicio después de publicar.
 
 Para actualizar, detén el servidor con Ctrl+C y ejecuta desde la carpeta del proyecto. Conserva antes tus cambios locales. La secuencia se detiene si Git o npm fallan:
