@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.15 — TikTok LIVE</title>
+    <title>Arena Live v0.16 — TikTok LIVE</title>
     <!--
       ARENA LIVE · GAME RUNTIME
       The classic game script stays here; utility CSS is built locally and
@@ -13,7 +13,7 @@
       have been migrated to explicit event listeners.
     -->
     <!-- Styles are built once; no browser compiler runs during a stream. -->
-    <link rel="stylesheet" href="styles/arena-ui.css?v=0.14">
+    <link rel="stylesheet" href="styles/arena-ui.css?v=0.16">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Fonts: Inter & Orbitron for Arcade/Esports HUD -->
@@ -1615,17 +1615,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.15 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.16 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
 
     <!-- ==================== COMPLETE GAME ENGINE, LOBBY & VICTORY SCRIPT ==================== -->
-    <script src="engine/arena-core.js?v=0.15"></script>
-    <script src="engine/arena-render.js?v=0.15"></script>
-    <script src="engine/arena-audio.js?v=0.15"></script>
-    <script src="engine/arena-settings.js?v=0.15"></script>
-    <script src="engine/arena-balance-evidence.js?v=0.15"></script>
+    <script src="engine/arena-core.js?v=0.16"></script>
+    <script src="engine/arena-render.js?v=0.16"></script>
+    <script src="engine/arena-audio.js?v=0.16"></script>
+    <script src="engine/arena-settings.js?v=0.16"></script>
+    <script src="engine/arena-balance-evidence.js?v=0.16"></script>
     <script>
         /*************************************************************************
          * ARENA LIVE · MONOLITHIC ENGINE INDEX
@@ -1761,7 +1761,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         // Phrase-first translations give natural wording for the main interface; the lexicon covers dynamic notices.
         const I18N_EXTRA_PHRASES = [
-            ['Arena Live v0.15 · TikTok','Arena Live — Protótipo interativo para lives','Arena Live — Prototipo interattivo per live'],
+            ['Arena Live — Prototipo Interactivo para Streams','Arena Live — Protótipo interativo para lives','Arena Live — Prototipo interattivo per live'],
             ['LOBBY ABIERTO','LOBBY ABERTO','LOBBY APERTO'], ['EN COMBATE','EM COMBATE','IN COMBATTIMENTO'], ['VICTORIA','VITÓRIA','VITTORIA'],
             ['⏸️ PAUSADO','⏸️ PAUSADO','⏸️ IN PAUSA'], ['Auto-Escala:','Escala automática:','Scala automatica:'], ['⚙️ Ajustes','⚙️ Configurações','⚙️ Impostazioni'],
             ['Emisión Activa','Transmissão ativa','Diretta attiva'], ['Modo Automático:','Modo automático:','Modalità automatica:'],
@@ -2466,8 +2466,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 pt:'Selecionar idioma', it:'Seleziona lingua'
             })[currentLanguage];
             try { localStorage.setItem('arenaLiveLanguage', currentLanguage); } catch (_e) { /* Private browsing may block storage. */ }
-            const titleSource = 'Arena Live — Prototipo Interactivo para Streams';
-            document.title = localizeText(titleSource, currentLanguage);
+            document.title = `Arena Live v${ARENA_RELEASE_VERSION} · TikTok`;
             const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
             let node;
             while ((node = walker.nextNode())) localizeNode(node);
@@ -7705,7 +7704,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.15';
+        const ARENA_RELEASE_VERSION = '0.16';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:10, footer:76});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
@@ -8454,7 +8453,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.15.0',
+            version: '0.16.0',
             edition: 'tiktok',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,
             getBalanceRules() {

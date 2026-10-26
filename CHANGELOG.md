@@ -1,5 +1,12 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-26 — Arena Live v0.16 · Identificación de la entrega terminada
+
+- Distingue la entrega final de la etiqueta v0.15 utilizada durante su implementación. Las seis correcciones se incorporaron en `1976160` y la compatibilidad Windows en `6ae39a4`.
+- Sincroniza paquete, shrinkwrap, API, título del navegador, pie de Ajustes y revisiones de recursos con 0.16.0 / 0.16. El título conserva la versión al cambiar cualquiera de los ocho idiomas.
+- Conserva los informes de equilibrio y rendimiento v0.15 como evidencia de las correcciones. Esta entrega corrige su identificación; mantiene los parámetros de combate de la entrega validada.
+
+
 
 ## 2026-10-26 — Arena Live v0.15 · Seis correcciones integradas
 

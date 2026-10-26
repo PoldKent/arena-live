@@ -54,6 +54,7 @@ await check('UI styles are served locally without a browser Tailwind compiler',a
 });
 await check(`v${visibleVersion} starts with large game, left chat and only the social test group expanded`,async()=>{
  assert.equal(await page.evaluate(()=>ArenaLive.version),release);
+ assert.equal(await page.title(),`Arena Live v${visibleVersion} · TikTok`);
  const panels=await page.locator('.arena-work-panel').evaluateAll(ns=>ns.map(n=>({id:n.id,open:n.open,parent:n.parentElement.id})));
  assert.equal(panels.find(n=>n.id==='arenaPanelChat').parent,'arenaDockLeft');
  assert.deepEqual(panels.filter(n=>n.open&&n.id!=='arenaPanelChat').map(n=>n.id),['arenaPanelSocial']);
@@ -320,6 +321,7 @@ await check('Mobile special action follows the no-powers rule while movement and
   const native=await page.evaluate(()=>({clock:Date.now.toString().includes('[native code]'),random:Math.random.toString().includes('[native code]'),raf:requestAnimationFrame.toString().includes('[native code]'),harness:typeof window.ArenaBalanceHarness}));
   assert.deepEqual(native,{clock:true,random:true,raf:true,harness:'undefined'});
   assert.equal(await page.locator('#arenaVersionInfo').textContent(),`Arena Live v${visibleVersion} · TikTok`);
+  assert.equal(await page.title(),`Arena Live v${visibleVersion} · TikTok`);
   assert.equal(await page.evaluate(()=>Object.isFrozen(ArenaLive.getBalanceRules())&&Object.isFrozen(ArenaLive.getBalanceRules().iso.ninja)),true);
  });
  await check('Playable powers apply the measured damage, windup and target caps in all three modes',async()=>{
@@ -601,6 +603,7 @@ await check('Settings shows the release only in its footer and retains UI/power 
  for(const language of ['es','en','fr','de','zh','ja','pt','it']){
   await page.evaluate(language=>setLanguage(language),language);
   assert.equal(await page.locator('#arenaVersionInfo').textContent(),`Arena Live v${visibleVersion} · TikTok`);
+  assert.equal(await page.title(),`Arena Live v${visibleVersion} · TikTok`);
   assert.equal(await page.locator('[data-ui-label]').evaluateAll(ns=>ns.every(n=>n.textContent.trim()&&!/undefined|null/.test(n.textContent))),true);
   assert.equal(await page.locator('[data-command-label]').evaluateAll(ns=>ns.every(n=>n.textContent.trim())),true);
  }
