@@ -49,7 +49,7 @@ function balance(){
  vm.runInContext([constant('ARENA_CLASS_BALANCE'),constant('ARENA_CLASS_RIVALRIES'),source('getArenaClassDamageMultiplier'),source('arenaClassPowersAllowed'),source('getArenaBalanceSnapshot')].join('\n'),e);return e;
 }
 test('all 15 class/mode inspection rows read the native engine profile and the shared base damage',()=>{
- const e=balance(),expected={'1v1':[43,38,38,37,37],smash:[44,50,38,28,44],iso:[38,60,38,32,60]};
+ const e=balance(),expected={'1v1':[43,38,38,37,37],smash:[44,50,38,28,44],iso:[38,60,38,32,32]};
  for(const mode of Object.keys(expected)){
   const snapshot=e.getArenaBalanceSnapshot(mode);
   assert.equal(snapshot.mode,mode);assert.deepEqual(Array.from(snapshot.rows,r=>r.base),[12,12,12,12,12]);

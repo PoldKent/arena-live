@@ -1,18 +1,28 @@
-# Arena Live · v0.14
+# Arena Live · v0.15
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
 ## Versión principal
 
-`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API, el servidor y el paquete identifican la versión 0.14. [Cambios y validación](docs/RELEASE-0.14-DEPURACION.md).
+`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API, el servidor y el paquete identifican la versión 0.15. [Las seis correcciones y su validación](docs/RELEASE-0.15-CORRECCIONES.md).
 
 ## Rivalidades de clase
 
-La cadena **Guerrero → Titán → Rayo → Espíritu → Shinobi → Guerrero** aporta +10 % de daño en el sentido de la flecha y −10 % en sentido contrario, tanto en golpes como en poderes. Los otros enfrentamientos son neutros. Guerrero prefiere luchar con Guerreros, Shinobi enfrenta al cercano y prefiere otra clase si está como máximo un **15 % más lejos**, sin inmunidad entre compañeros y Titán ataca a cualquiera. Los Shinobi restantes disputan una final.
+La cadena **Guerrero → Titán → Rayo → Espíritu → Shinobi → Guerrero** aporta +10 % de daño en el sentido de la flecha y −10 % en sentido contrario, tanto en golpes como en poderes. Los otros enfrentamientos son neutros. Guerrero responde al rival cercano y prefiere otro Guerrero hasta un **25 % más lejos**, Shinobi enfrenta al cercano y prefiere otra clase si está como máximo un **15 % más lejos**, sin inmunidad entre compañeros y Titán ataca a cualquiera. Los Shinobi restantes disputan una final.
 
 En **Ajustes → Equilibrio por clase → Rival del gráfico**, compara el daño real contra cada clase en un **radar pentagonal** con cinco ejes y dos polígonos: básico y especial. Revisa las reglas de los tres modos. La consulta mantiene el menú abierto y conserva OBS.
 
-Las [2.400 simulaciones de v0.12](docs/balance-v0.12-summary.json) repiten la muestra de v0.11: las victorias Shinobi con 125 peleadores bajan de 93 a 23 de 100, y con 25, de 45 a 19. Los 2.000 duelos y las 100 partidas de cinco peleadores se reproducen exactamente. Guerrero y Espíritu siguen por debajo de otras clases en arenas numerosas; queda equilibrio por afinar.
+Las [2.400 simulaciones de validación de v0.15](docs/balance-v0.15-summary.json) usan semillas distintas a las de ajuste. En 100 rondas iniciadas con 125 peleadores: Guerrero **17 %**, Shinobi **20 %**, Titán **19 %**, Rayo **25 %** y Espíritu **19 %**. El control con las mismas semillas y el equilibrio anterior dio 8 %, 17 %, 37 %, 28 % y 10 %. En Duelo, las tasas por clase van de 46,5 % a 54,5 %. Son resultados de IA con intervalos de incertidumbre, sin apoyos ni reingresos. No garantizan el mismo resultado con público o reglas personalizadas. En **Ajustes → Equilibrio por clase → Resultados medidos**, consulta también grupos de 5, 10 y 25; las rondas incluyen sus cambios de modo.
+
+En Arena, Kame, Coloso y Trueno alcanzan hasta dos objetivos. Enredadera enlaza hasta **dos rivales**, con **32 HP por objetivo y 28 pasos de carga**; conserva un objetivo en Duelo y Smash. Se mantienen 180 HP, golpe base 12 y rivalidades ±10 %.
+
+## Sesión, pausa y configuración
+
+**Ajustes → Sesión y rendimiento** reúne las reglas de especiales, acciones durante la pausa, calidad, límite de dibujo de 30/60 FPS, prioridad de Guerrero y volumen. El modo predeterminado exige **25 de energía y 8 s de espera** a IA, chat, Prota y pruebas. El especial consume hasta 45 de energía; la opción de participación libre conserva poderes débiles sin energía para acciones humanas, con una explicación visible.
+
+Abrir Ajustes pausa y cerrarlo reanuda. Durante la pausa, el chat puede guardar la última acción de cada persona: hasta 64 personas, vigencia de 8 s y salida de 4 acciones/s. Se puede elegir mostrar sin ejecutar. Los poderes desactivados se rechazan antes de entrar en la cola. Revancha restaura los participantes de la ronda, incluido Prota; los perfiles guardan preferencias y ya no inscriben automáticamente a espectadores históricos.
+
+**Guardar/Cargar configuración** conserva reglas, sesión, calibración OBS y las distribuciones de ambos espacios. El archivo no es una partida guardada ni contiene los perfiles del chat. La importación aplica opciones al instante. **Restablecer sesión** conserva OBS y los paneles. **Exportar diagnóstico** registra tiempos de CPU y resoluciones, sin inventar uso de GPU.
 
 ## Rendimiento con 128 jugadores
 
@@ -20,24 +30,24 @@ La interfaz sirve sus estilos ya generados desde `styles/arena-ui.css`: el naveg
 
 La física conserva el orden secuencial de los peleadores y evita las llamadas de una función por cada par de cuerpos. Los poderes limitados eligen los mismos uno, dos o tres blancos con distancias calculadas una sola vez. La retirada de partículas, textos y efectos usa un recorrido estable, y los símbolos de estado reutilizan listas acotadas. Las dos capturas comparten orden y tiempo de animación; los fondos estáticos y las medidas de nombres siguen reutilizándose.
 
-Se mantienen el cupo de 128, los poderes, los límites de efectos, la simulación de 60 Hz y las capturas **1920 × 1080** y **1080 × 1920**. [Mediciones y condiciones de v0.14](docs/performance-v0.14.json). Las cifras de este entorno no representan los FPS de tu equipo con OBS.
+Se mantienen el cupo de 128, los poderes, los límites de efectos, la simulación de 60 Hz y las capturas **1920 × 1080** y **1080 × 1920**. [Mediciones y condiciones de v0.15](docs/performance-v0.15.json). Las cifras de este entorno no representan los FPS de tu equipo con OBS. La calidad **Rendimiento** dibuja menos partículas y conserva el combate completo. El límite de dibujo de 30 FPS mantiene la simulación de 60 pasos/s y ambas capturas Full HD.
 
 Los lienzos opacos usan Canvas 2D con `willReadFrequently:false`; el navegador puede rasterizarlos con GPU cuando tiene aceleración gráfica disponible. El juego no lee píxeles durante la emisión. `npm.cmd run test:gpu` deja habilitada la configuración gráfica predeterminada del navegador de pruebas e informa de `2d_canvas`, composición y renderer reales. No fuerza una GPU ni confirma la configuración de tu navegador habitual. El control `test:performance` desactiva la GPU para conservar una medición por software comparable; sus tiempos incluyen lectura de píxeles, y los de `test:gpu` miden envío de comandos, sin esperar a que la GPU termine.
 
 ## Instalar y arrancar en Windows
 
-Requiere Git y Node.js 20 o superior:
+Requiere Git y Node.js 20 o superior; CI verifica Node.js 24 en Windows y Linux. `npm-shrinkwrap.json` fija las dependencias para `npm.cmd ci` y tiene prioridad sobre un `package-lock.json` local, que no se elimina:
 
 ```powershell
 git clone --branch main https://github.com/PoldKent/arena-live.git Arena_Live_GitHub
 cd Arena_Live_GitHub
-npm.cmd install
+npm.cmd ci
 npm.cmd start
 ```
 
 Abre **http://127.0.0.1:4173/** y conserva abierta la consola. TikTok comienza desconectado; **📡 TikTok** conecta o desconecta según el estado real del puente.
 
-Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd install` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.14 en el pie de Ajustes**.
+Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd ci` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.15 en el pie de Ajustes**.
 
 Para volver a `main` desde una rama anterior:
 
@@ -45,13 +55,15 @@ Para volver a `main` desde una rama anterior:
 git fetch origin
 git switch main
 git pull --ff-only origin main
-npm.cmd install
+npm.cmd ci
 npm.cmd start
 ```
 
 Detén la secuencia si Git avisa de cambios locales o falla algún comando; conserva esos cambios antes de continuar.
 
 Después de actualizar, `npm.cmd run clean:branches` retira las cuatro ramas antiguas conocidas. Primero verifica que todo su historial esté en `origin/main`; usa una operación atómica con comprobación de referencias para conservar cualquier trabajo nuevo. Utiliza la autenticación Git de tu equipo y conserva las ramas personales ajenas a esta migración. Puede repetirse cuando ya estén retiradas.
+
+El puente reconecta con espera gradual solo después de pulsar Conectar. Al cerrar la ventana que recibía el chat, las otras ventanas no toman su control automáticamente: usa **Usar esta partida**. LIVE recibe comentarios; los apoyos sociales del panel son simulaciones.
 
 ## Inicio / Pruebas
 
@@ -169,6 +181,7 @@ Para modificar clases de la interfaz, ejecuta `npm.cmd run build:styles` y guard
 
 Las pruebas del navegador arrancan y cierran su servidor local y simulan las respuestas de TikTok. Cubren paneles, persistencia, escenarios, chats, pausa, capturas, idiomas y controles móviles; no conectan con una emisión real.
 
+- [Correcciones de integridad, rendimiento, TikTok, equilibrio, ajustes y verificación de v0.15](docs/RELEASE-0.15-CORRECCIONES.md).
 - [Depuración, carga de 128 peleadores y diagnóstico gráfico de v0.14](docs/RELEASE-0.14-DEPURACION.md).
 - [Radar pentagonal de daño en v0.13](docs/RELEASE-0.13-RADAR.md).
 - [Cercanía Shinobi y comparación de v0.12](docs/RELEASE-0.12-CERCANIA-SHINOBI.md).
@@ -186,4 +199,4 @@ Las pruebas del navegador arrancan y cierran su servidor local y simulan las res
 - [Registro de cambios](CHANGELOG.md).
 - Historial: [v0.2](docs/RELEASE-0.2-OPERADOR.md), [v0.1](docs/RELEASE-0.1-OBS.md).
 
-El desarrollo y las actualizaciones continúan en `main`. La entrega vigente es Arena Live v0.14, con ambas capturas Full HD, textos de poderes configurables, inspector de equilibrio, TikTok, reglas, potencias, comandos y caída isométrica integrados. Las entregas anteriores quedan como historial.
+El desarrollo y las actualizaciones continúan en `main`. La entrega vigente es Arena Live v0.15, con ambas capturas Full HD, textos de poderes configurables, inspector de equilibrio, TikTok, reglas, potencias, comandos y caída isométrica integrados. Las entregas anteriores quedan como historial.

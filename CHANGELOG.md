@@ -1,5 +1,17 @@
 # Registro de cambios — Arena Live
 
+
+## 2026-10-26 — Arena Live v0.15 · Seis correcciones integradas
+
+- Partidas: revancha del roster completo, reinicio de vidas sin bonos ni atribución antiguos, puntuación por daño efectivo, podio inmutable sin duplicados y empate sin supervivientes. El ganador por tiempo puede estar eliminado y tiene una presentación separada.
+- Juego: energía y espera compartidas entre IA/chat/Prota/pruebas; política participativa opcional; cola de pausa acotada y caducable; reloj por tiempo simulado y RNG de combate separado del visual.
+- Rendimiento: presupuestos de partículas, descarte fuera de cámara, nombres según supervivientes, dibujo de 30/60 FPS independiente de la física, audio con 16 voces y diagnósticos con tiempos de CPU. Full HD y OBS conservados.
+- TikTok: generaciones de conexión, timeout, reconexión gradual, descarte de eventos antiguos, cierre del servidor con sockets abiertos y traspaso explícito de ventana receptora. Historial circular de 50.000 mensajes; métricas sin datos ficticios.
+- Equilibrio: Guerrero prioriza su clase a distancia parecida (25 %); Arena limita Kame/Coloso/Trueno a dos blancos; Enredadera enlaza dos con daño 32 y carga 28. Duelo y Smash conservan sus perfiles. Radar pentagonal con resultados medidos e intervalos de 2.400 partidas de validación.
+- Ajustes: sesión/rendimiento en ocho idiomas, volumen, opacidad persistente, exportación/importación de configuración y diagnóstico; Stream conserva el panel hasta reemplazarlo o cerrarlo con ×.
+- Mantenimiento: módulos de reglas/dibujo/audio/ajustes, eliminación de parámetros ignorados, dependencias exactas con shrinkwrap y CI para Windows/Linux. Historial documental y claves de almacenamiento conservados.
+
+
 ## 2026-10-24 — Arena Live v0.14 · Depuración y carga con 128 peleadores
 
 - Retiradas doce funciones heredadas, rutas cooperativas inactivas, tarjetas/leyendas de HUD ocultas, descripción de modo sin elemento, constantes sin referencias y 32 selectores CSS anteriores.

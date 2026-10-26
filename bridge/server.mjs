@@ -1,3 +1,5 @@
+import {randomUUID} from 'node:crypto';
+import {LiveSession} from './live-session.mjs';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -16,16 +18,12 @@ const ORIGIN = `http://${HOST}:${PORT}`;
 const wss = new WebSocketServer({ noServer: true, maxPayload: 8192 });
 const connectedSockets = new Set();
 let controller = null;
-let connection = null;
-let phase = 'disconnected';
-let lastError = '';
-let connectedSince = null;
 const recentEventIds = new Map();
 
 function snapshot() {
   return {
-    type: 'status', phase, account: `@${TIKTOK_USERNAME}`, lastError, connectedSince,
-    viewers: connectedSockets.size, controllerConnected: controller?.readyState === WebSocket.OPEN,
+    type: 'status', ...liveSession.status, account: `@${TIKTOK_USERNAME}`,
+    viewers: connectedSockets.size, localWindows: connectedSockets.size, capabilities:{comments:true,socialEvents:false}, controllerConnected: controller?.readyState === WebSocket.OPEN,
     version: VERSION
   };
 }
@@ -34,7 +32,7 @@ function push(ws, payload) {
 }
 function updateStatus() {
   const message = snapshot();
-  for (const ws of connectedSockets) push(ws, { ...message, isController: ws === controller });
+  for (const ws of connectedSockets) push(ws, { ...message, isController: ws === controller,clientId:ws.clientId,canClaimControl:!controller });
 }
 function sendChat(payload) {
   if (controller?.readyState !== WebSocket.OPEN) return false;
@@ -58,48 +56,12 @@ function publishChat(event) {
   sendChat(chat);
 }
 
-async function connectLive() {
-  if (connection || phase === 'connecting') return;
-  phase = 'connecting'; lastError = ''; updateStatus();
-  let live;
-  try {
-    const imported = await import('tiktok-live-connector');
-    const LiveConnection = imported.TikTokLiveConnection || imported.default?.TikTokLiveConnection;
-    if (!LiveConnection) throw new Error('La versión instalada del conector no expone TikTokLiveConnection.');
-    live = new LiveConnection(TIKTOK_USERNAME);
-    connection = live;
-    live.on('chat', publishChat);
-    live.on('disconnected', () => {
-      if (connection !== live) return;
-      connection = null; phase = 'disconnected'; connectedSince = null;
-      lastError = 'Se interrumpió la conexión con TikTok.';
-      updateStatus();
-    });
-    live.on('error', err => {
-      if (connection !== live) return;
-      lastError = String(err?.message || err).slice(0, 240);
-      updateStatus();
-    });
-    await live.connect();
-    if (connection !== live) return;
-    phase = 'connected'; connectedSince = new Date().toISOString(); lastError = '';
-    updateStatus();
-  } catch (error) {
-    if (live && connection !== live) return;
-    connection = null; phase = 'error'; connectedSince = null;
-    lastError = String(error?.message || error).slice(0, 240);
-    updateStatus();
-  }
-}
-async function disconnectLive() {
-  const current = connection;
-  connection = null;
-  phase = 'disconnected'; lastError = ''; connectedSince = null;
-  updateStatus();
-  if (current) {
-    try { await current.disconnect(); } catch { /* No active connection to close. */ }
-  }
-}
+const liveSession=new LiveSession({
+  async createConnection(){const imported=await import('tiktok-live-connector');const C=imported.TikTokLiveConnection||imported.default?.TikTokLiveConnection;if(!C)throw new Error('TikTokLiveConnection no disponible.');return new C(TIKTOK_USERNAME);},
+  onChat:publishChat,onStatus:updateStatus
+});
+const connectLive=()=>liveSession.connect();
+const disconnectLive=()=>liveSession.disconnect();
 
 function json(res, status, body) {
   res.writeHead(status, {
@@ -137,6 +99,7 @@ const server = createServer(async (req, res) => {
       res.end(injected);
       return;
     }
+    if(req.method==='GET'&&['/engine/arena-core.js','/engine/arena-render.js','/engine/arena-audio.js','/engine/arena-settings.js','/engine/arena-balance-evidence.js'].includes(pathname)){res.writeHead(200,{...noCache,'Content-Type':'text/javascript; charset=utf-8'});res.end(await readFile(resolve(ROOT,pathname.slice(1))));return;}
     if (req.method === 'GET' && pathname === '/bridge-client.js') {
       const script = await readFile(resolve(__dirname, 'bridge-client.js'), 'utf8');
       res.writeHead(200, { ...noCache, 'Content-Type': 'text/javascript; charset=utf-8' });
@@ -158,6 +121,12 @@ const server = createServer(async (req, res) => {
       void disconnectLive();
       return json(res, 200, { status: 'disconnected' });
     }
+    if(req.method==='POST'&&pathname==='/api/claim-control'){
+      const {clientId}=await requestBody(req);const client=[...connectedSockets].find(ws=>ws.clientId===clientId&&ws.readyState===WebSocket.OPEN);
+      if(!client)return json(res,400,{error:'Ventana no disponible.'});
+      if(controller&&controller!==client)return json(res,409,{error:'Otra ventana recibe el chat.'});
+      controller=client;updateStatus();return json(res,200,{claimed:true});
+    }
     if (req.method === 'POST' && pathname === '/api/test-chat') {
       if (process.env.NODE_ENV === 'production') return json(res, 403, { error: 'Prueba desactivada.' });
       const body = await requestBody(req);
@@ -178,12 +147,13 @@ server.on('upgrade', (req, socket, head) => {
   wss.handleUpgrade(req, socket, head, ws => wss.emit('connection', ws, req));
 });
 wss.on('connection', ws => {
+  ws.clientId=randomUUID();ws.isAlive=true;ws.on('pong',()=>{ws.isAlive=true;});
   connectedSockets.add(ws);
   if (!controller || controller.readyState !== WebSocket.OPEN) controller = ws;
   updateStatus();
   ws.on('close', () => {
     connectedSockets.delete(ws);
-    if (ws === controller) controller = [...connectedSockets].find(x => x.readyState === WebSocket.OPEN) || null;
+    if (ws === controller) controller = null;
     updateStatus();
   });
   // Intentionally no inbound game-control messages: all operations use local JSON POST endpoints.
@@ -196,10 +166,15 @@ server.listen(PORT, HOST, () => {
   console.log('El puente solo escucha en 127.0.0.1. No utiliza contraseña de TikTok.');
 });
 
+const heartbeat=setInterval(()=>{for(const ws of connectedSockets){if(!ws.isAlive){ws.terminate();continue;}ws.isAlive=false;ws.ping();}},30000);heartbeat.unref();
+let stopping=false;
 async function shutdown() {
-  await disconnectLive();
-  wss.close();
-  server.close();
+  if(stopping)return;stopping=true;clearInterval(heartbeat);
+  for(const ws of connectedSockets)ws.close(1001,'Servidor detenido');
+  const deadline=setTimeout(()=>{server.closeAllConnections();for(const ws of connectedSockets)ws.terminate();},1000);deadline.unref();
+  await Promise.allSettled([disconnectLive(),new Promise(r=>wss.close(r)),new Promise(r=>server.close(r))]);
+  clearTimeout(deadline);if(process.env.NODE_ENV==='test'&&process.connected)process.disconnect();
 }
 process.once('SIGTERM', () => { void shutdown(); });
 process.once('SIGINT', () => { void shutdown(); });
+if(process.env.NODE_ENV==='test'&&process.send)process.on('message',message=>{if(message==='arena-test-shutdown')void shutdown();});

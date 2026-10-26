@@ -35,10 +35,12 @@ window.ArenaBalanceHarness = (() => {
   triggerFinalKOSequence = value => { winner = value; koSequenceActive = true; };
 
   const fighterStats = fighter => stats.get(fighter?.id);
-  applyDamage = function(target, amount, attacker, critical, knockback, attackType) {
+  const legacyDamage=original.damage.toString().includes('knockbackPower');
+  applyDamage = function(target, amount, attacker, critical, extra, legacyType) {
+    const attackType=legacyDamage?legacyType:extra;
     const hp = target.hp, shield = target.shieldHP || 0, charging = target.castingSkill;
     damageDepth++;
-    try { original.damage(target, amount, attacker, critical, knockback, attackType); }
+    try { if(legacyDamage)original.damage(target,amount,attacker,critical,extra,attackType);else original.damage(target,amount,attacker,critical,attackType); }
     finally { damageDepth--; }
     const effective = Math.max(0, Math.min(hp, hp - target.hp));
     const absorbed = Math.max(0, shield - (target.shieldHP || 0));
@@ -81,6 +83,7 @@ window.ArenaBalanceHarness = (() => {
   };
 
   function reset(config) {
+    if(typeof setArenaRandomSeed==='function'){setArenaRandomSeed(config.seed>>>0);arenaFighterSerial=0;arenaSimulationTick=0;arenaRoundClockTicks=0;arenaAudienceQueue.length=0;arenaNextQueueTick=0;}
     seed = config.seed >>> 0; now = 0; winner = null; timers.clear(); stats = new Map(); cast = null; damageDepth = 0;
     arenaRoundRevision++; fighters = []; particles = []; activeEffects = []; floatingTexts = []; confetti = [];
     eliminationOrder = []; currentWinner = null; gameState = 'LOBBY'; koSequenceActive = false;
@@ -126,7 +129,7 @@ window.ArenaBalanceHarness = (() => {
       ...config, steps, seconds: steps / 60, winner: winner?.archetypeKey || null,
       alive: roster.filter(f => !f.eliminated).length,
       fighters: roster.map(f => ({ ...stats.get(f.id), hp: f.hp, kills: f.kills,
-        nominalDamage: f.damageDealt, survived: !f.eliminated }))
+        scoreDamage: f.damageDealt, survived: !f.eliminated }))
     };
   }
 

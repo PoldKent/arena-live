@@ -9,7 +9,7 @@ const functionSource = name => {
   assert.ok(match, `Missing engine function ${name}`);
   return match[0];
 };
-const context = vm.createContext({ fighters: [] });
+const context = vm.createContext({ fighters: [],arenaRuntime:{warriorTargeting:'local'} });
 vm.runInContext([
   html.match(/        const ARENA_COMBAT_TARGET_RULES = Object\.freeze\([\s\S]*?\n        \}\);/)[0],
   functionSource('canFighterAttack'), functionSource('findPreferredCombatTarget')
@@ -21,7 +21,7 @@ function nearestTarget(attacker, roster, inRange = () => true) {
     && !attacker.eliminated && !other.eliminated && !(attacker.fallDrop > 0) && !(other.fallDrop > 0) && inRange(other));
   const distance = other => Math.hypot(other.x - attacker.x, other.y - attacker.y);
   candidates.sort((a, b) => distance(a) - distance(b));
-  if(attacker.archetypeKey==='kame')return candidates.find(f=>f.archetypeKey==='kame')||candidates[0]||null;
+  if(attacker.archetypeKey==='kame'&&candidates.length)return candidates.find(f=>f.archetypeKey==='kame'&&distance(f)<=distance(candidates[0])*1.25)||candidates[0];
   if(attacker.archetypeKey==='ninja'&&candidates.length){
     const local=candidates.filter(f=>distance(f)<=distance(candidates[0])*1.15);
     return local.find(f=>f.archetypeKey!=='ninja')||candidates[0];
@@ -80,7 +80,9 @@ test('Shinobi preference includes exactly 15 percent farther, works in every dir
 
 test('Warriors prefer Warriors while Titans attack the nearest of any class',()=>{
   const actor={id:0,x:0,y:0,archetypeKey:'kame'},warrior={id:1,x:90,y:0,archetypeKey:'kame'},titan={id:2,x:10,y:0,archetypeKey:'titan'};
-  context.fighters=[actor,warrior,titan];assert.equal(context.findPreferredCombatTarget(actor),warrior);
+  context.fighters=[actor,warrior,titan];assert.equal(context.findPreferredCombatTarget(actor),titan);
+  warrior.x=12.5;assert.equal(context.findPreferredCombatTarget(actor),warrior);warrior.x=12.501;assert.equal(context.findPreferredCombatTarget(actor),titan);warrior.x=90;
+  context.arenaRuntime.warriorTargeting='always';assert.equal(context.findPreferredCombatTarget(actor),warrior);context.arenaRuntime.warriorTargeting='local';
   assert.equal(context.findPreferredCombatTarget(actor,f=>f.x<20),titan);
   actor.archetypeKey='titan';assert.equal(context.findPreferredCombatTarget(actor),titan,'a Titan can attack another Titan');
 });

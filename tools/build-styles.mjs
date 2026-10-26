@@ -14,7 +14,7 @@ const committed = join(root, 'styles/arena-ui.css');
 const output = check ? join(temporary, 'arena-ui.css') : committed;
 try {
   const result = spawnSync(process.execPath, [cli, '--input', 'styles/arena-ui.input.css',
-    '--output', output, '--content', 'index.html,bridge/bridge-client.js', '--minify'],
+    '--output', output, '--content', 'index.html,bridge/bridge-client.js,engine/*.js', '--minify'],
     {cwd:root, encoding:'utf8'});
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error(result.stderr || 'No se pudo generar el CSS.');

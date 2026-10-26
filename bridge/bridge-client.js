@@ -1,7 +1,7 @@
 /* Arena Live: local TikTok chat bridge. Loaded only by bridge/server.mjs. */
 (() => {
   'use strict';
-  const state = { socket: null, connected: false, controller: false, statusReceived: false, phase: 'disconnected', account: '@polkent.live', received: 0 };
+  const state = { socket: null, connected: false, controller: false, statusReceived: false, phase: 'disconnected', account: '@polkent.live', received: 0,clientId:null,canClaimControl:false };
   const panel = document.createElement('section');
   panel.id = 'arena-live-bridge-panel';
   panel.setAttribute('aria-label', 'TikTok LIVE — conexión local');
@@ -11,6 +11,8 @@
     <span id="bridge-status" role="status" aria-live="polite">Conectando al puente local…</span>
     <button type="button" id="bridge-connect">Conectar LIVE</button>
     <button type="button" id="bridge-disconnect">Desconectar</button>
+    <button type="button" id="bridge-claim" hidden>Usar esta partida</button>
+    <small>LIVE: comentarios · Apoyos sociales: simulación</small>
     <input id="bridge-test" maxlength="160" value="!guerrero" aria-label="Mensaje de prueba" style="background:#121d2c;color:white;border:1px solid #64748b;border-radius:5px;padding:5px;min-width:105px" />
     <button type="button" id="bridge-send-test">Probar comando</button>
     <small id="bridge-count" style="color:#a7b8c9">Mensajes recibidos: 0</small>`;
@@ -26,10 +28,11 @@
   const buttonDisconnect = panel.querySelector('#bridge-disconnect');
   const buttonTest = panel.querySelector('#bridge-send-test');
   const inputTest = panel.querySelector('#bridge-test');
+  const buttonClaim=panel.querySelector('#bridge-claim');
 
   // Dedicated, read-only TikTok LIVE mirror. Rate limits affect gameplay, not this inbox.
   // A 50,000-message memory guard protects long streams; export is available at any point.
-  const incoming = [];
+  const incoming = ArenaCore.createHistory(50000);
   const MAX_INCOMING_HISTORY = 50000;
   const LIVE_WINDOW = 450;
   const HISTORY_PAGE = 250;
@@ -92,7 +95,7 @@
       message: String(data.message).slice(0, 500)
     };
     if (incoming.length >= MAX_INCOMING_HISTORY) {
-      incoming.shift(); droppedHistory += 1;
+      droppedHistory += 1;
       if (!followLive) browseEnd = Math.max(0, browseEnd - 1);
     }
     incoming.push(entry);
@@ -126,7 +129,7 @@
   });
   function updateLiveChatStatus() {
     if (!statusInbox) return;
-    const states = {disconnected:'Desconectado',connecting:'Conectando…',connected:'LIVE conectado',error:'Error LIVE'};
+    const states = {disconnected:'Desconectado',connecting:'Conectando…',reconnecting:'Reconectando…',connected:'LIVE conectado',error:'Error LIVE'};
     statusInbox.textContent = state.connected && state.controller ? states[state.phase] || states.disconnected : 'Sin recepción';
     statusInbox.style.color = state.phase === 'connected' && state.controller ? '#4ade80' : '#facc15';
   }
@@ -134,10 +137,11 @@
   updateLiveChatStatus();
 
   function refresh(message = '') {
-    const titles = { disconnected: 'LIVE desconectado', connecting: 'Conectando con TikTok…', connected: 'LIVE conectado', error: 'Error de conexión' };
+    const titles = { disconnected: 'LIVE desconectado', connecting: 'Conectando con TikTok…', reconnecting:'Reconectando con TikTok…', connected: 'LIVE conectado', error: 'Error de conexión' };
     const duplicate = state.connected && state.statusReceived && !state.controller;
-    indicator.textContent = message || (duplicate ? 'El juego está abierto en otra pestaña: esta no recibe el chat.' : (state.connected && !state.statusReceived ? 'Esperando estado del puente…' : titles[state.phase] || 'Puente desconectado'));
-    buttonConnect.disabled = duplicate || !state.connected || !state.statusReceived || ['connected', 'connecting'].includes(state.phase);
+    buttonClaim.hidden=!(state.connected&&state.canClaimControl&&!state.controller);
+    indicator.textContent = message || (state.connected&&state.canClaimControl&&!state.controller?'Elige Usar esta partida para recibir comentarios.':'') || (duplicate ? 'El juego está abierto en otra pestaña: esta no recibe el chat.' : (state.connected && !state.statusReceived ? 'Esperando estado del puente…' : titles[state.phase] || 'Puente desconectado'));
+    buttonConnect.disabled = duplicate || !state.connected || !state.statusReceived || ['connected', 'connecting','reconnecting'].includes(state.phase);
     buttonDisconnect.disabled = duplicate || !state.connected || state.phase === 'disconnected';
     buttonTest.disabled = duplicate || !state.connected || !state.statusReceived;
     for (const b of [buttonConnect, buttonDisconnect, buttonTest]) b.style.opacity = b.disabled ? '.4' : '1';
@@ -167,18 +171,23 @@
       if (!r.sent) refresh('Abre esta página como la ventana principal del juego.');
     } catch (error) { refresh(String(error.message || error)); }
   });
+  buttonClaim.addEventListener('click',async()=>{try{await post('/api/claim-control',{clientId:state.clientId});}catch(error){refresh(error.message);}});
+  let reconnectTimer=null,reconnectAttempt=0,stopped=false;
+  window.addEventListener('pagehide',()=>{stopped=true;clearTimeout(reconnectTimer);state.socket?.close();});
   function openSocket() {
+    if(stopped)return;
     const socket = new WebSocket(`ws://${location.host}/ws`);
     state.socket = socket;
-    socket.addEventListener('open', () => { state.connected = true; refresh(); });
+    socket.addEventListener('open', () => { if(state.socket!==socket||stopped)return;reconnectAttempt=0;state.connected = true; refresh(); });
     socket.addEventListener('message', e => {
+      if(state.socket!==socket||stopped)return;
       let data;
       try { data = JSON.parse(e.data); } catch { return; }
       if (data.type === 'status') {
         state.phase = data.phase;
         state.statusReceived = true;
         state.account = typeof data.account === 'string' ? data.account : state.account;
-        state.controller = Boolean(data.isController);
+        state.controller = Boolean(data.isController);state.clientId=data.clientId;state.canClaimControl=Boolean(data.canClaimControl);
         refresh(data.lastError ? `${data.phase}: ${data.lastError}` : '');
       } else if (data.type === 'chat' && state.controller && data.platformKey === 'tiktok') {
         if (typeof data.message !== 'string' || typeof data.username !== 'string') return;
@@ -194,10 +203,10 @@
       }
     });
     socket.addEventListener('close', () => {
-      if (state.socket !== socket) return;
+      if (state.socket !== socket||stopped) return;
       state.connected = false; state.controller = false; state.statusReceived = false;
       refresh('Puente local desconectado. Reintentando…');
-      setTimeout(openSocket, 2500);
+      reconnectTimer=setTimeout(openSocket,Math.min(30000,1000*2**Math.min(reconnectAttempt++,5)));
     });
     socket.addEventListener('error', () => { /* close event drives reconnection */ });
   }

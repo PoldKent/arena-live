@@ -8,7 +8,7 @@ const constant=name=>{const m=html.match(new RegExp(`        const ${name} = Obj
 const keys=['kame','ninja','titan','trueno','esmeralda'];
 const matrix=[[1,.9,1.1,1,1],[1.1,1,1,1,.9],[.9,1,1,1.1,1],[1,1,.9,1,1.1],[1,1.1,1,.9,1]];
 function engine(){
- const e=vm.createContext({gameState:'COMBAT',activeMode:'iso',arenaCombatRules:{damage:1,knockback:0,powerMode:'full'},
+ const e=vm.createContext({gameState:'COMBAT',activeMode:'iso',koSequenceActive:false,arenaSimulationTick:0,arenaCombatRules:{damage:1,knockback:0,powerMode:'full'},
   ARENA_GROUND_JUMP_IMPULSE:9.4,ARENA_SPECIAL_LAUNCH_MULTIPLIER:2,screenShake:0,
   spawnFloatingText(){},spawnParticle(){},playSound(){},handleFighterKO(f){f.hp=0;f.eliminated=true;}});
  vm.runInContext([constant('ARENA_CLASS_RIVALRIES'),...['getArenaClassDamageMultiplier','canFighterAttack','getFighterAttackDamageMultiplier','applyDamage'].map(source)].join('\n'),e);
@@ -29,7 +29,7 @@ test('ordinary, critical and special damage apply rivalry once before the final 
  const e=engine();
  for(let a=0;a<5;a++)for(let b=0;b<5;b++)for(const mode of ['1v1','smash','iso'])for(const [type,raw,crit] of [['normal',12,false],['normal',20,true],['special',60,true]]){
   e.activeMode=mode;const actor=fighter(0,keys[a]),target=fighter(1,keys[b]);
-  e.applyDamage(target,raw,actor,crit,9.4,type);
+  e.applyDamage(target,raw,actor,crit,type);
   assert.equal(1000-target.hp,Math.round(raw*matrix[a][b]),`${mode}/${keys[a]}/${keys[b]}/${type}/${crit}`);
   assert.equal(actor.damageDealt,1000-target.hp);assert.equal(target.lastAttacker,actor);
  }
@@ -39,9 +39,9 @@ test('rivalry composes with charge, audience boosts and round rules, then defens
  const e=engine(),actor=fighter(0,'kame'),target=fighter(1,'titan');
  actor.activeSpecialFactor=.5;actor.specialAmplifyTimer=10;actor.likeBoostTimer=10;e.arenaCombatRules.damage=1.25;
  // 40 × 1.5 × 1.3 × .5 = 39; then × 1.25 × 1.1 -> 54 HP.
- e.applyDamage(target,40,actor,true,9.4,'special');assert.equal(target.hp,946);
- target.hp=1000;target.shieldHP=100;target.shieldTimer=10;e.applyDamage(target,40,actor,true,9.4,'special');
+ e.applyDamage(target,40,actor,true,'special');assert.equal(target.hp,946);
+ target.hp=1000;target.shieldHP=100;target.shieldTimer=10;e.applyDamage(target,40,actor,true,'special');
  assert.equal(target.hp,1000);assert.equal(target.shieldHP,46);
- target.shieldHP=0;target.shieldTimer=0;target.immunityTimer=10;e.applyDamage(target,40,actor,true,9.4,'special');assert.equal(target.hp,981);
- e.arenaCombatRules.powerMode='melee';const hp=target.hp;e.applyDamage(target,40,actor,true,9.4,'special');assert.equal(target.hp,hp);
+ target.shieldHP=0;target.shieldTimer=0;target.immunityTimer=10;e.applyDamage(target,40,actor,true,'special');assert.equal(target.hp,981);
+ e.arenaCombatRules.powerMode='melee';const hp=target.hp;e.applyDamage(target,40,actor,true,'special');assert.equal(target.hp,hp);
 });

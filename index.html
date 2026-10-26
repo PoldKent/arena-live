@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.14 — TikTok LIVE</title>
+    <title>Arena Live v0.15 — TikTok LIVE</title>
     <!--
       ARENA LIVE · GAME RUNTIME
       The classic game script stays here; utility CSS is built locally and
@@ -714,7 +714,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 .arena-radar-basic{fill:#cbd5e1;fill-opacity:.07;stroke:#cbd5e1;stroke-width:2;stroke-dasharray:5 3;stroke-linejoin:round}
 .arena-radar-point{stroke:#0c1624;stroke-width:1.5}
 .arena-radar-point.is-selected{stroke:#f8fafc;stroke-width:2}
-.arena-balance-table-head,.arena-balance-row{display:grid;grid-template-columns:minmax(0,1fr) 44px 44px;align-items:center;gap:5px;min-width:0;padding:7px}
+.arena-balance-table-head,.arena-balance-row{display:grid;grid-template-columns:minmax(0,1fr) 56px 56px;align-items:center;gap:5px;min-width:0;padding:7px}
 .arena-balance-table-head{font-size:11px;color:#cbd5e1;overflow-wrap:anywhere}
 .arena-balance-table-head>span:not(:first-child){text-align:right}
 .arena-balance-row{width:100%;text-align:left;background:#0c1624;color:#e2e8f0;border:1px solid #334155;border-radius:6px}
@@ -1607,19 +1607,25 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     <div id="arenaBalanceDetail" class="arena-balance-detail" aria-live="polite"></div>
                     <p id="arenaBalanceRivalries" class="arena-balance-hint"></p>
                     <p class="arena-balance-hint" data-balance-copy="rivalryHelp">Cada flecha indica +10 % de daño; en sentido contrario, −10 %. Los otros enfrentamientos son neutros. Se aplica a golpes y poderes antes de redondear a HP enteros.</p>
-                    <p class="arena-balance-hint" data-balance-copy="policy">Guerreros: priorizan otros Guerreros. Shinobi: el rival cercano; prefieren otra clase hasta un 15 % más lejos. Pueden dañarse entre sí y disputan la final. Titanes: atacan a cualquiera.</p>
+                    <p class="arena-balance-hint" data-balance-copy="policy">Guerreros: responden al rival cercano; prefieren otro Guerrero hasta un 25 % más lejos. Shinobi: el rival cercano; prefieren otra clase hasta un 15 % más lejos. Pueden dañarse entre sí y disputan la final. Titanes: atacan a cualquiera.</p>
+                    <div id="arenaBalanceEvidence" class="arena-balance-detail"></div>
                     <p class="arena-balance-hint" data-balance-copy="readOnly">Consulta: elegir un modo o una clase aquí no cambia la partida.</p>
                 </div>
             </div>
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.14 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.15 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
 
     <!-- ==================== COMPLETE GAME ENGINE, LOBBY & VICTORY SCRIPT ==================== -->
+    <script src="engine/arena-core.js?v=0.15"></script>
+    <script src="engine/arena-render.js?v=0.15"></script>
+    <script src="engine/arena-audio.js?v=0.15"></script>
+    <script src="engine/arena-settings.js?v=0.15"></script>
+    <script src="engine/arena-balance-evidence.js?v=0.15"></script>
     <script>
         /*************************************************************************
          * ARENA LIVE · MONOLITHIC ENGINE INDEX
@@ -1755,7 +1761,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         // Phrase-first translations give natural wording for the main interface; the lexicon covers dynamic notices.
         const I18N_EXTRA_PHRASES = [
-            ['Arena Live — Prototipo Interactivo para Streams','Arena Live — Protótipo interativo para lives','Arena Live — Prototipo interattivo per live'],
+            ['Arena Live v0.15 · TikTok','Arena Live — Protótipo interativo para lives','Arena Live — Prototipo interattivo per live'],
             ['LOBBY ABIERTO','LOBBY ABERTO','LOBBY APERTO'], ['EN COMBATE','EM COMBATE','IN COMBATTIMENTO'], ['VICTORIA','VITÓRIA','VITTORIA'],
             ['⏸️ PAUSADO','⏸️ PAUSADO','⏸️ IN PAUSA'], ['Auto-Escala:','Escala automática:','Scala automatica:'], ['⚙️ Ajustes','⚙️ Configurações','⚙️ Impostazioni'],
             ['Emisión Activa','Transmissão ativa','Diretta attiva'], ['Modo Automático:','Modo automático:','Modalità automatica:'],
@@ -2444,6 +2450,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         function setArenaHudOpacity(input) {
             const amount = Math.max(35,Math.min(100,Math.round(Number(input)||85)));
             document.documentElement.style.setProperty('--arena-hud-opacity',String(amount/100));
+            setArenaRuntimeOption('hudOpacity',amount);
             const output = document.getElementById('hudOpacityValue');
             if (output) output.textContent = `${amount} %`;
         }
@@ -2479,6 +2486,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             refreshPresentationLabels();
             refreshArenaFullscreenLabels();
             refreshArenaCameraSettings();
+            refreshArenaRuntimeControls();
             refreshArenaBalancePanel(true);
             syncChatDisclosureState();
             refreshArenaOperatorToolbar();
@@ -2547,136 +2555,14 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         /*************************************************************************
          * 1. SOUND SYNTHESIZER (Web Audio API - Zero External Assets Needed)
          *************************************************************************/
-        let soundEnabled = true;
-        let audioCtx = null;
-
-        function initAudio() {
-            if (!audioCtx) {
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) audioCtx = new AudioContextClass();
-            }
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        }
-
-        function playSound(type) {
-            if (!soundEnabled) return;
-            try {
-                initAudio();
-                if (!audioCtx) return;
-                const now = audioCtx.currentTime;
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                if (type === 'hit') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(145, now);
-                    osc.frequency.exponentialRampToValueAtTime(45, now + 0.11);
-                    gain.gain.setValueAtTime(0.11, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.11);
-                    osc.start(now);
-                    osc.stop(now + 0.11);
-                } else if (type === 'crit') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(290, now);
-                    osc.frequency.exponentialRampToValueAtTime(75, now + 0.18);
-                    gain.gain.setValueAtTime(0.16, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.18);
-                    osc.start(now);
-                    osc.stop(now + 0.18);
-                } else if (type === 'charge') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(220, now);
-                    osc.frequency.exponentialRampToValueAtTime(620, now + 0.45);
-                    gain.gain.setValueAtTime(0.12, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.45);
-                    osc.start(now);
-                    osc.stop(now + 0.45);
-                } else if (type === 'laser') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(520, now);
-                    osc.frequency.exponentialRampToValueAtTime(120, now + 0.55);
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.55);
-                    osc.start(now);
-                    osc.stop(now + 0.55);
-                } else if (type === 'thunder') {
-                    osc.type = 'square';
-                    osc.frequency.setValueAtTime(640, now);
-                    osc.frequency.exponentialRampToValueAtTime(60, now + 0.4);
-                    gain.gain.setValueAtTime(0.18, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
-                    osc.start(now);
-                    osc.stop(now + 0.4);
-                } else if (type === 'powerup') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(310, now);
-                    osc.frequency.exponentialRampToValueAtTime(740, now + 0.25);
-                    gain.gain.setValueAtTime(0.14, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
-                    osc.start(now);
-                    osc.stop(now + 0.25);
-                } else if (type === 'victory') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(440, now);
-                    osc.frequency.setValueAtTime(554.37, now + 0.14);
-                    osc.frequency.setValueAtTime(659.25, now + 0.28);
-                    osc.frequency.setValueAtTime(880, now + 0.42);
-                    gain.gain.setValueAtTime(0.22, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.85);
-                    osc.start(now);
-                    osc.stop(now + 0.85);
-                } else if (type === 'doublejump') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(280, now);
-                    osc.frequency.exponentialRampToValueAtTime(680, now + 0.16);
-                    gain.gain.setValueAtTime(0.13, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.16);
-                    osc.start(now);
-                    osc.stop(now + 0.16);
-                } else if (type === 'transition') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(190, now);
-                    osc.frequency.setValueAtTime(380, now + 0.12);
-                    osc.frequency.setValueAtTime(570, now + 0.26);
-                    gain.gain.setValueAtTime(0.18, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.55);
-                    osc.start(now);
-                    osc.stop(now + 0.55);
-                }
-            } catch (e) {
-                // Ignore audio context restrictions before user interaction
-            }
-        }
-
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            const icon = document.getElementById('audioIcon');
-            const label = document.getElementById('audioStatusLabel');
-            if (icon) {
-                icon.className = soundEnabled ? 'fa-solid fa-volume-high text-cyan-400' : 'fa-solid fa-volume-xmark text-slate-500';
-            }
-            if (label) {
-                label.textContent = arenaText(soundEnabled ? 'soundOn' : 'soundOff');
-            }
-            const quickBtn = document.getElementById('btnQuickSound');
-            const quickIcon = document.getElementById('quickSoundIcon');
-            if (quickBtn) quickBtn.className = soundEnabled
-                ? 'px-2 py-1.5 rounded-lg bg-slate-800 border border-cyan-500/50 text-cyan-300 text-[10px] font-bold'
-                : 'px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-500 text-[10px] font-bold';
-            if (quickIcon) quickIcon.textContent = soundEnabled ? '🔊' : '🔇';
-            refreshArenaOperatorToolbar();
-        }
-
         let isGamePaused = false;
         let isSettingsOpen = false;
 
         function syncSettingsModalState() {
             const modal = document.getElementById('settingsPauseModal');
             if (!modal) return;
+            modal.setAttribute('role',arenaWorkspace.mode==='stream'?'region':'dialog');
+            if(arenaWorkspace.mode==='stream')modal.removeAttribute('aria-modal');else modal.setAttribute('aria-modal','true');
             modal.classList.toggle('hidden', !isSettingsOpen);
             document.getElementById('pausedBadgeHeader')?.classList.toggle('hidden', !isGamePaused);
             const badge = document.getElementById('settingsModeBadge');
@@ -2736,6 +2622,28 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             zoom: 1.15
         };
 
+        const arenaInitialSeed=Math.floor(Math.random()*4294967296)>>>0;
+        const arenaCombatRandom=ArenaCore.createRandom(arenaInitialSeed);
+        const arenaVisualRandomSource=ArenaCore.createRandom(arenaInitialSeed^0x9e3779b9);
+        let arenaFighterSerial=0;
+        function arenaRandom(){return arenaCombatRandom.next();}
+        function arenaVisualRandom(){return arenaVisualRandomSource.next();}
+        function setArenaRandomSeed(seed){if(!Number.isSafeInteger(seed)||seed<0||seed>4294967295)return false;arenaCombatRandom.reset(seed);arenaVisualRandomSource.reset(seed^0x9e3779b9);return true;}
+        const ARENA_RUNTIME_KEY='arenaLiveRuntimeV1';
+        const ARENA_RUNTIME_DEFAULTS=Object.freeze(ArenaCore.normalizeRuntime());
+        let arenaRuntime={...ARENA_RUNTIME_DEFAULTS};
+        function setArenaRuntimeOption(key,value,remember=true){
+            if(!Object.hasOwn(ARENA_RUNTIME_DEFAULTS,key))return false;
+            const next=ArenaCore.normalizeRuntime({...arenaRuntime,[key]:value});
+            if(String(next[key])!==String(value))return false;
+            arenaRuntime=next;
+            if(key==='pausePolicy'&&value==='show')arenaAudienceQueue.length=0;
+            if(remember)try{localStorage.setItem(ARENA_RUNTIME_KEY,JSON.stringify(arenaRuntime));}catch(_){}
+            if(typeof refreshArenaRuntimeControls==='function')refreshArenaRuntimeControls();
+            if(key==='warriorTargeting')refreshArenaBalancePanel(true);
+            return true;
+        }
+        function loadArenaRuntimeOptions(){let saved;try{saved=JSON.parse(localStorage.getItem(ARENA_RUNTIME_KEY)||'null');}catch(_){}arenaRuntime=ArenaCore.normalizeRuntime(saved);}
         let gameState = 'LOBBY';   // 'LOBBY', 'COMBAT', 'VICTORY'
         let autoAttackEnabled = true;
 
@@ -2797,11 +2705,14 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let matchTimeSeconds = matchDurationSeconds;
         let matchElapsedSeconds = 0;
         let victoryCountdown = DEFAULT_VICTORY_COUNTDOWN;
-        let currentWinner = null;
+        let currentWinner=null,pendingArenaResult=null,arenaRoundResult=null,arenaVictoryActor=null;
+        let arenaSimulationTick=0;
+        const ARENA_RESULT_COPY=Object.freeze({es:['🤝 Empate','Sin un ganador único'],en:['🤝 Draw','No single winner'],fr:['🤝 Égalité','Aucun vainqueur unique'],de:['🤝 Unentschieden','Kein eindeutiger Sieger'],zh:['🤝 平局','没有唯一获胜者'],ja:['🤝 引き分け','単独の勝者なし'],pt:['🤝 Empate','Sem vencedor único'],it:['🤝 Pareggio','Nessun vincitore unico']});
+        function arenaResultText(key){return (ARENA_RESULT_COPY[currentLanguage]||ARENA_RESULT_COPY.es)[key==='draw'?0:1];}
 
         // Visual & Stream Metrics
-        let simulatedViewers = 1420;
-        let simulatedTapsPerSec = 28;
+        let simulatedViewers=0;
+        let simulatedTapsPerSec=0;
         let screenShake = 0;
         const ARENA_CAMERA_SETTINGS_KEY = 'arenaLiveCameraV1';
         const ARENA_DEFAULT_SCREEN_SHAKE = 25;
@@ -3453,7 +3364,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // ==================== 4. FIGHTER LIFECYCLE, COMBAT RULES & AUTO-SCALING ====================
         class Fighter {
             constructor(username, platformKey = 'tiktok', isStreamer = false, preferredClassKey = null) {
-                this.id = 'f_' + Math.random().toString(36).substring(2, 9);
+                this.id='f_'+(++arenaFighterSerial).toString(36);
                 this.name = username;
                 this.platformKey = platformKey;
                 this.platform = PLATFORMS[platformKey] || PLATFORMS.tiktok;
@@ -3463,7 +3374,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
                 const preferredArch = preferredClassKey
                     ? (ARCHETYPES.find(a => a.key === preferredClassKey) || ARCHETYPES[0])
-                    : ARCHETYPES[Math.floor(Math.random() * ARCHETYPES.length)];
+                    : ARCHETYPES[Math.floor(arenaRandom() * ARCHETYPES.length)];
                 this.preferredArchetypeKey=preferredArch.key;
                 const arch=ARCHETYPES.find(a=>a.key===resolveArenaClass(preferredArch.key))||preferredArch;
 
@@ -3474,13 +3385,13 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 this.headband = isStreamer ? '#00f3ff' : arch.headband;
 
                 // Position & Velocity in Canonical World Space (960x540)
-                this.x = WORLD_W * (0.2 + Math.random() * 0.6);
+                this.x = WORLD_W * (0.2 + arenaRandom() * 0.6);
                 this.y = WORLD_H * 0.6;
                 this.z = 0;
                 this.vx = 0;
                 this.vy = 0;
                 this.vz = 0;
-                this.facing = Math.random() > 0.5 ? 1 : -1;
+                this.facing = arenaRandom() > 0.5 ? 1 : -1;
                 this.radius = 17.5;
 
                 // Combat Stats (Balanced for slower, readable fights)
@@ -3495,7 +3406,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 this.knockbackTimer = 0;
 
                 // Timers & States
-                this.attackCooldown = 40 + Math.random() * 40;
+                this.attackCooldown = 40 + arenaRandom() * 40;
                 this.attackAnimTimer = 0;
                 this.hurtTimer = 0;
                 this.critBoostTimer = 0;
@@ -3507,7 +3418,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 this.likeBoostTimer = 0;      // Likes: normal/special damage + movement speed.
                 this.immunityTimer = 0;       // Shares: 65% damage reduction, not absolute immunity.
                 this.castingSkill = null;
-                this.aiSpecialCooldown = 60 + Math.random() * 100;
+                this.aiSpecialCooldown = 60 + arenaRandom() * 100;
                 this.specialAmplifyTimer = 0;
                 this.energyRegenerationTimer = 0;
                 this.healthRegenerationTimer = 0;
@@ -3522,7 +3433,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 this.maxJoins = MAX_OPPORTUNITIES;
                 this.permanentlyOut = false;  // Set when no configured lives remain
                 this.blockedAttempts = 0;     // Rejected !jugar attempts after exhausting configured lives
-                this.lastAttacker = null;
+                this.lastAttacker=null;this.lastHitTick=null;this.lastHitLife=null;this.lifeSerial=1;
 
                 // Animation & Double Jump System (2 Jumps: 1 Ground + 1 Air Double Jump in Smash/1v1)
                 this.onGround = false;
@@ -3536,7 +3447,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 this.extraRecoveryUsed = false; // One emergency aerial jump per fall, if normal jumps ran out.
                 this.smashDropTimer = 0;
                 this.aiJumpCooldown = 0;
-                this.walkCycle = Math.random() * 10;
+                this.walkCycle = arenaVisualRandom() * 10;
             }
         }
 
@@ -3767,7 +3678,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     maxTimer: 22
                 });
                 for (let i = 0; i < 10; i++) {
-                    spawnParticle(f.x + (Math.random() - 0.5) * 24, f.y + f.radius, '#00f3ff', 3.2, 20, 0.04);
+                    spawnParticle(f.x + (arenaVisualRandom() - 0.5) * 24, f.y + f.radius, '#00f3ff', 3.2, 20, 0.04);
                 }
                 spawnFloatingText(f.x, f.y - 34, '🪽', '#00f3ff', 18);
             } else {
@@ -3807,6 +3718,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 return null;
             }
 
+            if(gameState==='VICTORY'||koSequenceActive)return null;
             const incomingIdentityKey = viewerIdentityKey(username, platformKey);
             if (!arenaRosterBatchDepth && !isStreamer && gameState === 'COMBAT' && fighters.filter(f => !f.eliminated).length <= 2) {
                 const alreadyAlive = fighters.some(f => !f.eliminated && viewerIdentityKey(f.name, f.platformKey) === incomingIdentityKey);
@@ -3850,33 +3762,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
                 // Allowed to re-enter: lives count entries, while hp is the character's damage health.
                 existing.joinsUsed += 1;
-                existing.eliminated = false;
-                existing.permanentlyOut = false;
-                existing.hp = existing.maxHp;
-                existing.energy = 65;
-                existing.damageTaken = 0;
-                existing.knockbackTimer = 0;
-                existing.vz = 0;
-                existing.ringOutTimer = 0;
-                existing.fallDrop = 0;
-                existing.vx = 0;
-                existing.vy = 0;
-                existing.jumpsLeft = existing.maxJumps;
-                existing.doubleJumpCooldown = 0;
-                existing.recoveryJumpUsed = false;
-                existing.extraRecoveryUsed = false;
-                existing.edgeRecoveryPending = false;
-                existing.shieldTimer = arenaSocialPowersAllowed()?110:0;
-                existing.shieldHP = arenaSocialPowersAllowed()?45:0;
-                existing.tapKnockbackTimer = 0;
-                existing.tapKnockbackBonus = 0;
-                existing.likeBoostTimer = 0;
-                existing.immunityTimer = 0;
-                existing.castingSkill = null;
-                existing.aiSpecialCooldown = 100;
-                existing.specialAmplifyTimer = 0;
-                existing.energyRegenerationTimer = 0;
-                existing.healthRegenerationTimer = 0;
+                ArenaCore.resetLife(existing,{energy:65,protection:arenaSocialPowersAllowed()});
                 arrangeFightersForCurrentState(existing);
                 evaluateArenaMode(silentBanner);
                 for (let i = 0; i < 18; i++) spawnParticle(existing.x, existing.y, existing.color, 4.5, 30);
@@ -3948,12 +3834,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             } else if (newFighter) {
                 if (activeMode === 'iso') {
                     // Safe randomized spawn inside the circular floor, never beyond its rim.
-                    const angle = Math.random() * Math.PI * 2;
-                    const r = Math.sqrt(Math.random()) * 0.72;
+                    const angle = arenaRandom() * Math.PI * 2;
+                    const r = Math.sqrt(arenaRandom()) * 0.72;
                     newFighter.x = ISOMETRIC_ARENA.centerX + Math.cos(angle) * ISOMETRIC_ARENA.radiusX * r;
                     newFighter.y = ISOMETRIC_ARENA.centerY + Math.sin(angle) * ISOMETRIC_ARENA.radiusY * r - newFighter.radius * 0.85;
                 } else {
-                    newFighter.x = WORLD_W * (0.18 + Math.random() * 0.64);
+                    newFighter.x = WORLD_W * (0.18 + arenaRandom() * 0.64);
                     newFighter.y = groundY - 60;
                 }
             }
@@ -3964,6 +3850,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             // Simulator presets use curated names and can never create a 129th body.
             targetCount = Math.max(0, Math.min(getArenaPlayerLimit(), Math.trunc(Number(targetCount) || 0)));
             arenaRoundRevision++;
+            arenaRoundClockTicks=0;arenaAudienceQueue.length=0;arenaNextQueueTick=arenaSimulationTick;
             koSequenceActive = false;
             slowMoFactor = 1;
             if (gameState === 'VICTORY') gameState = 'LOBBY';
@@ -4090,7 +3977,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         function openLobby(clearFighters = false) {
             arenaRoundRevision++;
-            currentWinner = null;
+            arenaRoundClockTicks=0;arenaAudienceQueue.length=0;arenaNextQueueTick=arenaSimulationTick;
+            currentWinner=pendingArenaResult=arenaRoundResult=arenaVictoryActor=null;
             gameState = 'LOBBY';
             koSequenceActive = false;
             slowMoFactor = 1.0;
@@ -4104,9 +3992,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 totalParticipants = 0;
                 document.getElementById('hudCoopBadge16')?.classList.add('hidden');
                 document.getElementById('hudCoopBadge9')?.classList.add('hidden');
-                // Known spectators automatically rejoin the lobby with their prior classes.
-                withArenaRosterBatch(() => [...viewerProfiles.values()].forEach(profile =>
-                    addOrBoostFighter(profile.name, profile.platformKey, false, profile.archetypeKey, true)));
+                // Saved profiles keep class preferences; admission belongs to this round.
                 ensureMinimumLobbyRoster();
                 manualSpectatorFighter = null; // Roster replaced; reattach from the identity key below.
                 if (manualSpectatorIdentity) {
@@ -4114,34 +4000,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 }
             } else {
                 fighters.forEach(f => {
-                    f.eliminated = false;
-                    f.permanentlyOut = false;
-                    f.ringOutTimer = 0;
-                    f.fallDrop = 0;
-                    f.joinsUsed = 1;
-                    f.blockedAttempts = 0;
-                    f.hp = f.maxHp;
-                    f.energy = 50;
-                    f.kills = 0;
-                    f.damageDealt = 0;
-                    f.castingSkill = null;
-                    f.aiSpecialCooldown = 100;
-                    f.classChangeCooldown = 0;
-                    f.specialAmplifyTimer = 0;
-                    f.energyRegenerationTimer = 0;
-                    f.healthRegenerationTimer = 0;
-                    f.berserkTimer = 0;
-                    f.shieldTimer = 0;
-                    f.shieldHP = 0;
-                    f.tapKnockbackTimer = 0;
-                    f.tapKnockbackBonus = 0;
-                    f.likeBoostTimer = 0;
-                    f.immunityTimer = 0;
-                    f.edgeRecoveryPending = false;
-                    f.recoveryJumpUsed = false;
-                    f.extraRecoveryUsed = false;
-                    f.smashDropTimer = 0;
-                    f.aiJumpCooldown = 0;
+                    ArenaCore.resetLife(f,{round:true});
                 });
                 ensureMinimumLobbyRoster();
             }
@@ -4158,8 +4017,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         function startCombatFromLobby() {
             arenaRoundRevision++;
+            arenaRoundClockTicks=0;arenaAudienceQueue.length=0;arenaNextQueueTick=arenaSimulationTick;
             trimArenaRosterToLimit();
-            currentWinner = null;
+            currentWinner=pendingArenaResult=arenaRoundResult=arenaVictoryActor=null;
             if (fighters.length < 2) {
                 triggerQuickJoin();
             }
@@ -4167,13 +4027,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 addOrBoostFighter('@ArenaBot', 'tiktok', false, 'ninja', true);
             }
 
-            lastMatchRoster = fighters.map(f => ({
-                name: f.name,
-                platformKey: f.platformKey,
-                isStreamer: f.isStreamer,
-                archetypeKey: f.archetypeKey,
-                coopCount: f.coopCount
-            }));
+            lastMatchRoster=fighters.map(ArenaCore.rosterEntry);
 
             gameState = 'COMBAT';
             koSequenceActive = false;
@@ -4186,40 +4040,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const groundY = WORLD_H * 0.79;
 
             fighters.forEach((f, idx) => {
-                f.eliminated = false;
-                f.permanentlyOut = false;
-                f.joinsUsed = 1;
-                f.blockedAttempts = 0;
-                f.hp = f.maxHp;
-                f.energy = 50;
-                f.kills = 0;
-                f.damageDealt = 0;
-                f.attackCooldown = 45 + Math.random() * 45;
-                f.castingSkill = null;
-                f.aiSpecialCooldown = 150 + Math.random() * 90;
-                f.classChangeCooldown = 0;
-                f.specialAmplifyTimer = 0;
-                f.energyRegenerationTimer = 0;
-                f.healthRegenerationTimer = 0;
-                f.shieldTimer = 0;
-                f.shieldHP = 0;
-                f.immunityTimer = 0;
-                f.likeBoostTimer = 0;
-                f.tapKnockbackTimer = 0;
-                f.tapKnockbackBonus = 0;
-                f.critBoostTimer = 0;
-                f.berserkTimer = 0;
-                f.extraRecoveryUsed = false;
-                f.smashDropTimer = 0;
-                f.aiJumpCooldown = 0;
-                f.jumpsLeft = 2;
-                f.doubleJumpCooldown = 0;
-                f.knockbackTimer = 0;
-                f.edgeRecoveryPending = false;
-                f.recoveryJumpUsed = false;
-                f.vz = 0;
-                f.ringOutTimer = 0;
-                f.fallDrop = 0;
+                ArenaCore.resetLife(f,{round:true});
+                f.attackCooldown=45+arenaRandom()*45;
+                f.aiSpecialCooldown=150+arenaRandom()*90;
 
                 if (activeMode === '1v1' && fighters.length === 2) {
                     f.x = idx === 0 ? WORLD_W * 0.32 : WORLD_W * 0.68;
@@ -4240,93 +4063,38 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         function rematchSamePlayers() {
-            fighters = [];
-            totalParticipants = 0;
-            document.getElementById('hudCoopBadge16')?.classList.add('hidden');
-            document.getElementById('hudCoopBadge9')?.classList.add('hidden');
-            // Restore all known viewers and their selected classes; the streamer must join separately.
-            const returningViewers = [...viewerProfiles.values()];
-            returningViewers.forEach(r => addOrBoostFighter(r.name, r.platformKey, false, r.archetypeKey, true));
+            const roster=(fighters.length?fighters.map(ArenaCore.rosterEntry):lastMatchRoster).slice(0,getArenaPlayerLimit());
+            arenaRoundRevision++;
+            arenaRoundClockTicks=0;arenaAudienceQueue.length=0;arenaNextQueueTick=arenaSimulationTick;
+            gameState='LOBBY';koSequenceActive=false;slowMoFactor=1;
+            currentWinner=pendingArenaResult=arenaRoundResult=arenaVictoryActor=null;
+            fighters=[];totalParticipants=0;eliminationOrder=[];
+            particles.length=floatingTexts.length=activeEffects.length=0;
+            withArenaRosterBatch(()=>{for(const entry of roster){const f=addOrBoostFighter(entry.name,entry.platformKey,entry.isStreamer,entry.archetypeKey,true);if(f)f.coopCount=entry.coopCount;}});
             ensureMinimumLobbyRoster();
-            startCombatFromLobby();
-            updateStreamerJoinButton();
+            manualSpectatorFighter=manualSpectatorIdentity?fighters.find(f=>viewerIdentityKey(f.name,f.platformKey)===manualSpectatorIdentity)||null:null;
+            startCombatFromLobby();updateStreamerJoinButton();
         }
 
-        function triggerVictoryScreen(winner) {
-            currentWinner = winner || null;
-            gameState = 'VICTORY';
-            koSequenceActive = false;
-            slowMoFactor = 1.0;
-            victoryCountdown = 12;
+        function triggerVictoryScreen(winner,result=pendingArenaResult) {
+            arenaRoundResult=result||ArenaCore.result(fighters,winner,{eliminations:eliminationOrder});
+            pendingArenaResult=null;currentWinner=arenaRoundResult.winner;
+            gameState='VICTORY';koSequenceActive=false;slowMoFactor=1;victoryCountdown=DEFAULT_VICTORY_COUNTDOWN;
+            activeEffects.length=particles.length=floatingTexts.length=0;
+            arenaVictoryActor=currentWinner?{...currentWinner,eliminated:false,hp:Math.max(1,currentWinner.hp),x:WORLD_W*.5,y:WORLD_H*.76,
+                vx:0,vy:0,z:0,vz:0,fallDrop:0,ringOutTimer:0,castingSkill:null,shieldTimer:0,shieldHP:0,hurtTimer:0,attackAnimTimer:0,knockbackTimer:0}:null;
             playSound('victory');
-
-            if (winner) {
-                winner.x = WORLD_W * 0.5;
-                winner.y = WORLD_H * 0.76;
-                winner.vx = 0;
-                winner.vy = 0;
-                winner.z = 0;
-                winner.castingSkill = null;
-
-                // Populate both 16:9 and 9:16 Victory Podiums simultaneously
-                ['16', '9'].forEach(sfx => {
-                    document.getElementById(`victoryWinnerName${sfx}`).textContent = getFighterDisplayName(winner);
-                    document.getElementById(`victoryWinnerPlatform${sfx}`).textContent = `${winner.platform.icon} ${winner.platform.name} • ${getFighterClassTitle(winner)}`;
-                    document.getElementById(`victoryStatKills${sfx}`).textContent = winner.kills;
-                    document.getElementById(`victoryStatDamage${sfx}`).textContent = Math.round(winner.damageDealt);
-                    document.getElementById(`victoryStatLikes${sfx}`).textContent = `❤️ ${winner.likesReceived}`;
-                });
+            for(const sfx of ['16','9']) {
+                document.getElementById('victoryWinnerName'+sfx).textContent=currentWinner?getFighterDisplayName(currentWinner):arenaResultText('draw');
+                document.getElementById('victoryWinnerPlatform'+sfx).textContent=currentWinner?currentWinner.platform.icon+' '+currentWinner.platform.name+' • '+getFighterClassTitle(currentWinner):arenaResultText('help');
+                document.getElementById('victoryStatKills'+sfx).textContent=currentWinner?currentWinner.kills:0;
+                document.getElementById('victoryStatDamage'+sfx).textContent=currentWinner?Math.round(currentWinner.damageDealt):0;
+                document.getElementById('victoryStatLikes'+sfx).textContent='❤️ '+(currentWinner?currentWinner.likesReceived:0);
             }
-
-            const others = fighters
-                .filter(f => !winner || f.id !== winner.id)
-                .sort((a, b) => (b.kills * 200 + b.damageDealt) - (a.kills * 200 + a.damageDealt));
-
-            const second = eliminationOrder[eliminationOrder.length - 1] || others[0];
-            const third = eliminationOrder[eliminationOrder.length - 2] || others[1];
-
-            const runnersContainer16 = document.getElementById('victoryRunnersUp16');
-            runnersContainer16.innerHTML = '';
-
-            if (second) {
-                runnersContainer16.innerHTML += `
-                    <div class="bg-slate-900/80 border border-slate-700/80 rounded-xl p-1.5 flex items-center gap-1.5">
-                        <span class="text-base">🥈</span>
-                        <div class="overflow-hidden">
-                            <div class="text-[10px] font-bold text-slate-100 truncate">${second.platform.icon} ${escapeHTML(getFighterDisplayName(second))}</div>
-                            <div class="text-[9px] text-slate-400">${second.kills} KOs • ${Math.round(second.damageDealt)} Dmg</div>
-                        </div>
-                    </div>
-                `;
-            }
-            if (third && (!second || third.id !== second.id)) {
-                runnersContainer16.innerHTML += `
-                    <div class="bg-slate-900/80 border border-slate-700/80 rounded-xl p-1.5 flex items-center gap-1.5">
-                        <span class="text-base">🥉</span>
-                        <div class="overflow-hidden">
-                            <div class="text-[10px] font-bold text-slate-100 truncate">${third.platform.icon} ${escapeHTML(getFighterDisplayName(third))}</div>
-                            <div class="text-[9px] text-slate-400">${third.kills} KOs • ${Math.round(third.damageDealt)} Dmg</div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Spawn Celebratory Confetti in World Space
-            confetti = [];
-            const colors = ['#00f3ff', '#ffbe0b', '#ff007f', '#4ade80', '#a855f7'];
-            for (let i = 0; i < 85; i++) {
-                confetti.push({
-                    x: Math.random() * WORLD_W,
-                    y: Math.random() * WORLD_H - WORLD_H,
-                    vy: 1.8 + Math.random() * 2.5,
-                    vx: (Math.random() - 0.5) * 1.6,
-                    size: 5 + Math.random() * 5,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    angle: Math.random() * Math.PI * 2,
-                    spin: (Math.random() - 0.5) * 0.15
-                });
-            }
-
+            const runners=currentWinner?arenaRoundResult.podium.slice(1):arenaRoundResult.podium.slice(0,2);
+            document.getElementById('victoryRunnersUp16').innerHTML=runners.map((f,i)=>'<div class="bg-slate-900/80 border border-slate-700/80 rounded-xl p-1.5 flex items-center gap-1.5" data-podium-id="'+escapeHTML(f.id)+'"><span class="text-base">'+(i?'🥉':'🥈')+'</span><div class="overflow-hidden"><div class="text-[10px] font-bold text-slate-100 truncate">'+f.platform.icon+' '+escapeHTML(getFighterDisplayName(f))+'</div><div class="text-[9px] text-slate-400">'+f.kills+' KOs • '+Math.round(f.damageDealt)+' HP</div></div></div>').join('');
+            confetti=[];const colors=['#00f3ff','#ffbe0b','#ff007f','#4ade80','#a855f7'];
+            for(let i=0;i<85;i++)confetti.push({x:arenaVisualRandom()*WORLD_W,y:arenaVisualRandom()*WORLD_H-WORLD_H,vy:1.8+arenaVisualRandom()*2.5,vx:(arenaVisualRandom()-.5)*1.6,size:5+arenaVisualRandom()*5,color:colors[Math.floor(arenaVisualRandom()*colors.length)],angle:arenaVisualRandom()*Math.PI*2,spin:(arenaVisualRandom()-.5)*.15});
             updatePhaseUI();
         }
 
@@ -4570,7 +4338,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         function performMeleeAttack(attacker) {
             if (attacker.attackCooldown > 0 || attacker.castingSkill) return;
 
-            attacker.attackCooldown = attacker.berserkTimer > 0 ? 58 : (92 + Math.random() * 35);
+            attacker.attackCooldown = attacker.berserkTimer > 0 ? 58 : (92 + arenaRandom() * 35);
             attacker.attackAnimTimer = 18;
             const reach = (attacker.radius * 2.75) * (attacker.berserkTimer > 0 ? 1.25 : 1);
             const target = findPreferredCombatTarget(attacker, other => {
@@ -4581,12 +4349,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             });
             if (!target) return;
 
-            const isCrit = Math.random() < (attacker.critChance + (attacker.critBoostTimer > 0 ? 0.35 : 0));
+            const isCrit = arenaRandom() < (attacker.critChance + (attacker.critBoostTimer > 0 ? 0.35 : 0));
             let dmg = attacker.baseDamage * (attacker.berserkTimer > 0 ? 1.6 : 1);
             dmg *= getFighterAttackDamageMultiplier(attacker);
             if (isCrit) dmg *= 1.65;
             const damageAmount = Math.round(dmg);
-            applyDamage(target, damageAmount, attacker, isCrit, ARENA_GROUND_JUMP_IMPULSE, 'normal');
+            applyDamage(target, damageAmount, attacker, isCrit, 'normal');
             attacker.energy = Math.min(100, attacker.energy + 14);
             playSound('hit');
         }
@@ -4615,11 +4383,11 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 esmeralda: Object.freeze({damage:44,windup:22,targets:1})
             }),
             iso: Object.freeze({
-                kame: Object.freeze({damage:38,windup:34,targets:3}),
+                kame: Object.freeze({damage:38,windup:34,targets:2}),
                 ninja: Object.freeze({damage:60,windup:20,targets:1}),
-                titan: Object.freeze({damage:38,windup:34,targets:3}),
-                trueno: Object.freeze({damage:32,windup:34,targets:3}),
-                esmeralda: Object.freeze({damage:60,windup:20,targets:1})
+                titan: Object.freeze({damage:38,windup:34,targets:2}),
+                trueno: Object.freeze({damage:32,windup:34,targets:2}),
+                esmeralda: Object.freeze({damage:32,windup:28,targets:2})
             })
         });
         // Chain A: every class has one prey, one counter and three neutral matchups.
@@ -4629,9 +4397,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             disadvantage: 0.90,
             beats: Object.freeze({ kame:'titan', titan:'trueno', trueno:'esmeralda', esmeralda:'ninja', ninja:'kame' })
         });
-        const COMBAT_TARGET_POLICY = 'class-priority-shinobi-local';
+        const COMBAT_TARGET_POLICY = 'class-priority-local';
         const ARENA_COMBAT_TARGET_RULES = Object.freeze({
-            shinobiSimilarDistancePercent: 15
+            shinobiSimilarDistancePercent: 15, warriorSimilarDistancePercent: 25
         });
 
         function getArenaClassDamageMultiplier(attackerKey, defenderKey) {
@@ -4643,14 +4411,14 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         const ARENA_BALANCE_COPY = Object.freeze({
-            es: ["Equilibrio por clase","Modo","Modo actual","Duelo","Smash","Arena","Valores","Perfil de clase","Reglas de esta ronda","Básico","Especial","HP por objetivo, con energía completa y sin críticos, escudos ni apoyos.","Carga (f)","Cupo","Rango","Bloqueado","Guerreros: priorizan otros Guerreros. Shinobi: el rival cercano; prefieren otra clase hasta un {distance} % más lejos. Pueden dañarse entre sí y disputan la final. Titanes: atacan a cualquiera.","Consulta: elegir un modo o una clase aquí no cambia la partida.","60 f ≈ 1 s a ritmo 1×. Cupo configurado; en Duelo solo hay un rival. Rango = sin cupo extra, dentro del alcance.","Rival del gráfico","Sin rivalidad","Ventaja al atacar a","Desventaja al atacar a","Afinidad de daño","Cadena A","Cada flecha indica +10 % de daño; en sentido contrario, −10 %. Los otros enfrentamientos son neutros. Se aplica a golpes y poderes antes de redondear a HP enteros.","Clase","Radar pentagonal de daño","Los ejes 1–5 corresponden a las clases de la lista."],
-            en: ["Class balance","Mode","Current mode","Duel","Smash","Arena","Values","Class profile","Current round rules","Basic","Special","HP per target at full energy, without critical hits, shields or support.","Charge (f)","Cap","Range","Blocked","Warriors prioritize Warriors. Shinobi choose the nearest rival, preferring another class up to {distance}% farther away. They can hurt each other and fight the final. Titans attack anyone.","View only: choosing a mode or class here does not change the match.","60 f ≈ 1 s at 1× pace. Configured cap; a Duel has one rival. Range = no extra cap, within attack reach.","Chart opponent","No rivalry","Advantage attacking","Disadvantage attacking","Damage affinity","Chain A","Each arrow means +10% damage; the reverse means −10%. Other matchups are neutral. Applies to basic and special attacks before rounding to whole HP.","Class","Pentagonal damage radar","Axes 1–5 match the classes in the list."],
-            fr: ["Équilibre des classes","Mode","Mode actuel","Duel","Smash","Arène","Valeurs","Profil de classe","Règles de la manche","Base","Spécial","PV par cible à énergie pleine, sans critiques, boucliers ni soutien.","Charge (f)","Limite","Portée","Bloqué","Les Guerriers privilégient les Guerriers. Les Shinobi choisissent le plus proche, préférant une autre classe jusqu’à {distance} % plus loin. Ils peuvent se blesser et disputent la finale. Les Titans attaquent tous.","Consultation : choisir un mode ou une classe ici ne modifie pas la partie.","60 f ≈ 1 s à 1×. Limite configurée ; un duel compte un adversaire. Portée = sans limite supplémentaire.","Adversaire du graphique","Sans rivalité","Avantage contre","Désavantage contre","Affinité de dégâts","Chaîne A","Chaque flèche indique +10 % de dégâts ; en sens inverse, −10 %. Les autres duels sont neutres. Coups et pouvoirs sont arrondis aux PV entiers après application.","Classe","Radar pentagonal de dégâts","Les axes 1–5 correspondent aux classes de la liste."],
-            de: ["Klassenbalance","Modus","Aktueller Modus","Duell","Smash","Arena","Werte","Klassenprofil","Rundenregeln","Basis","Spezial","HP pro Ziel bei voller Energie, ohne kritische Treffer, Schilde oder Hilfe.","Ladung (f)","Limit","Reichw.","Gesperrt","Krieger bevorzugen Krieger. Shinobi wählen den nächsten Gegner und bevorzugen andere Klassen bis zu {distance} % weiter entfernt. Sie können einander verletzen und kämpfen im Finale. Titanen greifen jeden an.","Nur Ansicht: Modus- und Klassenwahl hier ändern den Kampf nicht.","60 f ≈ 1 s bei 1×. Konfiguriertes Limit; im Duell ein Gegner. Reichweite = kein zusätzliches Limit.","Gegner im Diagramm","Ohne Rivalität","Vorteil gegen","Nachteil gegen","Schadensfaktor","Kette A","Jeder Pfeil bedeutet +10 % Schaden; umgekehrt −10 %. Andere Paarungen sind neutral. Gilt für normale und Spezialangriffe vor dem Runden auf ganze HP.","Klasse","Fünfeck-Schadensradar","Die Achsen 1–5 entsprechen den Klassen in der Liste."],
-            zh: ["职业平衡","模式","当前模式","决斗","平台战","竞技场","数值","职业配置","本轮规则","普通","技能","每个目标的生命伤害：满能量，无暴击、护盾或支援。","蓄力(f)","上限","范围","禁用","战士优先攻击战士。忍者选择最近的对手，若其他职业只比最近对手远不超过{distance}%，则优先攻击其他职业。忍者可互相伤害并在最后决出胜负。泰坦攻击任何人。","仅查看：在此选择模式或职业不会改变比赛。","1×速度下60f约为1秒。决斗仅有一名对手；范围表示射程内无额外目标上限。","图表对手","无克制","攻击优势目标","攻击劣势目标","伤害克制","克制链A","顺箭头伤害+10%，逆箭头−10%，其他对阵中立。适用于普通攻击和技能，然后四舍五入为整数生命值。","职业","五边形伤害雷达图","轴1–5对应下方列表中的职业。"],
-            ja: ["クラスバランス","モード","現在のモード","決闘","スマッシュ","アリーナ","数値","クラス設定","ラウンドルール","通常","必殺","各対象のHPダメージ。満タンのエネルギーで、クリティカル・シールド・支援なし。","溜め(f)","上限","範囲","無効","戦士は戦士を優先。忍者は最寄りの相手を選び、距離が{distance}%増以内なら他クラスを優先します。仲間にもダメージが入り、最後は忍者同士で決着。タイタンは全員を攻撃。","表示のみ：ここでモードやクラスを選んでも試合は変わりません。","1×速度で60f ≈ 1秒。決闘の相手は1人。範囲＝射程内に追加の対象上限なし。","グラフの対戦相手","相性なし","攻撃有利","攻撃不利","ダメージ相性","相性チェーンA","矢印方向はダメージ+10%、逆方向は−10%。他は中立。通常・必殺技に適用してからHPを整数に丸めます。","クラス","五角形ダメージレーダー","軸1〜5は下のリストのクラスに対応します。"],
-            pt: ["Equilíbrio por classe","Modo","Modo atual","Duelo","Smash","Arena","Valores","Perfil da classe","Regras da rodada","Básico","Especial","HP por alvo, energia cheia, sem críticos, escudos ou apoios.","Carga (f)","Limite","Alcance","Bloqueado","Guerreiros priorizam Guerreiros. Shinobi escolhem o mais próximo, preferindo outra classe até {distance}% mais longe. Podem ferir uns aos outros e disputam a final. Titãs atacam qualquer um.","Consulta: escolher modo ou classe aqui não altera a partida.","60 f ≈ 1 s a 1×. Limite configurado; no duelo há um rival. Alcance = sem limite extra dentro do alcance.","Rival do gráfico","Sem rivalidade","Vantagem contra","Desvantagem contra","Afinidade de dano","Cadeia A","Cada seta indica +10% de dano; no sentido inverso, −10%. Os outros confrontos são neutros. Vale para golpes e poderes antes do arredondamento para HP inteiros.","Classe","Radar pentagonal de dano","Os eixos 1–5 correspondem às classes da lista."],
-            it: ["Equilibrio delle classi","Modalità","Modalità attuale","Duello","Smash","Arena","Valori","Profilo classe","Regole del round","Base","Speciale","HP per bersaglio, energia piena, senza critici, scudi o supporti.","Carica (f)","Limite","Portata","Bloccato","I Guerrieri preferiscono Guerrieri. Gli Shinobi scelgono il più vicino, preferendo un’altra classe fino al {distance}% più lontano. Possono ferirsi e disputano la finale. I Titani attaccano chiunque.","Solo consultazione: scegliere modalità o classe qui non cambia la partita.","60 f ≈ 1 s a 1×. Limite configurato; un rivale nel duello. Portata = nessun limite aggiuntivo nel raggio.","Rivale del grafico","Senza rivalità","Vantaggio contro","Svantaggio contro","Affinità danno","Catena A","Ogni freccia indica +10% di danno; al contrario, −10%. Gli altri scontri sono neutri. Vale per colpi e poteri prima di arrotondare agli HP interi.","Classe","Radar pentagonale dei danni","Gli assi 1–5 corrispondono alle classi della lista."]
+            es: ["Equilibrio por clase","Modo","Modo actual","Duelo","Smash","Arena","Valores","Perfil de clase","Reglas de esta ronda","Básico","Especial","HP por objetivo, con energía completa y sin críticos, escudos ni apoyos.","Carga (f)","Cupo","Rango","Bloqueado","{warrior} Shinobi: el rival cercano; prefieren otra clase hasta un {distance} % más lejos. Pueden dañarse entre sí y disputan la final. Titanes: atacan a cualquiera.","Consulta: elegir un modo o una clase aquí no cambia la partida.","60 f ≈ 1 s a ritmo 1×. Cupo configurado; en Duelo solo hay un rival. Rango = sin cupo extra, dentro del alcance.","Rival del gráfico","Sin rivalidad","Ventaja al atacar a","Desventaja al atacar a","Afinidad de daño","Cadena A","Cada flecha indica +10 % de daño; en sentido contrario, −10 %. Los otros enfrentamientos son neutros. Se aplica a golpes y poderes antes de redondear a HP enteros.","Clase","Radar pentagonal de daño","Los ejes 1–5 corresponden a las clases de la lista."],
+            en: ["Class balance","Mode","Current mode","Duel","Smash","Arena","Values","Class profile","Current round rules","Basic","Special","HP per target at full energy, without critical hits, shields or support.","Charge (f)","Cap","Range","Blocked","{warrior} Shinobi choose the nearest rival, preferring another class up to {distance}% farther away. They can hurt each other and fight the final. Titans attack anyone.","View only: choosing a mode or class here does not change the match.","60 f ≈ 1 s at 1× pace. Configured cap; a Duel has one rival. Range = no extra cap, within attack reach.","Chart opponent","No rivalry","Advantage attacking","Disadvantage attacking","Damage affinity","Chain A","Each arrow means +10% damage; the reverse means −10%. Other matchups are neutral. Applies to basic and special attacks before rounding to whole HP.","Class","Pentagonal damage radar","Axes 1–5 match the classes in the list."],
+            fr: ["Équilibre des classes","Mode","Mode actuel","Duel","Smash","Arène","Valeurs","Profil de classe","Règles de la manche","Base","Spécial","PV par cible à énergie pleine, sans critiques, boucliers ni soutien.","Charge (f)","Limite","Portée","Bloqué","{warrior} Les Shinobi choisissent le plus proche, préférant une autre classe jusqu’à {distance} % plus loin. Ils peuvent se blesser et disputent la finale. Les Titans attaquent tous.","Consultation : choisir un mode ou une classe ici ne modifie pas la partie.","60 f ≈ 1 s à 1×. Limite configurée ; un duel compte un adversaire. Portée = sans limite supplémentaire.","Adversaire du graphique","Sans rivalité","Avantage contre","Désavantage contre","Affinité de dégâts","Chaîne A","Chaque flèche indique +10 % de dégâts ; en sens inverse, −10 %. Les autres duels sont neutres. Coups et pouvoirs sont arrondis aux PV entiers après application.","Classe","Radar pentagonal de dégâts","Les axes 1–5 correspondent aux classes de la liste."],
+            de: ["Klassenbalance","Modus","Aktueller Modus","Duell","Smash","Arena","Werte","Klassenprofil","Rundenregeln","Basis","Spezial","HP pro Ziel bei voller Energie, ohne kritische Treffer, Schilde oder Hilfe.","Ladung (f)","Limit","Reichw.","Gesperrt","{warrior} Shinobi wählen den nächsten Gegner und bevorzugen andere Klassen bis zu {distance} % weiter entfernt. Sie können einander verletzen und kämpfen im Finale. Titanen greifen jeden an.","Nur Ansicht: Modus- und Klassenwahl hier ändern den Kampf nicht.","60 f ≈ 1 s bei 1×. Konfiguriertes Limit; im Duell ein Gegner. Reichweite = kein zusätzliches Limit.","Gegner im Diagramm","Ohne Rivalität","Vorteil gegen","Nachteil gegen","Schadensfaktor","Kette A","Jeder Pfeil bedeutet +10 % Schaden; umgekehrt −10 %. Andere Paarungen sind neutral. Gilt für normale und Spezialangriffe vor dem Runden auf ganze HP.","Klasse","Fünfeck-Schadensradar","Die Achsen 1–5 entsprechen den Klassen in der Liste."],
+            zh: ["职业平衡","模式","当前模式","决斗","平台战","竞技场","数值","职业配置","本轮规则","普通","技能","每个目标的生命伤害：满能量，无暴击、护盾或支援。","蓄力(f)","上限","范围","禁用","{warrior}忍者选择最近的对手，若其他职业只比最近对手远不超过{distance}%，则优先攻击其他职业。忍者可互相伤害并在最后决出胜负。泰坦攻击任何人。","仅查看：在此选择模式或职业不会改变比赛。","1×速度下60f约为1秒。决斗仅有一名对手；范围表示射程内无额外目标上限。","图表对手","无克制","攻击优势目标","攻击劣势目标","伤害克制","克制链A","顺箭头伤害+10%，逆箭头−10%，其他对阵中立。适用于普通攻击和技能，然后四舍五入为整数生命值。","职业","五边形伤害雷达图","轴1–5对应下方列表中的职业。"],
+            ja: ["クラスバランス","モード","現在のモード","決闘","スマッシュ","アリーナ","数値","クラス設定","ラウンドルール","通常","必殺","各対象のHPダメージ。満タンのエネルギーで、クリティカル・シールド・支援なし。","溜め(f)","上限","範囲","無効","{warrior}忍者は最寄りの相手を選び、距離が{distance}%増以内なら他クラスを優先します。仲間にもダメージが入り、最後は忍者同士で決着。タイタンは全員を攻撃。","表示のみ：ここでモードやクラスを選んでも試合は変わりません。","1×速度で60f ≈ 1秒。決闘の相手は1人。範囲＝射程内に追加の対象上限なし。","グラフの対戦相手","相性なし","攻撃有利","攻撃不利","ダメージ相性","相性チェーンA","矢印方向はダメージ+10%、逆方向は−10%。他は中立。通常・必殺技に適用してからHPを整数に丸めます。","クラス","五角形ダメージレーダー","軸1〜5は下のリストのクラスに対応します。"],
+            pt: ["Equilíbrio por classe","Modo","Modo atual","Duelo","Smash","Arena","Valores","Perfil da classe","Regras da rodada","Básico","Especial","HP por alvo, energia cheia, sem críticos, escudos ou apoios.","Carga (f)","Limite","Alcance","Bloqueado","{warrior} Shinobi escolhem o mais próximo, preferindo outra classe até {distance}% mais longe. Podem ferir uns aos outros e disputam a final. Titãs atacam qualquer um.","Consulta: escolher modo ou classe aqui não altera a partida.","60 f ≈ 1 s a 1×. Limite configurado; no duelo há um rival. Alcance = sem limite extra dentro do alcance.","Rival do gráfico","Sem rivalidade","Vantagem contra","Desvantagem contra","Afinidade de dano","Cadeia A","Cada seta indica +10% de dano; no sentido inverso, −10%. Os outros confrontos são neutros. Vale para golpes e poderes antes do arredondamento para HP inteiros.","Classe","Radar pentagonal de dano","Os eixos 1–5 correspondem às classes da lista."],
+            it: ["Equilibrio delle classi","Modalità","Modalità attuale","Duello","Smash","Arena","Valori","Profilo classe","Regole del round","Base","Speciale","HP per bersaglio, energia piena, senza critici, scudi o supporti.","Carica (f)","Limite","Portata","Bloccato","{warrior} Gli Shinobi scelgono il più vicino, preferendo un’altra classe fino al {distance}% più lontano. Possono ferirsi e disputano la finale. I Titani attaccano chiunque.","Solo consultazione: scegliere modalità o classe qui non cambia la partita.","60 f ≈ 1 s a 1×. Limite configurato; un rivale nel duello. Portata = nessun limite aggiuntivo nel raggio.","Rivale del grafico","Senza rivalità","Vantaggio contro","Svantaggio contro","Affinità danno","Catena A","Ogni freccia indica +10% di danno; al contrario, −10%. Gli altri scontri sono neutri. Vale per colpi e poteri prima di arrotondare agli HP interi.","Classe","Radar pentagonale dei danni","Gli assi 1–5 corrispondono alle classi della lista."]
         });
         const ARENA_BALANCE_WORDS = ['title','mode','current','duel','smash','iso','profile','nominal','round','basic','special','assumption','windup','targets','range','blocked','policy','readOnly','note','target','neutral','prey','counter','affinity','chain','rivalryHelp','class','radar','axesHint'];
         let arenaBalanceSelectedClass = 'kame';
@@ -4658,7 +4426,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaBalanceRenderWidth = 0;
         let arenaBalanceResizeObserver = null;
         function arenaBalanceText(key) {
-            const text = (ARENA_BALANCE_COPY[currentLanguage] || ARENA_BALANCE_COPY.es)[ARENA_BALANCE_WORDS.indexOf(key)] || key;
+            let text = (ARENA_BALANCE_COPY[currentLanguage] || ARENA_BALANCE_COPY.es)[ARENA_BALANCE_WORDS.indexOf(key)] || key;
+            if(key==='policy')text=text.replace('{warrior}',arenaWarriorPolicyText());
             return text.replace('{distance}', ARENA_COMBAT_TARGET_RULES.shinobiSimilarDistancePercent);
         }
         function getArenaBalanceSnapshot(mode = activeMode, profile = 'nominal', rival = null) {
@@ -4756,6 +4525,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             document.getElementById('arenaBalanceScale').textContent = `0–${max} HP`;
             const focusedClass = chart.contains(document.activeElement) ? document.activeElement.dataset.balanceClass : null;
             renderArenaBalanceRadar(snapshot, max, chartWidth);
+            refreshArenaBalanceEvidence();
             if (focusedClass) chart.querySelector(`[data-balance-class="${focusedClass}"]`)?.focus({preventScroll:true});
             const selected = snapshot.rows.find(row => row.key === arenaBalanceSelectedClass);
             const prey = ARENA_CLASS_RIVALRIES.beats[selected.key];
@@ -4827,7 +4597,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 }
             }
             if (!preferred) return closest;
-            if (preferSameClass) return preferred;
+            if (preferSameClass) return arenaRuntime.warriorTargeting==='always'?preferred:
+                preferredDistanceSq*10000<=closestDistanceSq*(100+ARENA_COMBAT_TARGET_RULES.warriorSimilarDistancePercent)**2?preferred:closest;
             const similarDistancePercent = 100 + ARENA_COMBAT_TARGET_RULES.shinobiSimilarDistancePercent;
             // Integer percent comparison includes the exact boundary without a square root.
             return preferredDistanceSq * 10000 <= closestDistanceSq * similarDistancePercent ** 2 ? preferred : closest;
@@ -4858,40 +4629,41 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const range = AI_SPECIAL_RULES.maxRangeByClass[fighter.archetypeKey] || 140;
             if (!command || Math.hypot(target.x - fighter.x, target.y - fighter.y) > range) return false;
             fighter.facing = target.x >= fighter.x ? 1 : -1;
-            fighter.aiSpecialCooldown = AI_SPECIAL_RULES.cooldownFrames;
-            queueFighterSkillWindup(fighter, command);
+            queueFighterSkillWindup(fighter,command,'ai');
             return !!fighter.castingSkill;
         }
 
-        // Dramatic Skill Wind-up ("CARGANDO PODER...") before releasing attack
-        function queueFighterSkillWindup(fighter, command, forceFree = false) {
-            if (!arenaClassPowersAllowed() || !fighter || fighter.eliminated || fighter.fallDrop > 0) return false;
-            const cmd = getMatchedSkillCommand(command);
-            const requiredClass=SKILL_REQUIRED_CLASS[cmd];
-            if(!requiredClass||fighter.archetypeKey!==requiredClass)return false;
-            const rule = getFighterSpecialRule(fighter);
-            if (!rule) return false;
-            if (gameState !== 'COMBAT') {
-                spawnFloatingText(fighter.x, fighter.y - 42, `⚡ LISTO: ${command.toUpperCase()}`, '#00f3ff', 15);
-                return;
+        const ARENA_ACTION_COPY=Object.freeze({
+            es:['Sin energía: mínimo 25','Especial en espera','Partida pausada','Poder no disponible','Cargando','Acción en cola','Acción omitida durante la pausa','Simulación','Sin datos LIVE','Tiempo terminado'],
+            en:['Not enough energy: minimum 25','Special on cooldown','Match paused','Power unavailable','Charging','Action queued','Action skipped during pause','Simulation','No LIVE data','Time up'],
+            fr:['Énergie insuffisante : minimum 25','Pouvoir en recharge','Partie en pause','Pouvoir indisponible','Chargement','Action en attente','Action ignorée pendant la pause','Simulation','Aucune donnée LIVE','Temps écoulé'],
+            de:['Zu wenig Energie: mindestens 25','Spezialangriff lädt nach','Spiel pausiert','Kraft nicht verfügbar','Lädt','Aktion vorgemerkt','Aktion während der Pause übersprungen','Simulation','Keine LIVE-Daten','Zeit abgelaufen'],
+            zh:['能量不足：至少25','技能冷却中','比赛已暂停','技能不可用','蓄力中','操作已排队','暂停期间忽略操作','模拟','无直播数据','时间到'],
+            ja:['エネルギー不足：最低25','必殺技はクールダウン中','試合は一時停止中','技を使用できません','チャージ中','操作を待機中','一時停止中の操作をスキップ','シミュレーション','ライブデータなし','時間切れ'],
+            pt:['Energia insuficiente: mínimo 25','Especial em recarga','Partida pausada','Poder indisponível','Carregando','Ação na fila','Ação ignorada durante a pausa','Simulação','Sem dados LIVE','Tempo esgotado'],
+            it:['Energia insufficiente: minimo 25','Speciale in ricarica','Partita in pausa','Potere non disponibile','Caricamento','Azione in coda','Azione ignorata durante la pausa','Simulazione','Nessun dato LIVE','Tempo scaduto']
+        });
+        function arenaActionText(key){return (ARENA_ACTION_COPY[currentLanguage]||ARENA_ACTION_COPY.es)[['energy','cooldown','paused','unavailable','charging','queued','skipped','simulation','noData','timeUp'].indexOf(key)]||key;}
+        function validateArenaSpecialAction(f,cmd,origin='operator'){
+            if(!arenaClassPowersAllowed()||!f||f.eliminated||f.fallDrop>0||!getFighterSpecialRule(f)||SKILL_REQUIRED_CLASS[cmd]!==f.archetypeKey||gameState!=='COMBAT'||koSequenceActive||f.castingSkill)return {allowed:false,reason:'unavailable'};
+            if(isGamePaused)return {allowed:false,reason:'paused'};
+            if(arenaRuntime.specialPolicy==='fair'||origin==='ai'){
+                if(f.energy<AI_SPECIAL_RULES.minEnergy)return {allowed:false,reason:'energy'};
+                if(f.aiSpecialCooldown>0)return {allowed:false,reason:'cooldown'};
             }
-            if (fighter.castingSkill) return;
-
-            // Spending any available charge is allowed; partial charge weakens the result.
-            const availableEnergy = Math.max(0, fighter.energy);
-            const spentEnergy = Math.min(45, availableEnergy);
-            fighter.energy = Math.max(0, fighter.energy - spentEnergy);
-            const powerFactor = Math.max(0.25, spentEnergy / 45);
-            playSound('charge');
-            fighter.castingSkill = {
-                cmd: cmd,
-                timer: rule.windup, // visible and interruptible charge
-                maxTimer: rule.windup,
-                powerFactor
-            };
-            if (!fighter.isStreamer) fighter.aiSpecialCooldown = Math.max(fighter.aiSpecialCooldown, AI_SPECIAL_RULES.cooldownFrames);
-
-            spawnFloatingText(fighter.x, fighter.y - 48, `⚡ CARGANDO ${cmd.toUpperCase()}...`, '#ffbe0b', 16);
+            return {allowed:true};
+        }
+        function announceArenaActionRejected(f,reason){const now=Date.now();if(f.lastActionFeedback===reason&&now-(f.lastActionFeedbackAt||0)<1000)return;f.lastActionFeedback=reason;f.lastActionFeedbackAt=now;appendChatMessage('@ArenaSystem',f.platformKey,'⏳ '+getFighterDisplayName(f)+' · '+arenaActionText(reason),'normal');}
+        // Dramatic Skill Wind-up ("CARGANDO PODER...") before releasing attack
+        function queueFighterSkillWindup(fighter,command,origin='operator'){
+            const cmd=getMatchedSkillCommand(command),validation=validateArenaSpecialAction(fighter,cmd,origin);
+            if(!validation.allowed){if(fighter&&origin!=='ai')announceArenaActionRejected(fighter,validation.reason);return false;}
+            const rule=getFighterSpecialRule(fighter),spent=Math.min(45,Math.max(0,fighter.energy));
+            fighter.energy=Math.max(0,fighter.energy-spent);playSound('charge');
+            fighter.castingSkill={cmd,timer:rule.windup,maxTimer:rule.windup,powerFactor:Math.max(.25,spent/45)};
+            fighter.aiSpecialCooldown=Math.max(fighter.aiSpecialCooldown,AI_SPECIAL_RULES.cooldownFrames);
+            spawnFloatingText(fighter.x,fighter.y-48,'⚡ '+arenaActionText('charging')+' '+cmd.toUpperCase(),'#ffbe0b',16);
+            return true;
         }
 
         // MODULE BLOCK G: COMBAT ACTIONS + DAMAGE + K.O. (future js/combat.js).
@@ -4936,7 +4708,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     const inFront = dir === 1 ? target.x > fighter.x - 10 : target.x < fighter.x + 10;
                     if (inFront && Math.abs(target.y - fighter.y) < 75) {
                         // A K.O. can change mode and reposition survivors during this cast.
-                        applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 10.5, 'special');
+                        applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 'special');
                     }
                 });
 
@@ -4958,7 +4730,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 const target = findPreferredCombatTarget(fighter, other =>
                     Math.hypot(other.x - fighter.x, other.y - fighter.y) < 170
                     && Math.sign(other.x - fighter.x || dir) === dir);
-                if (target) applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 11.5, 'special');
+                if (target) applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 'special');
 
             } else if (cmd === '!trueno') {
                 playSound('thunder');
@@ -4978,7 +4750,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             timer: 28,
                             maxTimer: 28
                         });
-                        applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 8.5, 'special');
+                        applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 'special');
                 });
                 if (struck === 0) {
                     addActiveEffect({
@@ -4991,33 +4763,21 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 }
 
             } else if (cmd === '!enred' || cmd === '!enredadera') {
-                // Espíritu: a single offensive vine strike designed to launch opponents off-stage.
+                // Espíritu: one command, a chained vine; two targets only in Arena.
                 playSound('hit');
                 screenShake = Math.max(screenShake, 9);
                 const dir = fighter.facing;
-                const target = findPreferredCombatTarget(fighter, other => {
-                    const dx = (other.x - fighter.x) * dir;
-                    const dy = Math.abs(other.y - fighter.y);
-                    const dist = Math.hypot(other.x - fighter.x, other.y - fighter.y);
-                    return activeMode === 'iso' ? dist < 300 : (dx > 0 && dx < 340 && dy < 135);
+                const targets=getFighterSpecialTargets(fighter,other=>{
+                    const dx=(other.x-fighter.x)*dir,dy=Math.abs(other.y-fighter.y);
+                    return activeMode==='iso'?Math.hypot(other.x-fighter.x,other.y-fighter.y)<300:dx>0&&dx<340&&dy<135;
                 });
-                if (target) {
-                    const steps = 12;
-                    for (let step = 1; step <= steps; step++) {
-                        const t = step / steps;
-                        spawnParticle(
-                            fighter.x + (target.x - fighter.x) * t,
-                            fighter.y + (target.y - fighter.y) * t,
-                            '#4ade80', 3.2 + Math.random() * 1.4, 22, 0.05
-                        );
-                    }
-                    addActiveEffect({ type: 'thornVine', x: target.x, y: target.y, color: '#4ade80', timer: 28, maxTimer: 28 });
-                    applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 14.5, 'special');
-                } else {
-                    for (let step = 1; step <= 8; step++) {
-                        spawnParticle(fighter.x + dir * step * 22, fighter.y - 6, '#4ade80', 2.8, 18, 0.05);
-                    }
+                let previous=fighter;
+                for(const target of targets){
+                    for(let step=1;step<=12;step++){const t=step/12;spawnParticle(previous.x+(target.x-previous.x)*t,previous.y+(target.y-previous.y)*t,'#4ade80',3.2+arenaVisualRandom()*1.4,22,.05);}
+                    addActiveEffect({type:'thornVine',x:target.x,y:target.y,color:'#4ade80',timer:28,maxTimer:28});
+                    applyDamage(target,getFighterSpecialRule(fighter).damage,fighter,true,'special');previous=target;
                 }
+                if(!targets.length)for(let step=1;step<=8;step++)spawnParticle(fighter.x+dir*step*22,fighter.y-6,'#4ade80',2.8,18,.05);
                 spawnFloatingText(fighter.x, fighter.y - 44, `🌿 ${arenaPowerName('!enred')}`, '#4ade80', 20, 'power');
 
             } else if (cmd === '!coloso' || cmd === '!golpecolosal') {
@@ -5030,21 +4790,21 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     const distance = Math.hypot(target.x - fighter.x, target.y - fighter.y);
                     if (distance <= 135) {
                         target.vx += Math.sign(target.x - fighter.x || fighter.facing) * 16 * arenaCombatRules.knockback;
-                        applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 14, 'special');
+                        applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 'special');
                     }
                 });
-                for (let i = 0; i < 22; i++) spawnParticle(fighter.x + (Math.random() - 0.5) * 150, fighter.y + fighter.radius, '#fb7185', 4.5, 24, 0.15);
+                for (let i = 0; i < 22; i++) spawnParticle(fighter.x + (arenaVisualRandom() - 0.5) * 150, fighter.y + fighter.radius, '#fb7185', 4.5, 24, 0.15);
                 spawnFloatingText(fighter.x, fighter.y - 45, `💥 ${arenaPowerName('!coloso')}`, '#fb7185', 21, 'power');
 
             }
         }
 
-        function applyDamage(target, amount, attacker, isCrit = false, knockbackPower = 6.5, attackType = 'normal') {
-            if (target.eliminated || gameState !== 'COMBAT') return;
+        function applyDamage(target, amount, attacker, isCrit = false, attackType = 'normal') {
+            if(target.eliminated||gameState!=='COMBAT'||koSequenceActive)return;
             if(attackType==='special'&&arenaCombatRules.powerMode==='melee')return;
             if (attacker && !canFighterAttack(attacker, target)) return;
             // Defensive priority: damage reduction -> absorb limited shield pool -> HP.
-            if (attacker) target.lastAttacker = attacker;
+            if(attacker){target.lastAttacker=attacker;target.lastHitTick=arenaSimulationTick;target.lastHitLife=target.lifeSerial;}
             const damageBeforeHit = Math.max(0, Number(target.damageTaken) || 0);
             const special = attackType === 'special';
             const boostedAmount = special
@@ -5074,10 +4834,11 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 target.castingSkill = null;
                 spawnFloatingText(target.x, target.y - 34, '⚡✕', '#fb7185', 15);
             }
-            target.hp -= amount;
+            const effectiveDamage=Math.min(Math.max(0,target.hp),amount);
+            target.hp=Math.max(0,target.hp-amount);
             target.damageTaken = damageBeforeHit + amount;
             target.hurtTimer = 12;
-            if (attacker) attacker.damageDealt += amount;
+            if(attacker)attacker.damageDealt+=effectiveDamage;
 
             // Impulse reference is a ground jump (9.4). Specials get twice that.
             // Damage/critical scaling remains moderate, to avoid instant edge eliminations.
@@ -5118,16 +4879,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         function handleFighterKO(victim, killer) {
-            if (victim.eliminated) return;
+            if(victim.eliminated||koSequenceActive||gameState!=='COMBAT')return;
             victim.hp = 0;
             victim.eliminated = true;
             victim.castingSkill = null;
-            eliminationOrder.push(victim);
+            eliminationOrder.push(ArenaCore.snapshot(victim));
 
-            const creditKiller = killer || victim.lastAttacker;
+            const recentHit=victim.lastHitTick==null||(victim.lastHitLife===victim.lifeSerial&&arenaSimulationTick-victim.lastHitTick<=480);
+            const creditKiller=recentHit?(killer||victim.lastAttacker):null;
             if (creditKiller && creditKiller.id !== victim.id) {
                 creditKiller.kills += 1;
-                creditKiller.hp = Math.min(creditKiller.maxHp, creditKiller.hp + 30);
+                if(!creditKiller.eliminated)creditKiller.hp=Math.min(creditKiller.maxHp,creditKiller.hp+30);
             }
 
             // Evaluate Re-entry status according to active Rejoin Rule Mode ('3_lives' vs 'timed')
@@ -5195,15 +4957,15 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             // A sole survivor wins immediately in every rule set (lives, timed, or free entry).
             // Show the winner podium now; do not wait for a re-entry window, the clock, or a K.O. animation.
             if (remaining.length <= 1 && !koSequenceActive) {
-                const winner = remaining[0] || creditKiller || victim;
-                const winnerName = getFighterDisplayName(winner);
-                triggerFinalKOSequence(winner, `¡${winnerName} queda como último luchador en pie!`);
+                const winner=remaining[0]||null;
+                triggerFinalKOSequence(winner,winner?'¡'+getFighterDisplayName(winner)+' queda como último luchador en pie!':arenaResultText('help'));
             }
         }
 
-        function triggerFinalKOSequence(winner, subtitleText, titleText = '💥 ¡K.O. DECISIVO! 💥') {
+        function triggerFinalKOSequence(winner, subtitleText, titleText = '💥 ¡K.O. DECISIVO! 💥', reason='survival') {
             if (koSequenceActive) return;
             koSequenceActive = true;
+            pendingArenaResult=ArenaCore.result(fighters,winner,{reason,eliminations:eliminationOrder});
             updateStreamerJoinButton();
             slowMoFactor = 0.22;
             const roundRevision = arenaRoundRevision;
@@ -5222,7 +4984,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 ['16', '9'].forEach(sfx => {
                     document.getElementById(`koSlowMoOverlay${sfx}`).classList.add('hidden');
                 });
-                triggerVictoryScreen(winner);
+                triggerVictoryScreen(winner,pendingArenaResult);
             }, 2600);
         }
 
@@ -5262,7 +5024,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             }
             // Dodging a close opponent's visible swing is an optional tactical jump.
             if (fighter.onGround && nearby && Math.abs(dy) < 50 && Math.abs(dx) < 100
-                && target.attackAnimTimer > 9 && Math.random() < 0.045) {
+                && target.attackAnimTimer > 9 && arenaRandom() < 0.045) {
                 fighter.aiJumpCooldown = 60;
                 return performFighterJump(fighter, false, false);
             }
@@ -5270,7 +5032,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         function updatePhysicsAndAI() {
-            if (isGamePaused) return;
+            if(isGamePaused)return;
+            arenaSimulationTick++;drainArenaAudienceQueue();advanceArenaRoundClock();
             const W = WORLD_W;
             const H = WORLD_H;
             const groundY = H * 0.79;
@@ -5287,21 +5050,18 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     c.angle += c.spin;
                     if (c.y > H + 120) {
                         c.y = -40;
-                        c.x = Math.random() * W;
+                        c.x = arenaVisualRandom() * W;
                     }
                 });
             }
 
             for (const f of fighters) {
-                if (f.eliminated) continue;
+                if(f.eliminated||koSequenceActive)continue;
 
                 // Lobby & Victory idle warmup animation
                 if (gameState === 'LOBBY' || gameState === 'VICTORY') {
                     f.walkCycle += 0.09 * dt;
-                    if (gameState === 'VICTORY') {
-                        f.x = W * 0.5;
-                        f.y = H * 0.78 - f.radius;
-                    }
+                    // Victory uses a presentation actor; battle positions remain unchanged.
                     continue;
                 }
 
@@ -5343,10 +5103,10 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 if (f.castingSkill) {
                     f.vx *= 0.7;
                     f.castingSkill.timer -= dt;
-                    if (Math.random() < 0.45) {
+                    if (arenaVisualRandom() < 0.45) {
                         spawnParticle(
-                            f.x + (Math.random() - 0.5) * 45,
-                            f.y + (Math.random() - 0.5) * 45,
+                            f.x + (arenaVisualRandom() - 0.5) * 45,
+                            f.y + (arenaVisualRandom() - 0.5) * 45,
                             '#ffbe0b', 2.5, 16, -0.1
                         );
                     }
@@ -5688,6 +5448,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             if (node && node.style.width !== width) node.style.width = width;
         }
         const arenaDrawOrder = [];
+        let arenaRenderFighterCount=0,arenaLastRenderShake={x:0,y:0};
         const arenaFighterDepthOrder = (a, b) => a.y - b.y;
         function renderBothScreensSimultaneously() {
             const fullscreenId = document.fullscreenElement?.id;
@@ -5698,9 +5459,11 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             // Both captures share one depth order from the same simulation snapshot.
             const orderedFighters = arenaDrawOrder;
             orderedFighters.length = 0;
-            for (const fighter of fighters) if (!fighter.eliminated) orderedFighters.push(fighter);
+            if(gameState==='VICTORY'){if(arenaVictoryActor)orderedFighters.push(arenaVictoryActor);}
+            else for (const fighter of fighters) if (!fighter.eliminated) orderedFighters.push(fighter);
             orderedFighters.sort(arenaFighterDepthOrder);
-            const shake = sampleArenaScreenShake();
+            arenaRenderFighterCount=orderedFighters.length;
+            const shake = sampleArenaScreenShake();arenaLastRenderShake=shake;
             const animationTime = Date.now();
             // Full HD backing stores; logical camera/world coordinates remain unchanged.
             // 1. Render 16:9 Horizontal Broadcast Canvas (1920x1080)
@@ -5940,23 +5703,15 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             paintArenaCachedStage(targetCtx);
 
             // 4. Depth-Sort Living Fighters
-            const visibleFighters = orderedFighters || fighters
-                .filter(f => !f.eliminated)
-                .sort((a, b) => a.y - b.y);
+            const visibleFighters=orderedFighters||(gameState==='VICTORY'?(arenaVictoryActor?[arenaVictoryActor]:[]):fighters.filter(f=>!f.eliminated).sort((a,b)=>a.y-b.y));
 
-            for (const fighter of visibleFighters) drawFighterOnCtx(targetCtx, fighter, animationTime);
+            const bounds=getArenaViewportBounds(viewW,viewH,camX,camY,camZoom,shake);
+            for (const fighter of visibleFighters)if(ArenaRender.intersects(bounds,fighter.x,fighter.y-(fighter.z||0)+(fighter.fallDrop||0),180))drawFighterOnCtx(targetCtx,fighter,animationTime);
 
             // 5. Render Special Effects & Particles
-            drawSpecialEffectsOnCtx(targetCtx, getArenaViewportBounds(viewW, viewH, camX, camY, camZoom, shake));
+            drawSpecialEffectsOnCtx(targetCtx,bounds,animationTime);
 
-            for (const p of particles) {
-                targetCtx.fillStyle = p.color;
-                targetCtx.globalAlpha = Math.max(0, p.life / p.maxLife);
-                targetCtx.beginPath();
-                targetCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                targetCtx.fill();
-            }
-            targetCtx.globalAlpha = 1;
+            ArenaRender.drawParticles(targetCtx,particles,bounds,arenaRuntime.quality);
 
             // 6. Confetti Rain in Victory State
             if (gameState === 'VICTORY') {
@@ -5976,6 +5731,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
             // 7. Floating Combat Texts
             for (const ft of floatingTexts) {
+                if(!ArenaRender.intersects(bounds,ft.x,ft.y,220))continue;
                 targetCtx.save();
                 targetCtx.font = `800 ${ft.size}px 'Inter', sans-serif`;
                 targetCtx.textAlign = 'center';
@@ -6190,7 +5946,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 }
             }
             const portraitLabel = targetCtx === ctx9;
-            const packedFighterCount = fighters.length;
+            const packedFighterCount = arenaRenderFighterCount;
             const nameFont = portraitLabel
                 ? (packedFighterCount <= 8 ? 12 : packedFighterCount <= 32 ? 10 : packedFighterCount <= 80 ? 9 : 7.4)
                 : (packedFighterCount <= 8 ? 9 : packedFighterCount <= 80 ? 8 : 7.2);
@@ -6237,7 +5993,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             };
         }
 
-        function drawSpecialEffectsOnCtx(targetCtx, bounds = {left:0, right:WORLD_W, top:0, bottom:WORLD_H}) {
+        function drawSpecialEffectsOnCtx(targetCtx, bounds = {left:0, right:WORLD_W, top:0, bottom:WORLD_H},animationTime=Date.now()) {
             activeEffects.forEach(ef => {
                 targetCtx.save();
                 const progress = ef.timer / ef.maxTimer;
@@ -6264,14 +6020,14 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 } else if (ef.type === 'rasengan') {
                     const host = fighters.find(f => f.id === ef.fighterId);
                     const rx = host ? host.x + host.facing * 20 : ef.x;
-                    const ry = host ? host.y : ef.y;
+                    const ry = host ? host.y-(host.z||0)+(host.fallDrop||0) : ef.y;
                     const rad = 38 * (1.2 - progress * 0.3);
 
                     targetCtx.strokeStyle = '#00f3ff';
                     targetCtx.lineWidth = 3;
                     for (let s = 0; s < 3; s++) {
                         targetCtx.beginPath();
-                        targetCtx.arc(rx, ry, rad * (0.4 + s * 0.28), Date.now() * 0.02 + s, Date.now() * 0.02 + s + 4);
+                        targetCtx.arc(rx, ry, rad * (0.4 + s * 0.28), animationTime * 0.02 + s, animationTime * 0.02 + s + 4);
                         targetCtx.stroke();
                     }
 
@@ -6334,8 +6090,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         function spawnParticle(x, y, color, speed = 4, life = 25, gravity = 0.1) {
-            const angle = Math.random() * Math.PI * 2;
-            const spd = Math.random() * speed + 1;
+            const angle = arenaVisualRandom() * Math.PI * 2;
+            const spd = arenaVisualRandom() * speed + 1;
             if (particles.length >= MAX_PARTICLES) {
                 particles.splice(0, particles.length - MAX_PARTICLES + 1);
             }
@@ -6344,7 +6100,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 vx: Math.cos(angle) * spd,
                 vy: Math.sin(angle) * spd - 1.5,
                 color,
-                size: Math.random() * 3.5 + 1.5,
+                size: arenaVisualRandom() * 3.5 + 1.5,
                 life,
                 maxLife: life,
                 gravity
@@ -6859,7 +6615,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 const found = alive.find(f => f.id === val);
                 if (found) return found;
             }
-            return alive.length ? alive[Math.floor(Math.random() * alive.length)] : null;
+            return alive.length ? alive[Math.floor(arenaRandom() * alive.length)] : null;
         }
 
         function triggerQuickJoin() {
@@ -6869,7 +6625,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             }
             const unused = BOT_ROSTER.filter(bot => !fighters.some(f => f.name.toLocaleLowerCase() === bot.name.toLocaleLowerCase()));
             if (!unused.length) return null;
-            const bot = unused[Math.floor(Math.random() * unused.length)];
+            const bot = unused[Math.floor(arenaRandom() * unused.length)];
             // Each test identity uses its assigned class regardless of join timing.
             return addOrBoostFighter(bot.name, 'tiktok', false, bot.classKey, true);
         }
@@ -7044,7 +6800,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                         if (!canFighterAttack(f, other)) return;
                         if (Math.hypot(other.x - f.x, other.y - f.y) > 155) return;
                         hits++;
-                        applyDamage(other, Math.round(12 * scale), f, false, 9.4, 'normal');
+                        applyDamage(other, Math.round(12 * scale), f, false, 'normal');
                     });
                 }
                 addActiveEffect({type:'titanQuake',x:f.x,y:f.y+f.radius,color:'#38bdf8',timer:23,maxTimer:23});
@@ -7062,7 +6818,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     targets.slice(0,2).forEach(other => {
                         hits++;
                         addActiveEffect({type:'lightning',x:other.x,y:other.y,timer:23,maxTimer:23});
-                        applyDamage(other, Math.round(22 * scale), f, false, 9.4, 'special');
+                        applyDamage(other, Math.round(22 * scale), f, false, 'special');
                     });
                 }
                 value = String(hits); symbol = '🌠'; color = '#93c5fd';
@@ -7134,7 +6890,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     if (isBuiltInSpectatorBot(name)) continue;
                     const archetypeKey = isValidArchetypeKey(item.archetypeKey)
                         ? item.archetypeKey
-                        : ARCHETYPES[Math.floor(Math.random() * ARCHETYPES.length)].key;
+                        : ARCHETYPES[Math.floor(arenaRandom() * ARCHETYPES.length)].key;
                     viewerProfiles.set(viewerIdentityKey(name, platformKey), {
                         name, platformKey, archetypeKey,
                         lastSeenAt: Number(item.lastSeenAt) || Date.now()
@@ -7154,7 +6910,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const validRequestedClass = isValidArchetypeKey(classKey) ? classKey : null;
             const archetypeKey = (replaceClass && validRequestedClass)
                 ? validRequestedClass
-                : (previous?.archetypeKey || validRequestedClass || ARCHETYPES[Math.floor(Math.random() * ARCHETYPES.length)].key);
+                : (previous?.archetypeKey || validRequestedClass || ARCHETYPES[Math.floor(arenaRandom() * ARCHETYPES.length)].key);
             const profile = { name, platformKey: platform, archetypeKey, lastSeenAt: Date.now() };
             viewerProfiles.delete(key);
             viewerProfiles.set(key, profile);
@@ -7259,23 +7015,14 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         // MODULE BLOCK L: CHAT ROUTER + COMMANDS + ANTI-SPAM (future js/chat.js).
 
-        function processChatCommand(username, platformKey, text, explicitFighter = null, bypassRateLimit = false) {
-            const clean = String(text ?? '').replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, 160);
-            if (!clean) return false;
-            username = normalizeChatUsername(username);
-            platformKey = Object.prototype.hasOwnProperty.call(PLATFORMS, platformKey) ? platformKey : 'tiktok';
-            if (!bypassRateLimit && !allowIncomingChatMessage(username, platformKey, clean)) return false;
-            const lower = canonicalizeChatCommandText(clean);
-            const displayCommand = lower.startsWith('!') ? localizeVisibleCommands(lower, currentLanguage) : clean;
-            appendChatMessage(username, platformKey, displayCommand, lower.startsWith('!') ? 'command' : 'normal');
-
+        function executeArenaChatAction(username,platformKey,clean,explicitFighter=null){
+            const lower=canonicalizeChatCommandText(clean);
             // Once the final K.O. begins, the winner is locked; ignore gameplay commands until the next lobby.
-            if (koSequenceActive || gameState === 'VICTORY') return;
+            if (koSequenceActive || gameState === 'VICTORY') return false;
 
             // Joining remains available independently from class selection.
             if (lower === '!jugar') {
-                addOrBoostFighter(username, platformKey, false);
-                return true;
+                return !!addOrBoostFighter(username,platformKey,false);
             }
 
             // A viewer who speaks for the first time enters automatically; !jugar remains
@@ -7307,11 +7054,39 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     announceWrongClassPower(platformKey, matchedSkill, requiredClassKey);
                     return true;
                 }
-                if (actor) queueFighterSkillWindup(actor, matchedSkill, true);
-                return true;
+                return actor?queueFighterSkillWindup(actor,matchedSkill,'chat'):false;
             }
 
             return true;
+        }
+        const arenaAudienceQueue=[];
+        const ARENA_AUDIENCE_QUEUE_LIMIT=64,ARENA_AUDIENCE_QUEUE_TTL_MS=8000;
+        let arenaNextQueueTick=0,arenaLastChatRejection=null;
+        function drainArenaAudienceQueue(){
+            if(isGamePaused||koSequenceActive||gameState==='VICTORY'||arenaSimulationTick<arenaNextQueueTick)return;
+            const now=Date.now();
+            while(arenaAudienceQueue.length){const event=arenaAudienceQueue.shift();
+                if(event.round!==arenaRoundRevision||now-event.receivedAt>ARENA_AUDIENCE_QUEUE_TTL_MS)continue;
+                const actor=event.targetId?fighters.find(f=>f.id===event.targetId&&!f.eliminated)||null:null;
+                if(event.targetId&&!actor)continue;
+                executeArenaChatAction(event.username,event.platformKey,event.clean,actor);arenaNextQueueTick=arenaSimulationTick+15;break;
+            }
+        }
+        function processChatCommand(username,platformKey,text,explicitFighter=null,bypassRateLimit=false){
+            const clean=String(text??'').replace(/[\u0000-\u001F\u007F]/g,'').trim().slice(0,160);if(!clean)return false;
+            username=normalizeChatUsername(username);platformKey=Object.hasOwn(PLATFORMS,platformKey)?platformKey:'tiktok';
+            arenaLastChatRejection='rate';if(!bypassRateLimit&&!allowIncomingChatMessage(username,platformKey,clean))return false;arenaLastChatRejection=null;
+            const lower=canonicalizeChatCommandText(clean);
+            appendChatMessage(username,platformKey,lower.startsWith('!')?localizeVisibleCommands(lower,currentLanguage):clean,lower.startsWith('!')?'command':'normal');
+            if(koSequenceActive||gameState==='VICTORY')return false;
+            if(!arenaClassPowersAllowed()&&findSkillCommandInCanonicalText(lower)){arenaLastChatRejection='unavailable';appendChatMessage('@ArenaSystem',platformKey,arenaCombatRuleText('powersOff'),'normal');return false;}
+            const identity=viewerIdentityKey(username,platformKey),actionable=lower==='!jugar'||!!CLASS_SELECTION_COMMANDS[lower]||!!findSkillCommandInCanonicalText(lower)||(!lower.startsWith('!')&&!fighters.some(f=>viewerIdentityKey(f.name,f.platformKey)===identity));
+            if(isGamePaused&&actionable){if(arenaRuntime.pausePolicy==='show'){arenaLastChatRejection='paused';return false;}
+                const prior=arenaAudienceQueue.findIndex(e=>e.identity===identity);if(prior>=0)arenaAudienceQueue.splice(prior,1);
+                if(arenaAudienceQueue.length>=ARENA_AUDIENCE_QUEUE_LIMIT)arenaAudienceQueue.shift();
+                arenaAudienceQueue.push({identity,username,platformKey,clean,targetId:explicitFighter?.id||null,receivedAt:Date.now(),round:arenaRoundRevision});return true;
+            }
+            return executeArenaChatAction(username,platformKey,clean,explicitFighter);
         }
 
         function showFighterSpeechBubble(fighter, message) {
@@ -7351,8 +7126,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                         ? { width: 540, height: 960, camX: camera9x16.x, camY: camera9x16.y, zoom: camera9x16.zoom }
                         : { width: 960, height: 540, camX: WORLD_W * 0.5, camY: WORLD_H * 0.54,
                             zoom: (gameState === 'COMBAT' && activeMode === '1v1') ? 1.12 : 1.0 };
-                    const screenX = view.width * 0.5 + (fighter.x - view.camX) * view.zoom;
-                    const screenY = view.height * 0.56 + (fighter.y - view.camY) * view.zoom - Math.max(24, (fighter.radius || 20) * view.zoom + 14);
+                    const screenX = arenaLastRenderShake.x+view.width * 0.5 + (fighter.x - view.camX) * view.zoom;
+                    const screenY = arenaLastRenderShake.y+view.height * 0.56 + (fighter.y-(fighter.z||0)+(fighter.fallDrop||0) - view.camY) * view.zoom - Math.max(24, (fighter.radius || 20) * view.zoom + 14);
                     bubble.style.left = `${Math.max(5, Math.min(95, screenX / view.width * 100))}%`;
                     bubble.style.top = `${Math.max(7, Math.min(91, screenY / view.height * 100))}%`;
                     bubble.style.transform = 'translate(-50%, -100%)';
@@ -7452,7 +7227,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 // Joining and lobby class selection belong to the sender's @. During play, a skill command
                 // is applied to the selected supported fighter; this mirrors the quick-skill test buttons.
                 const accepted = processChatCommand(username, platformKey, text, selectedSkillTarget);
-                if (accepted === false) {
+                if(accepted===false&&arenaLastChatRejection==='rate'){
                     appendChatMessage('@ArenaSystem', platformKey, 'Comando limitado por anti-spam; espera un momento y vuelve a intentarlo.', 'normal');
                 }
                 msgInput.value = '';
@@ -7641,19 +7416,10 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
          * 9. TIMERS & INITIALIZATION
          *************************************************************************/
         // 1-Second State Timer Loop (Synchronized across 16:9 and 9:16 HUDs)
-        setInterval(() => {
-            if (isGamePaused) return;
-            simulatedViewers += Math.floor((Math.random() - 0.42) * 18);
-            simulatedTapsPerSec = Math.floor(18 + Math.random() * 45);
-
-            ['16', '9'].forEach(sfx => {
-                document.getElementById(`hudViewerCount${sfx}`).textContent = simulatedViewers.toLocaleString();
-                document.getElementById(`hudTapsPerSec${sfx}`).textContent = simulatedTapsPerSec;
-                const topTaps = document.getElementById('topTapsPerSec'); if (topTaps) topTaps.textContent = simulatedTapsPerSec;
-            });
-
-
-
+        let arenaRoundClockTicks=0;
+        function advanceArenaRoundClock(){if(isGamePaused||koSequenceActive)return;if(++arenaRoundClockTicks<60)return;arenaRoundClockTicks=0;tickArenaRoundSecond();}
+        function tickArenaRoundSecond(){
+            if(isGamePaused||koSequenceActive)return;
             if (gameState === 'LOBBY') {
                 if (countdownsEnabled && !lobbyTimerPaused && fighters.length >= 2) {
                     lobbyCountdown--;
@@ -7669,7 +7435,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 });
 
                 // Auto-Audience joins during Lobby
-                if (autoChatEnabled && fighters.length < 8 && Math.random() < 0.55) {
+                if (autoChatEnabled && fighters.length < 8 && arenaRandom() < 0.55) {
                     triggerQuickJoin();
                 }
 
@@ -7681,17 +7447,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                         updateCombatTimerDisplay();
 
                         if (matchTimeSeconds <= 0) {
-                            const ranked = [...fighters].sort((a, b) => {
-                                const scoreA = a.kills * 250 + a.damageDealt;
-                                const scoreB = b.kills * 250 + b.damageDealt;
-                                return scoreB - scoreA;
-                            });
-                            const winner = ranked[0] || fighters[0];
-                            triggerFinalKOSequence(
-                                winner,
-                                `⏰ ¡Tiempo agotado! Campeón por supervivencia, KOs y daño: ${winner ? getFighterDisplayName(winner) : ''}`,
-                                '⏰ ¡TIEMPO TERMINADO! ⏰'
-                            );
+                            const ranked=[...fighters].sort(ArenaCore.compareScore);
+                            const winner=ranked.length&&(!ranked[1]||ArenaCore.compareScore(ranked[0],ranked[1])!==0)?ranked[0]:null;
+                            triggerFinalKOSequence(winner,winner?'⏰ '+getFighterDisplayName(winner)+' · K.O. × 250 + HP':arenaResultText('help'),'⏰ '+arenaActionText('timeUp'),'timed');
                             return;
                         }
                     } else {
@@ -7709,7 +7467,16 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     openLobby(false);
                 }
             }
-        }, 1000);
+        }
+        function refreshArenaAudienceMetrics(){
+            if(autoChatEnabled){simulatedViewers=Math.max(0,simulatedViewers+Math.floor((arenaVisualRandom()-.42)*18));simulatedTapsPerSec=Math.floor(18+arenaVisualRandom()*45);}
+            else{simulatedViewers=0;simulatedTapsPerSec=0;}
+            for(const sfx of ['16','9'])for(const [id,value] of [['hudViewerCount',simulatedViewers],['hudTapsPerSec',simulatedTapsPerSec]]){
+                const n=document.getElementById(id+sfx);if(n){n.textContent=autoChatEnabled?value.toLocaleString():'—';n.dataset.metricSource=autoChatEnabled?'simulation':'unavailable';n.title=arenaActionText(autoChatEnabled?'simulation':'noData');}
+            }
+            const top=document.getElementById('topTapsPerSec');if(top){top.textContent=autoChatEnabled?String(simulatedTapsPerSec):'—';top.dataset.metricSource=autoChatEnabled?'simulation':'unavailable';top.title=arenaActionText(autoChatEnabled?'simulation':'noData');}
+        }
+        setInterval(refreshArenaAudienceMetrics,1000);
 
         // Configurable auto-audience loop. A lightweight tick applies the selected event cadence immediately.
         setInterval(() => {
@@ -7721,19 +7488,19 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
             const alive = fighters.filter(f => !f.eliminated && !f.isStreamer);
             if (!alive.length) return;
-            const actor = alive[Math.floor(Math.random() * alive.length)];
+            const actor = alive[Math.floor(arenaRandom() * alive.length)];
             const messages = {
                 es:['¡Vamos!','¡Buen combate!','¡Dale!'],en:['Let’s go!','Great fight!','You got this!'],
                 fr:['Allez !','Beau combat !','Courage !'],de:['Los geht’s!','Guter Kampf!','Weiter so!'],
                 zh:['加油！','精彩对决！','继续！'],ja:['がんばれ！','いい勝負！','いけ！'],
                 pt:['Vamos!','Boa luta!','Força!'],it:['Forza!','Che lotta!','Vai!']
             };
-            if (arenaClassPowersAllowed() && Math.random() < 0.34 && !actor.castingSkill) {
+            if (arenaClassPowersAllowed() && arenaRandom() < 0.34 && !actor.castingSkill) {
                 const command = CLASS_COMMANDS[actor.archetypeKey]?.powers?.[0];
                 if (command) processChatCommand(actor.name, actor.platformKey || 'tiktok', command, actor, true);
             } else {
                 const options = messages[currentLanguage] || messages.es;
-                const text = options[Math.floor(Math.random() * options.length)];
+                const text = options[Math.floor(arenaRandom() * options.length)];
                 appendChatMessage(actor.name, actor.platformKey || 'tiktok', text, 'normal');
                 showFighterSpeechBubble(actor, text);
             }
@@ -7749,28 +7516,21 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let previousFrameTime = null;
         let simulationAccumulator = 0;
 
-        function gameLoop(timestamp) {
-            if (previousFrameTime === null) previousFrameTime = timestamp;
-            const frameDelta = Math.max(0, Math.min(timestamp - previousFrameTime, MAX_FRAME_DELTA_MS));
-            previousFrameTime = timestamp;
-
-            if (isGamePaused) {
-                // Don't accumulate physics debt while the player has explicitly paused the game.
-                simulationAccumulator = 0;
-            } else {
-                simulationAccumulator = Math.min(
-                    simulationAccumulator + frameDelta,
-                    SIMULATION_STEP_MS * MAX_SIMULATION_STEPS_PER_FRAME
-                );
-                let steps = 0;
-                while (simulationAccumulator >= SIMULATION_STEP_MS && steps < MAX_SIMULATION_STEPS_PER_FRAME) {
-                    updatePhysicsAndAI();
-                    simulationAccumulator -= SIMULATION_STEP_MS;
-                    steps++;
-                }
+        let arenaDroppedTimeMs=0,arenaLastRenderTime=null;
+        const arenaDiagnostics=ArenaRender.createDiagnostics();
+        function gameLoop(timestamp){
+            if(previousFrameTime===null)previousFrameTime=timestamp;
+            const elapsed=Math.max(0,timestamp-previousFrameTime),frameDelta=Math.min(elapsed,MAX_FRAME_DELTA_MS);
+            if(!isGamePaused)arenaDroppedTimeMs+=Math.max(0,elapsed-frameDelta);previousFrameTime=timestamp;
+            const simulationStart=performance.now();
+            if(isGamePaused)simulationAccumulator=0;
+            else{simulationAccumulator=Math.min(simulationAccumulator+frameDelta,SIMULATION_STEP_MS*MAX_SIMULATION_STEPS_PER_FRAME);let steps=0;
+                while(simulationAccumulator>=SIMULATION_STEP_MS&&steps<MAX_SIMULATION_STEPS_PER_FRAME){updatePhysicsAndAI();simulationAccumulator-=SIMULATION_STEP_MS;steps++;}}
+            const simulationMs=performance.now()-simulationStart;
+            if(arenaLastRenderTime===null||timestamp-arenaLastRenderTime>=1000/arenaRuntime.renderFps-.5){
+                const drawingStart=performance.now();renderBothScreensSimultaneously();
+                arenaDiagnostics.record(arenaLastRenderTime===null?0:timestamp-arenaLastRenderTime,simulationMs,performance.now()-drawingStart);arenaLastRenderTime=timestamp;
             }
-
-            renderBothScreensSimultaneously();
             requestAnimationFrame(gameLoop);
         }
 
@@ -7779,6 +7539,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaLiveInitialized = false;
         function initializeArenaLive() {
             if (arenaLiveInitialized) return;
+            loadArenaRuntimeOptions();refreshArenaAudienceMetrics();
             arenaLiveInitialized = true;
             let preferredLanguage = 'es';
             try {
@@ -7944,7 +7705,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.14';
+        const ARENA_RELEASE_VERSION = '0.15';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:10, footer:76});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
@@ -8385,10 +8146,10 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         function arenaDefaultWorkspace(mode) {
             return {version:3,leftWidth:mode==='stream'?260:260,rightWidth:300,chatTab:'tiktok',panels:Object.fromEntries(['Chat','Target','Scenarios','Social','Players','Powers','Simulation','Bridge'].map((name,index)=>['arenaPanel'+name,{dock:name==='Chat'?'left':'right',order:index,open:name==='Social'||name==='Chat',x:40,y:40,width:300,height:0,bodyHeight:0}])),settings:{}};
         }
-        function readArenaWorkspace(mode) {
+        function readArenaWorkspace(mode,provided=undefined) {
             const defaults=arenaDefaultWorkspace(mode);
             try {
-                const saved=JSON.parse(localStorage.getItem(ARENA_WORKSPACE_KEYS[mode])||'null');
+                const saved=provided===undefined?JSON.parse(localStorage.getItem(ARENA_WORKSPACE_KEYS[mode])||'null'):provided;
                 if(!saved || saved.version!==3)return defaults;
                 for(const key of ['leftWidth','rightWidth'])if(Number.isFinite(saved[key]))defaults[key]=Math.max(200,Math.min(500,saved[key]));
                 if(['tiktok','local'].includes(saved.chatTab))defaults.chatTab=saved.chatTab;
@@ -8398,7 +8159,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     if(typeof value.open==='boolean')entry.open=value.open;
                     for(const key of ['order','x','y','width','height','bodyHeight'])if(Number.isFinite(value[key]))entry[key]=Math.max(0,Math.min(4000,value[key]));
                 }
-                if(saved.settings&&typeof saved.settings==='object')defaults.settings=saved.settings;
+                if(saved.settings&&typeof saved.settings==='object')for(const [key,value]of Object.entries(saved.settings))if(/^\d{1,2}$/.test(key)&&Number(key)<16&&typeof value==='boolean')defaults.settings[key]=value;
             }catch(_){}
             return defaults;
         }
@@ -8597,6 +8358,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             document.getElementById('arenaTargetState').textContent=target?`${target.eliminated?'K.O.':'●'} · ${Math.max(0,Math.ceil(target.hp))}/${Math.ceil(target.maxHp)} HP · ${Math.floor(target.energy)} ⚡`:'—';
         }
         function installArenaWorkspace(){
+            installArenaRuntimeSettings();
             arenaWorkspace.layouts.preparation=readArenaWorkspace('preparation');arenaWorkspace.layouts.stream=readArenaWorkspace('stream');
             arenaWorkspace.panels=[...document.querySelectorAll('.arena-work-panel')];
             arenaWorkspace.panels.forEach(panel=>{
@@ -8669,7 +8431,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 const surface=isSettingsOpen?document.getElementById('settingsPauseModal'):!popover.hidden?popover:arenaWorkspace.activeStream?document.getElementById('arenaStreamPanelHost'):null;
                 if(!surface)return;
                 if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();if(isSettingsOpen)toggleSettingsModal(false);else closeArenaOperatorPopover();return;}
-                if(event.key==='Tab' && (isSettingsOpen||!popover.hidden)){
+                if(event.key==='Tab' && arenaWorkspace.mode!=='stream' && (isSettingsOpen||!popover.hidden)){
                     const controls=[...surface.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),summary,[tabindex="0"]')].filter(node=>node.getClientRects().length);
                     const first=controls[0],last=controls.at(-1);
                     if(event.shiftKey && document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey && document.activeElement===last){event.preventDefault();first?.focus();}
@@ -8692,8 +8454,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.14.0',
+            version: '0.15.0',
             edition: 'tiktok',
+            setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,
             getBalanceRules() {
                 return ARENA_CLASS_BALANCE;
             },
@@ -8709,7 +8472,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     phase: gameState,
                     mode: activeMode,
                     rejoinRule: rejoinRuleMode,
-                    paused: isGamePaused,
+                    paused:isGamePaused,queuedActions:arenaAudienceQueue.length,runtime:{...arenaRuntime},simulationTick:arenaSimulationTick,droppedTimeMs:arenaDroppedTimeMs,combatRandomState:arenaCombatRandom.state(),result:arenaRoundResult,
                     settingsOpen: isSettingsOpen,
                     koSequenceActive,
                     activeFighters: alive.length,
@@ -8742,6 +8505,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     coOpCount: fighter.coopCount || 0
                 }));
             },
+            setSeed(seed){return setArenaRandomSeed(seed);},
             sendChat({ username = '@Espectador', platformKey = 'tiktok', message = '', targetId = null } = {}) {
                 const skillCommand = getMatchedSkillCommand(message);
                 const target = skillCommand && targetId != null

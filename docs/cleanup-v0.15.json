@@ -1,0 +1,55 @@
+{
+  "release": "0.15.0",
+  "previousSourceGitBlob": "70838c8c834dfc45d192b80d32204c4fd4ee50eb",
+  "sourceGitBlob": "c00f74d97e9fb38cca4e46d46a59732087f6b3f7",
+  "extractedModules": [
+    "engine/arena-core.js",
+    "engine/arena-render.js",
+    "engine/arena-audio.js",
+    "engine/arena-settings.js",
+    "engine/arena-balance-evidence.js",
+    "bridge/live-session.mjs"
+  ],
+  "removedIgnoredParameters": [
+    "forceFree in skill windup/execution; action origin is explicit",
+    "knockbackPower in applyDamage; impulse remains derived from the shared rules"
+  ],
+  "runtimeNamedDeclarationsReviewed": 279,
+  "dynamicNamedEntryPointsRetained": [
+    "selectArenaBalanceClass in generated onclick markup"
+  ],
+  "unreferencedNamedFunctions": [],
+  "boundedResources": {
+    "audioVoices": 16,
+    "liveChatHistory": 50000,
+    "pauseQueuePeople": 64,
+    "pauseQueueTtlMs": 8000,
+    "diagnosticFrames": 240,
+    "particleDrawBudgets": {
+      "high": 1800,
+      "balanced": 900,
+      "performance": 350
+    }
+  },
+  "rejectedExperiments": [
+    {
+      "change": "4x bitmap labels",
+      "softwareMeanBeforeMs": 39.0056,
+      "softwareMeanAfterMs": 109.6083,
+      "samplesPerPath": 36,
+      "applied": false
+    },
+    {
+      "change": "Merged particle paths",
+      "applied": false,
+      "reason": "Software measurements regressed; retain native circles."
+    }
+  ],
+  "preserved": [
+    "historical docs and balance archives",
+    "saved profiles and previous storage keys",
+    "all test controls and social simulations",
+    "Full HD dual captures and OBS calibration"
+  ],
+  "scope": "Named declarations, browser/bridge entry points and ignored parameters. Not proof that every possible unreachable branch is eliminated."
+}

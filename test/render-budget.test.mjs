@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import '../engine/arena-render.js';
+const r=globalThis.ArenaRender;
+test('visual budgets preserve all simulation particles and retain exact color/opacity for drawn samples',()=>{const particles=Array.from({length:1800},(_,i)=>({x:i%900,y:20,color:'#00ff00',size:3,life:25,maxLife:50})),before=structuredClone(particles);const counts=[];for(const quality of ['high','balanced','performance']){let count=0;const ctx={beginPath(){},arc(){},fill(){assert.equal(this.fillStyle,'#00ff00');assert.equal(this.globalAlpha,.5);count++;}};r.drawParticles(ctx,particles,{left:0,right:960,top:0,bottom:540},quality);counts.push(count);assert.equal(ctx.globalAlpha,1);}assert.deepEqual(counts,[1800,900,300]);assert.deepEqual(particles,before);});
+test('culling includes intersecting edges and rejects objects wholly outside the camera',()=>{const b={left:100,right:200,top:0,bottom:300};assert.equal(r.intersects(b,95,100,5),true);assert.equal(r.intersects(b,94.9,100,5),false);assert.equal(r.intersects(b,150,-5,5),true);assert.equal(r.intersects(b,150,306,5),false);});
+test('diagnostics keep a bounded sample window and report measured frame percentiles',()=>{const d=r.createDiagnostics(4);for(let i=1;i<=6;i++)d.record(i*10,i,i*2);const s=d.snapshot();assert.equal(s.samples,4);assert.equal(s.frame.p50Ms,50);assert.equal(s.frame.p95Ms,60);assert.equal(s.frame.p99Ms,60);assert.equal(s.simulation.meanMs,4.5);assert.equal(s.drawing.meanMs,9);assert.ok(Math.abs(s.fps-1000/45)<.00001);});

@@ -1,0 +1,98 @@
+{
+  "release": "0.15.0",
+  "date": "2026-10-26",
+  "branch": "main",
+  "mainBefore": "59248b1ea8289c75ecfe39e4cc3f4b4d3e95336b",
+  "sources": {
+    "index.html": "c00f74d97e9fb38cca4e46d46a59732087f6b3f7",
+    "package.json": "a1ed36dd9bd0f28f17a41ced357d293c37a75d2d",
+    "npm-shrinkwrap.json": "f2f1760035ca35808b8f9912166fb45d0501ea94",
+    "engine/arena-audio.js": "319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934",
+    "engine/arena-balance-evidence.js": "0aab05b49f0ef9e80c43810b2bfc929b4f695cdf",
+    "engine/arena-core.js": "a72073d0089f8122b0ddc13668d1c8f9248657e9",
+    "engine/arena-render.js": "6ab5a73c08d6d7e2b1a8bc6e212616e114cb06db",
+    "engine/arena-settings.js": "99d3bf1beb033258203df2a0f3f94799d23ac48e",
+    "bridge/bridge-client.js": "7ffafa4ba98c3eab68a7798c89850a41b4785f35",
+    "bridge/chat-normalize.mjs": "eca18d492f22afe78036465d3deec446fa8c8430",
+    "bridge/live-session.mjs": "ffe93334015092b017f2c4b22e508362dc47f978",
+    "bridge/server.mjs": "5b1d2222eb794280dfba46aa203d2d853221e3af"
+  },
+  "environment": {
+    "node": "v24.22.1",
+    "browser": "153.0.8010.0",
+    "platform": "Linux",
+    "physicalGpuValidated": false
+  },
+  "tests": {
+    "unit": {
+      "passed": 80,
+      "failed": 0
+    },
+    "operatorBrowser": {
+      "passed": 65,
+      "pageErrors": 0
+    },
+    "integrityBrowser": {
+      "passed": 24,
+      "pageErrors": 0
+    },
+    "load128": {
+      "passed": 19,
+      "errors": 0,
+      "report": "performance-v0.15.json"
+    },
+    "graphicsDiagnostic": {
+      "passed": 19,
+      "errors": 0,
+      "report": "gpu-v0.15.json",
+      "canvas2d": "unavailable_software"
+    },
+    "balance": {
+      "nativeMatches": 2400,
+      "controlMatches": 2400,
+      "heldOutSeedStart": 8000,
+      "duelSeedClusters": 25,
+      "arenaSeedClusters": 20,
+      "deterministic": true,
+      "telemetryParity": true,
+      "crossScenarioParity": true
+    }
+  },
+  "installation": {
+    "npmCi": true,
+    "publicRegistryResolvedPackages": 133,
+    "shrinkwrapEntries": 134,
+    "existingUntrackedPackageLockPreservedByteForByte": true
+  },
+  "manualUI": {
+    "darkControlContrastReviewed": true,
+    "streamRegionRole": true,
+    "runtimeControlsOverflow": false,
+    "nativeCaptures": [
+      [
+        1920,
+        1080
+      ],
+      [
+        1080,
+        1920
+      ]
+    ],
+    "settingsVersionOnlyInFooter": true
+  },
+  "ci": {
+    "workflow": ".github/workflows/checks.yml",
+    "matrix": [
+      "ubuntu-latest",
+      "windows-latest"
+    ],
+    "node": 24,
+    "remoteRun": "Check GitHub Actions after publishing; local validation is Linux only."
+  },
+  "limits": [
+    "No real TikTok LIVE connection in this validation; local bridge and controlled session failures tested.",
+    "No physical GPU validated; browser controls hardware acceleration.",
+    "Win rates are AI-only whole rounds with actual mode transitions, no boosts or re-entry. Rayo still leads at ten and Spirit lags at twenty-five.",
+    "Measurements do not represent the operator PC or OBS frame rate."
+  ]
+}

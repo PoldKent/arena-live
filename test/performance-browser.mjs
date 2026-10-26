@@ -11,7 +11,10 @@ const sources = [['current', current]];
 if (process.env.ARENA_PERF_BASELINE) sources.unshift(['baseline', await readFile(process.env.ARENA_PERF_BASELINE, 'utf8')]);
 const css = process.env.ARENA_TEST_CSS ? await readFile(process.env.ARENA_TEST_CSS, 'utf8') : null;
 const localStyles = await readFile(new URL('../styles/arena-ui.css', import.meta.url));
+const engineAssets=new Map(await Promise.all(['core','render','audio','settings','balance-evidence'].map(async name=>['/engine/arena-'+name+'.js',await readFile(new URL('../engine/arena-'+name+'.js',import.meta.url))])));
 const server = createServer((req, res) => {
+  const assetPath=new URL(req.url,'http://localhost').pathname;
+  if(/^\/engine\/arena-(core|render|audio|settings|balance-evidence)\.js$/.test(assetPath)){res.writeHead(200,{'content-type':'text/javascript'});res.end(engineAssets.get(assetPath));return;}
   if (new URL(req.url, 'http://localhost').pathname === '/styles/arena-ui.css') {
     res.writeHead(200, {'content-type':'text/css; charset=utf-8'}); res.end(localStyles); return;
   }
@@ -25,7 +28,7 @@ const launch = { headless: true, args: gpuMode ? [] : ['--disable-gpu'] };
 if (process.env.ARENA_BROWSER_EXECUTABLE) launch.executablePath = process.env.ARENA_BROWSER_EXECUTABLE;
 if (process.env.ARENA_BROWSER_LIBRARY_PATH) launch.env = { ...process.env, LD_LIBRARY_PATH: process.env.ARENA_BROWSER_LIBRARY_PATH };
 let browser;
-const checks = [], errors = [], measurements = [], burstMeasurements = [];
+const checks = [], errors = [], measurements = [], burstMeasurements = [], qualityMeasurements=[];
 const referenceStates = new Map();
 const check = async (name, fn) => { await fn(); checks.push(name); console.log('PASS', name); };
 try {
@@ -110,9 +113,10 @@ try {
       setArenaCombatRule('knockback',1); gameState='LOBBY'; applyPlayerCountPreset(128); startCombatFromLobby();
       for (const f of fighters) { f.energy=100; f.aiSpecialCooldown=0; }
       const simulation=[], drawing=[];
-      let maxParticles=0, maxEffects=0, maxTexts=0;
+      let maxParticles=0, maxEffects=0, maxTexts=0;window.arenaParticlePeak=null;
       for (let frame=0; frame<180; frame++) {
         const start=performance.now(); updatePhysicsAndAI(); simulation.push(performance.now()-start);
+        if(!window.arenaParticlePeak||particles.length>window.arenaParticlePeak.particles.length)window.arenaParticlePeak=structuredClone({fighters,particles,activeEffects,floatingTexts,camera:camera9x16,screenShake,skyFlashTimer,skyFlashColor,activeMode,gameState,combatSeed:arenaCombatRandom.state(),visualSeed:arenaVisualRandomSource.state()});
         maxParticles=Math.max(maxParticles,particles.length); maxEffects=Math.max(maxEffects,activeEffects.length); maxTexts=Math.max(maxTexts,floatingTexts.length);
         if (frame%6===0) {
           const start=performance.now(); renderBothScreensSimultaneously();
@@ -135,6 +139,20 @@ try {
     burstMeasurements.push({source,count:128,frames:180,drawnFrames:30,...burstTimings,stateSHA256:burstSHA256});
     if(source==='current')checks.push('128-player full-power burst retains finite state, bounded effects and baseline parity when provided');
     console.log('BURST',JSON.stringify(burstMeasurements.at(-1)));
+    if(source==='current'){
+      const quality=await page.evaluate(gpuMode=>{
+        const peak=window.arenaParticlePeak;fighters=peak.fighters;particles=peak.particles;activeEffects=peak.activeEffects;floatingTexts=peak.floatingTexts;Object.assign(camera9x16,peak.camera);
+        screenShake=peak.screenShake;skyFlashTimer=peak.skyFlashTimer;skyFlashColor=peak.skyFlashColor;activeMode=peak.activeMode;gameState=peak.gameState;arenaCombatRandom.reset(peak.combatSeed);arenaVisualRandomSource.reset(peak.visualSeed);
+        const state=()=>JSON.stringify({fighters,particles,activeEffects,floatingTexts,combatSeed:arenaCombatRandom.state(),visualSeed:arenaVisualRandomSource.state()},(key,value)=>key==='lastAttacker'?value?.id||null:value);
+        const before=state(),samples={high:[],balanced:[],performance:[]},render=()=>{renderBothScreensSimultaneously();if(!gpuMode){ctx16.getImageData(0,0,1,1);ctx9.getImageData(0,0,1,1);}};
+        for(const key of Object.keys(samples)){arenaRuntime.quality=key;for(let i=0;i<5;i++)render();}
+        for(let i=0;i<24;i++)for(const key of i%2?['high','balanced','performance']:['performance','balanced','high']){arenaRuntime.quality=key;const t=performance.now();render();samples[key].push(performance.now()-t);}
+        const stats=values=>{values.sort((a,b)=>a-b);return {mean:values.reduce((a,b)=>a+b,0)/values.length,p95:values[Math.floor(values.length*.95)],samples:values.length};};
+        arenaRuntime.quality='balanced';window.arenaParticlePeak=null;
+        return {particles:particles.length,alive:fighters.filter(f=>!f.eliminated).length,qualities:Object.fromEntries(Object.entries(samples).map(([key,values])=>[key,stats(values)])),simulationUnchanged:before===state(),captures:[[canvas16.width,canvas16.height],[canvas9.width,canvas9.height]]};
+      },gpuMode);
+      assert.equal(quality.simulationUnchanged,true);assert.deepEqual(quality.captures,[[1920,1080],[1080,1920]]);qualityMeasurements.push(quality);checks.push('quality budgets preserve simulation and native Full HD at a captured particle peak');console.log('QUALITY',JSON.stringify(quality));
+    }
     await page.evaluate(()=>{gameState='LOBBY';applyPlayerCountPreset(128);startCombatFromLobby();});
     if (source === 'current') {
       await check('Full HD captures are opaque and remain eligible for automatic hardware rasterization', async () => {
@@ -357,12 +375,12 @@ try {
     return { source, version: content.match(/version: '([\d.]+)'/)?.[1],
       gitBlob: createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex') };
   });
-  const report = { passed: checks.length, errors: errors.length, checks, measurements, burstMeasurements, sourceHashes,
+  const report = { passed: checks.length, errors: errors.length, checks, measurements, burstMeasurements,qualityMeasurements, sourceHashes,
     environment: { node: process.version, browser: await browser.version(),
       gpu: gpuMode ? 'browser default; consult graphics featureStatus for actual acceleration' : 'disabled by test; software raster and readback included',
       drawTiming:gpuMode ? 'CPU command submission only; excludes GPU completion and presentation' : 'command submission and software raster readback',
       graphics, viewport: '1720x720', simulationHz: 60,
-      workload: 'Constant-population timings disable knockback and suppress automatic specials; paired 128-player bursts restore normal HP, full knockback and all automatic specials for 180 ticks, rendering every sixth tick. Clock/RNG initialization is identical.' } };
+      workload: 'Constant-population timings disable knockback and suppress automatic specials; paired 128-player bursts restore normal HP, full knockback and all automatic specials for 180 ticks, rendering every sixth tick. Clock/RNG initialization is identical. Quality timings alternate on the same frozen peak-particle scene; no FPS guarantee.' } };
   if (process.env.ARENA_PERF_REPORT) await writeFile(process.env.ARENA_PERF_REPORT, JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report));
 } finally {

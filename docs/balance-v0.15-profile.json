@@ -1,0 +1,83 @@
+{
+  "1v1": {
+    "kame": {
+      "damage": 43,
+      "windup": 34,
+      "targets": null
+    },
+    "ninja": {
+      "damage": 38,
+      "windup": 34,
+      "targets": 1
+    },
+    "titan": {
+      "damage": 38,
+      "windup": 34,
+      "targets": null
+    },
+    "trueno": {
+      "damage": 37,
+      "windup": 34,
+      "targets": 3
+    },
+    "esmeralda": {
+      "damage": 37,
+      "windup": 34,
+      "targets": 1
+    }
+  },
+  "smash": {
+    "kame": {
+      "damage": 44,
+      "windup": 34,
+      "targets": null
+    },
+    "ninja": {
+      "damage": 50,
+      "windup": 18,
+      "targets": 1
+    },
+    "titan": {
+      "damage": 38,
+      "windup": 34,
+      "targets": null
+    },
+    "trueno": {
+      "damage": 28,
+      "windup": 34,
+      "targets": 2
+    },
+    "esmeralda": {
+      "damage": 44,
+      "windup": 22,
+      "targets": 1
+    }
+  },
+  "iso": {
+    "kame": {
+      "damage": 38,
+      "windup": 34,
+      "targets": 2
+    },
+    "ninja": {
+      "damage": 60,
+      "windup": 20,
+      "targets": 1
+    },
+    "titan": {
+      "damage": 38,
+      "windup": 34,
+      "targets": 2
+    },
+    "trueno": {
+      "damage": 32,
+      "windup": 34,
+      "targets": 2
+    },
+    "esmeralda": {
+      "damage": 32,
+      "windup": 28,
+      "targets": 2
+    }
+  }
+}

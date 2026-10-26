@@ -5,10 +5,11 @@ import { createHash } from 'node:crypto';
 import { resolve, dirname } from 'node:path';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
+import {applyBalanceControl} from './balance-control.mjs';
 import { summarizeBalance } from './balance-summary.mjs';
 const productionHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-const variant = 'published';
-const html = productionHtml;
+const variant = process.env.ARENA_BALANCE_CONTROL==='1'?'previous-balance-control':process.env.ARENA_BALANCE_SOURCE?'source-control':'published';
+const html = process.env.ARENA_BALANCE_CONTROL==='1'?applyBalanceControl(productionHtml):process.env.ARENA_BALANCE_SOURCE?await readFile(process.env.ARENA_BALANCE_SOURCE,'utf8'):productionHtml;
 const harness = await readFile(new URL('./balance-harness.js', import.meta.url), 'utf8');
 const pilot = process.env.ARENA_BALANCE_PILOT === '1';
 const duelSeeds = Number(process.env.ARENA_BALANCE_DUEL_SEEDS || (pilot ? 2 : 50));
@@ -36,7 +37,10 @@ for (const count of counts) for (let s = 0; s < arenaSeeds; s++) for (let rotati
     seed: 91000 + (s + seedStart) * 7919, rotation, seconds });
 }
 const localStyles = await readFile(new URL('../styles/arena-ui.css', import.meta.url));
+const engineAssets=new Map(await Promise.all(['core','render','audio','settings','balance-evidence'].map(async name=>['/engine/arena-'+name+'.js',await readFile(new URL('../engine/arena-'+name+'.js',import.meta.url))])));
 const server = createServer((request, response) => {
+  const assetPath=new URL(request.url,'http://localhost').pathname;
+  if(/^\/engine\/arena-(core|render|audio|settings|balance-evidence)\.js$/.test(assetPath)){response.writeHead(200,{'content-type':'text/javascript'});response.end(engineAssets.get(assetPath));return;}
   const isStyles = new URL(request.url, 'http://localhost').pathname === '/styles/arena-ui.css';
   response.writeHead(200, {'content-type':isStyles ? 'text/css; charset=utf-8' : 'text/html; charset=utf-8'});
   response.end(isStyles ? localStyles : html);
@@ -67,7 +71,7 @@ try {
   assert.deepEqual(crossScenario[0], crossScenario[1], 'Previous arena/mode must not bias a repeated duel');
   const parity = await page.evaluate(() => {
     const shape = r => ({ winner: r.winner, seconds: r.seconds, alive: r.alive,
-      fighters: r.fighters.map(({ classKey, hp, kills, nominalDamage, survived }) => ({ classKey, hp, kills, nominalDamage, survived })) });
+      fighters: r.fighters.map(({ classKey, hp, kills, scoreDamage, survived }) => ({ classKey, hp, kills, scoreDamage, survived })) });
     return [
       { pair: ['kame', 'ninja'], seed: 207, side: 1, first: 1, seconds: 60 },
       { count: 25, rotation: 2, seed: 991, seconds: 120 },
@@ -86,10 +90,12 @@ try {
   const bytes = Buffer.from(html);
   const productionBytes = Buffer.from(productionHtml);
   const report = { metadata: { ...metadata, variant,
+    modules:Object.fromEntries([...engineAssets].filter(([path])=>!path.includes('evidence')).map(([path,content])=>[path,createHash('sha1').update('blob '+content.length+'\0').update(content).digest('hex')])),
     productionGitBlob: createHash('sha1').update(`blob ${productionBytes.length}\0`).update(productionBytes).digest('hex'),
     engineGitBlob: createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex'),
     browser: await browser.version(), duelSeeds, arenaSeeds, seedStart, counts, maxSeconds: seconds, matches: results.length,
     method: 'Seeded AI, no audience boosts or re-entry, canonical spawns; crossed duel side/order and rotated arena assignments; virtual 60Hz timers; UI and rendering suppressed, combat/particle RNG preserved.' },
+    provenance:{variant,productionGitBlob:createHash('sha1').update('blob '+productionBytes.length+'\0').update(productionBytes).digest('hex'),modules:Object.fromEntries([...engineAssets].filter(([path])=>!path.includes('evidence')).map(([path,content])=>[path,createHash('sha1').update('blob '+content.length+'\0').update(content).digest('hex')])),harnessSha256:createHash('sha256').update(harness).digest('hex'),control:variant==='previous-balance-control'?'Previous Arena caps/profile and global Warrior preference; same corrected lifecycle, action rules and RNG':null},
     probes, deterministic: true, telemetryParity: true, crossScenarioParity: true, errors, results };
   await mkdir(dirname(output), { recursive: true });
   await writeFile(output, JSON.stringify(report) + '\n');
