@@ -8,6 +8,8 @@ export function applyBalanceControl(html){
     assert.ok(start>=0&&end>start,'Native Arena profile not found');
     const profile='            iso: Object.freeze({\n'+Object.entries(previous).map(([key,r])=>`                ${key}: Object.freeze({damage:${r.damage},windup:${r.windup},targets:${r.targets}})`).join(',\n');
     html=html.slice(0,start)+profile+html.slice(end);
+    const current='const policy = ArenaCore.combatTargetPolicy(attacker.archetypeKey,arenaRuntime);';
+    if(html.includes(current))return html.replace(current,"const policy = ArenaCore.combatTargetPolicy(attacker.archetypeKey,{...arenaRuntime,warriorTargeting:'always'});").replace("'class-priority-local'","'class-priority-shinobi-local-control'");
     const target=/if \(preferSameClass\) return arenaRuntime\.warriorTargeting==='always'\?preferred:[\s\S]*?\?preferred:closest;/;
     assert.match(html,target,'Native Warrior local policy not found');
     return html.replace(target,'if (preferSameClass) return preferred;').replace("'class-priority-local'","'class-priority-shinobi-local-control'");

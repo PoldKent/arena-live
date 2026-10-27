@@ -36,11 +36,32 @@
     function createRandom(seed){let state=Number(seed)>>>0;return Object.freeze({
         next(){state=(Math.imul(state,1664525)+1013904223)>>>0;return state/4294967296;},
         state(){return state;},reset(value){state=Number(value)>>>0;}});}
+    const targetingKeys=Object.freeze({kame:'warriorTargeting',ninja:'shinobiTargeting',titan:'titanTargeting',trueno:'lightningTargeting',esmeralda:'spiritTargeting'});
+    const targetingOptions=Object.freeze({kame:Object.freeze(['local','always','nearest','prey']),ninja:Object.freeze(['local','always','nearest','prey']),titan:Object.freeze(['nearest','prey','same','other']),trueno:Object.freeze(['nearest','prey','same','other']),esmeralda:Object.freeze(['nearest','prey','same','other'])});
+    const policies=Object.freeze({
+        nearest:Object.freeze({kind:'nearest',absolute:false,distanceFactor:10000}),
+        same:Object.freeze({kind:'same',absolute:false,distanceFactor:15625}),
+        other:Object.freeze({kind:'other',absolute:false,distanceFactor:15625}),
+        shinobi:Object.freeze({kind:'other',absolute:false,distanceFactor:13225}),
+        prey:Object.freeze({kind:'prey',absolute:false,distanceFactor:15625}),
+        sameAlways:Object.freeze({kind:'same',absolute:true,distanceFactor:15625}),
+        otherAlways:Object.freeze({kind:'other',absolute:true,distanceFactor:13225})
+    });
+    function targetingMode(classKey,runtime={}){
+        const options=Object.hasOwn(targetingOptions,classKey)?targetingOptions[classKey]:null;if(!options)return 'nearest';
+        const value=runtime?.[targetingKeys[classKey]];return options.includes(value)?value:options[0];
+    }
+    function combatTargetPolicy(classKey,runtime={}){
+        const mode=targetingMode(classKey,runtime);
+        if(mode==='local')return classKey==='kame'?policies.same:policies.shinobi;
+        if(mode==='always')return classKey==='kame'?policies.sameAlways:policies.otherAlways;
+        return policies[mode];
+    }
     function normalizeRuntime(value={}) {
         const v=value&&typeof value==='object'?value:{};
         return {specialPolicy:v.specialPolicy==='audience'?'audience':'fair',pausePolicy:v.pausePolicy==='show'?'show':'queue',
             renderFps:Number(v.renderFps)===30?30:60,quality:['high','balanced','performance'].includes(v.quality)?v.quality:'balanced',
-            warriorTargeting:v.warriorTargeting==='always'?'always':'local',masterVolume:Number.isFinite(Number(v.masterVolume))?Math.round(Math.min(100,Math.max(0,Number(v.masterVolume)))/5)*5:70,
+            ...Object.fromEntries(Object.entries(targetingKeys).map(([classKey,key])=>[key,targetingMode(classKey,v)])),testAdaptClass:v.testAdaptClass!==false,masterVolume:Number.isFinite(Number(v.masterVolume))?Math.round(Math.min(100,Math.max(0,Number(v.masterVolume)))/5)*5:70,
             hudOpacity:Number.isFinite(Number(v.hudOpacity))?Math.round(Math.min(100,Math.max(35,Number(v.hudOpacity)))):85};
     }
     function createHistory(capacity=50000){
@@ -49,5 +70,5 @@
         return Object.freeze({get length(){return length;},get dropped(){return dropped;},push(value){if(length===capacity){entries[start]=value;start=(start+1)%capacity;dropped++;}else{entries[(start+length)%capacity]=value;length++;}},
             slice(from=0,to=length){from=Math.max(0,from);to=Math.min(length,to);return Array.from({length:Math.max(0,to-from)},(_,i)=>entries[(start+from+i)%capacity]);},map(fn){return this.slice().map(fn);}});
     }
-    root.ArenaCore=Object.freeze({resetLife,rosterEntry,score,compareScore,snapshot,result,createRandom,normalizeRuntime,createHistory});
+    root.ArenaCore=Object.freeze({resetLife,rosterEntry,score,compareScore,snapshot,result,createRandom,normalizeRuntime,createHistory,targetingKeys,targetingOptions,targetingMode,combatTargetPolicy});
 })(globalThis);

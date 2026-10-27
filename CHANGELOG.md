@@ -1,5 +1,13 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-27 — Arena Live v0.17 · Preferencias y pruebas de clase
+
+- Cinco preferencias de objetivo independientes en Ajustes → Equilibrio por clase, con persistencia, respaldo de configuración y restauración conjunta. Conserva los valores iniciales de Guerrero/Shinobi y la cercanía de Titán/Rayo/Espíritu. Identifica preferencias personalizadas junto a las victorias históricas.
+- Panel de poderes con selector sincronizado, nombre/clase/HP/energía, clase de prueba, comandos dirigidos y última identidad usada. El aleatorio filtra por la firma; un fijo conserva su identidad, incluso eliminado.
+- Adaptación explícita de clase para probar cualquier firma, energía completa y recarga lista solo en estas herramientas. Desde el lobby inicia el combate; mantiene pausa, clase única, poderes bloqueados y resultado final.
+- Corrige accesos al panel en Stream/móvil y conserva el panel mientras se usan sus controles. Mantiene los comandos de ejecución vinculados al verdadero lanzador.
+- Una sola v0.17.0 para paquete, API, pie de Ajustes, recursos y HTML móvil generado desde main. Documentos y datos v0.15/v0.16 conservados.
+
 ## 2026-10-27 — Exportación monolítica móvil de v0.16.0
 
 - `build:mobile` reúne el HTML, cinco módulos del motor y CSS en un archivo reproducible de menos de 1 MiB, sin fuentes ni dependencias de red.

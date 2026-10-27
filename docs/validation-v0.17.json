@@ -1,0 +1,70 @@
+{
+  "version": "0.17.0",
+  "baseCommit": "5fc1fb5b2b9fa894b070c042741ed2402ecfdf43",
+  "sourceGitBlob": "43f82f1a19ee37696887bf9fb269258a0e0c4b85",
+  "inputs": {
+    "index.html": "fc076e0b08e1cf38f2f2b18fc4f04bc853cf0e8a59a576286c66c1be8568d91b",
+    "engine/arena-core.js": "7e3ed3ddae978e26a2efd3a39816d8f4941c859518c0becd5a6903596b8da8ad",
+    "engine/arena-settings.js": "bb11c88a239f3a87983a907f8b11b7a5f21e031f5dc8cb621ae12580dc3af0ea",
+    "styles/arena-ui.css": "57c6fa4202d2ee8d1e28e5650d9b41db1d272fc7d0270743c64f25aa1577f1db",
+    "package.json": "956c25eb6e2f2c9d6754ecc7af75ee612224350eb36ad36d4e208f7fefe13dd7",
+    "npm-shrinkwrap.json": "5d2282f719bb08931188aa3d4cf375aa856b810727c7b1117ac28a054a3492fb"
+  },
+  "checks": {
+    "unit": 84,
+    "operatorBrowser": 65,
+    "integrityBrowser": 24,
+    "trainingBrowser": 17,
+    "portableBrowser": 13,
+    "performance": 19
+  },
+  "training": {
+    "checks": [
+      "powers contain the target selector, live identity, class selection and player command input",
+      "random tests always choose the matching class for every power across a 128-player roster",
+      "a fixed player can test Kame then Thunder with visible class adaptation and canonical windup",
+      "disabling adaptation preserves an incompatible fixed class and explains the blocked power",
+      "missing classes can be adapted in random mode while falling players are never selected",
+      "a power pressed in the lobby starts combat and executes instead of silently failing",
+      "a fixed eliminated player stays selected and never redirects the action to a random survivor",
+      "training obeys pause, power restrictions, class restrictions and final-result lock",
+      "player commands and class selection affect the chosen player without creating a new sender",
+      "viewing targets and power availability never consumes combat randomness",
+      "Prota can change class and rejoin through targeted commands without a duplicate hidden-name viewer",
+      "each class has independent persisted preferences, configuration backup and restore without OBS changes",
+      "custom class priorities are identified beside historical measured win rates",
+      "eight languages name all five class preferences and all training controls",
+      "Stream keeps the combined tool after casting and the selected actor remains explicit",
+      "the combined test tool stays usable at phone width and its shortcut opens the mobile host",
+      "all five preference controls fit a phone and keep settings open while applying changes"
+    ],
+    "errors": [],
+    "scope": "Chromium software rendering; operator training and simulated data, no real LIVE"
+  },
+  "portable": {
+    "filename": "Arena-Live-v0.17.0-movil.html",
+    "bytes": 790933,
+    "sha256": "573da7d3fe36a395e0e4531c2e8c608206c11bb34c9a490b4274559d90796530",
+    "httpWebSocketRequests": 0
+  },
+  "defaultCombatParity": {
+    "referenceVersion": "0.16.0",
+    "counts": [
+      32,
+      64,
+      128
+    ],
+    "fullPower128": true,
+    "scope": "Saved baseline HTML loads its own engine modules; identical fighter states and combat RNG. Default class policies only, not evidence for every custom policy."
+  },
+  "controlStudySmoke": {
+    "matches": 10,
+    "secondsPerMatch": 8,
+    "scope": "Execution check only; not a balance study."
+  },
+  "limits": [
+    "Chromium software renderer, no physical GPU/phone/OBS FPS measured",
+    "No real TikTok LIVE connection",
+    "Historical measured win rates remain the original default-profile evidence"
+  ]
+}

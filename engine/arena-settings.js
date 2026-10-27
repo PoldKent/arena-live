@@ -16,7 +16,7 @@ function installArenaRuntimeSettings(){
       +select('specialPolicy',1,[['fair',2],['audience',3]])+select('pausePolicy',4,[['queue',5],['show',6]])
       +'<p id="arenaSpecialPolicyHelp" class="text-[10px] text-slate-400" data-runtime-copy="16"></p><p class="text-[10px] text-slate-400" data-runtime-copy="17"></p>'
       +select('quality',7,[['high',8],['balanced',9],['performance',10]])+select('renderFps',11,[['30','30 FPS'],['60','60 FPS']])
-      +'<p class="text-[10px] text-slate-400" data-runtime-copy="18"></p>'+select('warriorTargeting',12,[['local',13],['always',14]])
+      +'<p class="text-[10px] text-slate-400" data-runtime-copy="18"></p>'+renderArenaClassPreferenceControls()
       +'<label class="flex flex-col gap-1 text-xs"><span><span data-runtime-copy="15"></span>: <output id="arenaRuntimeVolumeValue"></output></span><input id="arenaRuntime_masterVolume" data-runtime-option="masterVolume" type="range" min="0" max="100" step="5"></label>'
       +'<div class="flex flex-wrap gap-2"><button type="button" id="arenaSaveConfiguration" data-runtime-copy="19"></button><button type="button" id="arenaLoadConfiguration" data-runtime-copy="20"></button><button type="button" id="arenaResetRuntime" data-runtime-copy="21"></button><button type="button" id="arenaExportDiagnostics" data-runtime-copy="22"></button></div><input type="file" id="arenaConfigurationFile" accept=".json,application/json" hidden><p class="text-[10px] text-slate-400" data-runtime-copy="25"></p><output id="arenaConfigurationStatus" role="status" class="text-xs"></output>';
     for(const select of card.querySelectorAll('select')){select.className='min-w-0 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-slate-200';select.style.colorScheme='dark';}
@@ -29,12 +29,14 @@ function installArenaRuntimeSettings(){
     file.onchange=async()=>{let accepted=false;try{if(file.files[0]?.size<=262144)accepted=importArenaConfiguration(JSON.parse(await file.files[0].text()));}catch(_){}document.getElementById('arenaConfigurationStatus').textContent=(ARENA_RUNTIME_COPY[currentLanguage]||ARENA_RUNTIME_COPY.es)[accepted?23:24];file.value='';};
     card.querySelector('#arenaResetRuntime').onclick=()=>{for(const [key,value]of Object.entries(ARENA_RUNTIME_DEFAULTS))setArenaRuntimeOption(key,value);};
     card.querySelector('#arenaExportDiagnostics').onclick=()=>downloadArenaJSON(getArenaDiagnostics(),'arena-live-diagnostico');
+    document.getElementById('arenaBalancePanel').insertBefore(document.getElementById('arenaClassPreferences'),document.getElementById('arenaBalanceEvidence'));
     refreshArenaRuntimeControls();
 }
 function refreshArenaRuntimeControls(){
     const words=ARENA_RUNTIME_COPY[currentLanguage]||ARENA_RUNTIME_COPY.es;
     for(const node of document.querySelectorAll('[data-runtime-copy]'))writeArenaHudText(node,words[Number(node.dataset.runtimeCopy)]);
-    const help={specialPolicy:arenaRuntime.specialPolicy==='fair'?words[16]:(ARENA_PARTICIPATION_HELP[currentLanguage]||ARENA_PARTICIPATION_HELP.es),pausePolicy:words[17],quality:words[18],renderFps:words[18],warriorTargeting:arenaWarriorPolicyText(),masterVolume:words[15]+' · 0–100 %'};
+    const help={specialPolicy:arenaRuntime.specialPolicy==='fair'?words[16]:(ARENA_PARTICIPATION_HELP[currentLanguage]||ARENA_PARTICIPATION_HELP.es),pausePolicy:words[17],quality:words[18],renderFps:words[18],masterVolume:words[15]+' · 0–100 %'};
+    for(const [classKey,key]of Object.entries(ArenaCore.targetingKeys))help[key]=arenaClassPolicyText(classKey);
     for(const node of document.querySelectorAll('[data-runtime-option]')){node.value=String(arenaRuntime[node.dataset.runtimeOption]);node.title=help[node.dataset.runtimeOption];}
     writeArenaHudText(document.getElementById('arenaSpecialPolicyHelp'),help.specialPolicy);
     writeArenaHudText(document.getElementById('arenaRuntimeVolumeValue'),arenaRuntime.masterVolume+' %');
@@ -42,6 +44,8 @@ function refreshArenaRuntimeControls(){
     const opacity=document.getElementById('hudOpacityRange');if(opacity)opacity.value=String(arenaRuntime.hudOpacity);
     writeArenaHudText(document.getElementById('hudOpacityValue'),arenaRuntime.hudOpacity+' %');
     refreshArenaAudioVolume();
+    refreshArenaClassPreferenceControls();
+    refreshArenaTrainingControls();
 }
 function getArenaDiagnostics(){return {version:window.ArenaLive.version,...arenaDiagnostics.snapshot(),timing:'CPU: simulation and canvas command submission; not GPU execution time',gpu:'Managed by browser; hardware acceleration cannot be verified from Canvas 2D',captures:[[canvas16.width,canvas16.height],[canvas9.width,canvas9.height]],quality:arenaRuntime.quality,renderFps:arenaRuntime.renderFps,activeFighters:fighters.filter(f=>!f.eliminated).length,droppedTimeMs:arenaDroppedTimeMs,memory:performance.memory?{usedJSHeapSize:performance.memory.usedJSHeapSize,jsHeapSizeLimit:performance.memory.jsHeapSizeLimit}:null};}
 function downloadArenaJSON(value,name){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download=name+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
@@ -70,17 +74,82 @@ function importArenaConfiguration(value){
     if(['16:9','9:16','dual'].includes(value.display?.focus))setMonitorFocus(value.display.focus);
     refreshArenaRuntimeControls();return true;
 }
-const ARENA_WARRIOR_POLICY_COPY=Object.freeze({
- es:['Guerreros: responden al rival cercano; prefieren otro Guerrero hasta un 25 % más lejos.','Guerreros: siempre priorizan otros Guerreros.'],
- en:['Warriors face the nearby rival; prefer another Warrior up to 25% farther away.','Warriors always prioritize other Warriors.'],
- fr:['Les Guerriers affrontent le rival proche ; préfèrent un Guerrier jusqu’à 25 % plus loin.','Les Guerriers privilégient toujours les Guerriers.'],
- de:['Krieger kämpfen gegen nahe Gegner; bevorzugen Krieger bis zu 25 % weiter entfernt.','Krieger bevorzugen immer andere Krieger.'],
- zh:['战士应对近处对手，优先选择距离不超过最近对手125%的其他战士。','战士始终优先攻击战士。'],
- ja:['戦士は近い相手に対処し、25%遠くまでなら戦士を優先。','戦士は常に他の戦士を優先。'],
- pt:['Guerreiros enfrentam o rival próximo; preferem outro Guerreiro até 25% mais longe.','Guerreiros sempre priorizam outros Guerreiros.'],
- it:['I Guerrieri affrontano il vicino; preferiscono un Guerriero fino al 25% più lontano.','I Guerrieri preferiscono sempre altri Guerrieri.']
+const ARENA_CLASS_PREFERENCE_COPY=Object.freeze({
+ es:['Preferencias de ataque por clase','Más cercano','Mi clase cerca · +25 %','Otra clase cerca · +15 %','Siempre mi clase','Siempre otra clase','Ventaja cerca · +25 %','Otra clase cerca · +25 %','Restaurar preferencias','El margen es distancia extra frente al rival más cercano. La prioridad nunca da inmunidad ni amplía el alcance.','Preferencias personalizadas: la muestra de victorias usa los valores originales.'],
+ en:['Attack preferences by class','Nearest rival','My class nearby · +25%','Other class nearby · +15%','Always my class','Always another class','Favorable rival nearby · +25%','Other class nearby · +25%','Reset preferences','The margin is extra distance over the nearest rival. Priority never grants immunity or increases attack range.','Custom preferences: measured wins use the original settings.'],
+ fr:['Préférences d’attaque par classe','Le plus proche','Ma classe proche · +25 %','Autre classe proche · +15 %','Toujours ma classe','Toujours une autre classe','Rival favorable proche · +25 %','Autre classe proche · +25 %','Rétablir les préférences','La marge est la distance supplémentaire par rapport au rival le plus proche. Aucune immunité ni portée accrue.','Préférences personnalisées : les victoires mesurées utilisent les réglages initiaux.'],
+ de:['Angriffsprioritäten pro Klasse','Nächster Gegner','Eigene Klasse nah · +25 %','Andere Klasse nah · +15 %','Immer eigene Klasse','Immer andere Klasse','Günstiger Gegner nah · +25 %','Andere Klasse nah · +25 %','Prioritäten zurücksetzen','Abstandsmarge gegenüber dem nächsten Gegner. Keine Immunität und keine erhöhte Reichweite.','Eigene Prioritäten: gemessene Siege verwenden die ursprünglichen Einstellungen.'],
+ zh:['各职业攻击偏好','最近对手','附近同职业 · +25%','附近其他职业 · +15%','始终优先同职业','始终优先其他职业','附近克制目标 · +25%','附近其他职业 · +25%','重置偏好','百分比为相对最近对手的额外距离。偏好不会带来免疫或扩大攻击范围。','自定义偏好：实测胜率使用原始设置。'],
+ ja:['クラス別の攻撃優先順位','最も近い相手','近くの同クラス · +25%','近くの他クラス · +15%','常に同クラス','常に他クラス','近くの有利な相手 · +25%','近くの他クラス · +25%','優先順位をリセット','割合は最寄りの相手からの追加距離。免疫や射程延長はありません。','優先順位変更済み：実測勝率は初期設定の結果です。'],
+ pt:['Preferências de ataque por classe','Rival mais próximo','Minha classe perto · +25%','Outra classe perto · +15%','Sempre minha classe','Sempre outra classe','Rival favorável perto · +25%','Outra classe perto · +25%','Restaurar preferências','A margem é a distância extra em relação ao rival mais próximo. Sem imunidade nem aumento de alcance.','Preferências alteradas: vitórias medidas usam os ajustes originais.'],
+ it:['Preferenze di attacco per classe','Rivale più vicino','Mia classe vicina · +25%','Altra classe vicina · +15%','Sempre la mia classe','Sempre un’altra classe','Rivale favorevole vicino · +25%','Altra classe vicina · +25%','Ripristina preferenze','Il margine è la distanza extra rispetto al rivale più vicino. Nessuna immunità o portata aggiuntiva.','Preferenze personalizzate: le vittorie misurate usano i valori iniziali.']
 });
-function arenaWarriorPolicyText(){return(ARENA_WARRIOR_POLICY_COPY[currentLanguage]||ARENA_WARRIOR_POLICY_COPY.es)[arenaRuntime.warriorTargeting==='always'?1:0];}
+function arenaClassPolicyLabel(classKey,mode){
+ const w=ARENA_CLASS_PREFERENCE_COPY[currentLanguage]||ARENA_CLASS_PREFERENCE_COPY.es;
+ const index=mode==='local'?(classKey==='kame'?2:3):mode==='always'?(classKey==='kame'?4:5):({nearest:1,same:2,other:7,prey:6}[mode]);
+ return w[index]+(mode==='prey'?' · '+localizedClassName(ARENA_CLASS_RIVALRIES.beats[classKey]):'');
+}
+function arenaClassPolicyText(classKey){return arenaClassPolicyLabel(classKey,ArenaCore.targetingMode(classKey,arenaRuntime));}
+function renderArenaClassPreferenceControls(){
+ return '<fieldset id="arenaClassPreferences" class="flex flex-col gap-2"><legend id="arenaClassPreferencesTitle" class="font-bold text-xs"></legend>'
+ +Object.entries(ArenaCore.targetingKeys).map(([classKey,key])=>`<label class="flex flex-col gap-1 text-xs"><span data-class-preference-label="${classKey}"></span><select id="arenaRuntime_${key}" data-runtime-option="${key}" data-class-preference="${classKey}" aria-describedby="arenaClassPreferencesHelp">${ArenaCore.targetingOptions[classKey].map(mode=>`<option value="${mode}"></option>`).join('')}</select></label>`).join('')
+ +'<small id="arenaClassPreferencesHelp"></small><button type="button" id="arenaResetClassPreferences" onclick="resetArenaClassPreferences()"></button></fieldset>';
+}
+function refreshArenaClassPreferenceControls(){
+ const w=ARENA_CLASS_PREFERENCE_COPY[currentLanguage]||ARENA_CLASS_PREFERENCE_COPY.es;
+ writeArenaHudText(document.getElementById('arenaClassPreferencesTitle'),w[0]);writeArenaHudText(document.getElementById('arenaClassPreferencesHelp'),w[9]);writeArenaHudText(document.getElementById('arenaResetClassPreferences'),w[8]);
+ for(const node of document.querySelectorAll('[data-class-preference-label]'))writeArenaHudText(node,localizedClassName(node.dataset.classPreferenceLabel));
+ for(const node of document.querySelectorAll('[data-class-preference]'))for(const option of node.options)writeArenaHudText(option,arenaClassPolicyLabel(node.dataset.classPreference,option.value));
+}
+function resetArenaClassPreferences(){for(const key of Object.values(ArenaCore.targetingKeys))setArenaRuntimeOption(key,ARENA_RUNTIME_DEFAULTS[key]);}
+
+const ARENA_TRAINING_COPY=Object.freeze({
+ es:['Jugador, poderes y comandos','Jugador objetivo','Aleatorio compatible con el poder','Clase del jugador','Adaptar clase para probar','El elegido ejecuta el poder. Adaptar permite cambiar su clase para la prueba.','Prueba inmediata: energía completa y recarga lista. En el lobby inicia el combate.','Comando del jugador','Enviar','Última prueba','No hay jugadores activos','Partida pausada: reanuda para probar','Ronda terminada: usa Revancha','El jugador está cayendo: elige otro','Poderes desactivados por las reglas','Clase bloqueada por las reglas','No hay un compatible: activa Adaptar clase','Elige su poder o activa Adaptar clase','Listo para probar','Clase automática','Clase de prueba','El jugador ya no está en la ronda','Abrir poderes y comandos','Sin prueba reciente','Comando enviado','Todas las clases pueden dañarse entre sí y disputar la final.'],
+ en:['Player, powers and commands','Target player','Random player compatible with the power','Player class','Adapt class for testing','The chosen player casts the power. Adapt allows changing their class for the test.','Instant test: full energy and cooldown ready. Starts combat from the lobby.','Player command','Send','Last test','No active players','Paused: resume to test','Round finished: use Rematch','Player is falling: choose another','Powers disabled by rules','Class blocked by rules','No compatible player: enable Adapt class','Choose their power or enable Adapt class','Ready to test','Automatic class','Test class','Player is no longer in this round','Open powers and commands','No recent test','Command sent','All classes can damage each other and contest the final.'],
+ fr:['Joueur, pouvoirs et commandes','Joueur ciblé','Joueur aléatoire compatible avec le pouvoir','Classe du joueur','Adapter la classe pour tester','Le joueur choisi lance le pouvoir. Adapter permet de changer sa classe pour le test.','Test immédiat : énergie pleine et recharge prête. Lance le combat depuis le lobby.','Commande du joueur','Envoyer','Dernier test','Aucun joueur actif','En pause : reprenez pour tester','Manche terminée : utilisez Revanche','Le joueur tombe : choisissez un autre','Pouvoirs désactivés par les règles','Classe bloquée par les règles','Aucun compatible : activez Adapter la classe','Choisissez son pouvoir ou adaptez sa classe','Prêt pour le test','Classe automatique','Classe de test','Ce joueur ne participe plus à la manche','Ouvrir pouvoirs et commandes','Aucun test récent','Commande envoyée','Toutes les classes peuvent se blesser et disputer la finale.'],
+ de:['Spieler, Kräfte und Befehle','Zielspieler','Zufälliger passender Spieler','Spielerklasse','Klasse für Tests anpassen','Der gewählte Spieler setzt die Kraft ein. Anpassen erlaubt einen Klassenwechsel für den Test.','Soforttest: volle Energie und bereit zum Einsatz. Startet den Kampf in der Lobby.','Spielerbefehl','Senden','Letzter Test','Keine aktiven Spieler','Pausiert: zum Testen fortsetzen','Runde beendet: Revanche wählen','Spieler fällt: anderen wählen','Kräfte durch Regeln deaktiviert','Klasse durch Regeln gesperrt','Kein passender Spieler: Klasse anpassen aktivieren','Passende Kraft wählen oder Klasse anpassen','Testbereit','Automatische Klasse','Testklasse','Spieler ist nicht mehr in dieser Runde','Kräfte und Befehle öffnen','Kein letzter Test','Befehl gesendet','Alle Klassen können einander verletzen und das Finale bestreiten.'],
+ zh:['玩家、技能和指令','目标玩家','随机选择与技能兼容的玩家','玩家职业','测试时调整职业','所选玩家释放技能。启用调整职业后，可为测试更改其职业。','即时测试：满能量并重置冷却。大厅中会开始战斗。','玩家指令','发送','上次测试','没有活跃玩家','已暂停：继续后测试','本轮结束：请重赛','玩家正在坠落：请选择其他人','规则已禁用技能','规则禁止该职业','没有兼容玩家：启用调整职业','选择其技能或启用调整职业','可以测试','自动职业','测试职业','玩家已不在本轮中','打开技能和指令','暂无测试','指令已发送','所有职业都能互相伤害并争夺最终胜利。'],
+ ja:['プレイヤー・能力・コマンド','対象プレイヤー','能力に合うプレイヤーをランダム選択','プレイヤーのクラス','テスト時にクラスを変更','選択したプレイヤーが能力を使います。変更を有効にするとテスト用にクラスを変えられます。','即時テスト：エネルギー満タン・待機なし。ロビーでは戦闘を開始。','プレイヤーのコマンド','送信','直前のテスト','参加中のプレイヤーなし','一時停止中：再開してテスト','ラウンド終了：再戦を選択','落下中：別のプレイヤーを選択','ルールで能力が無効','ルールでクラスが禁止','適合者なし：クラス変更を有効に','本人の能力かクラス変更を選択','テスト可能','自動クラス','テスト用クラス','このプレイヤーはラウンドにいません','能力とコマンドを開く','まだテストなし','コマンド送信済み','全クラスが互いにダメージを与え決勝を戦えます。'],
+ pt:['Jogador, poderes e comandos','Jogador alvo','Jogador aleatório compatível com o poder','Classe do jogador','Adaptar classe para testar','O jogador escolhido usa o poder. Adaptar permite mudar sua classe para o teste.','Teste imediato: energia cheia e recarga pronta. Inicia o combate no lobby.','Comando do jogador','Enviar','Último teste','Sem jogadores ativos','Em pausa: retome para testar','Rodada encerrada: use Revanche','Jogador caindo: escolha outro','Poderes desativados pelas regras','Classe bloqueada pelas regras','Sem compatível: ative Adaptar classe','Escolha o poder dele ou adapte a classe','Pronto para testar','Classe automática','Classe de teste','O jogador não está mais nesta rodada','Abrir poderes e comandos','Sem teste recente','Comando enviado','Todas as classes podem se ferir e disputar a final.'],
+ it:['Giocatore, poteri e comandi','Giocatore bersaglio','Giocatore casuale compatibile con il potere','Classe del giocatore','Adatta classe per i test','Il giocatore scelto usa il potere. Adatta consente di cambiare la sua classe per il test.','Test immediato: energia piena e attesa azzerata. Avvia il combattimento dalla lobby.','Comando del giocatore','Invia','Ultimo test','Nessun giocatore attivo','In pausa: riprendi per il test','Round concluso: usa Rivincita','Giocatore in caduta: scegline un altro','Poteri disattivati dalle regole','Classe bloccata dalle regole','Nessun compatibile: attiva Adatta classe','Scegli il suo potere o adatta la classe','Pronto per il test','Classe automatica','Classe di test','Il giocatore non è più in questo round','Apri poteri e comandi','Nessun test recente','Comando inviato','Tutte le classi possono ferirsi e disputare la finale.']
+});
+function arenaTrainingText(index){return(ARENA_TRAINING_COPY[currentLanguage]||ARENA_TRAINING_COPY.es)[index];}
+function installArenaTrainingControls(){
+ const body=document.querySelector('#arenaPanelPowers .arena-panel-body');body.dataset.noTranslate='';body.dataset.operatorKeepOpen='';
+ const card=document.createElement('div');card.id='arenaTrainingTargetCard';
+ card.innerHTML='<label for="arenaPowerTargetSelect" data-training-copy="1"></label><select id="arenaPowerTargetSelect" aria-describedby="arenaPowerTargetStatus"><option value="random"></option></select><strong id="arenaPowerTargetName"></strong><span id="arenaPowerTargetClass"></span><div id="arenaPowerTargetState"></div><label for="arenaTestClassSelect" data-training-copy="3"></label><select id="arenaTestClassSelect"><option value=""></option>'+CLASS_KEY_ORDER.map(key=>`<option value="${key}"></option>`).join('')+'</select><label class="arena-test-adapt"><input type="checkbox" id="arenaTestAdaptClass"><span data-training-copy="4"></span></label><small data-training-copy="5"></small><output id="arenaPowerTargetStatus" role="status"></output>';
+ body.prepend(card);
+ const form=document.createElement('form');form.id='arenaTargetCommandForm';
+ form.innerHTML='<small data-training-copy="6"></small><label for="arenaTargetCommandInput" data-training-copy="7"></label><div class="arena-target-command-row"><input id="arenaTargetCommandInput" maxlength="160" autocomplete="off" placeholder="!kame, !rayo…"><button type="submit" data-training-copy="8"></button></div><output id="arenaLastTestAction" role="status" aria-live="polite"></output>';
+ body.appendChild(form);form.addEventListener('submit',event=>{event.preventDefault();sendArenaTargetTestCommand();});
+ document.getElementById('arenaPowerTargetSelect').addEventListener('change',event=>{document.getElementById('targetFighterSelect').value=event.target.value;refreshArenaTargetPanel();});
+ document.getElementById('arenaTestAdaptClass').addEventListener('change',event=>{setArenaRuntimeOption('testAdaptClass',event.target.checked);refreshArenaTargetPanel();});
+ document.getElementById('arenaTestClassSelect').addEventListener('change',event=>setArenaTestTargetClass(event.target.value));
+ const shortcut=document.createElement('button');shortcut.type='button';shortcut.dataset.workspaceReveal='arenaPanelPowers';shortcut.dataset.trainingCopy='22';shortcut.dataset.operatorKeepOpen='';document.querySelector('#arenaPanelTarget .arena-panel-body').appendChild(shortcut);
+ document.querySelector('#arenaPanelPowers .arena-panel-title').removeAttribute('data-workspace-copy');document.querySelector('#arenaPanelPowers .arena-panel-title').dataset.trainingCopy='0';
+ updateTargetSelectDropdown();
+}
+function refreshArenaTrainingControls(){
+ for(const node of document.querySelectorAll('[data-training-copy]'))writeArenaHudText(node,arenaTrainingText(Number(node.dataset.trainingCopy)));
+ const select=document.getElementById('arenaTestClassSelect');if(!select)return;
+ const target=peekArenaTestTarget(),fixed=document.getElementById('targetFighterSelect').value!=='random';
+ document.getElementById('arenaPowerTargetSelect').value=document.getElementById('targetFighterSelect').value;
+ document.getElementById('arenaTestAdaptClass').checked=arenaRuntime.testAdaptClass;
+ for(const option of select.options)writeArenaHudText(option,option.value?localizedClassName(option.value):arenaTrainingText(19));
+ select.value=fixed&&target?target.archetypeKey:'';select.disabled=!fixed||!target||target.eliminated||isGamePaused||koSequenceActive||gameState==='VICTORY'||arenaCombatRules.classRule!=='any';
+ select.title=arenaCombatRules.classRule!=='any'?arenaTrainingText(15):arenaTrainingText(3);
+ let available=0;const alivePool=fixed?null:fighters.filter(f=>!f.eliminated&&!(f.fallDrop>0));
+ for(const button of document.querySelectorAll('.arena-skill-buttons button')){
+  const cmd=button.querySelector('[data-command-label]').dataset.commandLabel,state=getArenaTestPowerState(cmd,alivePool);
+  button.disabled=!state.allowed;const title=localizedClassName(SKILL_REQUIRED_CLASS[cmd])+' · '+localizedChatCommand(cmd)+' · '+arenaTrainingText(state.reason);
+  if(button.title!==title)button.title=title;
+  const label=arenaPowerName(cmd)+' · '+title;if(button.getAttribute('aria-label')!==label)button.setAttribute('aria-label',label);if(state.allowed)available++;
+ }
+ const warning=available?arenaTrainingText(18):arenaTrainingText(getArenaTestPowerState('!kame').reason);
+ writeArenaHudText(document.getElementById('quickSkillTargetStatus'),warning);writeArenaHudText(document.getElementById('arenaPowerTargetStatus'),warning);
+ const last=arenaLastTestAction?.round===arenaRoundRevision?arenaLastTestAction:null;
+ writeArenaHudText(document.getElementById('arenaLastTestAction'),last?`${arenaTrainingText(9)}: ${last.name} · ${localizedClassName(last.classKey)} · ${localizeVisibleCommands(last.command,currentLanguage)}`:arenaTrainingText(23));
+}
 const ARENA_EVIDENCE_COPY=Object.freeze({
  es:['Resultados medidos','Muestra','Duelo','Inicio','Victorias','IC 95 %','IA sin apoyos ni reingresos; rondas completas con cambios de modo. Arena usa cinco rotaciones por semilla. Los intervalos reflejan incertidumbre; no garantizan igualdad.','partidas','Ver metodología y datos','Cambiar reglas, prioridad o participación puede cambiar estos resultados.'],
  en:['Measured results','Sample','Duel','Starting players','Wins','95% CI','AI without boosts or re-entry; full matches with mode transitions. Arena groups use five rotations per seed. Intervals show uncertainty, not guaranteed equality.','matches','Method and data','Changing rules, targeting or participation can change these results.'],
@@ -96,6 +165,8 @@ function refreshArenaBalanceEvidence(){
  const restoreFocus=host.contains(document.activeElement);
  const key=host.querySelector('select')?.value||'125',group=ARENA_BALANCE_EVIDENCE.groups[key];
  host.innerHTML=`<h4 class="font-bold text-xs">${w[0]}</h4><label class="flex flex-col gap-1 text-xs">${w[1]}<select id="arenaBalanceEvidenceScenario" class="min-w-0 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-slate-200" style="color-scheme:dark">${['duel','5','10','25','125'].map(k=>`<option value="${k}"${k===key?' selected':''}>${k==='duel'?w[2]:w[3]+': '+k}</option>`).join('')}</select></label><p class="arena-balance-hint">${group.matches} ${w[7]} · ≤ ${ARENA_BALANCE_EVIDENCE.sample.maxSeconds} s</p><table><thead><tr><th>${arenaBalanceText('class')}</th><th>${w[4]}</th><th>${w[5]}</th></tr></thead><tbody>${group.classes.map(row=>`<tr><th scope="row">${escapeHTML(localizedClassName(row.classKey))}</th><td>${row.winPct} % <small>(n=${row.matches})</small></td><td>${row.ci95.low}–${row.ci95.high} %</td></tr>`).join('')}</tbody></table><p class="arena-balance-hint">${w[6]}</p><p class="arena-balance-hint">${w[9]}</p><a class="text-xs text-cyan-300" href="https://github.com/PoldKent/arena-live/blob/main/docs/RELEASE-0.15-CORRECCIONES.md" target="_blank" rel="noopener">${w[8]}</a>`;
+ const custom=Object.keys(ArenaCore.targetingKeys).some(key=>ArenaCore.targetingMode(key,arenaRuntime)!==ArenaCore.targetingOptions[key][0]);
+ if(custom){const note=document.createElement('p');note.dataset.evidenceCustomPreferences='';note.className='arena-balance-hint';note.textContent=(ARENA_CLASS_PREFERENCE_COPY[currentLanguage]||ARENA_CLASS_PREFERENCE_COPY.es)[10];host.prepend(note);}
  host.querySelector('select').onchange=refreshArenaBalanceEvidence;if(restoreFocus)host.querySelector('select').focus({preventScroll:true});
 }
 

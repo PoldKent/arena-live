@@ -2,6 +2,7 @@ import {readEngineSource} from './read-engine-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import '../engine/arena-core.js';
 
 const html = await readEngineSource();
 const functionSource = name => {
@@ -9,7 +10,7 @@ const functionSource = name => {
   assert.ok(match, `Missing engine function ${name}`);
   return match[0];
 };
-const context = vm.createContext({ fighters: [],arenaRuntime:{warriorTargeting:'local'} });
+const context = vm.createContext({ fighters: [],arenaRuntime:{warriorTargeting:'local'},ArenaCore:globalThis.ArenaCore,ARENA_CLASS_RIVALRIES:{beats:{kame:'titan',titan:'trueno',trueno:'esmeralda',esmeralda:'ninja',ninja:'kame'}} });
 vm.runInContext([
   html.match(/        const ARENA_COMBAT_TARGET_RULES = Object\.freeze\([\s\S]*?\n        \}\);/)[0],
   functionSource('canFighterAttack'), functionSource('findPreferredCombatTarget')

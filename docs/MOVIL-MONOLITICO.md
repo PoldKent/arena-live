@@ -1,10 +1,10 @@
-# Arena Live v0.16.0 · Un archivo para celular
+# Arena Live v0.17.0 · Un archivo para celular
 
 La descarga móvil es una exportación del juego de `main`, sin una rama de desarrollo ni una implementación distinta del combate. Reúne el HTML, estilos y cinco módulos del motor en un solo archivo. El formato es **HTML**, no APK ni aplicación de App Store.
 
 ## Descargar y jugar
 
-1. Guarda `Arena-Live-v0.16.0-movil.html` en el teléfono.
+1. Guarda `Arena-Live-v0.17.0-movil.html` en el teléfono.
 2. Ábrelo con un navegador o visor que permita ejecutar JavaScript en archivos HTML locales. Algunas vistas previas de archivos muestran solo el documento o su código: en ese caso utiliza «Abrir con» un navegador compatible. La disponibilidad de esa opción depende del sistema y del gestor de archivos.
 3. Elige la cantidad de peleadores y tu clase. Con «Jugar como Prota» desmarcado observas a la IA.
 4. Pulsa **Iniciar partida**. El total seleccionado incluye a Prota.
@@ -45,7 +45,7 @@ En la carpeta habitual del proyecto, después de actualizar `main`:
 npm.cmd run build:mobile
 ```
 
-Resultado: `dist/Arena-Live-v0.16.0-movil.html`. La generación usa solo Node, no requiere minificadores ni nuevas dependencias. `dist` no se rastrea para evitar mantener una copia del motor a mano. El HTML incluye hashes SHA-256 de sus entradas. El generador se detiene si cambian los puntos de adaptación esperados.
+Resultado: `dist/Arena-Live-v0.17.0-movil.html`. La generación usa solo Node, no requiere minificadores ni nuevas dependencias. `dist` no se rastrea para evitar mantener una copia del motor a mano. El HTML incluye hashes SHA-256 de sus entradas. El generador se detiene si cambian los puntos de adaptación esperados.
 
 Pruebas:
 

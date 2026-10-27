@@ -1,16 +1,20 @@
-# Arena Live · v0.16
+# Arena Live · v0.17
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
 ## Versión principal
 
-`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API, el servidor y el paquete identifican la versión 0.16. [Identificación de la entrega terminada](docs/RELEASE-0.16-VERSION.md). [Las seis correcciones y su validación](docs/RELEASE-0.15-CORRECCIONES.md).
+`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API, el servidor y el paquete identifican la versión 0.17. [Preferencias y pruebas de v0.17](docs/RELEASE-0.17-CLASES-PRUEBAS.md). [Las seis correcciones y su validación](docs/RELEASE-0.15-CORRECCIONES.md).
 
 ## Probar en un celular con un solo archivo
 
-Ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.16.0-movil.html`. Copia ese único HTML al teléfono y ábrelo con un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
+Ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.17.0-movil.html`. Copia ese único HTML al teléfono y ábrelo con un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
 
 La exportación usa el combate de `main`; comienza en 720p, dibujo a 30 FPS y calidad Rendimiento. Permite cambiar a 540p/1080p y 30/60 FPS. TikTok LIVE real sigue necesitando el servidor: este archivo ofrece pruebas locales. [Uso, optimizaciones y límites de la exportación móvil](docs/MOVIL-MONOLITICO.md).
+
+## Preferencias y herramientas de clase
+
+En **Ajustes → Equilibrio por clase**, cada una de las cinco clases tiene preferencias independientes de objetivo. En **Jugador, poderes y comandos**, elige un jugador fijo o un aleatorio compatible, cambia su clase y prueba todos los poderes. **Adaptar clase para probar** permite lanzar Kame o Trueno con la misma identidad, indicando el cambio. Los botones preparan energía y recarga; el juego normal conserva sus reglas. [Uso y validación de v0.17](docs/RELEASE-0.17-CLASES-PRUEBAS.md).
 
 ## Rivalidades de clase
 
@@ -53,7 +57,7 @@ npm.cmd start
 
 Abre **http://127.0.0.1:4173/** y conserva abierta la consola. TikTok comienza desconectado; **📡 TikTok** conecta o desconecta según el estado real del puente.
 
-Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd ci` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.16 en el pie de Ajustes**.
+Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd ci` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.17 en el pie de Ajustes**.
 
 Para volver a `main` desde una rama anterior:
 
@@ -205,4 +209,4 @@ Las pruebas del navegador arrancan y cierran su servidor local y simulan las res
 - [Registro de cambios](CHANGELOG.md).
 - Historial: [v0.2](docs/RELEASE-0.2-OPERADOR.md), [v0.1](docs/RELEASE-0.1-OBS.md).
 
-El desarrollo y las actualizaciones continúan en `main`. La entrega vigente es Arena Live v0.16, con ambas capturas Full HD, textos de poderes configurables, inspector de equilibrio, TikTok, reglas, potencias, comandos y caída isométrica integrados. Las entregas anteriores quedan como historial.
+El desarrollo y las actualizaciones continúan en `main`. La entrega vigente es Arena Live v0.17, con ambas capturas Full HD, textos de poderes configurables, inspector de equilibrio, TikTok, reglas, potencias, comandos y caída isométrica integrados. Las entregas anteriores quedan como historial.

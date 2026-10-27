@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { createHash } from 'node:crypto';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { chromium } from 'playwright';
 
 const current = await readFile(new URL('../index.html', import.meta.url), 'utf8');
@@ -12,15 +12,23 @@ if (process.env.ARENA_PERF_BASELINE) sources.unshift(['baseline', await readFile
 const css = process.env.ARENA_TEST_CSS ? await readFile(process.env.ARENA_TEST_CSS, 'utf8') : null;
 const localStyles = await readFile(new URL('../styles/arena-ui.css', import.meta.url));
 const engineAssets=new Map(await Promise.all(['core','render','audio','settings','balance-evidence'].map(async name=>['/engine/arena-'+name+'.js',await readFile(new URL('../engine/arena-'+name+'.js',import.meta.url))])));
+// A saved baseline must load its own referenced modules. Mixing an old HTML
+// with current settings/core can break startup or invalidate a combat comparison.
+const baselineAssets=new Map();
+if(process.env.ARENA_PERF_BASELINE)for(const match of sources[0][1].matchAll(/src="(engine\/[^"?]+)(?:\?[^\"]*)?"/g)){
+  baselineAssets.set('/'+match[1],await readFile(join(dirname(process.env.ARENA_PERF_BASELINE),match[1])));
+}
 const server = createServer((req, res) => {
-  const assetPath=new URL(req.url,'http://localhost').pathname;
-  if(/^\/engine\/arena-(core|render|audio|settings|balance-evidence)\.js$/.test(assetPath)){res.writeHead(200,{'content-type':'text/javascript'});res.end(engineAssets.get(assetPath));return;}
+  const requestUrl=new URL(req.url,'http://localhost'),assetPath=requestUrl.pathname;
+  if(/^\/engine\/arena-(core|render|audio|settings|balance-evidence)\.js$/.test(assetPath)){res.writeHead(200,{'content-type':'text/javascript'});res.end((requestUrl.searchParams.get('arenaPerfSource')==='baseline'?baselineAssets:engineAssets).get(assetPath));return;}
   if (new URL(req.url, 'http://localhost').pathname === '/styles/arena-ui.css') {
     res.writeHead(200, {'content-type':'text/css; charset=utf-8'}); res.end(localStyles); return;
   }
   const name = new URL(req.url, 'http://localhost').searchParams.get('source');
   res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-  res.end(sources.find(([key]) => key === name)?.[1] || current);
+  let html=sources.find(([key]) => key === name)?.[1] || current;
+  if(name==='baseline')html=html.replace(/(src="engine\/[^\"]+)(")/g,(_match,start,end)=>start+(start.includes('?')?'&':'?')+'arenaPerfSource=baseline'+end);
+  res.end(html);
 });
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 const gpuMode = process.argv.includes('--gpu');
