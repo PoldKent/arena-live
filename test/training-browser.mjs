@@ -116,7 +116,10 @@ try{
   const rows=await page.evaluate(()=>Object.keys(LANGUAGE_LABELS).map(language=>{setLanguage(language);refreshArenaRuntimeControls();refreshArenaTargetPanel();return {language,count:document.querySelectorAll('[data-class-preference]').length,names:[...document.querySelectorAll('[data-class-preference-label]')].map(n=>n.textContent),options:[...document.querySelectorAll('[data-class-preference] option')].every(n=>n.textContent.trim()),training:[...document.querySelectorAll('[data-training-copy]')].every(n=>n.textContent.trim()&&!/undefined/.test(n.textContent))};}));for(const r of rows){assert.equal(r.count,5);assert.ok(r.names.every(Boolean));assert.equal(r.options,true);assert.equal(r.training,true);}await page.evaluate(()=>setLanguage('es'));
  });
  await check('Stream keeps the combined tool after casting and the selected actor remains explicit',async()=>{
-  await page.locator('#btnFullscreenDual').click();await page.waitForFunction(()=>document.fullscreenElement?.id==='broadcastStageSection');
+  await page.locator('#btnFullscreenDual').click();
+  // Native fullscreen resolves before fullscreenchange finishes moving panels.
+  // Wait for the operator workspace, not just the browser fullscreen element.
+  await page.waitForFunction(()=>document.fullscreenElement?.id==='broadcastStageSection'&&arenaWorkspace.mode==='stream'&&arenaDualWasFullscreen&&!arenaWorkspace.restoring);
   await page.evaluate(()=>{trainingFixture(32);revealArenaWorkspacePanel('arenaPanelPowers');});
   await page.locator('#targetFighterSelect').selectOption(await page.evaluate(()=>String(fighters[0].id)));
   await page.locator('.arena-skill-buttons button[onclick="triggerQuickSkill(\'!kame\')"]').click();
@@ -124,8 +127,8 @@ try{
   if(process.env.ARENA_TRAINING_REPORT_DIR){await mkdir(process.env.ARENA_TRAINING_REPORT_DIR,{recursive:true});await page.evaluate(()=>renderBothScreensSimultaneously());await page.screenshot({path:join(process.env.ARENA_TRAINING_REPORT_DIR,'training-stream.png')});}
  });
  await check('the unified test tool stays usable at phone width and opens directly in the mobile host',async()=>{
-  await page.evaluate(async()=>{await document.exitFullscreen();});await page.waitForFunction(()=>arenaWorkspace.mode==='preparation');
-  await page.setViewportSize({width:390,height:844});await page.waitForFunction(()=>arenaWorkspace.mobile);
+  await page.evaluate(async()=>{await document.exitFullscreen();});await page.waitForFunction(()=>!document.fullscreenElement&&arenaWorkspace.mode==='preparation'&&!arenaDualWasFullscreen&&!arenaWorkspace.restoring);
+  await page.setViewportSize({width:390,height:844});await page.waitForFunction(()=>arenaWorkspace.mobile&&!arenaWorkspace.restoring);
   await page.evaluate(()=>{trainingFixture(9);revealArenaWorkspacePanel('arenaPanelPowers');});
   assert.equal(await page.locator('#arenaPanelPowers').isVisible(),true);
   await page.locator('#targetFighterSelect').selectOption(await page.evaluate(()=>String(fighters[1].id)));
