@@ -1,5 +1,12 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-27 — Arena Live v0.18 · Un solo panel de jugador
+
+- Retira Jugador objetivo y su acceso del navegador de herramientas. Jugador, poderes y comandos conserva el único selector, identidad, estado, clase y comandos, con la selección compartida por chat y apoyos.
+- Elimina el selector espejo y los estados duplicados. Compacta nombre/clase y muestra el cambio de clase al elegir un jugador fijo.
+- Adapta las distribuciones y configuraciones anteriores de ambos modos: conserva la posición de Poderes y lo abre si antes estaba abierto Jugador objetivo. Mantiene preferencias de clase y OBS.
+- Actualiza versión, API, paquete y descarga monolítica a 0.18.0. Conserva las entregas e informes históricos.
+
 ## 2026-10-27 — Arena Live v0.17 · Preferencias y pruebas de clase
 
 - Cinco preferencias de objetivo independientes en Ajustes → Equilibrio por clase, con persistencia, respaldo de configuración y restauración conjunta. Conserva los valores iniciales de Guerrero/Shinobi y la cercanía de Titán/Rayo/Espíritu. Identifica preferencias personalizadas junto a las victorias históricas.

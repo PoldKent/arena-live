@@ -1,0 +1,54 @@
+{
+  "version": "0.18.0",
+  "baseCommit": "242bd851d9c2f2d23b0ccbabf1f5aa34a446a593",
+  "scope": "UI consolidation only. The Target panel and mirrored selector are removed. Player, class powers and commands share one selector. Gameplay profiles and engine rules are unchanged.",
+  "inputs": {
+    "index.html": "0278eef5dbaa831f404120515d79ab5ac060b0c94eea0083cd7bcdc355622598",
+    "engine/arena-settings.js": "bc7103a6736f49ae53dd4b86b0f1e3f13ff335b01db3b6c7dc81e5e865080b63",
+    "styles/arena-ui.css": "348cc444a65847fb3e8521eac7d9a38a2166eef7db6fb3cb7f54640c83db9c5b",
+    "package.json": "f1ff73d43f0e890d44e2d0d636180b60aa4106b69d80f8ba614d209bfc430597",
+    "npm-shrinkwrap.json": "2b5de7b329c522769dd3ebaa73bcfcc69b17d56a046aff0c442d53030b6d60bc"
+  },
+  "checks": {
+    "unit": 84,
+    "operatorBrowser": 65,
+    "integrityBrowser": 24,
+    "trainingBrowser": 18,
+    "portableBrowser": 13
+  },
+  "migration": "Both saved modes and imported v0.17 layouts retain the Powers location. Open state is merged; a lone legacy Target location is used as fallback. OBS and runtime preferences are preserved.",
+  "training": {
+    "checks": [
+      "powers contain the target selector, live identity, class selection and player command input",
+      "older Target layouts merge into the unified panel while preserving the Powers position and settings",
+      "random tests always choose the matching class for every power across a 128-player roster",
+      "a fixed player can test Kame then Thunder with visible class adaptation and canonical windup",
+      "disabling adaptation preserves an incompatible fixed class and explains the blocked power",
+      "missing classes can be adapted in random mode while falling players are never selected",
+      "a power pressed in the lobby starts combat and executes instead of silently failing",
+      "a fixed eliminated player stays selected and never redirects the action to a random survivor",
+      "training obeys pause, power restrictions, class restrictions and final-result lock",
+      "player commands and class selection affect the chosen player without creating a new sender",
+      "viewing targets and power availability never consumes combat randomness",
+      "Prota can change class and rejoin through targeted commands without a duplicate hidden-name viewer",
+      "each class has independent persisted preferences, configuration backup and restore without OBS changes",
+      "custom class priorities are identified beside historical measured win rates",
+      "eight languages name all five class preferences and all training controls",
+      "Stream keeps the combined tool after casting and the selected actor remains explicit",
+      "the unified test tool stays usable at phone width and opens directly in the mobile host",
+      "all five preference controls fit a phone and keep settings open while applying changes"
+    ],
+    "errors": [],
+    "scope": "Chromium software rendering; operator training and simulated data, no real LIVE"
+  },
+  "mobile": {
+    "filename": "Arena-Live-v0.18.0-movil.html",
+    "bytes": 788925,
+    "sha256": "f7607f2414823a08fe3f3dfb1677a92f06c7dfcf92850baf8c89b59f5dad9a20",
+    "requests": 0
+  },
+  "limits": [
+    "Chromium software rendering and phone/touch emulation",
+    "No physical-phone or real-LIVE verification in this UI change"
+  ]
+}

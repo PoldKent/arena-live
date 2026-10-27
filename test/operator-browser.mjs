@@ -76,10 +76,10 @@ await check('Scenario selector waits for Load; the 128-player roster and smaller
  await page.locator('#arenaLoadScenario').click();assert.equal((await state()).fighterBodies,128);assert.equal(new Set(await page.evaluate(()=>ArenaLive.getFighters().map(f=>f.name))).size,128);
  await page.locator('#arenaScenarioSelect').selectOption('4');await page.locator('#arenaLoadScenario').click();assert.equal((await state()).activeFighters,4);
 });
-await check('Target has a dedicated name, class and live health/energy state',async()=>{
- await unfold('arenaPanelTarget');const fighter=(await page.evaluate(()=>ArenaLive.getFighters()))[0];
+await check('The unified player/powers panel has one selector with live name, class, health and energy',async()=>{
+ await unfold('arenaPanelPowers');const fighter=(await page.evaluate(()=>ArenaLive.getFighters()))[0];
  await page.locator('#targetFighterSelect').selectOption(String(fighter.id));
- assert.equal(await page.locator('#arenaTargetName').innerText(),fighter.name);assert.ok((await page.locator('#arenaTargetClass').innerText()).length>1);assert.match(await page.locator('#arenaTargetState').innerText(),/HP/);
+ assert.equal(await page.locator('#arenaPowerTargetName').innerText(),fighter.name);assert.ok((await page.locator('#arenaPowerTargetClass').innerText()).length>1);assert.match(await page.locator('#arenaPowerTargetState').innerText(),/HP/);
  const before=await page.locator('#chatFeed>div').count();await page.locator('#arenaPanelSocial button[onclick="triggerSocialEvent(\'follow\')"]').click();assert.ok(await page.locator('#chatFeed>div').count()>=before);
  assert.equal(await page.locator('#arenaPanelSocial').evaluate(n=>n.open),true);
 });

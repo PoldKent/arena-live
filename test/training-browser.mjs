@@ -22,12 +22,26 @@ try{
   trainingFixture();
  });
  await check('powers contain the target selector, live identity, class selection and player command input',async()=>{
-  for(const id of ['arenaPowerTargetSelect','arenaPowerTargetName','arenaPowerTargetClass','arenaPowerTargetState','arenaTestClassSelect','arenaTargetCommandInput'])assert.equal(await page.locator('#arenaPanelPowers #'+id).count(),1);
+  for(const id of ['targetFighterSelect','arenaPowerTargetName','arenaPowerTargetClass','arenaPowerTargetState','arenaTestClassSelect','arenaTargetCommandInput'])assert.equal(await page.locator('#arenaPanelPowers #'+id).count(),1);
   assert.equal(await page.locator('.arena-skill-buttons button').count(),5);
-  const id=await page.evaluate(()=>String(fighters[3].id));await page.locator('#arenaPowerTargetSelect').selectOption(id);
-  assert.equal(await page.locator('#targetFighterSelect').inputValue(),id);assert.equal(await page.locator('#arenaPowerTargetName').textContent(),await page.locator('#arenaTargetName').textContent());
+  const id=await page.evaluate(()=>String(fighters[3].id));await page.locator('#targetFighterSelect').selectOption(id);
+  assert.equal(await page.locator('#targetFighterSelect').count(),1);assert.equal(await page.locator('#arenaPanelTarget').count(),0);assert.equal(await page.locator('[data-workspace-reveal=\"arenaPanelTarget\"]').count(),0);assert.equal(await page.locator('#arenaPowerTargetName').textContent(),await page.evaluate(()=>getFighterDisplayName(peekArenaTestTarget())));
   await page.evaluate(()=>{document.getElementById('targetFighterSelect').value=String(fighters[1].id);document.getElementById('targetFighterSelect').dispatchEvent(new Event('change'));});
-  assert.equal(await page.locator('#arenaPowerTargetSelect').inputValue(),await page.locator('#targetFighterSelect').inputValue());
+  assert.equal(await page.locator('#arenaTestClassSelect').inputValue(),await page.evaluate(()=>peekArenaTestTarget().archetypeKey));assert.equal(await page.locator('#arenaTestClassChoice').isVisible(),true);
+  await page.locator('#targetFighterSelect').selectOption('random');assert.equal(await page.locator('#arenaTestClassChoice').isHidden(),true);
+ });
+ await check('older Target layouts merge into the unified panel while preserving the Powers position and settings',async()=>{
+  const r=await page.evaluate(()=>{
+   const original=exportArenaConfiguration(),old=JSON.parse(JSON.stringify(original));old.version='0.17.0';
+   const legacy={...old.layouts.preparation.panels.arenaPanelPowers,dock:'left',open:true,width:310};
+   old.layouts.preparation.panels.arenaPanelTarget=legacy;old.layouts.preparation.panels.arenaPanelPowers.open=false;old.layouts.preparation.panels.arenaPanelPowers.dock='right';
+   old.layouts.stream.panels.arenaPanelTarget={...legacy,dock:'left'};old.layouts.stream.panels.arenaPanelPowers.open=false;
+   const fallback=JSON.parse(JSON.stringify(old.layouts.preparation));delete fallback.panels.arenaPanelPowers;
+   const fallbackLayout=readArenaWorkspace('preparation',fallback);
+   const accepted=importArenaConfiguration(old),updated=exportArenaConfiguration();
+   const result={accepted,position:updated.layouts.preparation.panels.arenaPanelPowers.dock,preparationOpen:updated.layouts.preparation.panels.arenaPanelPowers.open,streamOpen:updated.layouts.stream.panels.arenaPanelPowers.open,removed:['preparation','stream'].every(mode=>!Object.hasOwn(updated.layouts[mode].panels,'arenaPanelTarget')),fallback:fallbackLayout.panels.arenaPanelPowers.dock,runtime:JSON.stringify(original.runtime)===JSON.stringify(updated.runtime),obs:JSON.stringify(original.obs)===JSON.stringify(updated.obs)};
+   importArenaConfiguration(original);return result;
+  });assert.deepEqual(r,{accepted:true,position:'right',preparationOpen:true,streamOpen:true,removed:true,fallback:'left',runtime:true,obs:true});
  });
  await check('random tests always choose the matching class for every power across a 128-player roster',async()=>{
   const result=await page.evaluate(()=>{
@@ -48,7 +62,7 @@ try{
    for(const cmd of ['!kame','!trueno']){
     actor.energy=0;actor.aiSpecialCooldown=9999;const accepted=triggerQuickSkill(cmd),casting=actor.castingSkill?.cmd,energy=actor.energy;finishTrainingPower();
     const record=[...document.querySelectorAll('#chatFeed>[data-chat-event="special"]')].at(-1);
-    rows.push({accepted,casting,energy,classKey:actor.archetypeKey,id:record?.dataset.fighterId,command:record?.dataset.command,selected:document.getElementById('arenaPowerTargetSelect').value});
+    rows.push({accepted,casting,energy,classKey:actor.archetypeKey,id:record?.dataset.fighterId,command:record?.dataset.command,selected:document.getElementById('targetFighterSelect').value});
    }return {id,rows};
   });for(const [i,row]of result.rows.entries()){assert.equal(row.accepted,true);assert.equal(row.casting,i?'!trueno':'!kame');assert.equal(row.classKey,i?'trueno':'kame');assert.equal(row.energy,55);assert.equal(row.id,result.id);assert.equal(row.selected,result.id);assert.equal(row.command,row.casting);}
  });
@@ -67,8 +81,8 @@ try{
   const r=await page.evaluate(()=>{trainingFixture(4);openLobby(false);const accepted=triggerQuickSkill('!coloso');return {accepted,state:gameState,casting:fighters.some(f=>f.castingSkill?.cmd==='!coloso')};});assert.deepEqual(r,{accepted:true,state:'COMBAT',casting:true});
  });
  await check('a fixed eliminated player stays selected and never redirects the action to a random survivor',async()=>{
-  const r=await page.evaluate(()=>{trainingFixture();const actor=fighters[0],id=String(actor.id);document.getElementById('targetFighterSelect').value=id;actor.eliminated=true;updateTargetSelectDropdown();return {accepted:triggerQuickSkill('!kame'),id,selected:document.getElementById('arenaPowerTargetSelect').value,casts:fighters.filter(f=>f.castingSkill).length,state:document.getElementById('arenaPowerTargetState').textContent};});assert.equal(r.accepted,false);assert.equal(r.selected,r.id);assert.equal(r.casts,0);assert.match(r.state,/K.O./);
-  const rejoin=await page.evaluate(()=>{document.getElementById('arenaTargetCommandInput').value='!jugar';const accepted=sendArenaTargetTestCommand();return {accepted,alive:!peekArenaTestTarget().eliminated,id:document.getElementById('arenaPowerTargetSelect').value,count:fighters.length};});assert.deepEqual(rejoin,{accepted:true,alive:true,id:r.id,count:32});
+  const r=await page.evaluate(()=>{trainingFixture();const actor=fighters[0],id=String(actor.id);document.getElementById('targetFighterSelect').value=id;actor.eliminated=true;updateTargetSelectDropdown();return {accepted:triggerQuickSkill('!kame'),id,selected:document.getElementById('targetFighterSelect').value,casts:fighters.filter(f=>f.castingSkill).length,state:document.getElementById('arenaPowerTargetState').textContent};});assert.equal(r.accepted,false);assert.equal(r.selected,r.id);assert.equal(r.casts,0);assert.match(r.state,/K.O./);
+  const rejoin=await page.evaluate(()=>{document.getElementById('arenaTargetCommandInput').value='!jugar';const accepted=sendArenaTargetTestCommand();return {accepted,alive:!peekArenaTestTarget().eliminated,id:document.getElementById('targetFighterSelect').value,count:fighters.length};});assert.deepEqual(rejoin,{accepted:true,alive:true,id:r.id,count:32});
  });
  await check('training obeys pause, power restrictions, class restrictions and final-result lock',async()=>{
   const r=await page.evaluate(()=>{trainingFixture();const out=[];isGamePaused=true;out.push(triggerQuickSkill('!kame'));isGamePaused=false;setArenaCombatRule('powerMode','noSpecials');out.push(triggerQuickSkill('!kame'));setArenaCombatRule('powerMode','full');setArenaCombatRule('classRule','ninja');out.push(triggerQuickSkill('!kame'));out.push(triggerQuickSkill('!rasen'));koSequenceActive=true;out.push(triggerQuickSkill('!rasen'));return out;});assert.deepEqual(r,[false,false,false,true,false]);
@@ -89,7 +103,7 @@ try{
    trainingFixture(9);joinAsStreamer();const actor=fighters.find(f=>f.isStreamer),id=String(actor.id);document.getElementById('targetFighterSelect').value=id;refreshArenaTargetPanel();document.getElementById('chatFeed').replaceChildren();
    const changed=setArenaTestTargetClass('titan');document.getElementById('arenaTargetCommandInput').value='!rayo';const command=sendArenaTargetTestCommand(),classKey=actor.archetypeKey;
    actor.eliminated=true;isGamePaused=true;updateTargetSelectDropdown();document.getElementById('arenaTargetCommandInput').value='!jugar';const queued=sendArenaTargetTestCommand(),stillDead=actor.eliminated;isGamePaused=false;drainArenaAudienceQueue();
-   return {changed,command,classKey,queued,stillDead,alive:!actor.eliminated,id,selected:document.getElementById('arenaPowerTargetSelect').value,count:fighters.length,leaked:document.getElementById('chatFeed').textContent.includes(HOST_INTERNAL_NAME),duplicates:fighters.filter(f=>f.name.includes(HOST_INTERNAL_NAME)).length};
+   return {changed,command,classKey,queued,stillDead,alive:!actor.eliminated,id,selected:document.getElementById('targetFighterSelect').value,count:fighters.length,leaked:document.getElementById('chatFeed').textContent.includes(HOST_INTERNAL_NAME),duplicates:fighters.filter(f=>f.name.includes(HOST_INTERNAL_NAME)).length};
   });assert.equal(r.changed,true);assert.equal(r.command,true);assert.equal(r.classKey,'trueno');assert.equal(r.queued,true);assert.equal(r.stillDead,true);assert.equal(r.alive,true);assert.equal(r.selected,r.id);assert.equal(r.count,10);assert.equal(r.leaked,false);assert.equal(r.duplicates,1);
  });
  await check('each class has independent persisted preferences, configuration backup and restore without OBS changes',async()=>{
@@ -104,18 +118,17 @@ try{
  await check('Stream keeps the combined tool after casting and the selected actor remains explicit',async()=>{
   await page.locator('#btnFullscreenDual').click();await page.waitForFunction(()=>document.fullscreenElement?.id==='broadcastStageSection');
   await page.evaluate(()=>{trainingFixture(32);revealArenaWorkspacePanel('arenaPanelPowers');});
-  await page.locator('#arenaPowerTargetSelect').selectOption(await page.evaluate(()=>String(fighters[0].id)));
+  await page.locator('#targetFighterSelect').selectOption(await page.evaluate(()=>String(fighters[0].id)));
   await page.locator('.arena-skill-buttons button[onclick="triggerQuickSkill(\'!kame\')"]').click();
   assert.equal(await page.locator('#arenaStreamPanelHost>#arenaPanelPowers').count(),1);assert.equal(await page.locator('#arenaPanelPowers').isVisible(),true);assert.equal(await page.evaluate(()=>peekArenaTestTarget().castingSkill?.cmd),'!kame');
   if(process.env.ARENA_TRAINING_REPORT_DIR){await mkdir(process.env.ARENA_TRAINING_REPORT_DIR,{recursive:true});await page.evaluate(()=>renderBothScreensSimultaneously());await page.screenshot({path:join(process.env.ARENA_TRAINING_REPORT_DIR,'training-stream.png')});}
  });
- await check('the combined test tool stays usable at phone width and its shortcut opens the mobile host',async()=>{
+ await check('the unified test tool stays usable at phone width and opens directly in the mobile host',async()=>{
   await page.evaluate(async()=>{await document.exitFullscreen();});await page.waitForFunction(()=>arenaWorkspace.mode==='preparation');
   await page.setViewportSize({width:390,height:844});await page.waitForFunction(()=>arenaWorkspace.mobile);
-  await page.evaluate(()=>{trainingFixture(9);revealArenaWorkspacePanel('arenaPanelTarget');});
-  await page.locator('#arenaPanelTarget [data-workspace-reveal="arenaPanelPowers"]').click();
+  await page.evaluate(()=>{trainingFixture(9);revealArenaWorkspacePanel('arenaPanelPowers');});
   assert.equal(await page.locator('#arenaPanelPowers').isVisible(),true);
-  await page.locator('#arenaPowerTargetSelect').selectOption(await page.evaluate(()=>String(fighters[1].id)));
+  await page.locator('#targetFighterSelect').selectOption(await page.evaluate(()=>String(fighters[1].id)));
   await page.locator('.arena-skill-buttons button[onclick="triggerQuickSkill(\'!trueno\')"]').click();
   const r=await page.evaluate(()=>{const body=document.querySelector('#arenaPanelPowers .arena-panel-body');return {selected:peekArenaTestTarget().castingSkill?.cmd,fits:body.scrollWidth<=body.clientWidth+1,pageFits:document.documentElement.scrollWidth<=innerWidth};});assert.deepEqual(r,{selected:'!trueno',fits:true,pageFits:true});
   if(process.env.ARENA_TRAINING_REPORT_DIR)await page.screenshot({path:join(process.env.ARENA_TRAINING_REPORT_DIR,'training-mobile.png')});
