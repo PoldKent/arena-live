@@ -1,5 +1,13 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-27 — Exportación monolítica móvil de v0.16.0
+
+- `build:mobile` reúne el HTML, cinco módulos del motor y CSS en un archivo reproducible de menos de 1 MiB, sin fuentes ni dependencias de red.
+- Inicio rápido de 2, 4, 9, 32, 64 o 128 peleadores, Prota opcional, joystick en la vista activa y barra inferior en ambas orientaciones. Chat de pruebas seleccionado inicialmente.
+- Perfil inicial de 720p / 30 FPS / Rendimiento; 540p o 1080p y 60 FPS opcionales. Un canvas oculto libera su respaldo, y la vuelta desde otra app reinicia el reloj sin adelantar la partida. La física sigue a 60 pasos por segundo.
+- Generado desde el mismo combate y equilibrio de `main`; sin ramas ni otra implementación de reglas. El servidor principal conserva ambas capturas Full HD y TikTok LIVE. La descarga funciona sin conexión y sus interacciones sociales son simuladas.
+- Pruebas de archivo local sin red, controles táctiles, los tres modos, carga con 128, persistencia, almacenamiento bloqueado y paridad de combate entre perfiles. CI incluye la exportación móvil en Windows y Linux.
+
 ## 2026-10-26 — Arena Live v0.16 · Identificación de la entrega terminada
 
 - Distingue la entrega final de la etiqueta v0.15 utilizada durante su implementación. Las seis correcciones se incorporaron en `1976160` y la compatibilidad Windows en `6ae39a4`.

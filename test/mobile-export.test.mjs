@@ -1,0 +1,28 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp,readFile,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {Script} from 'node:vm';
+import {buildMobile} from '../tools/build-mobile.mjs';
+
+test('portable export is self-contained, deterministic and includes the exact current engine modules',async()=>{
+    const dir=await mkdtemp(join(tmpdir(),'arena-mobile-export-'));
+    try{
+        const a=await buildMobile(join(dir,'a.html')),b=await buildMobile(join(dir,'b.html'));
+        assert.equal(a.sha256,b.sha256);
+        const html=await readFile(a.path,'utf8');
+        assert.ok(a.bytes<1024*1024,'Single file stays under 1 MiB');
+        assert.doesNotMatch(html,/<(?:script|link)\b[^>]+(?:src|href)\s*=/i);
+        assert.doesNotMatch(html,/@import\s|url\(["']?https?:/i);
+        for(const name of ['core','render','audio','settings','balance-evidence']){
+            const path=`engine/arena-${name}.js`,source=(await readFile(new URL('../'+path,import.meta.url),'utf8')).replace(/\r\n?/g,'\n');
+            assert.ok(html.includes(source.replace(/<\/script/gi,'<\\/script')),path+' is copied without gameplay edits');
+        }
+        for(const [,source]of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))new Script(source);
+        assert.match(html,/TikTok LIVE real requiere el servidor/);
+        const index=await readFile(new URL('../index.html',import.meta.url),'utf8');
+        assert.match(index,/id="canvas16x9" width="1920" height="1080"/);
+        assert.match(index,/id="canvas9x16" width="1080" height="1920"/);
+    }finally{await rm(dir,{recursive:true,force:true});}
+});

@@ -1,0 +1,46 @@
+{
+  "version": "0.16.0",
+  "baseCommit": "03c0d04ff8b95e58d79a113ce01d31c737f9cd44",
+  "artifact": {
+    "filename": "Arena-Live-v0.16.0-movil.html",
+    "bytes": 765958,
+    "sha256": "997b54968af0a8622d646a523197c4a642179fe0a732703e8a4d58c9d115b489",
+    "inputs": {
+      "index.html": "a576be0e32a6627639a5b8c83a17ba71917c956de72bae5fa5158cf26595109f",
+      "styles/arena-ui.css": "be2f4045ff727e732bf41d4336f13c41a24c8447076ca78b811891ab6bc83d70",
+      "styles/TAILWIND-LICENSE.txt": "60e0b68c0f35c078eef3a5d29419d0b03ff84ec1df9c3f9d6e39a519a5ae7985",
+      "engine/arena-core.js": "b0032cc7d12a6eb3c5801b6891baf6fec02aa7089418853a1f0d59fcfb9dd7f6",
+      "engine/arena-render.js": "ed5bf76bd0bd4fd52a0fd126ac5f02e89342e54d80bfb5a0fcec8be59a02fd40",
+      "engine/arena-audio.js": "8127314cdb79d2453183c6a93a86ad0256df672b10c250630a1a15ed7c1a2bbf",
+      "engine/arena-settings.js": "823ebc26befeb92f293d8ff171141d773550776298590fecaacc8bebb4829ff5",
+      "engine/arena-balance-evidence.js": "415f773a93d5e24322344de174c136eedfe141507ada335e7e7b6a6f6860442b",
+      "portable/mobile.css": "5e3e4a11b086f0ee9c9bc99a0001b72b16bc43b8041d3f3cfbab623a1dcbcf7a",
+      "portable/mobile-runtime.js": "ef2afe4b00c8ed3cf495adc8a442d80f9c626a314c42598630ed8d0f4baeb781"
+    }
+  },
+  "validation": {
+    "unitTests": 81,
+    "operatorBrowserChecks": 65,
+    "integrityBrowserChecks": 24,
+    "mainPerformanceChecks": 19,
+    "portableBrowserChecks": [
+      "opens a single downloaded HTML offline with a touch-friendly quick setup",
+      "quick start includes Prota in the selected count and preserves class selection",
+      "only the visible portrait capture allocates pixels; 720p uses 56% fewer pixels than full HD",
+      "touch actions and class powers reach the command history",
+      "all three game modes start from the same engine",
+      "128 fighters run with all classes and visible local commands",
+      "drawing quality changes do not change a seeded combat outcome",
+      "settings retain rules, class radar and pause/resume behavior",
+      "rotating a phone keeps a horizontal action bar and moves the same joystick into the active view",
+      "profile settings survive reopening the downloaded file",
+      "returning from another app resets the wall clock without changing a manual pause",
+      "no network request is needed for scripts, fonts, styles or gameplay",
+      "still runs with blocked file storage and on a narrow phone"
+    ],
+    "httpWebsocketRequests": 0,
+    "pageErrors": 0
+  },
+  "environment": "Chromium software rendering; touch and phone viewport emulation, not a physical phone or GPU",
+  "scope": "Downloaded file tested with file://, offline, portrait/landscape, touch input and 128 fighters. Same seeded combat state at 540p/30 and 1080p/60. No real LIVE, physical phone, WebKit or physical GPU test. Measured draw CPU timing is not phone FPS."
+}

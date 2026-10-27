@@ -793,6 +793,9 @@ await check('Autonomous Shinobi pursuit follows the local-distance rule in Duel,
 });
 await check('Radar axes and power names stay readable across eight languages, mobile width and the narrow Stream column',async()=>{
  await page.evaluate(async()=>{if(document.fullscreenElement)await document.exitFullscreen();toggleSettingsModal(false);isGamePaused=true;});
+ // exitFullscreen can resolve before the fullscreenchange handler has restored
+ // the preparation workspace. Wait before opening a modal in its former host.
+ await page.waitForFunction(()=>!document.fullscreenElement&&arenaWorkspace.mode==='preparation'&&!arenaDualWasFullscreen);
  await page.setViewportSize({width:1366,height:900});await openBalance();
  await page.waitForFunction(()=>document.getElementById('arenaBalanceRadar')?.dataset.radarNamedAxes==='true');
  const fits=async()=>{

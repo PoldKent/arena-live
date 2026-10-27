@@ -6,6 +6,12 @@ Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16
 
 `main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API, el servidor y el paquete identifican la versión 0.16. [Identificación de la entrega terminada](docs/RELEASE-0.16-VERSION.md). [Las seis correcciones y su validación](docs/RELEASE-0.15-CORRECCIONES.md).
 
+## Probar en un celular con un solo archivo
+
+Ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.16.0-movil.html`. Copia ese único HTML al teléfono y ábrelo con un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
+
+La exportación usa el combate de `main`; comienza en 720p, dibujo a 30 FPS y calidad Rendimiento. Permite cambiar a 540p/1080p y 30/60 FPS. TikTok LIVE real sigue necesitando el servidor: este archivo ofrece pruebas locales. [Uso, optimizaciones y límites de la exportación móvil](docs/MOVIL-MONOLITICO.md).
+
 ## Rivalidades de clase
 
 La cadena **Guerrero → Titán → Rayo → Espíritu → Shinobi → Guerrero** aporta +10 % de daño en el sentido de la flecha y −10 % en sentido contrario, tanto en golpes como en poderes. Los otros enfrentamientos son neutros. Guerrero responde al rival cercano y prefiere otro Guerrero hasta un **25 % más lejos**, Shinobi enfrenta al cercano y prefiere otra clase si está como máximo un **15 % más lejos**, sin inmunidad entre compañeros y Titán ataca a cualquiera. Los Shinobi restantes disputan una final.

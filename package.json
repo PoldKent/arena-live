@@ -14,7 +14,9 @@
     "test:browser": "node test/operator-browser.mjs && node test/integrity-browser.mjs",
     "test:performance": "node test/performance-browser.mjs",
     "test:gpu": "node test/performance-browser.mjs --gpu",
+    "test:mobile": "node test/mobile-browser.mjs",
     "build:styles": "node tools/build-styles.mjs",
+    "build:mobile": "node tools/build-mobile.mjs",
     "clean:branches": "node tools/clean-merged-branches.mjs",
     "analyze:balance": "node test/balance-simulation.mjs"
   },
