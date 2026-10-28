@@ -147,6 +147,14 @@ La etiqueta **🎮 Juego** distingue estas acciones observadas de los mensajes r
 
 El conector de TikTok es no oficial. Una conexión real necesita un LIVE público activo y un comentario desde otra cuenta; sigue pendiente su validación durante una emisión real. La integración recibe comentarios y el evento LIKE de TikTok (taps). El contador del puente distingue taps reales, pruebas y efectos aplicados. Para probar sin LIVE, envía `!jugar` desde **Probar comando**, luego usa **Probar 10 taps** sobre `@arena_prueba`. Los regalos, las demás interacciones sociales y los botones de prueba siguen simulados.
 
+## Cómo participar · Guía permanente en ambas emisiones
+
+El lobby muestra una tarjeta de bienvenida adaptada a **16:9 y 9:16** con los pasos para entrar desde TikTok: escribe `!jugar`, elige una clase y activa su ataque. Conserva el reloj, modo, reglas y botones del operador. Al comenzar el combate, la tarjeta central desaparece.
+
+Una franja compacta al pie de **ambas capturas** permanece visible en lobby, combate y victoria: `!jugar`; `!guerrero → !kame`, `!shinobi → !rasen`, `!titan → !coloso`, `!rayo → !trueno` y `!espiritu → !enred`. En 9:16 se organiza en dos columnas para no atravesar el centro del escenario; los espectadores que llegan tarde siguen viendo las instrucciones.
+
+El teléfono vertical usa un **marco de previsualización 9:20** al preparar la vista 9:16. El vídeo interior permanece 9:16, centrado y sin deformación. El encuadre extra solo se usa en la pantalla del teléfono: la captura vertical de OBS y TikTok sigue siendo **1080 × 1920 (9:16)**, sin barras nuevas grabadas en el vídeo.
+
 ## Móvil y controles
 
 En móvil se prioriza 9:16 y una barra inferior con **Prota, Pausa, Saltar, Golpe, Poder y Menú**. Menú permite acceder a todas las opciones, chats y herramientas compactas. Se conservan joystick y gestos; las acciones de combate se habilitan al participar con control manual.
