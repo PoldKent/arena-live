@@ -135,6 +135,25 @@ try{
         assert.equal(await page.locator('#settingsPauseModal').isVisible(),true);
         assert.equal(await page.locator('#arenaMaxPlayers').count(),1);
         assert.ok(await page.locator('#arenaBalanceRadar').count());
+        const placement=await page.evaluate(()=>{
+            const category=id=>document.getElementById(id)?.closest('.arena-settings-section')?.dataset.settingsCategory;
+            return {
+                names:category('showFighterNamesToggle'),
+                damageNumbers:category('showCombatNumbersToggle'),
+                powerText:category('showPowerTextToggle'),
+                transparency:category('hudOpacityRange'),
+                mobileControls:category('arenaMobileControlSettings'),
+                volume:category('arenaRuntime_masterVolume'),
+                capacity:category('arenaMaxPlayers'),
+                damageRule:category('arenaRuleDamage'),
+                audience:category('autoAudienceRateSettings')
+            };
+        });
+        assert.deepEqual(placement,{
+            names:'broadcast',damageNumbers:'broadcast',powerText:'broadcast',
+            transparency:'broadcast',mobileControls:'controls',volume:'audio',
+            capacity:'match',damageRule:'combat',audience:'audience'
+        });
         await page.evaluate(()=>{setArenaCombatRule('maxPlayers',64);toggleSettingsModal(false);});
         assert.equal(await page.evaluate(()=>ArenaLive.getState().paused),false);
         await page.evaluate(()=>ArenaPortable.start({count:128,join:false}));assert.equal(await page.evaluate(()=>fighters.length),64);
