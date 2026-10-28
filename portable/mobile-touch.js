@@ -210,7 +210,7 @@ function arenaMobileShowTestDrawer(open=true){
     if(shortcut){shortcut.setAttribute('aria-expanded',String(!!open));shortcut.setAttribute('aria-controls','arenaPortableTestDrawer');}
     const fab=document.getElementById('arenaMobileTestFab');
     if(fab)fab.setAttribute('aria-expanded',String(!!open));
-    if(open)requestAnimationFrame(()=>drawer.scrollIntoView({block:'nearest',inline:'nearest'}));
+    // A fixed drawer is already visible: scrolling the document would move the game.
 }
 function arenaMobileInstallTestDrawer(){
     const drawer=document.createElement('aside');
