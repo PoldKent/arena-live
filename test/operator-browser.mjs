@@ -1161,8 +1161,8 @@ await check('Optional HUD labels show only confirmed TikTok taps, !jugar and Pro
    const allHidden=![bot,tapped,playedFighter,prota].some(shouldShowFighterLabel);
    setCombatDisplayOption('names',true);
    const saved=JSON.parse(localStorage.getItem(ARENA_COMBAT_DISPLAY_KEY)||'{}');
-   const setting=document.getElementById('showTikTokParticipantNamesOnlyToggle');
-   const persisted=saved.tiktokNamesOnly===true&&setting?.checked===true;
+   const simulatedToggles=['showSimulatedFighterNamesToggle','showSimulatedFighterHpBarsToggle','showSimulatedFighterEnergyBarsToggle'];
+   const persisted=saved.tiktokNamesOnly===true&&simulatedToggles.every(id=>document.getElementById(id)?.checked===false);
    setCombatDisplayOption('tiktokNamesOnly',false);
    const oldViewRestored=shouldShowFighterLabel(bot);
    return {botHidden,tapVisible,playVisible,protaVisible,allHidden,persisted,oldViewRestored};
@@ -1203,6 +1203,28 @@ await check('LIVE participant filter hides only overhead indicators, preserving 
    return {botsHiddenAbove,bothVisible,afterTap,independentOfNames,restoredOverhead};
  });
  assert.deepEqual(r,{botsHiddenAbove:true,bothVisible:true,afterTap:true,independentOfNames:true,restoredOverhead:true});
+});
+await check('Six independent fighter HUD options and persistence',async()=>{
+ const r=await page.evaluate(()=>{
+  const ids=['showFighterNamesToggle','showSimulatedFighterNamesToggle','showFighterHpBarsToggle','showSimulatedFighterHpBarsToggle','showFighterEnergyBarsToggle','showSimulatedFighterEnergyBarsToggle'];
+  const six=ids.every(id=>!!document.getElementById(id));
+  const noHeavyCheckbox=!document.getElementById('showTikTokParticipantNamesOnlyToggle');
+  const bot={isStreamer:false,joinedByTikTok:false},real={isStreamer:false,joinedByTikTok:true};
+  setCombatDisplayOption('names',true);setCombatDisplayOption('simulatedNames',false);
+  setCombatDisplayOption('hpBars',true);setCombatDisplayOption('simulatedHpBars',true);
+  setCombatDisplayOption('energyBars',true);setCombatDisplayOption('simulatedEnergyBars',false);
+  const independent=!shouldShowFighterLabel(bot)&&shouldShowFighterHpBar(bot)&&
+   !shouldShowFighterEnergyBar(bot)&&shouldShowFighterLabel(real)&&shouldShowFighterHpBar(real)&&shouldShowFighterEnergyBar(real);
+  const persisted=JSON.parse(localStorage.getItem(ARENA_COMBAT_DISPLAY_KEY)||'{}');
+  const saved=persisted.simulatedNames===false&&persisted.simulatedHpBars===true&&persisted.simulatedEnergyBars===false;
+  setCombatDisplayOption('hpBars',false);
+  const dependentDisabled=document.getElementById('showSimulatedFighterHpBarsToggle').disabled;
+  setCombatDisplayOption('hpBars',true);
+  const dependentEnabled=!document.getElementById('showSimulatedFighterHpBarsToggle').disabled;
+  setCombatDisplayOption('tiktokNamesOnly',false);
+  return {six,noHeavyCheckbox,independent,saved,dependentDisabled,dependentEnabled};
+ });
+ assert.deepEqual(r,{six:true,noHeavyCheckbox:true,independent:true,saved:true,dependentDisabled:true,dependentEnabled:true});
 });
 await check('Protagonist can join and rejoin mid-fight in free mode at a full simulated 128 roster',async()=>{
  const r=await page.evaluate(()=>{

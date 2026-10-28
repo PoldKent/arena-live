@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.36 — TikTok LIVE</title>
+    <title>Arena Live v0.37 — TikTok LIVE</title>
     <!--
       ARENA LIVE · GAME RUNTIME
       The classic game script stays here; utility CSS is built locally and
@@ -219,7 +219,7 @@
 #viewport16x9 .arena-victory-card, #viewport9x16 .arena-victory-card,
 #viewport16x9 .arena-audience-guide, #viewport9x16 .arena-audience-guide { opacity: var(--arena-hud-opacity); }
 #verticalEventHistory { display: none !important; }
-/* v0.36 · Operator-first layout. No game canvas, OBS crop or rule logic is modified. */
+/* v0.37 · Operator-first layout. No game canvas, OBS crop or rule logic is modified. */
 #arenaSettingsNav {position:sticky;top:-10px;z-index:4;display:grid;gap:7px;padding:9px 1px 11px;background:#0b101e;border-bottom:1px solid #34495b;margin-bottom:11px}
 #arenaSettingsTabs {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
 #arenaSettingsTabs button {padding:9px 4px;min-height:37px;border:1px solid #30465b;border-radius:7px;background:#152131;color:#d2e0eb;font:650 11px Inter,system-ui;white-space:normal}
@@ -1913,7 +1913,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.36 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.37 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
@@ -3221,44 +3221,97 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let showCombatNumbers = false;
         let showPowerText = false;
         let showFighterNames = true;
-        let showTikTokParticipantNamesOnly = false;
-        // Only the labels and HP/energy bars above fighters are filtered.
-        // The fixed 1v1 duel HUD always shows both contestants, even simulated ones.
-        function shouldShowFighterInformation(fighter) {
-            return !showTikTokParticipantNamesOnly || fighter?.isStreamer === true || fighter?.joinedByTikTok === true;
+        let showSimulatedFighterNames = true;
+        let showFighterHpBars = true;
+        let showSimulatedFighterHpBars = true;
+        let showFighterEnergyBars = true;
+        let showSimulatedFighterEnergyBars = true;
+        // The 1v1 top HUD always displays both sides; these controls govern only
+        // names and bars anchored above fighters inside the two game canvases.
+        function isConfirmedArenaParticipant(fighter) {
+            return fighter?.isStreamer === true || fighter?.joinedByTikTok === true;
         }
         function shouldShowFighterLabel(fighter) {
-            return showFighterNames && shouldShowFighterInformation(fighter);
+            return showFighterNames && (showSimulatedFighterNames || isConfirmedArenaParticipant(fighter));
+        }
+        function shouldShowFighterHpBar(fighter) {
+            return showFighterHpBars && (showSimulatedFighterHpBars || isConfirmedArenaParticipant(fighter));
+        }
+        function shouldShowFighterEnergyBar(fighter) {
+            return showFighterEnergyBars && (showSimulatedFighterEnergyBars || isConfirmedArenaParticipant(fighter));
+        }
+        // Compatibility for older v0.34-v0.37 integrations that queried this predicate.
+        function shouldShowFighterInformation(fighter) {
+            return (showSimulatedFighterNames && showSimulatedFighterHpBars && showSimulatedFighterEnergyBars)
+                || isConfirmedArenaParticipant(fighter);
         }
         const ARENA_COMBAT_DISPLAY_KEY = 'arenaLiveCombatDisplayV1';
 
         function setCombatDisplayOption(option, enabled, remember = true) {
-            if (!['numbers', 'powerText', 'names', 'tiktokNamesOnly'].includes(option)) return;
-            if (option === 'numbers') showCombatNumbers = !!enabled;
-            if (option === 'powerText') showPowerText = !!enabled;
-            if (option === 'names') showFighterNames = !!enabled;
-            if (option === 'tiktokNamesOnly') showTikTokParticipantNamesOnly = !!enabled;
+            const valid=['numbers','powerText','names','simulatedNames','hpBars','simulatedHpBars','energyBars','simulatedEnergyBars','tiktokNamesOnly'];
+            if (!valid.includes(option)) return;
+            const value=!!enabled;
+            if (option === 'numbers') showCombatNumbers = value;
+            if (option === 'powerText') showPowerText = value;
+            if (option === 'names') showFighterNames = value;
+            if (option === 'simulatedNames') showSimulatedFighterNames = value;
+            if (option === 'hpBars') showFighterHpBars = value;
+            if (option === 'simulatedHpBars') showSimulatedFighterHpBars = value;
+            if (option === 'energyBars') showFighterEnergyBars = value;
+            if (option === 'simulatedEnergyBars') showSimulatedFighterEnergyBars = value;
+            // Legacy toggle: maps to the independent bot-display controls without
+            // reintroducing the oversized, combined checkbox.
+            if (option === 'tiktokNamesOnly') {
+                showSimulatedFighterNames = !value;
+                showSimulatedFighterHpBars = !value;
+                showSimulatedFighterEnergyBars = !value;
+            }
             for (const ft of floatingTexts) {
                 const visible = (ft.kind === 'number' && showCombatNumbers) || (ft.kind === 'power' && showPowerText);
                 ft.text = visible ? ft.labelText : ft.iconText;
             }
-            const numbers = document.getElementById('showCombatNumbersToggle');
-            const power = document.getElementById('showPowerTextToggle');
-            if (numbers) numbers.checked = showCombatNumbers;
-            if (power) power.checked = showPowerText;
-            const names=document.getElementById('showFighterNamesToggle');
-            if(names)names.checked=showFighterNames;
-            const onlyParticipants=document.getElementById('showTikTokParticipantNamesOnlyToggle');
-            if(onlyParticipants)onlyParticipants.checked=showTikTokParticipantNamesOnly;
-            if (remember) try { localStorage.setItem(ARENA_COMBAT_DISPLAY_KEY, JSON.stringify({numbers:showCombatNumbers, powerText:showPowerText, names:showFighterNames, tiktokNamesOnly:showTikTokParticipantNamesOnly})); } catch (_) {}
+            for(const [id,checked] of [
+                ['showCombatNumbersToggle',showCombatNumbers],
+                ['showPowerTextToggle',showPowerText],
+                ['showFighterNamesToggle',showFighterNames],
+                ['showSimulatedFighterNamesToggle',showSimulatedFighterNames],
+                ['showFighterHpBarsToggle',showFighterHpBars],
+                ['showSimulatedFighterHpBarsToggle',showSimulatedFighterHpBars],
+                ['showFighterEnergyBarsToggle',showFighterEnergyBars],
+                ['showSimulatedFighterEnergyBarsToggle',showSimulatedFighterEnergyBars]
+            ]){
+                const toggle=document.getElementById(id);
+                if(toggle)toggle.checked=checked;
+            }
+            // Grey out only the dependent bot checkbox; never change its saved value.
+            for(const [id,enabledParent] of [
+                ['showSimulatedFighterNamesToggle',showFighterNames],
+                ['showSimulatedFighterHpBarsToggle',showFighterHpBars],
+                ['showSimulatedFighterEnergyBarsToggle',showFighterEnergyBars]
+            ]){
+                const toggle=document.getElementById(id);
+                if(toggle)toggle.disabled=!enabledParent;
+            }
+            if (remember) try { localStorage.setItem(ARENA_COMBAT_DISPLAY_KEY, JSON.stringify({
+                numbers:showCombatNumbers,powerText:showPowerText,names:showFighterNames,
+                simulatedNames:showSimulatedFighterNames,hpBars:showFighterHpBars,
+                simulatedHpBars:showSimulatedFighterHpBars,energyBars:showFighterEnergyBars,
+                simulatedEnergyBars:showSimulatedFighterEnergyBars,
+                tiktokNamesOnly:!showSimulatedFighterNames&&!showSimulatedFighterHpBars&&!showSimulatedFighterEnergyBars
+            })); } catch (_) {}
         }
         function loadCombatDisplayOptions() {
             let saved;
             try { saved = JSON.parse(localStorage.getItem(ARENA_COMBAT_DISPLAY_KEY) || 'null'); } catch (_) {}
+            const legacyShowBots=saved?.tiktokNamesOnly !== true;
             setCombatDisplayOption('numbers', saved?.numbers === true, false);
             setCombatDisplayOption('powerText', saved?.powerText === true, false);
             setCombatDisplayOption('names', saved?.names !== false, false);
-            setCombatDisplayOption('tiktokNamesOnly', saved?.tiktokNamesOnly === true, false);
+            setCombatDisplayOption('simulatedNames', saved?.simulatedNames ?? legacyShowBots, false);
+            setCombatDisplayOption('hpBars', saved?.hpBars !== false, false);
+            setCombatDisplayOption('simulatedHpBars', saved?.simulatedHpBars ?? legacyShowBots, false);
+            setCombatDisplayOption('energyBars', saved?.energyBars !== false, false);
+            setCombatDisplayOption('simulatedEnergyBars', saved?.simulatedEnergyBars ?? legacyShowBots, false);
         }
         let activeEffects = [];
 
@@ -6490,17 +6543,20 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const plateY = drawY - r - (portraitLabel ? 24 : 22);
             if(shouldShowFighterLabel(f))drawFighterLabel(targetCtx, f, drawX, plateY, nameFont, classFont, packedFighterCount);
 
-            if (gameState !== 'LOBBY' && shouldShowFighterInformation(f)) {
+            if (gameState !== 'LOBBY' && (shouldShowFighterHpBar(f) || shouldShowFighterEnergyBar(f))) {
                 const barW = 44;
-                const hpPct = Math.max(0, f.hp / f.maxHp);
-                targetCtx.fillStyle = 'rgba(15, 23, 42, 0.92)';
-                targetCtx.fillRect(drawX - barW / 2, plateY + 13, barW, 5);
-                targetCtx.fillStyle = hpPct > 0.45 ? '#22c55e' : (hpPct > 0.2 ? '#f59e0b' : '#ef4444');
-                targetCtx.fillRect(drawX - barW / 2, plateY + 13, barW * hpPct, 5);
-
-                const enPct = Math.max(0, f.energy / 100);
-                targetCtx.fillStyle = '#38bdf8';
-                targetCtx.fillRect(drawX - barW / 2, plateY + 19, barW * enPct, 2);
+                if (shouldShowFighterHpBar(f)) {
+                    const hpPct = Math.max(0, f.hp / f.maxHp);
+                    targetCtx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+                    targetCtx.fillRect(drawX - barW / 2, plateY + 13, barW, 5);
+                    targetCtx.fillStyle = hpPct > 0.45 ? '#22c55e' : (hpPct > 0.2 ? '#f59e0b' : '#ef4444');
+                    targetCtx.fillRect(drawX - barW / 2, plateY + 13, barW * hpPct, 5);
+                }
+                if (shouldShowFighterEnergyBar(f)) {
+                    const enPct = Math.max(0, f.energy / 100);
+                    targetCtx.fillStyle = '#38bdf8';
+                    targetCtx.fillRect(drawX - barW / 2, plateY + (showFighterHpBars && shouldShowFighterHpBar(f) ? 19 : 13), barW * enPct, 2);
+                }
 
             }
 
@@ -9019,7 +9075,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             refreshArenaTrainingControls();
         }
 
-        // v0.36: Reorganize existing Settings sections, never cloning inputs or
+        // v0.37: Reorganize existing Settings sections, never cloning inputs or
         // changing their inline handlers, IDs, saved values or rule semantics.
         const ARENA_SETTINGS_NAV_KEY = 'arenaLiveSettingsNavV1';
         const ARENA_SETTINGS_GROUPS = Object.freeze(['match','controls','broadcast','audio','audience','system','combat','classes','system']);
@@ -9135,14 +9191,34 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 displayBody.appendChild(hud);
                 const toggles=hud.querySelector('#arenaHudDisplayToggles');
                 const oldContainer=document.getElementById('showCombatNumbersToggle')?.parentElement?.parentElement;
-                const names=document.createElement('label');
-                names.className='flex items-center gap-2';
-                names.innerHTML='<input id="showFighterNamesToggle" type="checkbox" class="accent-cyan-400" onchange="setCombatDisplayOption(\'names\',this.checked)"> <span id="arenaHudNamesLabel">Mostrar nombres y clases de jugadores</span>';
-                toggles.appendChild(names);
-                const audienceOnly=document.createElement('label');
-                audienceOnly.className='flex items-start gap-2 pl-4 text-cyan-100';
-                audienceOnly.innerHTML='<input id="showTikTokParticipantNamesOnlyToggle" type="checkbox" class="mt-0.5 accent-cyan-400" onchange="setCombatDisplayOption(\'tiktokNamesOnly\',this.checked)"> <span id="arenaHudParticipantsLabel">Mostrar nombres, vida y energía solo de participantes que entraron con taps o !jugar de TikTok (y Protagonista). Se ocultan únicamente los indicadores sobre los simulados; las barras superiores del duelo 1v1 siguen visibles.</span>';
-                toggles.appendChild(audienceOnly);
+                // Six short, independent controls grouped by label / HP / energy.
+                // Existing damage and power-text toggles remain below the same group.
+                const options=[
+                    ['showFighterNamesToggle','names','Nombres y clases'],
+                    ['showSimulatedFighterNamesToggle','simulatedNames','Incluir nombres de bots'],
+                    ['showFighterHpBarsToggle','hpBars','Barras de vida sobre jugadores'],
+                    ['showSimulatedFighterHpBarsToggle','simulatedHpBars','Incluir vida de bots'],
+                    ['showFighterEnergyBarsToggle','energyBars','Barras de energía sobre jugadores'],
+                    ['showSimulatedFighterEnergyBarsToggle','simulatedEnergyBars','Incluir energía de bots']
+                ];
+                const settingRows=document.createElement('div');
+                settingRows.id='arenaFighterDisplayOptions';
+                settingRows.className='grid grid-cols-1 sm:grid-cols-2 gap-2';
+                for(const [id,key,title] of options){
+                    const label=document.createElement('label');
+                    label.className='arena-hud-display-item flex items-center gap-2';
+                    const check=document.createElement('input');
+                    check.id=id;check.type='checkbox';check.className='accent-cyan-400 shrink-0';
+                    check.addEventListener('change',()=>setCombatDisplayOption(key,check.checked));
+                    const span=document.createElement('span');span.textContent=title;
+                    label.append(check,span);
+                    settingRows.appendChild(label);
+                }
+                toggles.appendChild(settingRows);
+                const help=document.createElement('p');
+                help.id='arenaHudDisplayHelp';help.className='text-[11px] text-slate-400 leading-relaxed';
+                help.textContent='Los controles de bots solo afectan los indicadores sobre los personajes. Las barras del duelo 1v1 siempre aparecen para ambos.';
+                toggles.appendChild(help);
                 move('showCombatNumbersToggle',toggles);
                 move('showPowerTextToggle',toggles);
                 if(oldContainer&&!oldContainer.querySelector('input,select,button'))oldContainer.remove();
@@ -9150,10 +9226,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 move('arenaCameraSettings',hud,'#arenaCameraSettings');
                 // loadCombatDisplayOptions executes before the settings navigator:
                 // synchronize newly-created controls with the existing source of truth.
-                const namesToggle=document.getElementById('showFighterNamesToggle');
-                if(namesToggle)namesToggle.checked=showFighterNames;
-                const tiktokNamesToggle=document.getElementById('showTikTokParticipantNamesOnlyToggle');
-                if(tiktokNamesToggle)tiktokNamesToggle.checked=showTikTokParticipantNamesOnly;
+                setCombatDisplayOption('names',showFighterNames,false);
             }
 
             let stored='match';try{stored=localStorage.getItem(ARENA_SETTINGS_NAV_KEY)||'match';}catch(_){}
@@ -9275,7 +9348,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.36.0',
+            version: '0.37.0',
             edition: 'tiktok',
             renderSpriteMode: arenaGpuSpritesEnabled ? 'hardware-candidate' : 'software-safe-vectors',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,

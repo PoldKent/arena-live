@@ -195,29 +195,24 @@ function arenaMobileInstallTestDrawer(){
         drawer.querySelector('#arenaPortableTestCollapse').textContent=drawer.classList.contains('is-collapsed')?'+':'−';
         drawer.querySelector('#arenaPortableTestCollapse').setAttribute('aria-label',drawer.classList.contains('is-collapsed')?'Expandir panel':'Minimizar panel');
     };
-    // Drag by the title bar without stealing touches from buttons and selects.
+    // Drag the entire panel; selector, target and skill buttons stay inside.
     const head=drawer.querySelector('#arenaPortableTestHead');let drag=null;
     head.addEventListener('pointerdown',event=>{
-        if(event.target.closest('button')||event.pointerType==='mouse'&&event.button!==0)return;
-        const rect=drawer.getBoundingClientRect();drag={id:event.pointerId,x:event.clientX-rect.left,y:event.clientY-rect.top};
+        if(event.target.closest('button')||(event.pointerType==='mouse'&&event.button!==0))return;
+        const rect=drawer.getBoundingClientRect();
+        drag={id:event.pointerId,dx:event.clientX-rect.left,dy:event.clientY-rect.top};
         try{head.setPointerCapture(event.pointerId);}catch(_){}
     });
     head.addEventListener('pointermove',event=>{
         if(!drag||drag.id!==event.pointerId)return;
         event.preventDefault();
-        // The testing overlay intentionally fills the arena without a background.
-        // Drag only the small selector/target tools; moving the overlay itself
-        // did nothing because its transparent layer is pinned to the viewport.
-        const view=drawer.parentElement.getBoundingClientRect();
-        const width=Math.min(310,view.width*.77);
-        const x=Math.max(6,Math.min(view.width-width-6,event.clientX-view.left-drag.x));
-        const y=Math.max(58,Math.min(view.height*.5,event.clientY-view.top-drag.y));
-        head.style.setProperty('left',x+'px','important');
-        head.style.setProperty('top',y+'px','important');
-        const picker=drawer.querySelector('.arena-portable-test-picker');
-        if(picker){picker.style.setProperty('left',x+'px','important');picker.style.setProperty('top',(y+46)+'px','important');}
-        const card=drawer.querySelector('#arenaTrainingTargetCard');
-        if(card){card.style.setProperty('left',x+'px','important');card.style.setProperty('top',(y+98)+'px','important');}
+        const viewport=drawer.parentElement.getBoundingClientRect();
+        const rect=drawer.getBoundingClientRect();
+        const x=Math.max(4,Math.min(viewport.width-rect.width-4,event.clientX-viewport.left-drag.dx));
+        const y=Math.max(4,Math.min(viewport.height-rect.height-4,event.clientY-viewport.top-drag.dy));
+        drawer.style.setProperty('left',x+'px','important');
+        drawer.style.setProperty('right','auto','important');
+        drawer.style.setProperty('top',y+'px','important');
     });
     const end=()=>{drag=null;};
     head.addEventListener('pointerup',end);head.addEventListener('pointercancel',end);

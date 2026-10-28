@@ -119,26 +119,37 @@ test('real TikTok LIVE follow gift and subscription events have isolated viewer-
  assert.match(bridge,/ARENA_SOCIAL_EVENT_TYPES = Object\.freeze\(\['taps', 'likes', 'share', 'follow', 'subscribe'/);
 });
 
-test('LIVE filter hides only overhead health; 1v1 HUD remains complete for simulated fighters',()=>{
- const info=html.match(/function shouldShowFighterInformation\(fighter\) \{[\s\S]*?\n        \}/)?.[0];
- assert.ok(info,'shared overhead information filter exists');
- const ctx=vm.createContext({});
- vm.runInContext('let showTikTokParticipantNamesOnly=true; '+info,ctx);
- const visible=vm.runInContext('shouldShowFighterInformation',ctx);
- assert.equal(visible({isStreamer:false,joinedByTikTok:false}),false);
- assert.equal(visible({isStreamer:false,joinedByTikTok:true}),true);
- assert.equal(visible({isStreamer:true,joinedByTikTok:false}),true);
- vm.runInContext('showTikTokParticipantNamesOnly=false',ctx);
- assert.equal(visible({isStreamer:false,joinedByTikTok:false}),true);
- assert.match(html,/if \(gameState !== 'LOBBY' && shouldShowFighterInformation\(f\)\) \{/);
+test('six HUD options filter labels, HP and energy independently without touching 1v1',()=>{
+ const source=html.slice(html.indexOf('        let showFighterNames = true;'),html.indexOf('        const ARENA_COMBAT_DISPLAY_KEY'));
+ assert.ok(source.includes('function shouldShowFighterHpBar'));
+ assert.ok(source.includes('function shouldShowFighterEnergyBar'));
+ const state=vm.createContext({});
+ vm.runInContext(source.replace('let showFighterNames = true','var showFighterNames = true'),state);
+ const bot={isStreamer:false,joinedByTikTok:false};
+ const viewer={isStreamer:false,joinedByTikTok:true};
+ const prota={isStreamer:true,joinedByTikTok:false};
+ assert.equal(vm.runInContext('shouldShowFighterLabel',state)(bot),true);
+ vm.runInContext('showSimulatedFighterNames=false;showSimulatedFighterHpBars=false;showSimulatedFighterEnergyBars=false',state);
+ for(const method of ['shouldShowFighterLabel','shouldShowFighterHpBar','shouldShowFighterEnergyBar']){
+  assert.equal(vm.runInContext(method,state)(bot),false);
+  assert.equal(vm.runInContext(method,state)(viewer),true);
+  assert.equal(vm.runInContext(method,state)(prota),true);
+ }
+ vm.runInContext('showSimulatedFighterHpBars=true',state);
+ assert.equal(vm.runInContext('shouldShowFighterHpBar',state)(bot),true);
+ assert.equal(vm.runInContext('shouldShowFighterEnergyBar',state)(bot),false);
+ assert.match(html,/if \(gameState !== 'LOBBY' && \(shouldShowFighterHpBar\(f\) \|\| shouldShowFighterEnergyBar\(f\)\)\)/);
+ assert.match(html,/if \(shouldShowFighterHpBar\(f\)\)/);
+ assert.match(html,/if \(shouldShowFighterEnergyBar\(f\)\)/);
  assert.doesNotMatch(html,/syncArenaDuelFighterInformation/);
- assert.doesNotMatch(html,/arena-duel-single/);
  for(const suffix of ['16','9']){
-   assert.match(html,new RegExp('id="hud1v1Bars'+suffix+'"'));
-   assert.match(html,new RegExp('id="p1Bar1v1_'+suffix+'"'));
-   assert.match(html,new RegExp('id="p2Bar1v1_'+suffix+'"'));
+  assert.match(html,new RegExp('id="hud1v1Bars'+suffix+'"'));
+  assert.match(html,new RegExp('id="p1Bar1v1_'+suffix+'"'));
+  assert.match(html,new RegExp('id="p2Bar1v1_'+suffix+'"'));
  }
  assert.match(html,/writeArenaHudText\(p1HpText, formatArenaFighterHp\(p1\)\)/);
  assert.match(html,/writeArenaHudText\(p2HpText, formatArenaFighterHp\(p2\)\)/);
- assert.match(html,/barras superiores del duelo 1v1 siguen visibles/);
+ for(const option of ['simulatedNames','simulatedHpBars','simulatedEnergyBars']){
+  assert.ok(html.includes(option));
+ }
 });

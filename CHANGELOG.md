@@ -1,5 +1,13 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-28 — Arena Live v0.37 · HUD independiente y panel Director compacto
+
+- Sustituido el checkbox largo de participación TikTok por seis controles individuales: mostrar nombres, nombres de bots, vida, vida de bots, energía y energía de bots. Siguen las opciones existentes de números de daño y texto de habilidades.
+- Migración automática de preferencias `arenaLiveCombatDisplayV1.tiktokNamesOnly` y compatibilidad con los controles guardados. Participantes LIVE y Protagonista mantienen sus datos; las estadísticas superiores 1v1 de ambos combatientes **nunca** se ocultan con este filtro.
+- Rediseño del panel móvil Herramientas de dirección: selector fijo, contenido dentro de una única hoja desplazable con alto limitado, cierre, minimización y arrastre de la hoja completa. Se elimina la distribución flotante que se superponía al combate y al resultado. Se preserva el mismo panel de comandos, jugador, interacciones y simulación sin duplicarlo.
+- Actualizados tanto los archivos fuente `portable/mobile.css` y `portable/mobile-touch.js` como el HTML monolítico v0.37, además de las pruebas de regresión. La comprobación visual en dispositivo y TikTok LIVE real queda pendiente.
+
+
 ## 2026-10-28 — Arena Live v0.36 · Mantener barras superiores en 1v1
 
 - Se corrige el alcance del filtro LIVE de v0.35: **solo** oculta nombres, HP y energía dibujados sobre personajes simulados. Las barras superiores del marcador de duelos 1v1 continúan mostrando a **ambos** participantes, incluidos bots, en 16:9 y 9:16.

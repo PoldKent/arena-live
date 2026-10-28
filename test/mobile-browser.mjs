@@ -261,7 +261,18 @@ try{
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
         assert.equal(await page.locator('#arenaPortableTestBody #arenaPanelPowers').count(),1);
         assert.equal(await page.locator('#arenaPortableTestBody #targetFighterSelect').count(),1);
-        assert.equal(await page.locator('#arenaPortableTestDrawer').evaluate(n=>getComputedStyle(n).borderTopWidth),'0px');
+        assert.equal(await page.locator('#arenaPortableTestBody .arena-skill-buttons button').count()>0,true);
+        const sheet=await page.locator('#arenaPortableTestDrawer').evaluate(n=>{
+            const box=n.getBoundingClientRect(),body=n.querySelector('#arenaPortableTestBody');
+            const panel=body.querySelector('.arena-panel-body');
+            const viewport=n.parentElement.getBoundingClientRect();
+            return {border:parseFloat(getComputedStyle(n).borderTopWidth)>0,
+                scroll:getComputedStyle(body).overflowY==='auto',
+                contained:box.width<=viewport.width&&box.height<=viewport.height,
+                normalPanel:getComputedStyle(panel).position==='static',
+                noScreenOverlay:box.width<viewport.width&&box.height<viewport.height};
+        });
+        assert.deepEqual(sheet,{border:true,scroll:true,contained:true,normalPanel:true,noScreenOverlay:true});
         assert.equal(await page.locator('#targetFighterSelect').count(),1);
         await page.locator('#arenaPortableTestSelect').selectOption('arenaPanelPlayers');
         assert.equal(await page.locator('#arenaPortableTestBody #arenaPanelPlayers').count(),1);

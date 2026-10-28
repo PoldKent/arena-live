@@ -570,90 +570,6 @@ html.arena-mobile-offline #arenaMobilePause{
  background:rgba(84,51,26,var(--arena-hud-opacity,.85))!important;
  z-index:202!important
 }
-/* A distributed testing workspace instead of a huge framed dialog. */
-html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
- position:absolute!important;inset:0!important;left:0!important;right:0!important;top:0!important;bottom:0!important;
- width:100%!important;height:100%!important;min-width:0!important;max-width:none!important;max-height:none!important;
- margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
- background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;
- overflow:visible!important;z-index:141!important;pointer-events:none!important;
-}
-html.arena-mobile-offline #arenaPortableTestHead{
- position:absolute;left:9px;top:clamp(56px,8%,91px);z-index:4;
- display:flex;align-items:center;gap:5px;width:min(73%,292px);max-width:calc(100% - 17px);
- padding:5px 7px;border:1px solid rgba(98,177,196,.56);border-radius:20px;
- font:700 11px/1.25 system-ui,sans-serif;color:#b0f5f5;
- background:rgba(15,54,73,var(--arena-hud-opacity,.85));
- box-shadow:0 5px 12px #0006;pointer-events:auto!important
-}
-html.arena-mobile-offline #arenaPortableTestHead button{
- width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;
- font-size:17px!important;padding:0!important;border-radius:50%!important;
- background:rgba(27,55,73,var(--arena-hud-opacity,.85))!important
-}
-html.arena-mobile-offline #arenaPortableTestDrawer .arena-portable-test-picker{
- position:absolute!important;top:clamp(102px,14%,142px);left:9px;
- width:min(76%,310px);padding:0!important;z-index:4;
- background:transparent!important;pointer-events:auto!important;
- font:650 11px system-ui,sans-serif
-}
-html.arena-mobile-offline #arenaPortableTestSelect{
- background:rgba(14,35,57,var(--arena-hud-opacity,.85))!important;
- min-height:40px!important;border-radius:11px!important;
-}
-html.arena-mobile-offline #arenaPortableTestBody,
-html.arena-mobile-offline #arenaPortableTestBody>.arena-work-panel,
-html.arena-mobile-offline #arenaPortableTestBody>.arena-work-panel>.arena-panel-body{
- display:contents!important;max-height:none!important;overflow:visible!important;
- padding:0!important;margin:0!important;border:0!important;
- background:none!important;box-shadow:none!important;pointer-events:none!important
-}
-html.arena-mobile-offline #arenaPortableTestBody #arenaTrainingTargetCard{
- position:absolute!important;top:clamp(160px,23%,230px)!important;left:9px!important;
- width:min(77%,320px)!important;max-height:min(25vh,270px)!important;
- overflow:auto!important;margin:0!important;padding:8px!important;
- border:1px solid rgba(80,144,171,.6)!important;border-radius:13px!important;
- background:rgba(9,27,45,var(--arena-hud-opacity,.85))!important;
- box-shadow:0 7px 18px #0005!important;pointer-events:auto!important
-}
-html.arena-mobile-offline #arenaPortableTestBody #arenaTrainingTargetCard small,
-html.arena-mobile-offline #arenaPortableTestBody #arenaTrainingTargetCard p{
- font-size:10px!important;line-height:1.25!important
-}
-html.arena-mobile-offline #arenaPortableTestBody .arena-skill-buttons{
- position:absolute!important;bottom:clamp(106px,15%,180px)!important;left:8px!important;
- width:calc(100% - 16px)!important;max-width:none!important;margin:0!important;
- padding:0!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
- gap:7px!important;pointer-events:none!important;
-}
-html.arena-mobile-offline #arenaPortableTestBody .arena-skill-buttons>button{
- display:flex!important;flex-direction:row!important;justify-content:center!important;
- gap:4px!important;align-items:center!important;pointer-events:auto!important;
- min-width:0!important;min-height:48px!important;height:auto!important;padding:6px 3px!important;
- border:1px solid rgba(103,184,206,.58)!important;border-radius:14px!important;
- color:#e3fbff!important;background:rgba(15,47,68,var(--arena-hud-opacity,.85))!important;
- font:700 12px/1.1 system-ui,sans-serif!important;box-shadow:0 5px 14px #0006!important
-}
-html.arena-mobile-offline #arenaPortableTestBody .arena-skill-buttons>button span{
- max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important
-}
-html.arena-mobile-offline #arenaPortableTestBody>.arena-work-panel:not(#arenaPanelPowers) .arena-panel-body{
- display:block!important;position:absolute!important;top:clamp(159px,23%,235px)!important;left:8px!important;right:8px!important;
- max-height:48%!important;overflow-y:auto!important;padding:9px!important;
- background:rgba(11,31,49,var(--arena-hud-opacity,.85))!important;
- border:1px solid rgba(99,173,190,.42)!important;border-radius:12px!important;
- pointer-events:auto!important
-}
-html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed:not([hidden]){
- width:100%!important;max-height:none!important;height:100%!important;
-}
-html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed #arenaPortableTestHead{
- width:min(70%,262px)!important
-}
-html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed .arena-portable-test-picker,
-html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed #arenaPortableTestBody{
- display:none!important
-}
 /* Single menu control with compact collapsed 'Partida', leaving Pause always at top left. */
 html.arena-mobile-offline .arena-mobile-match-menu{
  grid-column:1/-1;display:block!important;border-top:1px solid #365a70;
@@ -739,30 +655,6 @@ html.arena-mobile-offline[data-mobile-mode="director"]:not(.arena-mobile-edit-co
  display:none!important
 }
 
-/* v0.32 · true open testing canvas: individual widgets, not a giant test card. */
-html.arena-mobile-offline #arenaPortableTestBody #arenaTrainingTargetCard{
- background:transparent!important;border:0!important;border-radius:0!important;
- box-shadow:none!important;padding:0!important;overflow:visible!important;
- max-height:180px!important;
-}
-html.arena-mobile-offline #arenaPortableTestBody #arenaTrainingTargetCard>label{
- display:block!important;width:max-content;max-width:100%;margin:0 0 5px;
- border-radius:9px;padding:3px 8px;color:#a7f1f1!important;
- background:rgba(14,48,68,var(--arena-hud-opacity,.85))!important;
-}
-html.arena-mobile-offline #arenaPortableTestBody #targetFighterSelect{
- background:rgba(12,39,61,var(--arena-hud-opacity,.85))!important;
- border:1px solid rgba(114,192,204,.65)!important;
- border-radius:11px!important;min-height:45px!important;
-}
-html.arena-mobile-offline #arenaPortableTestBody .arena-skill-buttons>button{
- min-height:53px!important;
- background:rgba(14,54,74,var(--arena-hud-opacity,.85))!important;
- border-radius:17px!important;
-}
-html.arena-mobile-offline #arenaPortableTestBody .arena-skill-buttons>button:active{
- transform:scale(.96);border-color:#8beadf!important;
-}
 /* Menu control surface is the same translucent system as the HUD. */
 html.arena-mobile-offline #arenaPortableTestBody input,
 html.arena-mobile-offline #arenaPortableTestBody select,
@@ -772,4 +664,84 @@ html.arena-mobile-offline #arenaOperatorPopover .arena-mobile-match-menu>summary
 html.arena-mobile-offline #arenaPortableSetup input:not([type=checkbox]):not([type=radio]):not([type=range]),
 html.arena-mobile-offline #arenaPortableSetup select{
  background-color:rgba(19,50,72,var(--arena-hud-opacity,.85))!important;
+}
+
+
+/* v0.37: Director controls stay within one compact scrollable panel. */
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
+ position:absolute!important;top:clamp(78px,10%,110px);right:9px;left:auto;
+ width:min(92%,390px)!important;height:auto!important;max-height:min(59%,550px)!important;
+ display:flex!important;flex-direction:column!important;padding:0 0 5px!important;
+ border:1px solid #70d1dbad!important;border-radius:15px!important;overflow:hidden!important;
+ background:rgba(10,30,48,var(--arena-hud-opacity,.95))!important;
+ box-shadow:0 10px 32px #000a!important;pointer-events:auto!important;z-index:184!important;
+}
+html.arena-mobile-offline #arenaPortableTestHead{
+ position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;
+ min-height:44px!important;padding:5px 9px!important;border:0!important;
+ border-bottom:1px solid #638da55f!important;border-radius:0!important;
+ background:rgba(18,57,78,var(--arena-hud-opacity,.95))!important;
+ font:750 12px/1.3 system-ui,sans-serif!important
+}
+html.arena-mobile-offline #arenaPortableTestDrawer .arena-portable-test-picker{
+ position:static!important;inset:auto!important;width:100%!important;max-width:100%!important;
+ padding:5px 9px!important;display:flex!important;flex-direction:column!important;
+ gap:4px!important;pointer-events:auto!important
+}
+html.arena-mobile-offline #arenaPortableTestSelect{
+ width:100%!important;min-height:43px!important;font-size:14px!important
+}
+html.arena-mobile-offline #arenaPortableTestBody{
+ position:static!important;display:block!important;flex:1 1 auto!important;
+ min-height:0!important;max-height:none!important;overflow-y:auto!important;
+ padding:4px 9px 10px!important;overscroll-behavior:contain;touch-action:pan-y;pointer-events:auto!important
+}
+html.arena-mobile-offline #arenaPortableTestBody>.arena-work-panel{
+ position:relative!important;display:block!important;inset:auto!important;width:100%!important;
+ max-width:100%!important;max-height:none!important;padding:0!important;margin:0!important;
+ background:none!important;border:0!important;box-shadow:none!important;pointer-events:auto!important
+}
+html.arena-mobile-offline #arenaPortableTestBody>.arena-work-panel>.arena-panel-body{
+ position:static!important;display:block!important;inset:auto!important;width:100%!important;
+ max-height:none!important;height:auto!important;overflow:visible!important;
+ padding:2px 0!important;margin:0!important;background:none!important;border:0!important;pointer-events:auto!important
+}
+html.arena-mobile-offline #arenaPortableTestBody #arenaTrainingTargetCard{
+ position:static!important;inset:auto!important;width:100%!important;max-height:none!important;
+ padding:9px!important;margin:0 0 7px!important;border:1px solid #528ba36d!important;
+ border-radius:10px!important;background:rgba(17,47,68,var(--arena-hud-opacity,.92))!important;
+ overflow:visible!important;box-shadow:none!important;pointer-events:auto!important
+}
+html.arena-mobile-offline #arenaPortableTestBody .arena-skill-buttons{
+ position:static!important;inset:auto!important;left:auto!important;bottom:auto!important;
+ width:100%!important;max-width:100%!important;margin:6px 0!important;
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:7px!important;pointer-events:auto!important
+}
+html.arena-mobile-offline #arenaPortableTestBody .arena-skill-buttons>button{
+ display:flex!important;min-width:0!important;min-height:45px!important;
+ justify-content:center!important;align-items:center!important;
+ font:700 12px system-ui,sans-serif!important;pointer-events:auto!important
+}
+html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed:not([hidden]){
+ width:min(83%,316px)!important;max-height:45px!important;min-height:0!important;
+ padding:0!important;overflow:hidden!important
+}
+html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed .arena-portable-test-picker,
+html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed #arenaPortableTestBody{display:none!important}
+html.arena-mobile-offline #arenaFighterDisplayOptions{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important
+}
+html.arena-mobile-offline #arenaFighterDisplayOptions .arena-hud-display-item{
+ min-width:0;padding:8px 6px;border:1px solid #41677e77;border-radius:9px;
+ background:rgba(15,43,66,.5);font-size:11px;line-height:1.35;align-items:flex-start
+}
+html.arena-mobile-offline #arenaFighterDisplayOptions .arena-hud-display-item input{
+ margin-top:2px;flex:none;width:17px;height:17px
+}
+html.arena-mobile-offline #arenaFighterDisplayOptions .arena-hud-display-item:has(input:disabled){opacity:.55}
+@media(orientation:landscape) and (max-height:540px){
+ html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
+ top:8px;right:8px;width:min(55%,400px)!important;max-height:calc(100% - 16px)!important
+ }
 }
