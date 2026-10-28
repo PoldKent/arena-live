@@ -2,7 +2,7 @@
 // Desktop/OBS retains its own controls; this adapter never changes combat rules.
 const ARENA_MOBILE_TAP_GAP=325;
 const ARENA_MOBILE_LAYOUT_KEY='arenaLiveMobileButtonsV1';
-const arenaMobileLayoutDefaults=Object.freeze({arenaMobileJump:[73,82],arenaMobileAttack:[88,73],arenaMobilePower:[56,77],arenaMobileMoreBtn:[91,93]});
+const arenaMobileLayoutDefaults=Object.freeze({arenaMobileJump:[73,82],arenaMobileAttack:[88,73],arenaMobilePower:[56,77]});
 let arenaMobileLayout={size:70,points:Object.fromEntries(Object.entries(arenaMobileLayoutDefaults).map(([k,v])=>[k,[...v]]))};
 let arenaMobileEditing=false;
 try{const saved=JSON.parse(localStorage.getItem(ARENA_MOBILE_LAYOUT_KEY)||'null');if(saved&&Number.isFinite(saved.size))arenaMobileLayout.size=Math.max(56,Math.min(94,saved.size));for(const [id,p]of Object.entries(saved?.points||{})){if(Object.hasOwn(arenaMobileLayoutDefaults,id)&&Array.isArray(p)&&p.length===2&&p.every(Number.isFinite))arenaMobileLayout.points[id]=[Math.max(7,Math.min(93,p[0])),Math.max(8,Math.min(95,p[1]))];}}catch(_){}
@@ -144,6 +144,8 @@ function arenaMobileMountTestDrawer(){
     const drawer=document.getElementById('arenaPortableTestDrawer');
     if(viewport&&drawer){
         viewport.appendChild(drawer);
+        const skills=document.getElementById('arenaStreamerSkillsDock');
+        if(skills)viewport.appendChild(skills);
         // Reposition inside the viewport when orientation/ratio changes.
         drawer.style.top='';drawer.style.left='';drawer.style.right='';
     }
@@ -185,8 +187,8 @@ function arenaMobileShowTestDrawer(open=true){
 function arenaMobileInstallTestDrawer(){
     const drawer=document.createElement('aside');
     drawer.id='arenaPortableTestDrawer';drawer.hidden=true;
-    drawer.setAttribute('aria-label','Herramientas de dirección');
-    drawer.innerHTML='<div id="arenaPortableTestHead"><span>🧪 Herramientas de dirección</span><button type="button" id="arenaPortableTestCollapse" aria-label="Minimizar panel">−</button><button type="button" id="arenaPortableTestClose" aria-label="Cerrar pruebas">×</button></div><label class="arena-portable-test-picker">Panel<select id="arenaPortableTestSelect"><option value="arenaPanelPowers">Jugador, poderes y comandos</option><option value="arenaPanelPlayers">Jugadores y K.O.</option><option value="arenaPanelScenarios">Escenarios</option><option value="arenaPanelSocial">Interacciones</option><option value="arenaPanelSimulation">Simulación</option></select></label><div id="arenaPortableTestBody"></div>';
+    drawer.setAttribute('aria-label','Panel del streamer');
+    drawer.innerHTML='<div id="arenaPortableTestHead"><span>🧪 Panel del streamer</span><button type="button" id="arenaPortableTestCollapse" aria-label="Minimizar panel">−</button><button type="button" id="arenaPortableTestClose" aria-label="Cerrar pruebas">×</button></div><label class="arena-portable-test-picker">Panel<select id="arenaPortableTestSelect"><option value="arenaPanelPowers">Jugador y comandos</option><option value="arenaPanelPlayers">Participantes y K.O.</option><option value="arenaPanelScenarios">Escenarios</option><option value="arenaPanelSocial">Interacciones</option><option value="arenaPanelSimulation">Simulación</option></select></label><div id="arenaPortableTestBody"></div>';
     document.body.appendChild(drawer);
     drawer.querySelector('#arenaPortableTestSelect').addEventListener('change',event=>arenaMobileSelectTestPanel(event.target.value));
     drawer.querySelector('#arenaPortableTestClose').onclick=()=>arenaMobileShowTestDrawer(false);
@@ -218,12 +220,13 @@ function arenaMobileInstallTestDrawer(){
     head.addEventListener('pointerup',end);head.addEventListener('pointercancel',end);
     arenaMobileMountTestDrawer();
     const fab=document.createElement('button');fab.id='arenaMobileTestFab';fab.type='button';
-    fab.textContent='🧪';fab.title='Herramientas de dirección';fab.setAttribute('aria-label','Herramientas: jugador, poderes y comandos');fab.setAttribute('aria-expanded','false');
+    fab.textContent='⚙ Panel del streamer';fab.title='Panel del streamer';fab.setAttribute('aria-label','Abrir panel del streamer');fab.setAttribute('aria-expanded','false');fab.hidden=true;
     fab.onclick=()=>arenaMobileShowTestDrawer(!arenaMobileTestState.open);
-    document.getElementById('arenaMobileFloating')?.appendChild(fab);
+    // Keep the existing control ID for compatibility; access is through the main Menu.
+    document.getElementById('arenaOperatorPopover')?.appendChild(fab);
     const menu=document.querySelector('#arenaOperatorPopover [data-operator-panel="mobile"] [data-forward-control="arenaDualTestsToggle"]');
     if(menu){
-        menu.textContent='🧪 Herramientas de dirección';
+        menu.textContent='⚙ Panel del streamer';
         menu.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();arenaMobileShowTestDrawer(true);},true);
     }
     document.addEventListener('fullscreenchange',arenaMobileMountTestDrawer);
@@ -235,6 +238,17 @@ function arenaMobileInstallTestDrawer(){
     });
     const previousFocus=setMonitorFocus;
     setMonitorFocus=function(focus){previousFocus(focus);arenaMobileMountTestDrawer();};
+}
+function arenaMobileInstallStreamerSkills(){
+    // Keep the exact original five skill buttons and their onclick handlers.
+    const source=document.querySelector('#arenaPanelPowers .arena-skill-buttons');
+    if(!source)return;
+    const dock=document.createElement('nav');
+    dock.id='arenaStreamerSkillsDock';
+    dock.setAttribute('aria-label','Habilidades del modo streamer');
+    dock.appendChild(source);
+    document.body.appendChild(dock);
+    arenaMobileMountTestDrawer();
 }
 function arenaMobileSaveLayout(){try{localStorage.setItem(ARENA_MOBILE_LAYOUT_KEY,JSON.stringify(arenaMobileLayout));}catch(_){}}
 function arenaMobileApplyLayout(){
@@ -251,6 +265,7 @@ function arenaMobileApplyLayout(){
         const radius=size/2+4;
         const x=Math.min(Math.max(radius,bounds.width*position[0]/100),Math.max(radius,bounds.width-radius));
         const y=Math.min(Math.max(radius,bounds.height*position[1]/100),Math.max(radius,bounds.height-radius));
+        if(id==='arenaMobileMoreBtn')continue; // old layouts may still contain a floating menu position
         btn.style.setProperty('--mobile-x',x+'px');btn.style.setProperty('--mobile-y',y+'px');
         btn.setAttribute('data-mobile-positioned','true');
         btn.setAttribute('aria-description',arenaMobileEditing?'Desliza para colocar el botón':'Posición ajustable desde Ajustes');
@@ -361,6 +376,7 @@ function installArenaMobileTouch(){
         node.setAttribute('aria-label',node.title);
     }
     arenaMobileInstallTestDrawer();
+    arenaMobileInstallStreamerSkills();
     arenaMobileInstallControlDragging();
     const stop=()=>{arenaMobileResetTouch();arenaMobileClearRetry();};
     document.addEventListener('arena-touch-disable',stop);

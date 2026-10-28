@@ -28,8 +28,9 @@ test('portable export is self-contained, deterministic and includes the exact cu
         assert.match(html,/id="arenaPortableGuideMenu"/);
         assert.match(html,/arena-mobile-show-guide/);
         assert.match(html,/ARENA_MOBILE_MODES/);
-        assert.match(html,/Modo Director \(Streamer\)/);
-        assert.match(html,/Modo Jugador/);
+        assert.match(html,/Modo Streamer/);
+        assert.doesNotMatch(html,/Modo Director \(Streamer\)/);
+        assert.match(html,/Modo jugador/);
         assert.match(html,/id="arenaPortableModeOptions"/);
         assert.match(html,/arenaMobilePause/);
         assert.match(html,/arenaPortableSetMode/);

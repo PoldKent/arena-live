@@ -1,5 +1,14 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-28 — Arena Live v0.38 · Modo Streamer y ergonomía móvil
+
+- Nombres visibles estandarizados: «Modo jugador» y «Modo Streamer»; antiguo identificador interno `director` conservado para compatibilidad del guardado. «Herramientas de dirección» se sustituye por «Panel del streamer», «Jugadores y K.O.» por «Participantes y K.O.», y «Jugador, poderes y comandos» por «Jugador y comandos» en móvil.
+- Pausa, Menú y Pantalla completa pasan a una barra compacta en la esquina superior; la ayuda se consulta desde Menú y se elimina el botón redundante de herramientas flotantes. La acción de abrir Panel del streamer continúa accesible desde el menú.
+- Las cinco habilidades de clase originales, con sus mismos handlers, aparecen en una barra de cinco botones al pie del escenario durante Modo Streamer. El panel avanzado queda cerrado por defecto, se abre a demanda, es compacto y desplazable.
+- Ajustes y Combate se limitan al viewport, con columnas y campos min-width:0, selectores al ancho disponible, sliders fluidos y desplazamiento vertical interno. Los duelos 1v1 siguen mostrando las dos barras superiores.
+- Cambios aplicados en fuentes `portable/mobile.css`, `portable/mobile-runtime.js` y `portable/mobile-touch.js`, HTML autónomo y tests. Prueba física en Android y TikTok LIVE aún pendiente.
+
+
 ## 2026-10-28 — Arena Live v0.37 · HUD independiente y panel Director compacto
 
 - Sustituido el checkbox largo de participación TikTok por seis controles individuales: mostrar nombres, nombres de bots, vida, vida de bots, energía y energía de bots. Siguen las opciones existentes de números de daño y texto de habilidades.
