@@ -6297,13 +6297,6 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const vp9 = document.getElementById('viewport9x16');
             if (!stageGrid || !wrap16 || !wrap9 || !vp16 || !vp9) return;
 
-            // Only the phone's preview receives a 9:20 carrier. OBS still captures
-            // the same undistorted 9:16 viewport at its exact native aspect ratio.
-            const phonePortrait = !document.fullscreenElement && monitorFocus === '9:16'
-                && window.matchMedia?.('(max-width:767px) and (orientation:portrait)').matches;
-            wrap9.classList.toggle('arena-phone-fit', !!phonePortrait);
-            if (!phonePortrait) { wrap9.style.width = ''; wrap9.style.height = ''; }
-
             if (document.fullscreenElement === document.getElementById('broadcastStageSection')) {
                 fitArenaDualOperatorMonitors();
                 return;
@@ -6358,17 +6351,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             } else if (monitorFocus === '9:16') {
                 wrap16.classList.add('hidden');
                 wrap9.classList.remove('hidden');
-                const targetH = Math.max(40, Math.min(
-                    phonePortrait ? viewportMaxH * (16 / 20) : viewportMaxH,
-                    availW / (9 / 16)
-                ));
-                const portraitW = Math.floor(targetH * (9 / 16));
-                vp9.style.width = `${portraitW}px`;
+                const targetH = Math.max(40, Math.min(viewportMaxH, availW / (9 / 16)));
+                vp9.style.width = `${Math.floor(targetH * (9 / 16))}px`;
                 vp9.style.height = `${Math.floor(targetH)}px`;
-                if (phonePortrait) {
-                    wrap9.style.width = `${portraitW}px`;
-                    wrap9.style.height = `${Math.floor(targetH * (20 / 16))}px`;
-                }
             }
         }
 
@@ -7927,7 +7912,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
           const stage=document.getElementById('broadcastStageSection');
           if(document.fullscreenElement!==stage){el.textContent=copy[5];return;}
           const dims=id=>{const r=document.getElementById(id)?.getBoundingClientRect();return r?`${Math.round(r.width)}×${Math.round(r.height)}`:'—';};
-          el.textContent=`${copy[6]}: ${dims('viewport16x9')} (16:9) · ${dims('viewport9x16')} (9:16) · +${arenaObsCalibration.offset}px`;
+          el.textContent=`${copy[6]}: ${dims('viewport16x9')} (16:9) · ${dims('card-9x16')} (marco 9:21) → ${dims('viewport9x16')} (9:16) · +${arenaObsCalibration.offset}px`;
         }
         function refreshArenaObsCalibrationLabels() {
           const c=ARENA_OBS_COPY[currentLanguage]||ARENA_OBS_COPY.es;
@@ -7991,6 +7976,13 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             arenaDualMonitorMovedNodes.push({node,marker});
         }
         function restoreArenaDualMonitorNodes() {
+            // Remove the Stream-only 9:21 carrier; normal views remain native 9:16.
+            const portraitFrame=document.getElementById('card-9x16');
+            if(portraitFrame){
+                portraitFrame.classList.remove('arena-stream-921');
+                portraitFrame.style.width='';
+                portraitFrame.style.height='';
+            }
             for (let i = arenaDualMonitorMovedNodes.length - 1; i >= 0; i--) {
                 const {node, marker} = arenaDualMonitorMovedNodes[i];
                 if (marker.parentNode) marker.parentNode.insertBefore(node, marker);
@@ -8062,11 +8054,19 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 const height16 = scale16 * 9;
                 const avail9W = Math.max(1, rightRect.width - 20);
                 const avail9H = Math.max(1, rightRect.height - 2);
-                const scale9 = Math.max(.5, Math.min(avail9W / 9, avail9H / 16));
-                const width9 = scale9 * 9;
-                const height9 = scale9 * 16;
+                // Fit the entire 9:21 frame in the Stream dock. The 9:16 video
+                // occupies exactly 16/21 of its height, with equal upper/lower margins.
+                const scale9 = Math.max(.5, Math.min(avail9W / 9, avail9H / 21));
+                const width9 = Math.floor(scale9 * 9);
+                const height9 = Math.floor(scale9 * 16);
+                const frameHeight9 = Math.floor(scale9 * 21);
+                const frame9 = document.getElementById('card-9x16');
+                if (frame9) {
+                    frame9.classList.add('arena-stream-921');
+                    Object.assign(frame9.style,{width:`${width9}px`,height:`${frameHeight9}px`});
+                }
                 Object.assign(vp16.style,{width:`${Math.floor(width16)}px`,height:`${Math.floor(height16)}px`});
-                Object.assign(vp9.style,{width:`${Math.floor(width9)}px`,height:`${Math.floor(height9)}px`});
+                Object.assign(vp9.style,{width:`${width9}px`,height:`${height9}px`});
                 return;
             }
             if (stage) stage.classList.remove('arena-dual-ultrawide');
