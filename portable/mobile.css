@@ -1347,3 +1347,98 @@ html.arena-mobile-offline #card-9x16:fullscreen #arenaPortableTestDrawer.is-coll
 html.arena-mobile-offline #card-16x9:fullscreen #arenaPortableTestDrawer.is-collapsed:not([hidden]){
   height:38px!important;min-height:38px!important;max-height:38px!important;
 }
+
+
+/* v0.40.1 · Canonical mobile Streamer contract: testing tools NEVER reflow
+   the capture or hide the five ability buttons. No duplicate toolbars. */
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf,
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf.has-open-tests{
+  display:flex!important;
+  flex:0 0 auto!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  width:min(100%,560px)!important;
+  height:92px!important;
+  min-height:92px!important;
+  max-height:none!important;
+  overflow:visible!important;
+  position:relative!important;
+  z-index:350!important;
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf #arenaStreamerSkillsDock{
+  display:block!important;
+  position:relative!important;
+  visibility:visible!important;
+  opacity:1!important;
+  flex:0 0 auto!important;
+  width:100%!important;
+  min-height:62px!important;
+  max-height:none!important;
+  margin:0 auto!important;
+  z-index:360!important;
+  pointer-events:auto!important;
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf #arenaStreamerSkillsDock>.arena-skill-buttons{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:4px!important;
+  visibility:visible!important;
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf #arenaStreamerSkillsDock .arena-skill-buttons>button{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:56px!important;
+  height:56px!important;
+  touch-action:manipulation!important;
+}
+/* Tests float over the game if space is limited, but do not change its
+   dimensions or overlap the always-visible powers rail. */
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
+  z-index:285!important;
+  height:min(31dvh,220px)!important;
+  min-height:min(31dvh,130px)!important;
+  max-height:min(31dvh,220px)!important;
+  overflow:hidden!important;
+}
+html.arena-mobile-offline #card-9x16:fullscreen #arenaPortableTestDrawer:not([hidden]),
+html.arena-mobile-offline #card-16x9:fullscreen #arenaPortableTestDrawer:not([hidden]){
+  height:min(31dvh,220px)!important;
+  min-height:min(31dvh,130px)!important;
+  max-height:min(31dvh,220px)!important;
+  z-index:285!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer #arenaPortableTestBody{
+  overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+}
+html.arena-mobile-offline #card-9x16:fullscreen{
+  justify-content:center!important;
+  align-items:center!important;
+}
+/* 53px icon band + 92px action rail + a small safety margin.
+   No test-open state appears in these geometry rules. */
+html.arena-mobile-offline[data-mobile-mode="director"] #card-9x16 #viewport9x16{
+  width:min(calc(100% - 6px),calc((100dvh - 162px) * 9 / 16))!important;
+  max-height:calc(100dvh - 162px)!important;
+  aspect-ratio:9/16!important;
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #card-9x16:fullscreen #viewport9x16{
+  flex:0 1 auto!important;
+  width:min(100%,calc((100dvh - 162px) * 9 / 16))!important;
+  max-height:calc(100dvh - 162px)!important;
+  aspect-ratio:9/16!important;
+}
+@media(max-height:600px){
+  html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf{
+    height:75px!important;min-height:75px!important;
+  }
+  html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf #arenaStreamerSkillsDock .arena-skill-buttons>button{
+    min-height:44px!important;height:44px!important;
+  }
+  html.arena-mobile-offline[data-mobile-mode="director"] #card-9x16:fullscreen #viewport9x16{
+    width:min(100%,calc((100dvh - 140px) * 9 / 16))!important;
+    max-height:calc(100dvh - 140px)!important;
+  }
+}

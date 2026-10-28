@@ -97,7 +97,7 @@ test('v0.36–v0.37 top-right floating capsule is restored without overlapping 9
 test('Streamer Pruebas is a compact overlay, never reduces the arena or covers five skills',()=>{
   assert.match(touch,/function arenaMobilePositionTestDrawer\(\)/);
   assert.match(touch,/getElementById\('arenaStreamerSkillsDock'\)/);
-  assert.match(touch,/skills\.getBoundingClientRect\(\)\.top/);
+  assert.match(touch,/const rail=skills\?\.getBoundingClientRect\(\)/);
   assert.match(touch,/drawer\.style\.setProperty\('--arena-tests-bottom'/);
   assert.match(css,/bottom:var\(--arena-tests-bottom,80px\)!important/);
   assert.match(css,/#arenaMobileControlShelf #arenaStreamerSkillsDock\{/);
@@ -106,4 +106,20 @@ test('Streamer Pruebas is a compact overlay, never reduces the arena or covers f
   assert.doesNotMatch(css,/#card-9x16:has\(#arenaMobileControlShelf[.]has-open-tests\) #viewport9x16/);
   assert.doesNotMatch(css,/#card-9x16:fullscreen[.]arena-tests-visible #viewport9x16/);
   assert.doesNotMatch(css,/#card-9x16:fullscreen:has\(#arenaMobileControlShelf[.]has-open-tests\) #viewport9x16/);
+});
+
+
+test('v0.40.1 keeps all five original Streamer skills visible and the 9:16 fixed when tests open',()=>{
+  assert.match(touch,/function arenaMobileKeepStreamerSkillsVisible\(\)/);
+  assert.match(touch,/if\(skills\.parentElement!==shelf\)shelf\.appendChild\(skills\)/);
+  assert.match(touch,/skills\.hidden=false/);
+  assert.match(touch,/arenaMobileKeepStreamerSkillsVisible\(\);\s*if\(open\)/);
+  assert.match(css,/v0\.40\.1 · Canonical mobile Streamer contract/);
+  const latest=css.split('/* v0.40.1 · Canonical mobile Streamer contract')[1];
+  assert.match(latest,/data-mobile-mode="director"\] #arenaMobileControlShelf #arenaStreamerSkillsDock/);
+  assert.match(latest,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
+  assert.match(latest,/#card-9x16:fullscreen #arenaPortableTestDrawer:not/);
+  assert.match(latest,/max-height:calc\(100dvh - 162px\)/);
+  assert.doesNotMatch(latest,/\.arena-tests-visible/);
+  assert.doesNotMatch(latest,/\.has-open-tests #viewport9x16/);
 });

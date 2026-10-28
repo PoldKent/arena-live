@@ -156,18 +156,28 @@ function arenaMobileTouchCancel(event){
 function arenaMobileTestPanel(){
     return document.getElementById(arenaMobileTestState.active);
 }
+function arenaMobileKeepStreamerSkillsVisible(){
+    if(arenaPortableProfile.mode!==ARENA_MOBILE_MODES.DIRECTOR)return;
+    const shelf=document.getElementById('arenaMobileControlShelf');
+    const skills=document.getElementById('arenaStreamerSkillsDock');
+    if(!shelf||!skills)return;
+    // Do not clone or rebuild the five buttons: move the original node only.
+    if(skills.parentElement!==shelf)shelf.appendChild(skills);
+    skills.hidden=false;
+}
 function arenaMobilePositionTestDrawer(){
     const drawer=document.getElementById('arenaPortableTestDrawer');
+    if(!drawer)return;
+    arenaMobileKeepStreamerSkillsVisible();
     const skills=document.getElementById('arenaStreamerSkillsDock');
-    if(!drawer||!skills)return;
-    // The same five buttons are always a distinct bottom rail. On short screens
-    // the testing panel overlaps part of the video, never this active rail.
     const fullscreen=document.fullscreenElement;
     const host=fullscreen?.matches?.('#card-9x16,#card-16x9')?fullscreen:null;
     const bottom=host?host.getBoundingClientRect().bottom:window.innerHeight;
-    const skillsTop=skills.getBoundingClientRect().top;
-    const clearance=Math.max(72,Math.ceil(bottom-skillsTop+8));
-    drawer.style.setProperty('--arena-tests-bottom',clearance+'px');
+    const rail=skills?.getBoundingClientRect();
+    const usable=rail&&rail.height>=30&&rail.top>=0&&rail.top<bottom;
+    const clearance=usable?Math.ceil(bottom-rail.top+8):86;
+    // A hidden or unmounted rail must never push the tests offscreen.
+    drawer.style.setProperty('--arena-tests-bottom',Math.max(72,Math.min(bottom*.5,clearance))+'px');
 }
 function arenaMobileMountTestDrawer(){
     const drawer=document.getElementById('arenaPortableTestDrawer');
@@ -207,6 +217,7 @@ function arenaMobileShowTestDrawer(open=true){
     const drawer=document.getElementById('arenaPortableTestDrawer');
     if(!drawer)return;
     arenaMobileTestState.open=!!open;
+    arenaMobileKeepStreamerSkillsVisible();
     if(open){
         closeArenaOperatorPopover(false);
         if(isSettingsOpen)toggleSettingsModal(false);
@@ -218,6 +229,8 @@ function arenaMobileShowTestDrawer(open=true){
     }
     drawer.hidden=!open;
     drawer.classList.remove('is-collapsed'); // Always reopen with actual options visible.
+    document.getElementById('arenaPortableTestCollapse')?.setAttribute('aria-label','Minimizar panel');
+    const collapse=document.getElementById('arenaPortableTestCollapse');if(collapse)collapse.textContent='−';
     document.getElementById('arenaMobileControlShelf')?.classList.toggle('has-open-tests',!!open);
     for(const id of ['card-9x16','card-16x9'])document.getElementById(id)?.classList.toggle('arena-tests-visible',!!open);
     const shortcut=document.getElementById('arenaMobileTestsShortcut');
@@ -255,6 +268,7 @@ function arenaMobileInstallTestDrawer(){
     }
     document.addEventListener('fullscreenchange',()=>requestAnimationFrame(()=>{
         arenaMobileMountTestDrawer();
+        arenaMobileKeepStreamerSkillsVisible();
         arenaMobilePositionTestDrawer();
     }));
     window.addEventListener('resize',()=>{
