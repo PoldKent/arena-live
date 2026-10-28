@@ -391,6 +391,7 @@ await check('Mobile action buttons and joystick use the original manual combat c
 });
 await check('Mobile special action follows the no-powers rule while movement and normal attacks remain usable',async()=>{
  await page.locator('#arenaMobileMoreBtn').click();await page.locator('[data-forward-control="arenaDualSettingsBtn"]').click();
+ await page.evaluate(()=>selectArenaSettingsTab('combat',false));
  const rules=page.locator('.arena-settings-section').filter({has:page.locator('#arenaPowerMode')});if(!await rules.evaluate(n=>n.open))await rules.locator('summary').click();
  await page.locator('#arenaPowerMode').selectOption('noSpecials');await page.keyboard.press('Escape');assert.equal(await page.locator('#arenaMobilePower').isDisabled(),true);assert.equal(await page.locator('#arenaMobileAttack').isEnabled(),true);assert.equal(await page.locator('#arenaMobileJump').isEnabled(),true);
 });
