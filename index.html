@@ -360,10 +360,10 @@
 #viewport9x16 .arena-onboarding-meta{font-size:.68em;gap:4px}
 #viewport9x16 .arena-onboarding-meta>span,#viewport9x16 .arena-onboarding-meta>strong{padding:3px 5px}
 #viewport9x16 .arena-onboarding-tools button{font-size:.75em;padding:6px 10px!important}
-/* Stream dual displays a 9:16 scene at the center of a true, taller 9:21 carrier. */
+/* Stream dual keeps a 9:16 video centered within the selected vertical carrier (9:16…9:21). */
 #broadcastStageSection:fullscreen #card-9x16.arena-stream-921{
  position:relative!important;flex:none!important;flex-direction:column!important;
- justify-content:center!important;align-items:center!important;aspect-ratio:9/21!important;
+ justify-content:center!important;align-items:center!important;aspect-ratio:9 / var(--arena-vertical-frame-height,21)!important;
  overflow:hidden!important;border:1px solid #2c5567!important;border-radius:6px!important;
  box-sizing:border-box!important;
  background:linear-gradient(#102539 0%,#050c18 19%,#050c18 81%,#102539 100%)!important
@@ -371,16 +371,12 @@
 #broadcastStageSection:fullscreen #card-9x16.arena-stream-921 #viewport9x16{
  margin:auto 0!important;flex:none!important;aspect-ratio:9/16!important;max-width:100%!important
 }
-#broadcastStageSection:fullscreen #card-9x16.arena-stream-921::before,
-#broadcastStageSection:fullscreen #card-9x16.arena-stream-921::after{
- position:absolute;left:0;right:0;z-index:1;pointer-events:none;text-align:center;
- font:850 clamp(10px,1.1vw,16px)/1.2 Inter,system-ui,sans-serif;
- letter-spacing:.04em;color:#9fdee6;white-space:nowrap
+#broadcastStageSection:fullscreen #card-9x16.arena-stream-921::before{
+ content:"ARENA LIVE · TIKTOK";position:absolute;left:0;right:0;top:4%;z-index:1;
+ text-align:center;pointer-events:none;color:#9fdee6;
+ font:850 clamp(10px,1.1vw,16px)/1.2 Inter,system-ui,sans-serif;letter-spacing:.04em
 }
-#broadcastStageSection:fullscreen #card-9x16.arena-stream-921::before{content:"ARENA LIVE · TIKTOK";top:4%}
-#broadcastStageSection:fullscreen #card-9x16.arena-stream-921::after{
- content:"9:16 CENTRADO · MARCO 9:21";bottom:4%;color:#719bb3;font-size:clamp(9px,.85vw,13px)
-}
+#broadcastStageSection:fullscreen #card-9x16.arena-stream-921::after{content:none!important}
 /* The normal mobile preview remains independent of the dual Stream frame. */
 @media(max-width:767px) and (orientation:portrait){
  #card-9x16.arena-phone-fit{position:relative;align-self:center;flex:none!important;
@@ -865,7 +861,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 #broadcastStageSection:fullscreen #arenaHeaderActions button {min-height:27px;padding:3px 6px!important;font-size:10px}
 #broadcastStageSection:fullscreen #arenaDualCenterStageMount {display:flex;align-items:center;justify-content:center;min-height:0;min-width:0;overflow:hidden;padding:2px}
 #broadcastStageSection:fullscreen #arenaDualBottomCluster {min-width:0;min-height:0;height:var(--arena-operator-footer-height,76px);border-top:1px solid #202b3a;background:#0a111b}
-#broadcastStageSection:fullscreen #arenaDualUltrawideVerticalStage {display:flex!important;grid-column:3;grid-row:1;align-items:center;justify-content:flex-end;min-width:0;min-height:0;overflow:visible;transform:translateX(var(--arena-vertical-nudge,10px));padding-right:18px;box-sizing:border-box}
+#broadcastStageSection:fullscreen #arenaDualUltrawideVerticalStage {display:flex!important;grid-column:3;grid-row:1;align-items:center;justify-content:center;min-width:0;min-height:0;overflow:visible;transform:translateX(var(--arena-vertical-nudge,0px));padding:0;box-sizing:border-box}
 #broadcastStageSection:fullscreen #card-16x9,#broadcastStageSection:fullscreen #card-9x16 {display:flex!important;align-items:center;justify-content:center;flex:none;min-width:0;min-height:0;margin:0!important;padding:0!important}
 #broadcastStageSection:fullscreen #card-16x9>:not(#viewport16x9),#broadcastStageSection:fullscreen #card-9x16>:not(#viewport9x16) {display:none!important}
 #broadcastStageSection:fullscreen #viewport16x9,#broadcastStageSection:fullscreen #viewport9x16 {border:0!important;border-radius:3px!important;box-shadow:none!important;overflow:hidden!important;max-width:none!important;max-height:none!important;margin:0!important}
