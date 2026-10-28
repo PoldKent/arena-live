@@ -27,6 +27,12 @@ test('portable export is self-contained, deterministic and includes the exact cu
         assert.match(html,/id="arenaPortableFullscreen"/);
         assert.match(html,/id="arenaPortableGuideMenu"/);
         assert.match(html,/arena-mobile-show-guide/);
+        assert.match(html,/ARENA_MOBILE_MODES/);
+        assert.match(html,/Modo Director \(Streamer\)/);
+        assert.match(html,/Modo Jugador/);
+        assert.match(html,/id="arenaPortableModeOptions"/);
+        assert.match(html,/arenaMobilePause/);
+        assert.match(html,/arenaPortableSetMode/);
         const touchSource=await readFile(new URL('../portable/mobile-touch.js',import.meta.url),'utf8');
         assert.ok(html.includes(touchSource),'direct touch module is embedded');
         assert.match(html,/id="arena-mobile-touch"/);
