@@ -215,6 +215,12 @@ function arenaMobileInstallTestDrawer(){
         menu.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();arenaMobileShowTestDrawer(true);},true);
     }
     document.addEventListener('fullscreenchange',arenaMobileMountTestDrawer);
+    window.addEventListener('resize',()=>{
+        requestAnimationFrame(()=>{
+            arenaMobileMountTestDrawer();
+            if(arenaMobileTestState.open)arenaMobileSelectTestPanel(arenaMobileTestState.active);
+        });
+    });
     const previousFocus=setMonitorFocus;
     setMonitorFocus=function(focus){previousFocus(focus);arenaMobileMountTestDrawer();};
 }
