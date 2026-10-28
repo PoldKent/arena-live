@@ -235,11 +235,17 @@ function arenaMobileApplyLayout(){
     const view=document.getElementById(document.fullscreenElement?.id==='card-16x9'||(!document.fullscreenElement&&monitorFocus==='16:9')?'viewport16x9':'viewport9x16');
     const bar=document.getElementById('arenaHeaderActions');if(!view||!bar)return;
     if(bar.parentElement!==view)view.appendChild(bar);
+    const bounds=view.getBoundingClientRect();
+    // Keep each full hit-target visible on narrow devices, after rotation and
+    // when the user increases button size. Percentages remain stored in settings.
     const size=Math.max(56,Math.min(94,arenaMobileLayout.size));
     document.documentElement.style.setProperty('--arena-mobile-button-size',size+'px');
     for(const [id,position]of Object.entries(arenaMobileLayout.points)){
         const btn=document.getElementById(id);if(!btn)continue;
-        btn.style.setProperty('--mobile-x',position[0]+'%');btn.style.setProperty('--mobile-y',position[1]+'%');
+        const radius=size/2+4;
+        const x=Math.min(Math.max(radius,bounds.width*position[0]/100),Math.max(radius,bounds.width-radius));
+        const y=Math.min(Math.max(radius,bounds.height*position[1]/100),Math.max(radius,bounds.height-radius));
+        btn.style.setProperty('--mobile-x',x+'px');btn.style.setProperty('--mobile-y',y+'px');
         btn.setAttribute('data-mobile-positioned','true');
         btn.setAttribute('aria-description',arenaMobileEditing?'Desliza para colocar el botón':'Posición ajustable desde Ajustes');
     }
