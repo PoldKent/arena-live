@@ -6280,6 +6280,13 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const vp9 = document.getElementById('viewport9x16');
             if (!stageGrid || !wrap16 || !wrap9 || !vp16 || !vp9) return;
 
+            // Only the phone's preview receives a 9:20 carrier. OBS still captures
+            // the same undistorted 9:16 viewport at its exact native aspect ratio.
+            const phonePortrait = !document.fullscreenElement && monitorFocus === '9:16'
+                && window.matchMedia?.('(max-width:767px) and (orientation:portrait)').matches;
+            wrap9.classList.toggle('arena-phone-fit', !!phonePortrait);
+            if (!phonePortrait) { wrap9.style.width = ''; wrap9.style.height = ''; }
+
             if (document.fullscreenElement === document.getElementById('broadcastStageSection')) {
                 fitArenaDualOperatorMonitors();
                 return;
@@ -6334,9 +6341,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             } else if (monitorFocus === '9:16') {
                 wrap16.classList.add('hidden');
                 wrap9.classList.remove('hidden');
-                const targetH = Math.max(40, Math.min(viewportMaxH, availW / (9 / 16)));
-                vp9.style.width = `${Math.floor(targetH * (9 / 16))}px`;
+                const targetH = Math.max(40, Math.min(
+                    phonePortrait ? viewportMaxH * (16 / 20) : viewportMaxH,
+                    availW / (9 / 16)
+                ));
+                const portraitW = Math.floor(targetH * (9 / 16));
+                vp9.style.width = `${portraitW}px`;
                 vp9.style.height = `${Math.floor(targetH)}px`;
+                if (phonePortrait) {
+                    wrap9.style.width = `${portraitW}px`;
+                    wrap9.style.height = `${Math.floor(targetH * (20 / 16))}px`;
+                }
             }
         }
 
