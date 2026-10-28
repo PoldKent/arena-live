@@ -106,11 +106,10 @@ Requiere Git y Node.js 20 o superior; el flujo CI está configurado con Node.js 
 git clone --branch main https://github.com/PoldKent/arena-live.git arena-live
 cd arena-live
 npm.cmd ci
-npm.cmd run build:mobile
 npm.cmd start
 ```
 
-Abre **http://127.0.0.1:4173/** para la aplicación principal con TikTok LIVE, OBS y el motor completo. Abre **http://127.0.0.1:4173/mobile** para ver en tu PC la interfaz móvil generada desde ese mismo motor (el módulo móvil simula interacciones: no conecta al LIVE). En Chrome puedes pulsar **F12 → Ctrl+Shift+M** para emular un celular. Conserva abierta la consola; TikTok comienza desconectado y solo se conecta cuando pulsas **📡 TikTok**.
+**`npm.cmd start` regenera automáticamente `dist/Arena-Live-v0.40.0-movil.html` desde el motor principal antes de iniciar el servidor**. No necesitas mantener otro juego ni compilarlo manualmente. Abre **http://127.0.0.1:4173/** para la aplicación principal con TikTok LIVE, OBS y el motor completo. Abre **http://127.0.0.1:4173/mobile** para ver en tu PC la interfaz móvil generada desde ese mismo motor (el módulo móvil simula interacciones: no conecta al LIVE). En Chrome puedes pulsar **F12 → Ctrl+Shift+M** para emular un celular. Conserva abierta la consola; TikTok comienza desconectado y solo se conecta cuando pulsas **📡 TikTok**.
 
 Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd ci` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.40 en el pie de Ajustes**.
 
@@ -254,7 +253,7 @@ npm.cmd run verify:release
 
 Para validar todo lo relacionado con esta versión, `npm.cmd run verify:release` ejecuta pruebas unitarias, construye el HTML móvil desde el motor principal, verifica pantallas de escritorio y móvil y mide rendimiento. Si faltan navegadores de pruebas, instala Chromium con `npx.cmd playwright install chromium`. 
 
-Para modificar clases de la interfaz, ejecuta `npm.cmd run build:styles` y guarda también `styles/arena-ui.css`. El CSS ya está incluido para jugar; `npm.cmd start` no ejecuta un compilador. `npm.cmd test` verifica que coincida con las clases actuales.
+Para modificar clases de la interfaz, ejecuta `npm.cmd run build:styles` y guarda también `styles/arena-ui.css`. El CSS ya está incluido para jugar; `npm.cmd start` no recompila Tailwind, solo prepara automáticamente el HTML móvil con las fuentes actuales. `npm.cmd test` verifica que coincida con las clases actuales.
 
 Las pruebas del navegador arrancan y cierran su servidor local y simulan las respuestas de TikTok. Cubren paneles, persistencia, escenarios, chats, pausa, capturas, idiomas y controles móviles; no conectan con una emisión real.
 

@@ -17,6 +17,8 @@ test('the single full-game version matches the server and offline package',()=>{
   assert.ok(index.includes("const ARENA_RELEASE_VERSION = '"+short+"';"));
   assert.ok(index.includes("version: '"+pkg.version+"',"));
   assert.ok(offline.includes('<meta name="arena-portable-version" content="'+pkg.version+'">'));
+  assert.equal(pkg.scripts.prestart,'node tools/build-mobile.mjs');
+  assert.equal(pkg.scripts.predev,'node tools/build-mobile.mjs');
   assert.ok(server.includes("pathname==='/mobile'"));
   assert.ok(server.includes('Arena-Live-v${VERSION}-movil.html'));
 });
