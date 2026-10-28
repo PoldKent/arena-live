@@ -866,6 +866,15 @@ await check('Prota uses a direct five-class toolbar dropdown instead of a nested
  await page.evaluate(()=>joinAsStreamer());
  const chosen=await page.evaluate(()=>fighters.find(f=>f.isStreamer)?.archetypeKey);
  assert.equal(chosen,'ninja');
+ await select.selectOption('trueno');
+ assert.equal(await page.evaluate(()=>fighters.find(f=>f.isStreamer)?.archetypeKey),'trueno');
+ await page.evaluate(()=>{isGamePaused=false;startCombatFromLobby();});
+ await select.selectOption('titan');
+ assert.equal(await page.evaluate(()=>fighters.find(f=>f.isStreamer)?.archetypeKey),'titan');
+ await select.selectOption('kame'); // real 480-frame combat class cooldown
+ assert.equal(await select.inputValue(),'titan');
+ assert.equal(await page.evaluate(()=>fighters.find(f=>f.isStreamer)?.archetypeKey),'titan');
+ await page.evaluate(()=>{isGamePaused=true;});
 });
 await check('First TikTok tap admits one viewer in lobby, never duplicates or bypasses the 128-player cap',async()=>{
  const admission=await page.evaluate(()=>{
