@@ -274,6 +274,12 @@ function arenaMobileInstallLayoutSettings(){
     const control=document.createElement('section');control.id='arenaMobileControlSettings';control.setAttribute('aria-label','Acomodar botones');
     control.innerHTML='<h3>📱 Controles táctiles</h3><p>Mueve los botones a posiciones cómodas. Guarda cada cambio para próximas partidas.</p><button type="button" id="arenaMobileArrange">✥ Acomodar botones</button><label for="arenaMobileSize">Tamaño de botones <output id="arenaMobileSizeValue">70 px</output></label><input id="arenaMobileSize" type="range" min="56" max="94" step="2" value="70"><button type="button" id="arenaMobileReset">↺ Restablecer posiciones</button><small>Salto: 1 toque. Doble salto: 2 toques rápidos en ↑. Tocar la arena nunca salta.</small>';
     target.appendChild(control);
+    // Rehome the existing opacity control rather than duplicating a second setting.
+    const originalOpacity=document.getElementById('hudOpacityRange')?.closest('label');
+    if(originalOpacity){
+        originalOpacity.querySelector('span')?.replaceChildren(document.createTextNode('Transparencia de menús y botones'));
+        control.appendChild(originalOpacity);
+    }
     control.querySelector('#arenaMobileArrange').onclick=()=>arenaMobileEditButtons(true);
     control.querySelector('#arenaMobileSize').oninput=e=>arenaMobileSetButtonSize(e.target.value);
     control.querySelector('#arenaMobileReset').onclick=arenaMobileResetButtons;
