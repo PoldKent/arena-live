@@ -1627,11 +1627,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 <div id="arenaSettingsNav" aria-label="Navegación rápida de ajustes">
   <nav id="arenaSettingsTabs" role="tablist" aria-label="Categorías de ajustes">
     <button type="button" data-settings-tab="match" role="tab" aria-selected="true">🎮 Partida</button>
-    <button type="button" data-settings-tab="combat" role="tab" aria-selected="false">⚔️ Combate y Prota</button>
+    <button type="button" data-settings-tab="combat" role="tab" aria-selected="false">⚔️ Combate</button>
     <button type="button" data-settings-tab="classes" role="tab" aria-selected="false">⚖️ Clases</button>
     <button type="button" data-settings-tab="audience" role="tab" aria-selected="false">📡 Audiencia</button>
-    <button type="button" data-settings-tab="broadcast" role="tab" aria-selected="false">🖥 Pantallas</button>
-    <button type="button" data-settings-tab="audio" role="tab" aria-selected="false">🔊 Audio</button>
+    <button type="button" data-settings-tab="broadcast" role="tab" aria-selected="false">🖥 Pantalla y HUD</button>
+    <button type="button" data-settings-tab="audio" role="tab" aria-selected="false">🔊 Audio e idioma</button>
+    <button type="button" data-settings-tab="controls" role="tab" aria-selected="false">🎮 Controles</button>
     <button type="button" data-settings-tab="system" role="tab" aria-selected="false">⚙ Sistema</button>
   </nav>
   <input id="arenaSettingsSearch" type="search" autocomplete="off" placeholder="🔎 Buscar ajuste: vidas, volumen, OBS, daños…" aria-label="Buscar cualquier ajuste" />
@@ -1870,7 +1871,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <label class="flex items-center gap-2"><input id="showCombatNumbersToggle" type="checkbox" onchange="setCombatDisplayOption('numbers', this.checked)" class="accent-cyan-400"> Mostrar números de daño/curación</label>
                             <label class="flex items-center gap-2"><input id="showPowerTextToggle" type="checkbox" onchange="setCombatDisplayOption('powerText', this.checked)" class="accent-violet-400"> Mostrar texto de los poderes</label>
                         </div>
-                        <span class="arena-context-help" title="Los ajustes de audiencia, boosts y visualización se aplican al instante; no reinician la partida." aria-label="Ayuda: ajustes en vivo">ⓘ</span>
+                        <span class="arena-context-help" title="Los ajustes de audiencia, interacciones y chat se aplican al instante; no reinician la partida." aria-label="Ayuda: ajustes en vivo">ⓘ</span>
                         <div class="flex gap-2 flex-wrap">
                             <button type="button" onclick="clearChatFeed()" class="rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-[11px] font-semibold text-slate-300" title="Limpiar historial del chat"><i class="fa-solid fa-broom"></i> <span data-ui-label="clearChat">Limpiar Chat</span></button>
                             <button onclick="toggleAutoChat()" class="rounded-lg border border-emerald-500/40 bg-emerald-950/50 px-3 py-2 text-[11px] font-bold text-emerald-200">🤖 Activar / desactivar audiencia automática</button>
@@ -3219,12 +3220,14 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let floatingTexts = [];
         let showCombatNumbers = false;
         let showPowerText = false;
+        let showFighterNames = true;
         const ARENA_COMBAT_DISPLAY_KEY = 'arenaLiveCombatDisplayV1';
 
         function setCombatDisplayOption(option, enabled, remember = true) {
-            if (!['numbers', 'powerText'].includes(option)) return;
+            if (!['numbers', 'powerText', 'names'].includes(option)) return;
             if (option === 'numbers') showCombatNumbers = !!enabled;
             if (option === 'powerText') showPowerText = !!enabled;
+            if (option === 'names') showFighterNames = !!enabled;
             for (const ft of floatingTexts) {
                 const visible = (ft.kind === 'number' && showCombatNumbers) || (ft.kind === 'power' && showPowerText);
                 ft.text = visible ? ft.labelText : ft.iconText;
@@ -3233,13 +3236,16 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const power = document.getElementById('showPowerTextToggle');
             if (numbers) numbers.checked = showCombatNumbers;
             if (power) power.checked = showPowerText;
-            if (remember) try { localStorage.setItem(ARENA_COMBAT_DISPLAY_KEY, JSON.stringify({numbers:showCombatNumbers, powerText:showPowerText})); } catch (_) {}
+            const names=document.getElementById('showFighterNamesToggle');
+            if(names)names.checked=showFighterNames;
+            if (remember) try { localStorage.setItem(ARENA_COMBAT_DISPLAY_KEY, JSON.stringify({numbers:showCombatNumbers, powerText:showPowerText, names:showFighterNames})); } catch (_) {}
         }
         function loadCombatDisplayOptions() {
             let saved;
             try { saved = JSON.parse(localStorage.getItem(ARENA_COMBAT_DISPLAY_KEY) || 'null'); } catch (_) {}
             setCombatDisplayOption('numbers', saved?.numbers === true, false);
             setCombatDisplayOption('powerText', saved?.powerText === true, false);
+            setCombatDisplayOption('names', saved?.names !== false, false);
         }
         let activeEffects = [];
 
@@ -6466,7 +6472,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 ? (packedFighterCount <= 8 ? 9 : packedFighterCount <= 32 ? 8 : 7)
                 : (packedFighterCount <= 8 ? 8 : 7);
             const plateY = drawY - r - (portraitLabel ? 24 : 22);
-            drawFighterLabel(targetCtx, f, drawX, plateY, nameFont, classFont, packedFighterCount);
+            if(showFighterNames)drawFighterLabel(targetCtx, f, drawX, plateY, nameFont, classFont, packedFighterCount);
 
             if (gameState !== 'LOBBY') {
                 const barW = 44;
@@ -8997,16 +9003,16 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // v0.32: Reorganize existing Settings sections, never cloning inputs or
         // changing their inline handlers, IDs, saved values or rule semantics.
         const ARENA_SETTINGS_NAV_KEY = 'arenaLiveSettingsNavV1';
-        const ARENA_SETTINGS_GROUPS = Object.freeze(['match','combat','broadcast','audio','audience','system','combat','classes','system']);
+        const ARENA_SETTINGS_GROUPS = Object.freeze(['match','controls','broadcast','audio','audience','system','combat','classes','system']);
         const ARENA_SETTINGS_LABELS = Object.freeze({
-            es:['🎮 Partida','⚔️ Combate y Prota','⚖️ Clases','📡 Audiencia','🖥 Pantallas','🔊 Audio','⚙ Sistema','Buscar: vidas, poderes, audio, OBS…','Los ajustes se aplican sin pausar la partida.'],
-            en:['🎮 Match','⚔️ Combat and Prota','⚖️ Classes','📡 Audience','🖥 Displays','🔊 Audio','⚙ System','Find: lives, powers, audio, OBS…','Adjust without pausing the match.'],
-            fr:['🎮 Partie','⚔️ Combat','⚖️ Classes','📡 Public','🖥 Écrans','🔊 Audio','⚙ Système','Chercher un réglage…','Réglages en direct.'],
-            de:['🎮 Spiel','⚔️ Kampf','⚖️ Klassen','📡 Publikum','🖥 Bildschirme','🔊 Audio','⚙ System','Einstellung suchen…','Einstellungen ohne Pause.'],
-            zh:['🎮 对局','⚔️ 战斗','⚖️ 职业','📡 观众','🖥 屏幕','🔊 音频','⚙ 系统','搜索设置…','设置不中断战斗。'],
-            ja:['🎮 対戦','⚔️ 戦闘','⚖️ クラス','📡 観客','🖥 画面','🔊 音声','⚙ システム','設定を検索…','設定中も戦闘を続行。'],
-            pt:['🎮 Partida','⚔️ Combate','⚖️ Classes','📡 Público','🖥 Telas','🔊 Áudio','⚙ Sistema','Buscar configuração…','Ajustes sem pausa.'],
-            it:['🎮 Partita','⚔️ Combattimento','⚖️ Classi','📡 Pubblico','🖥 Schermi','🔊 Audio','⚙ Sistema','Cerca impostazione…','Modifiche senza pausa.']
+            es:["🎮 Partida","⚔️ Combate","⚖️ Clases","📡 Audiencia","🖥 Pantalla y HUD","🔊 Audio e idioma","🎮 Controles","⚙ Sistema","Buscar: vida, nombres, daño, poderes, OBS…","Los cambios se aplican sin pausar la partida."],
+            en:["🎮 Match","⚔️ Combat","⚖️ Classes","📡 Audience","🖥 Display & HUD","🔊 Audio & language","🎮 Controls","⚙ System","Find: health, names, damage, powers, OBS…","Adjustments apply without pausing."],
+            fr:["🎮 Partie","⚔️ Combat","⚖️ Classes","📡 Public","🖥 Écran et HUD","🔊 Audio et langue","🎮 Commandes","⚙ Système","Chercher : noms, dégâts, OBS…","Réglages sans pause."],
+            de:["🎮 Spiel","⚔️ Kampf","⚖️ Klassen","📡 Publikum","🖥 Bildschirm & HUD","🔊 Audio & Sprache","🎮 Steuerung","⚙ System","Suche: Namen, Schaden, OBS…","Einstellungen ohne Pause."],
+            zh:["🎮 对局","⚔️ 战斗","⚖️ 职业","📡 观众","🖥 显示与HUD","🔊 音频和语言","🎮 操作","⚙ 系统","搜索：姓名、伤害、OBS…","设置不中断战斗。"],
+            ja:["🎮 対戦","⚔️ 戦闘","⚖️ クラス","📡 観客","🖥 表示とHUD","🔊 音声と言語","🎮 操作","⚙ システム","検索：名前、ダメージ、OBS…","設定中も戦闘を継続。"],
+            pt:["🎮 Partida","⚔️ Combate","⚖️ Classes","📡 Público","🖥 Tela e HUD","🔊 Áudio e idioma","🎮 Controles","⚙ Sistema","Buscar: nomes, dano, OBS…","Ajustes sem pausa."],
+            it:["🎮 Partita","⚔️ Combattimento","⚖️ Classi","📡 Pubblico","🖥 Schermo e HUD","🔊 Audio e lingua","🎮 Controlli","⚙ Sistema","Cerca: nomi, danni, OBS…","Modifiche senza pausa."]
         });
         let arenaSettingsActiveTab = 'match';
         function refreshArenaSettingsNavigation() {
@@ -9015,9 +9021,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 if(button.textContent!==labels[index])button.textContent=labels[index];
             });
             const search=document.getElementById('arenaSettingsSearch');
-            if(search)search.placeholder='🔎 '+labels[7];
+            if(search)search.placeholder='🔎 '+labels[8];
             const note=document.getElementById('arenaSettingsNote');
-            if(note&&note.textContent!==labels[8])note.textContent=labels[8];
+            if(note&&note.textContent!==labels[9])note.textContent=labels[9];
         }
         function selectArenaSettingsTab(key, remember=true) {
             if(!ARENA_SETTINGS_GROUPS.includes(key))return;
@@ -9047,29 +9053,70 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         function installArenaSettingsNavigator() {
             const sections=[...document.querySelectorAll('#settingsGeneralPanel>.arena-settings-section')];
             sections.forEach((section,index)=>{
-                section.dataset.settingsCategory=ARENA_SETTINGS_GROUPS[index]||'workspace';
+                section.dataset.settingsCategory=ARENA_SETTINGS_GROUPS[index]||'system';
             });
-            // Move the existing elements; do not duplicate any functional buttons.
-            const matchBody=sections[0]?.querySelector('.arena-settings-content');
-            const combatBody=sections[1]?.querySelector('.arena-settings-content');
-            const pace=document.getElementById('arenaPaceSettingsGroup');
-            if(matchBody&&pace)matchBody.appendChild(pace);
-            for(const key of ['specialSource','specialPolicy']){
-                const control=document.getElementById('arenaRuntime_'+key);
-                if(combatBody&&control)combatBody.appendChild(control.closest('label'));
+
+            // One DOM control per option: reparent existing nodes, keep event handlers,
+            // values and persisted keys shared by Stream and offline Mobile.
+            const body=(key)=>sections.find(section=>section.dataset.settingsCategory===key)
+                ?.querySelector('.arena-settings-content');
+            const matchBody=body('match');
+            const combatBody=body('combat');
+            const displayBody=body('broadcast');
+            const audioBody=body('audio');
+            const audienceBody=body('audience');
+            const controlBody=body('controls');
+            const move=(id,destination,wrapper='label')=>{
+                const el=document.getElementById(id),item=el?.closest(wrapper);
+                if(item&&destination)destination.appendChild(item);
+                return item||null;
+            };
+            move('arenaPaceSettingsGroup',matchBody,'#arenaPaceSettingsGroup');
+            move('arenaMaxPlayers',matchBody);
+            move('arenaPlayerCapacityHelp',matchBody,'#arenaPlayerCapacityHelp');
+            move('arenaPlayerCapacityStatus',matchBody,'#arenaPlayerCapacityStatus');
+            move('arenaClassRule',matchBody);
+            for(const key of ['specialSource','specialPolicy'])move('arenaRuntime_'+key,combatBody);
+            move('arenaSpecialPolicyHelp',combatBody,'#arenaSpecialPolicyHelp');
+            move('arenaRuntime_pausePolicy',audienceBody);
+            move('arenaRuntime_masterVolume',audioBody);
+            // Preserve the original Protagonist control card, now under Controls.
+            if(controlBody)controlBody.setAttribute('aria-label','Control del protagonista');
+
+            // Everything rendered over fighters belongs to Display & HUD, not Audience.
+            if(displayBody){
+                const hud=document.createElement('section');
+                hud.id='arenaHudInformationSettings';
+                hud.className='rounded-xl border border-cyan-800/50 bg-slate-950/70 p-3 flex flex-col gap-3';
+                hud.setAttribute('aria-label','Información de combate');
+                hud.innerHTML='<h4 class="font-semibold text-cyan-200 text-xs">👁 Información de combate</h4>'
+                    +'<p class="text-[11px] text-slate-400">Solo cambia lo que se muestra en la pantalla; no modifica el daño, los golpes ni las reglas.</p>'
+                    +'<div id="arenaHudDisplayToggles" class="flex flex-col gap-2 text-xs text-slate-200"></div>';
+                displayBody.appendChild(hud);
+                const toggles=hud.querySelector('#arenaHudDisplayToggles');
+                const oldContainer=document.getElementById('showCombatNumbersToggle')?.parentElement?.parentElement;
+                const names=document.createElement('label');
+                names.className='flex items-center gap-2';
+                names.innerHTML='<input id="showFighterNamesToggle" type="checkbox" class="accent-cyan-400" onchange="setCombatDisplayOption(\'names\',this.checked)"> Mostrar nombres y clases de jugadores';
+                toggles.appendChild(names);
+                move('showCombatNumbersToggle',toggles);
+                move('showPowerTextToggle',toggles);
+                if(oldContainer&&!oldContainer.querySelector('input,select,button'))oldContainer.remove();
+                move('hudOpacityRange',hud);
+                move('arenaCameraSettings',hud,'#arenaCameraSettings');
+                // loadCombatDisplayOptions executes before the settings navigator:
+                // synchronize newly-created controls with the existing source of truth.
+                const namesToggle=document.getElementById('showFighterNamesToggle');
+                if(namesToggle)namesToggle.checked=showFighterNames;
             }
-            const help=document.getElementById('arenaSpecialPolicyHelp');
-            if(combatBody&&help)combatBody.appendChild(help);
-            const audienceBody=sections[4]?.querySelector('.arena-settings-content');
-            const pauseOption=document.getElementById('arenaRuntime_pausePolicy');
-            if(audienceBody&&pauseOption)audienceBody.appendChild(pauseOption.closest('label'));
-            const audioBody=sections[3]?.querySelector('.arena-settings-content');
-            const volume=document.getElementById('arenaRuntime_masterVolume');
-            if(audioBody&&volume)audioBody.appendChild(volume.closest('label'));
+
             let stored='match';try{stored=localStorage.getItem(ARENA_SETTINGS_NAV_KEY)||'match';}catch(_){}
             const tabs=document.querySelectorAll('[data-settings-tab]');
             tabs.forEach((button,index)=>{
-                button.addEventListener('click',()=>{document.getElementById('arenaSettingsSearch').value='';selectArenaSettingsTab(button.dataset.settingsTab);});
+                button.addEventListener('click',()=>{
+                    document.getElementById('arenaSettingsSearch').value='';
+                    selectArenaSettingsTab(button.dataset.settingsTab);
+                });
                 button.addEventListener('keydown',event=>{
                     if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
                     event.preventDefault();
@@ -9078,7 +9125,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     tabs[target].click();tabs[target].focus({preventScroll:true});
                 });
             });
-            document.getElementById('arenaSettingsSearch')?.addEventListener('input',()=>selectArenaSettingsTab(arenaSettingsActiveTab,false));
+            document.getElementById('arenaSettingsSearch')?.addEventListener('input',
+                ()=>selectArenaSettingsTab(arenaSettingsActiveTab,false));
             selectArenaSettingsTab(ARENA_SETTINGS_GROUPS.includes(stored)?stored:'match',false);
             refreshArenaSettingsNavigation();
         }
