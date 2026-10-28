@@ -271,91 +271,111 @@
 </style>
 
 
-<style id="arena-audience-onboarding-v019">
-/* Broadcast-safe viewer onboarding: no central obstruction once the lobby ends. */
-#viewport16x9,#viewport9x16 { isolation:isolate; container-type:inline-size; }
-#viewport16x9 .arena-audience-guide,#viewport9x16 .arena-audience-guide {
-    position:absolute;left:0;right:0;bottom:0;z-index:27;pointer-events:none;
-    display:flex;flex-direction:column;gap:4px;padding:7px 10px 9px;
-    color:#eef8ff;background:linear-gradient(0deg,#060d18 0%,rgba(6,13,24,.96) 76%,rgba(6,13,24,.88) 100%);
-    border-top:1px solid rgba(103,232,249,.44);font:600 clamp(8px,1.68cqw,13px)/1.25 Inter,system-ui,sans-serif;
-    box-shadow:0 -5px 18px rgba(1,7,15,.25);
+<style id="arena-audience-onboarding-v020">
+/* The guide is plain, always-visible text inside the TOP HUD, not an overlay over combat. */
+#viewport16x9,#viewport9x16{isolation:isolate;container-type:inline-size}
+#viewport16x9 .arena-audience-guide,#viewport9x16 .arena-audience-guide{
+ position:relative;inset:auto;bottom:auto;z-index:12;flex:none;pointer-events:none;width:100%;
+ margin:0 0 5px;padding:7px 10px 9px;border:0;border-bottom:1px solid #37667d;border-radius:0;
+ background:linear-gradient(180deg,rgba(4,14,28,.98),rgba(5,18,32,.93));box-shadow:0 5px 18px #0003;
+ color:#f1fdff;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:Inter,system-ui,sans-serif;
 }
-.arena-guide-intro {display:flex;align-items:center;gap:9px;justify-content:center;white-space:nowrap;}
-.arena-guide-step {color:#6ee7e8;font-weight:900;letter-spacing:.05em;}
-.arena-guide-intro strong {display:inline-block;color:#081826;background:#6ee7e8;border-radius:5px;padding:2px 7px;font-weight:900;font-size:1.25em;}
-.arena-guide-tip {color:#bfd4e8;font-weight:650;}
-.arena-guide-commands {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;align-items:stretch;}
-.arena-guide-pair {display:flex;align-items:center;justify-content:center;gap:3px;min-width:0;
-    padding:3px 2px;border:1px solid rgba(148,163,184,.28);border-radius:6px;background:#111e2c;white-space:nowrap;}
-.arena-guide-pair code {font:800 1em/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:-.04em;}
-.arena-guide-pair b {opacity:.7;font-size:.85em;}
-.arena-guide-warrior {color:#8deefa}.arena-guide-shinobi {color:#d3a6ff}.arena-guide-titan {color:#ffb6c0}
-.arena-guide-rayo {color:#fcd776}.arena-guide-espiritu {color:#8ff0b9}
-#viewport9x16 .arena-audience-guide {gap:2px;padding:3px 4px 4px;font-size:clamp(7px,3.6cqw,11px);border-top-color:rgba(244,114,182,.46);}
-#viewport9x16 .arena-guide-intro {gap:4px;flex-wrap:nowrap;line-height:1.05;}
-#viewport9x16 .arena-guide-step {font-size:.9em;}
-#viewport9x16 .arena-guide-intro strong {font-size:1.25em;}
-#viewport9x16 .arena-guide-tip {width:auto;min-width:0;white-space:nowrap;font-size:.79em;letter-spacing:-.04em;}
-#viewport9x16 .arena-guide-commands {grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;}
-#viewport9x16 .arena-guide-pair {padding:1px 1px;gap:2px;line-height:1.05;}
-#viewport9x16 .arena-guide-pair:last-child {grid-column:1 / -1;justify-self:stretch;}
-#viewport9x16 .arena-guide-pair code {letter-spacing:-.06em;}
-/* Lobby card is deliberately confined to the noncombat center; never shown during combat. */
-#viewport16x9 .arena-onboarding,#viewport9x16 .arena-onboarding {
-    position:absolute;left:4%;right:4%;top:45%;transform:translateY(-50%);margin:0;z-index:21;
-    width:auto;max-width:none;min-width:0;pointer-events:auto;
+#viewport16x9 .arena-guide-call,#viewport9x16 .arena-guide-call{
+ display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.29em;
+ font-size:clamp(15px,2.15cqw,33px);line-height:1.12;font-weight:950;letter-spacing:.015em;text-shadow:0 2px 8px #000a
 }
-#viewport16x9 .arena-onboarding[hidden],#viewport9x16 .arena-onboarding[hidden],
-#viewport16x9 .arena-onboarding.hidden,#viewport9x16 .arena-onboarding.hidden {display:none!important;}
-.arena-onboarding-card {display:flex;flex-direction:column;align-items:center;gap:6px;
-    max-width:100%;min-width:0;padding:13px 14px 10px;
-    border:1px solid rgba(103,232,249,.65);border-radius:13px;text-align:center;color:white;
-    background:linear-gradient(155deg,rgba(11,30,44,.97),rgba(7,15,29,.96));
-    box-shadow:0 10px 24px #02061799,0 0 0 1px #0c2845;line-height:1.22;
-    font:600 clamp(9px,1.7cqw,13px)/1.3 Inter,system-ui,sans-serif;
+#viewport16x9 .arena-guide-call strong,#viewport9x16 .arena-guide-call strong{
+ color:#67fff0;font-size:1.24em;font-weight:950;text-shadow:0 0 16px #22d3ee88;letter-spacing:0
 }
-.arena-onboarding-kicker {margin:0;color:#7fe7f4;font-size:.8em;font-weight:850;letter-spacing:.08em;}
-.arena-onboarding-card h2 {margin:0;font:900 1.5em/1.1 Orbitron,Inter,system-ui,sans-serif;color:#fff;letter-spacing:.015em;}
-.arena-onboarding-sub {margin:0;color:#cbdbe9;max-width:60ch;font-size:.96em;}
-.arena-onboarding-sub strong {display:inline-block;padding:2px 7px;border-radius:6px;color:#031523;background:#71f3ee;font:900 1.18em ui-monospace,Consolas,monospace;}
-.arena-onboarding-steps {display:flex;align-items:center;justify-content:center;gap:5px;width:100%;flex-wrap:wrap;}
-.arena-onboarding-steps span {padding:3px 6px;border:1px solid #2a4d63;border-radius:6px;background:#102434;color:#70e0e5;font-size:.8em;}
-.arena-onboarding-steps b {color:#f1f7ff;}
-.arena-onboarding-meta {display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:5px;font-size:.88em;}
-.arena-onboarding-stat,.arena-onboarding-meta>span,.arena-onboarding-meta>strong {padding:3px 8px;background:#0c2030;border:1px solid #38546b;border-radius:7px;color:#b8c8db;}
-.arena-onboarding-meta strong {color:#fef08a;font-weight:850;}
-.arena-onboarding-meta button {margin-left:4px;padding:0 4px;min-height:18px;color:#d7f4ff;border:1px solid #42647a;border-radius:4px;background:#17314a;cursor:pointer;}
-.arena-onboarding-rules,.arena-onboarding-tools {display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px;}
-.arena-onboarding-rules button {padding:4px 7px!important;border:1px solid #43576d;border-radius:6px;font-size:.85em;cursor:pointer;}
-.arena-onboarding-tools {border-top:1px solid #2a4056;padding-top:5px;width:100%;margin-top:1px;}
-.arena-onboarding-tools button {padding:5px 9px!important;border:1px solid #3d5974;border-radius:6px;color:#bfd7e8;background:#162a3c;font-size:.85em;font-weight:750;cursor:pointer;}
-.arena-onboarding-tools .arena-onboarding-start {background:#5eead4;color:#05232a;border-color:#5eead4;font-weight:900;}
-#viewport9x16 .arena-onboarding {left:5%;right:5%;top:42%;}
-#viewport9x16 .arena-onboarding-card {gap:5px;padding:10px 7px 9px;
-    font-size:clamp(8px,4cqw,13px);border-color:rgba(244,114,182,.64);}
-#viewport9x16 .arena-onboarding-card h2 {font-size:1.28em;}
-#viewport9x16 .arena-onboarding-sub {font-size:1.04em;}
-#viewport9x16 .arena-onboarding-steps span {padding:3px 4px;}
-#viewport9x16 .arena-onboarding-hint {margin:0;color:#a9cbdc;font-size:.8em;}
-#viewport9x16 .arena-onboarding-meta {gap:3px;}
-#viewport9x16 .arena-onboarding-meta>span,#viewport9x16 .arena-onboarding-meta>strong {padding:2px 5px;}
-#viewport9x16 .arena-onboarding-tools button {padding:4px 7px!important;}
-/* 9:20 is a PREVIEW FRAME for tall mobile devices, not an OBS capture format.
-   The real portrait video stays 9:16 and is centered with top/bottom letterboxing. */
-@media (max-width:767px) and (orientation:portrait) {
-    #card-9x16.arena-phone-fit {position:relative;align-self:center;flex:none!important;
-        overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center;
-        background:linear-gradient(180deg,#071524 0%,#030914 12%,#030914 88%,#071524 100%);
-        border:1px solid rgba(244,114,182,.28);border-radius:12px;
-        box-shadow:0 7px 24px #0008;}
-    #card-9x16.arena-phone-fit #viewport9x16 {margin:auto 0!important;flex:none!important;}
+.arena-guide-explain{margin:0;color:#daeaf5;font-size:clamp(11px,1.25cqw,19px);line-height:1.2;font-weight:750;text-align:center}
+.arena-guide-commands{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;
+ gap:3px clamp(8px,1.5cqw,22px);width:100%;font-size:clamp(10px,1.14cqw,18px)}
+.arena-guide-pair{display:inline-flex;align-items:baseline;justify-content:center;gap:.3em;
+ min-width:0;padding:0!important;border:0!important;border-radius:0!important;background:none!important;
+ line-height:1.35;white-space:nowrap}
+.arena-guide-pair code{font:800 1em/1.25 ui-monospace,Consolas,monospace;letter-spacing:0}
+.arena-guide-pair b{font-weight:850}.arena-guide-pair i{font-style:normal;opacity:.7}
+.arena-guide-warrior{color:#94f4ff}.arena-guide-shinobi{color:#dfb4ff}.arena-guide-titan{color:#ffc2c6}
+.arena-guide-rayo{color:#ffe18d}.arena-guide-espiritu{color:#9af6c7}
+#viewport9x16 .arena-audience-guide{padding:6px 3px 8px;gap:4px;border-color:#713e6e}
+#viewport9x16 .arena-guide-call{font-size:clamp(13px,4.2cqw,23px);gap:.22em;line-height:1.1}
+#viewport9x16 .arena-guide-call span{width:100%;text-align:center}
+#viewport9x16 .arena-guide-explain{font-size:clamp(10px,2.65cqw,15px)}
+#viewport9x16 .arena-guide-commands{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 4px;
+ font-size:clamp(9px,2.7cqw,15px);text-align:center}
+#viewport9x16 .arena-guide-pair{gap:2px;letter-spacing:-.025em}
+#viewport9x16 .arena-guide-pair:last-child{grid-column:1/-1}
+#viewport9x16 .arena-guide-pair b{font-size:.9em}
+/* A single strong call to action replaces the tiny, wide, control-heavy lobby. */
+#viewport16x9 .arena-onboarding,#viewport9x16 .arena-onboarding{
+ position:absolute;top:53%;left:50%;right:auto;bottom:auto;transform:translate(-50%,-50%);
+ width:min(85%,880px);max-width:none;min-width:0;margin:0;z-index:21;pointer-events:auto
 }
-@media (max-width:767px) and (orientation:portrait) {
-    #card-9x16:fullscreen {border:0!important;border-radius:0!important;}
-    #card-9x16:fullscreen #viewport9x16 {max-width:100vw!important;max-height:100dvh!important;object-fit:contain;}
+#viewport16x9 .arena-onboarding.hidden,#viewport9x16 .arena-onboarding.hidden{display:none!important}
+.arena-onboarding-card{display:flex;flex-direction:column;align-items:center;
+ gap:clamp(5px,.85cqw,12px);width:100%;max-width:100%;min-width:0;
+ padding:clamp(15px,2cqw,29px);border:2px solid #3cc1c7a8;border-radius:18px;
+ background:linear-gradient(145deg,rgba(6,23,39,.985),rgba(3,12,27,.985));
+ box-shadow:0 14px 42px #000b,0 0 27px #22d3ee19;
+ text-align:center;color:white;font:650 clamp(13px,1.8cqw,25px)/1.35 Inter,system-ui,sans-serif
 }
-@media (prefers-reduced-motion:reduce) {.arena-onboarding-card {scroll-behavior:auto;}}
+.arena-onboarding-kicker{margin:0;color:#6ff3f1;font-size:.68em;font-weight:900;letter-spacing:.09em}
+.arena-onboarding-card h2{margin:0;color:white;
+ font:900 clamp(20px,2.7cqw,39px)/1.13 Orbitron,Inter,system-ui,sans-serif;letter-spacing:.01em}
+.arena-onboarding-sub{margin:0;color:#eef7ff;font-size:1em;max-width:62ch;line-height:1.32}
+.arena-onboarding-sub strong{display:inline;color:#71faec;background:none;padding:0!important;
+ border:0;font-size:1.34em;font-weight:950;white-space:nowrap}
+.arena-onboarding-hint{margin:0;color:#aacddf;font-size:.82em}
+.arena-onboarding-meta,.arena-onboarding-rules,.arena-onboarding-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px}
+.arena-onboarding-meta{font-size:.7em}
+.arena-onboarding-stat,.arena-onboarding-meta>span,.arena-onboarding-meta>strong{
+ padding:4px 8px;border:1px solid #47627d8c;border-radius:6px;background:#0e2a3fbd;color:#c9dfed}
+.arena-onboarding-meta strong{color:#ffe58b;font-weight:850}
+.arena-onboarding-meta button{margin-left:4px;min-height:25px;padding:2px 6px;
+ color:#e5f6ff;border:1px solid #54718b;border-radius:5px;background:#183651;cursor:pointer}
+.arena-onboarding-rules button{padding:5px 9px!important;border:1px solid #405a71;
+ border-radius:7px;font-size:.65em;cursor:pointer}
+.arena-onboarding-tools{width:100%;padding-top:8px;margin-top:2px;border-top:1px solid #34526b}
+.arena-onboarding-tools button{padding:6px 11px!important;background:#182d42;color:#d4e9f4;
+ border:1px solid #445e76;border-radius:7px;font-size:.65em;font-weight:750;cursor:pointer}
+.arena-onboarding-tools .arena-onboarding-start{background:#68e5d5;color:#062a2b;border-color:#68e5d5;font-weight:900}
+#viewport9x16 .arena-onboarding{width:88%;top:58%}
+#viewport9x16 .arena-onboarding-card{gap:6px;padding:12px 10px;
+ border-color:#c85b95b8;font-size:clamp(13px,3.9cqw,19px)}
+#viewport9x16 .arena-onboarding-card h2{font-size:clamp(18px,5.15cqw,28px)}
+#viewport9x16 .arena-onboarding-hint{font-size:.84em}
+#viewport9x16 .arena-onboarding-meta{font-size:.68em;gap:4px}
+#viewport9x16 .arena-onboarding-meta>span,#viewport9x16 .arena-onboarding-meta>strong{padding:3px 5px}
+#viewport9x16 .arena-onboarding-tools button{font-size:.75em;padding:6px 10px!important}
+/* Stream dual displays a 9:16 scene at the center of a true, taller 9:21 carrier. */
+#broadcastStageSection:fullscreen #card-9x16.arena-stream-921{
+ position:relative!important;flex:none!important;flex-direction:column!important;
+ justify-content:center!important;align-items:center!important;aspect-ratio:9/21!important;
+ overflow:hidden!important;border:1px solid #2c5567!important;border-radius:6px!important;
+ box-sizing:border-box!important;
+ background:linear-gradient(#102539 0%,#050c18 19%,#050c18 81%,#102539 100%)!important
+}
+#broadcastStageSection:fullscreen #card-9x16.arena-stream-921 #viewport9x16{
+ margin:auto 0!important;flex:none!important;aspect-ratio:9/16!important;max-width:100%!important
+}
+#broadcastStageSection:fullscreen #card-9x16.arena-stream-921::before,
+#broadcastStageSection:fullscreen #card-9x16.arena-stream-921::after{
+ position:absolute;left:0;right:0;z-index:1;pointer-events:none;text-align:center;
+ font:850 clamp(10px,1.1vw,16px)/1.2 Inter,system-ui,sans-serif;
+ letter-spacing:.04em;color:#9fdee6;white-space:nowrap
+}
+#broadcastStageSection:fullscreen #card-9x16.arena-stream-921::before{content:"ARENA LIVE · TIKTOK";top:4%}
+#broadcastStageSection:fullscreen #card-9x16.arena-stream-921::after{
+ content:"9:16 CENTRADO · MARCO 9:21";bottom:4%;color:#719bb3;font-size:clamp(9px,.85vw,13px)
+}
+/* The normal mobile preview remains independent of the dual Stream frame. */
+@media(max-width:767px) and (orientation:portrait){
+ #card-9x16.arena-phone-fit{position:relative;align-self:center;flex:none!important;
+ overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center;
+ background:linear-gradient(#071524,#030914 16%,#030914 84%,#071524);
+ border:1px solid #bd6d9b44;border-radius:12px;box-shadow:0 7px 24px #0008}
+ #card-9x16.arena-phone-fit #viewport9x16{margin:auto 0!important;flex:none!important}
+}
 </style>
 
 <style id="arena-clean-broadcast">
