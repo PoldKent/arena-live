@@ -367,6 +367,12 @@ function arenaMobileInstallControlDragging(){
         btn.addEventListener('pointerup',release,true);btn.addEventListener('pointercancel',release,true);
         btn.addEventListener('click',event=>{if(arenaMobileEditing){event.preventDefault();event.stopImmediatePropagation();}},true);
     }
+    // Action buttons live in the viewport but must not also trigger the legacy
+    // viewport gesture listener when the user presses them.
+    for(const id of ['arenaMobileJump','arenaMobileAttack','arenaMobilePower']){
+        const action=document.getElementById(id);
+        for(const type of ['pointerdown','pointerup','pointercancel'])action?.addEventListener(type,event=>event.stopPropagation());
+    }
     const jump=document.getElementById('arenaMobileJump');
     if(jump){
         jump.onclick=null;
