@@ -9,7 +9,7 @@ test('Streamer naming is standard and the legacy director preference stays compa
   assert.match(runtime,/Modo Streamer/);
   assert.doesNotMatch(runtime,/Modo Director/);
   assert.match(runtime,/DIRECTOR:'director'/);
-  assert.match(touch,/Panel del streamer/);
+  assert.match(touch,/Opciones del Modo Streamer/);
   assert.doesNotMatch(touch,/Herramientas de direcci/);
 });
 test('mobile toolbar is top-aligned, preserves native pause and menu actions',()=>{
