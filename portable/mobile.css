@@ -495,3 +495,228 @@ html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileMoreBtn{
  html.arena-mobile-offline #arenaMobileFloating button{width:36px!important;height:36px!important;font-size:16px!important}
  html.arena-mobile-offline .arena-mobile-match-menu{grid-template-columns:1fr 1fr}
 }
+
+/* v0.31 · controls are individual draggable circles, not a compressed bottom bar. */
+html.arena-mobile-offline #arenaHeaderActions.arena-operator-toolbar{
+ position:absolute!important;inset:0!important;left:0!important;right:0!important;top:0!important;bottom:0!important;
+ display:block!important;width:100%!important;height:100%!important;min-height:0!important;max-width:none!important;
+ padding:0!important;margin:0!important;border:0!important;border-radius:0!important;
+ overflow:visible!important;pointer-events:none!important;z-index:165!important;
+ background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;
+}
+html.arena-mobile-offline #arenaHeaderActions>#arenaMobileJump,
+html.arena-mobile-offline #arenaHeaderActions>#arenaMobileAttack,
+html.arena-mobile-offline #arenaHeaderActions>#arenaMobilePower,
+html.arena-mobile-offline #arenaHeaderActions>#arenaMobileMoreBtn{
+ position:absolute!important;left:var(--mobile-x,85%)!important;top:var(--mobile-y,86%)!important;right:auto!important;bottom:auto!important;
+ transform:translate(-50%,-50%)!important;flex:none!important;display:grid!important;place-items:center!important;
+ width:var(--arena-mobile-button-size,70px)!important;height:var(--arena-mobile-button-size,70px)!important;
+ min-width:var(--arena-mobile-button-size,70px)!important;min-height:var(--arena-mobile-button-size,70px)!important;
+ max-width:none!important;padding:0!important;margin:0!important;box-sizing:border-box!important;
+ border-radius:50%!important;white-space:nowrap!important;pointer-events:auto!important;touch-action:none!important;
+ font:800 clamp(23px,6.2vw,33px)/1 system-ui,sans-serif!important;color:#eaffff!important;
+ border:2px solid rgba(135,210,235,.75)!important;
+ background:rgba(21,55,85,var(--arena-hud-opacity,.85))!important;
+ box-shadow:0 5px 18px #0009,inset 0 2px 5px #b5eeff20!important;
+}
+html.arena-mobile-offline #arenaHeaderActions>#arenaMobilePower{
+ background:rgba(7,102,111,var(--arena-hud-opacity,.85))!important;border-color:#70ecdf!important
+}
+html.arena-mobile-offline #arenaHeaderActions>#arenaMobileMoreBtn{
+ background:rgba(43,55,92,var(--arena-hud-opacity,.85))!important;border-color:#afbef0!important
+}
+html.arena-mobile-offline #arenaHeaderActions button:disabled{
+ opacity:.36!important;pointer-events:none!important
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaHeaderActions.arena-operator-toolbar{
+ width:100%!important;height:100%!important;display:block!important;background:transparent!important
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileMoreBtn{
+ width:var(--arena-mobile-button-size,70px)!important;height:var(--arena-mobile-button-size,70px)!important
+}
+html.arena-mobile-offline.arena-mobile-edit-controls #arenaHeaderActions>button[data-mobile-positioned]{
+ outline:2px dashed #f8d387!important;outline-offset:4px!important;
+ pointer-events:auto!important;opacity:1!important;filter:none!important;
+ cursor:move;animation:arena-edit-breathe 1.25s ease-in-out infinite alternate
+}
+@keyframes arena-edit-breathe{from{outline-color:#d3e5ee}to{outline-color:#f6c15b}}
+html.arena-mobile-offline #arenaMobileEditDone:not([hidden]){
+ width:auto!important;height:39px!important;padding:0 11px!important;
+ border:1px solid #77ebcc!important;border-radius:11px!important;
+ color:#dcfff4!important;background:rgba(11,82,72,var(--arena-hud-opacity,.85))!important;
+ font:700 12px system-ui,sans-serif!important
+}
+/* Compact upper tools: the original large top capsule consumed too much gameplay. */
+html.arena-mobile-offline #arenaMobileFloating{
+ top:calc(12px + env(safe-area-inset-top))!important;
+ right:max(9px,env(safe-area-inset-right))!important;
+ width:auto!important;height:auto!important;padding:3px!important;gap:4px!important;
+ border-radius:23px!important;
+ background:rgba(9,24,44,var(--arena-hud-opacity,.85))!important
+}
+html.arena-mobile-offline #arenaMobileFloating button:not(#arenaMobileEditDone){
+ width:35px!important;height:35px!important;min-width:35px!important;min-height:35px!important;
+ font-size:15px!important;font-weight:750!important;padding:0!important;
+ border-radius:50%!important;
+ color:#e6ffff!important;
+ background:rgba(21,72,88,var(--arena-hud-opacity,.85))!important
+}
+html.arena-mobile-offline #arenaMobileFloating #arenaPortableFullscreen{
+ background:rgba(14,79,83,var(--arena-hud-opacity,.85))!important
+}
+html.arena-mobile-offline #arenaMobilePause{
+ top:calc(11px + env(safe-area-inset-top))!important;left:calc(10px + env(safe-area-inset-left))!important;
+ width:53px!important;height:53px!important;border-radius:50%!important;
+ background:rgba(84,51,26,var(--arena-hud-opacity,.85))!important;
+ z-index:202!important
+}
+/* A distributed testing workspace instead of a huge framed dialog. */
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
+ position:absolute!important;inset:0!important;left:0!important;right:0!important;top:0!important;bottom:0!important;
+ width:100%!important;height:100%!important;min-width:0!important;max-width:none!important;max-height:none!important;
+ margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
+ background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;
+ overflow:visible!important;z-index:141!important;pointer-events:none!important;
+}
+html.arena-mobile-offline #arenaPortableTestHead{
+ position:absolute;left:9px;top:clamp(56px,8%,91px);z-index:4;
+ display:flex;align-items:center;gap:5px;width:min(73%,292px);max-width:calc(100% - 17px);
+ padding:5px 7px;border:1px solid rgba(98,177,196,.56);border-radius:20px;
+ font:700 11px/1.25 system-ui,sans-serif;color:#b0f5f5;
+ background:rgba(15,54,73,var(--arena-hud-opacity,.85));
+ box-shadow:0 5px 12px #0006;pointer-events:auto!important
+}
+html.arena-mobile-offline #arenaPortableTestHead button{
+ width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;
+ font-size:17px!important;padding:0!important;border-radius:50%!important;
+ background:rgba(27,55,73,var(--arena-hud-opacity,.85))!important
+}
+html.arena-mobile-offline #arenaPortableTestDrawer .arena-portable-test-picker{
+ position:absolute!important;top:clamp(102px,14%,142px);left:9px;
+ width:min(76%,310px);padding:0!important;z-index:4;
+ background:transparent!important;pointer-events:auto!important;
+ font:650 11px system-ui,sans-serif
+}
+html.arena-mobile-offline #arenaPortableTestSelect{
+ background:rgba(14,35,57,var(--arena-hud-opacity,.85))!important;
+ min-height:40px!important;border-radius:11px!important;
+}
+html.arena-mobile-offline #arenaPortableTestBody,
+html.arena-mobile-offline #arenaPortableTestBody>.arena-work-panel,
+html.arena-mobile-offline #arenaPortableTestBody>.arena-work-panel>.arena-panel-body{
+ display:contents!important;max-height:none!important;overflow:visible!important;
+ padding:0!important;margin:0!important;border:0!important;
+ background:none!important;box-shadow:none!important;pointer-events:none!important
+}
+html.arena-mobile-offline #arenaPortableTestBody #arenaTrainingTargetCard{
+ position:absolute!important;top:clamp(160px,23%,230px)!important;left:9px!important;
+ width:min(77%,320px)!important;max-height:min(25vh,270px)!important;
+ overflow:auto!important;margin:0!important;padding:8px!important;
+ border:1px solid rgba(80,144,171,.6)!important;border-radius:13px!important;
+ background:rgba(9,27,45,var(--arena-hud-opacity,.85))!important;
+ box-shadow:0 7px 18px #0005!important;pointer-events:auto!important
+}
+html.arena-mobile-offline #arenaPortableTestBody #arenaTrainingTargetCard small,
+html.arena-mobile-offline #arenaPortableTestBody #arenaTrainingTargetCard p{
+ font-size:10px!important;line-height:1.25!important
+}
+html.arena-mobile-offline #arenaPortableTestBody .arena-skill-buttons{
+ position:absolute!important;bottom:clamp(106px,15%,180px)!important;left:8px!important;
+ width:calc(100% - 16px)!important;max-width:none!important;margin:0!important;
+ padding:0!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+ gap:7px!important;pointer-events:none!important;
+}
+html.arena-mobile-offline #arenaPortableTestBody .arena-skill-buttons>button{
+ display:flex!important;flex-direction:row!important;justify-content:center!important;
+ gap:4px!important;align-items:center!important;pointer-events:auto!important;
+ min-width:0!important;min-height:48px!important;height:auto!important;padding:6px 3px!important;
+ border:1px solid rgba(103,184,206,.58)!important;border-radius:14px!important;
+ color:#e3fbff!important;background:rgba(15,47,68,var(--arena-hud-opacity,.85))!important;
+ font:700 12px/1.1 system-ui,sans-serif!important;box-shadow:0 5px 14px #0006!important
+}
+html.arena-mobile-offline #arenaPortableTestBody .arena-skill-buttons>button span{
+ max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important
+}
+html.arena-mobile-offline #arenaPortableTestBody>.arena-work-panel:not(#arenaPanelPowers) .arena-panel-body{
+ position:absolute!important;top:clamp(159px,23%,235px)!important;left:8px!important;right:8px!important;
+ max-height:48%!important;overflow-y:auto!important;padding:9px!important;
+ background:rgba(11,31,49,var(--arena-hud-opacity,.85))!important;
+ border:1px solid rgba(99,173,190,.42)!important;border-radius:12px!important;
+ pointer-events:auto!important
+}
+html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed:not([hidden]){
+ width:100%!important;max-height:none!important;height:100%!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed #arenaPortableTestHead{
+ width:min(70%,262px)!important
+}
+html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed .arena-portable-test-picker,
+html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed #arenaPortableTestBody{
+ display:none!important
+}
+/* Single menu control with compact collapsed 'Partida', leaving Pause always at top left. */
+html.arena-mobile-offline .arena-mobile-match-menu{
+ grid-column:1/-1;display:block!important;border-top:1px solid #365a70;
+ padding-top:5px;margin-top:3px;max-width:100%
+}
+html.arena-mobile-offline .arena-mobile-match-menu>summary{
+ cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:5px;
+ padding:11px 12px;border:1px solid #47758d;border-radius:12px;
+ color:#e8ffff;background:rgba(20,55,78,var(--arena-hud-opacity,.85));
+ font:750 13px system-ui,sans-serif
+}
+html.arena-mobile-offline .arena-mobile-match-menu>summary span{
+ font:500 10px system-ui,sans-serif;color:#a7cdd8
+}
+html.arena-mobile-offline .arena-mobile-match-menu[open]{
+ display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px
+}
+html.arena-mobile-offline .arena-mobile-match-menu[open]>summary{grid-column:1/-1}
+html.arena-mobile-offline .arena-mobile-match-menu>button{
+ width:100%!important;min-width:0!important;min-height:44px!important;
+ padding:6px 3px!important;font-size:11px!important
+}
+/* Unified translucent surfaces: existing HUD-opacity slider controls menus and their buttons. */
+html.arena-mobile-offline #arenaOperatorPopover,
+html.arena-mobile-offline #settingsPauseModal>div,
+html.arena-mobile-offline #arenaPortableSetup .arena-portable-card{
+ background:rgba(9,25,44,var(--arena-hud-opacity,.85))!important
+}
+html.arena-mobile-offline #arenaOperatorPopover button,
+html.arena-mobile-offline #arenaOperatorPopover select,
+html.arena-mobile-offline #arenaSettingsTabs button,
+html.arena-mobile-offline #settingsPauseModal button,
+html.arena-mobile-offline .arena-portable-card button,
+html.arena-mobile-offline .arena-mobile-mode-choice{
+ background:rgba(20,48,73,var(--arena-hud-opacity,.85))!important
+}
+html.arena-mobile-offline #arenaMobileControlSettings{
+ display:grid;gap:8px;padding:12px;margin:8px 0;
+ border:1px solid rgba(99,179,194,.52);border-radius:13px;
+ background:rgba(13,39,60,var(--arena-hud-opacity,.85));
+ color:#d8f4fb;font:500 12px/1.4 system-ui,sans-serif
+}
+html.arena-mobile-offline #arenaMobileControlSettings h3{
+ font:800 15px system-ui,sans-serif;margin:0;color:#8beef2
+}
+html.arena-mobile-offline #arenaMobileControlSettings p{margin:0}
+html.arena-mobile-offline #arenaMobileControlSettings label{
+ display:flex;justify-content:space-between;gap:6px;font-weight:700
+}
+html.arena-mobile-offline #arenaMobileControlSettings button{
+ min-height:42px;border-radius:10px;border:1px solid #55849c;
+ background:rgba(20,63,82,var(--arena-hud-opacity,.85));color:#eaffff;
+ font:750 13px system-ui,sans-serif
+}
+html.arena-mobile-offline #arenaMobileControlSettings input{width:100%;accent-color:#73e7df}
+@media (orientation:landscape) and (max-height:540px){
+ html.arena-mobile-offline #arenaPortableTestHead{top:6px;left:75px}
+ html.arena-mobile-offline #arenaPortableTestDrawer .arena-portable-test-picker{top:44px;left:75px}
+ html.arena-mobile-offline #arenaPortableTestBody #arenaTrainingTargetCard{
+  top:95px!important;left:10px!important;max-height:40%!important;width:min(44%,300px)!important
+ }
+ html.arena-mobile-offline #arenaPortableTestBody .arena-skill-buttons{
+  bottom:65px!important;left:48%!important;width:50%!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important
+ }
+}
