@@ -5569,6 +5569,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         const arenaDrawOrder = [];
         let arenaRenderFighterCount=0,arenaLastRenderShake={x:0,y:0};
         const arenaFighterDepthOrder = (a, b) => a.y - b.y;
+        const arenaRenderFighterIndex = new Map();
         function renderBothScreensSimultaneously() {
             const fullscreenId = document.fullscreenElement?.id;
             const draw16 = fullscreenId === 'broadcastStageSection' || fullscreenId === 'card-16x9'
@@ -5582,15 +5583,19 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             else for (const fighter of fighters) if (!fighter.eliminated) orderedFighters.push(fighter);
             orderedFighters.sort(arenaFighterDepthOrder);
             arenaRenderFighterCount=orderedFighters.length;
+            // Shared immutable-for-this-frame lookup; prevents 240 effects × 128
+            // linear actor searches × two cameras in simultaneous skill bursts.
+            arenaRenderFighterIndex.clear();
+            for (const fighter of fighters) arenaRenderFighterIndex.set(fighter.id, fighter);
             const shake = sampleArenaScreenShake();arenaLastRenderShake=shake;
             const animationTime = Date.now();
             // Full HD backing stores; logical camera/world coordinates remain unchanged.
             // 1. Render 16:9 Horizontal Broadcast Canvas (1920x1080)
             const zoom16 = (gameState === 'COMBAT' && activeMode === '1v1') ? 1.12 : 1.0;
-            if (draw16) renderWorldToViewport(ctx16, 960, 540, WORLD_W * 0.5, WORLD_H * 0.54, zoom16, orderedFighters, shake, animationTime);
+            if (draw16) renderWorldToViewport(ctx16, 960, 540, WORLD_W * 0.5, WORLD_H * 0.54, zoom16, orderedFighters, shake, animationTime, arenaRenderFighterIndex);
 
             // 2. Render 9:16 Vertical Mobile Broadcast Canvas (1080x1920) with Smart Camera
-            if (draw9) renderWorldToViewport(ctx9, 540, 960, camera9x16.x, camera9x16.y, camera9x16.zoom, orderedFighters, shake, animationTime);
+            if (draw9) renderWorldToViewport(ctx9, 540, 960, camera9x16.x, camera9x16.y, camera9x16.zoom, orderedFighters, shake, animationTime, arenaRenderFighterIndex);
 
             // 3. Synchronize 1v1 Top Health Bars on Both Screens when in 1v1 Combat
             if (gameState === 'COMBAT' && activeMode === '1v1') {
@@ -5801,7 +5806,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             }
             targetCtx.drawImage(arenaIsometricFloorCache, -margin, -margin, width, height);
         }
-        function renderWorldToViewport(targetCtx, viewW, viewH, camX, camY, camZoom, orderedFighters = null, shake = sampleArenaScreenShake(), animationTime = Date.now()) {
+        function renderWorldToViewport(targetCtx, viewW, viewH, camX, camY, camZoom, orderedFighters = null, shake = sampleArenaScreenShake(), animationTime = Date.now(), actorIndex = null) {
             targetCtx.save();
             // Rasterize vectors and text at the actual capture resolution, not a CSS upscale.
             targetCtx.setTransform(targetCtx.canvas.width / viewW, 0, 0, targetCtx.canvas.height / viewH, 0, 0);
@@ -5828,7 +5833,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             for (const fighter of visibleFighters)if(ArenaRender.intersects(bounds,fighter.x,fighter.y-(fighter.z||0)+(fighter.fallDrop||0),180))drawFighterOnCtx(targetCtx,fighter,animationTime);
 
             // 5. Render Special Effects & Particles
-            drawSpecialEffectsOnCtx(targetCtx,bounds,animationTime);
+            drawSpecialEffectsOnCtx(targetCtx,bounds,animationTime,actorIndex);
 
             ArenaRender.drawParticles(targetCtx,particles,bounds,arenaRuntime.quality);
 
@@ -6112,8 +6117,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             };
         }
 
-        function drawSpecialEffectsOnCtx(targetCtx, bounds = {left:0, right:WORLD_W, top:0, bottom:WORLD_H},animationTime=Date.now()) {
+        function drawSpecialEffectsOnCtx(targetCtx, bounds = {left:0, right:WORLD_W, top:0, bottom:WORLD_H},animationTime=Date.now(),actorIndex=null) {
             activeEffects.forEach(ef => {
+                // Resolve mobile effects once and skip all Canvas2D state/path work
+                // for effects strictly outside this camera. Beams/pillars are
+                // handled separately by conservative effectVisible bounds.
+                const host = ef.type === 'rasengan'
+                    ? (actorIndex?.get(ef.fighterId) || fighters.find(f => f.id === ef.fighterId))
+                    : null;
+                const fx = host ? host.x + host.facing * 20 : ef.x;
+                const fy = host ? host.y - (host.z || 0) + (host.fallDrop || 0) : ef.y;
+                if (!ArenaRender.effectVisible(ef, bounds, fx, fy)) return;
                 targetCtx.save();
                 const progress = ef.timer / ef.maxTimer;
 
@@ -6137,9 +6151,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     targetCtx.stroke();
 
                 } else if (ef.type === 'rasengan') {
-                    const host = fighters.find(f => f.id === ef.fighterId);
-                    const rx = host ? host.x + host.facing * 20 : ef.x;
-                    const ry = host ? host.y-(host.z||0)+(host.fallDrop||0) : ef.y;
+                    const rx = fx;
+                    const ry = fy;
                     const rad = 38 * (1.2 - progress * 0.3);
 
                     targetCtx.strokeStyle = '#00f3ff';
