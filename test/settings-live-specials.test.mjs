@@ -19,5 +19,5 @@ test('settings preserve manual pause and dual preview has a separate quick Strea
  assert.match(html,/id="btnViewDual" onclick="setMonitorFocus\('dual'\)"/);
  assert.match(html,/arenaRuntime\.specialSource==='commands'&&origin==='ai'/);
  assert.match(html,/arenaRuntime\.specialSource!=='both'/);
- for(const t of ['match','combat','classes','audience','broadcast','audio','system'])assert.match(html,new RegExp('data-settings-tab="'+t+'"'));
+ for(const t of ['match','combat','classes','audience','broadcast','audio','controls','system'])assert.match(html,new RegExp('data-settings-tab="'+t+'"'));
 });
