@@ -9,7 +9,7 @@ function arenaMobileActor(){
     return fighters.find(f=>f.isStreamer&&!f.eliminated)||null;
 }
 function arenaMobileCanControl(){
-    return !arenaPortableSetupOpen&&!isGamePaused&&!isSettingsOpen&&gameState==='COMBAT'&&streamerManualControl&&!!arenaMobileActor();
+    return arenaPortableProfile.mode===ARENA_MOBILE_MODES.PLAYER&&!arenaPortableSetupOpen&&!isGamePaused&&!isSettingsOpen&&gameState==='COMBAT'&&streamerManualControl&&!!arenaMobileActor();
 }
 function arenaMobileClearDirections(){
     keys.a=false;keys.d=false;keys.w=false;keys.s=false;
@@ -179,8 +179,8 @@ function arenaMobileShowTestDrawer(open=true){
 function arenaMobileInstallTestDrawer(){
     const drawer=document.createElement('aside');
     drawer.id='arenaPortableTestDrawer';drawer.hidden=true;
-    drawer.setAttribute('aria-label','Pruebas en vivo');
-    drawer.innerHTML='<div id="arenaPortableTestHead"><span>🧪 Modo prueba</span><button type="button" id="arenaPortableTestCollapse" aria-label="Minimizar panel">−</button><button type="button" id="arenaPortableTestClose" aria-label="Cerrar pruebas">×</button></div><label class="arena-portable-test-picker">Panel<select id="arenaPortableTestSelect"><option value="arenaPanelPowers">Jugador, poderes y comandos</option><option value="arenaPanelPlayers">Jugadores y K.O.</option><option value="arenaPanelScenarios">Escenarios</option><option value="arenaPanelSocial">Interacciones</option><option value="arenaPanelSimulation">Simulación</option></select></label><div id="arenaPortableTestBody"></div>';
+    drawer.setAttribute('aria-label','Herramientas de dirección');
+    drawer.innerHTML='<div id="arenaPortableTestHead"><span>🧪 Herramientas de dirección</span><button type="button" id="arenaPortableTestCollapse" aria-label="Minimizar panel">−</button><button type="button" id="arenaPortableTestClose" aria-label="Cerrar pruebas">×</button></div><label class="arena-portable-test-picker">Panel<select id="arenaPortableTestSelect"><option value="arenaPanelPowers">Jugador, poderes y comandos</option><option value="arenaPanelPlayers">Jugadores y K.O.</option><option value="arenaPanelScenarios">Escenarios</option><option value="arenaPanelSocial">Interacciones</option><option value="arenaPanelSimulation">Simulación</option></select></label><div id="arenaPortableTestBody"></div>';
     document.body.appendChild(drawer);
     drawer.querySelector('#arenaPortableTestSelect').addEventListener('change',event=>arenaMobileSelectTestPanel(event.target.value));
     drawer.querySelector('#arenaPortableTestClose').onclick=()=>arenaMobileShowTestDrawer(false);
@@ -206,12 +206,12 @@ function arenaMobileInstallTestDrawer(){
     head.addEventListener('pointerup',end);head.addEventListener('pointercancel',end);
     arenaMobileMountTestDrawer();
     const fab=document.createElement('button');fab.id='arenaMobileTestFab';fab.type='button';
-    fab.textContent='🧪';fab.title='Modo prueba';fab.setAttribute('aria-label','Modo prueba: jugador, poderes y comandos');fab.setAttribute('aria-expanded','false');
+    fab.textContent='🧪';fab.title='Herramientas de dirección';fab.setAttribute('aria-label','Herramientas: jugador, poderes y comandos');fab.setAttribute('aria-expanded','false');
     fab.onclick=()=>arenaMobileShowTestDrawer(!arenaMobileTestState.open);
     document.getElementById('arenaMobileFloating')?.appendChild(fab);
     const menu=document.querySelector('#arenaOperatorPopover [data-operator-panel="mobile"] [data-forward-control="arenaDualTestsToggle"]');
     if(menu){
-        menu.textContent='🧪 Pruebas en pantalla';
+        menu.textContent='🧪 Herramientas de dirección';
         menu.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();arenaMobileShowTestDrawer(true);},true);
     }
     document.addEventListener('fullscreenchange',arenaMobileMountTestDrawer);
