@@ -159,6 +159,22 @@ await check('Stream uses its own reserved left column and contains both correctl
  await page.waitForTimeout(150);assert.equal(await page.locator('#arenaStreamToolbarMount #arenaHeaderActions').count(),1);assert.equal(await page.locator('#arenaStreamPanelHost').isHidden(),true);
  const r=await rects();assert.ok(r.viewport16x9[0]>=260);assert.ok(r.viewport9x16[0]>r.viewport16x9[0]+r.viewport16x9[2]);assert.ok(r.viewport9x16[0]+r.viewport9x16[2]<=1720);
  assert.ok(Math.abs(r.viewport16x9[2]/r.viewport16x9[3]-16/9)<.01);assert.ok(Math.abs(r.viewport9x16[2]/r.viewport9x16[3]-9/16)<.01);
+ const carrier=await page.evaluate(()=>{
+  const outer=document.getElementById('card-9x16');
+  const inner=document.getElementById('viewport9x16');
+  const a=outer.getBoundingClientRect(),b=inner.getBoundingClientRect();
+  return {enabled:outer.classList.contains('arena-stream-921'),
+   ratio:a.width/a.height,innerRatio:b.width/b.height,
+   centered:Math.abs((a.top+a.bottom)/2-(b.top+b.bottom)/2)<2,
+   left:b.left-a.left,right:a.right-b.right,top:b.top-a.top,bottom:a.bottom-b.bottom,
+   instructions:document.getElementById('arenaAudienceGuide9').textContent};
+ });
+ assert.equal(carrier.enabled,true);assert.ok(Math.abs(carrier.ratio-9/21)<.015,JSON.stringify(carrier));
+ assert.ok(Math.abs(carrier.innerRatio-9/16)<.015,JSON.stringify(carrier));
+ assert.equal(carrier.centered,true);
+ assert.ok(Math.abs(carrier.top-carrier.bottom)<4,JSON.stringify(carrier));
+ assert.ok(carrier.top>10&&carrier.bottom>10);
+ assert.ok(carrier.instructions.includes('!jugar')&&carrier.instructions.includes('!trueno'));
 });
 await check('Stream keeps the selected panel through actions and outside clicks, replaces it with another menu, and closes with ×',async()=>{
  const before=await rects();await streamClick('arenaDualTestsToggle');assert.deepEqual(await rects(),before);
@@ -318,7 +334,7 @@ await check('Mobile prioritizes 9:16, exposes only the bottom action bar and pre
   const a=frame.getBoundingClientRect(),b=view.getBoundingClientRect();
   return {phoneFit:frame.classList.contains('arena-phone-fit'),outerRatio:a.width/a.height,innerRatio:b.width/b.height,fit:b.top>=a.top-1&&b.bottom<=a.bottom+1};
  });
- assert.equal(preview.phoneFit,true);assert.ok(Math.abs(preview.outerRatio-9/20)<.02,JSON.stringify(preview));assert.ok(Math.abs(preview.innerRatio-9/16)<.02,JSON.stringify(preview));assert.equal(preview.fit,true);assert.equal(await page.locator('#arenaHeaderActions').evaluate(n=>n.getBoundingClientRect().bottom),844);assert.equal(await page.locator('#arenaMobileMoreBtn').isVisible(),true);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ assert.equal(preview.phoneFit,false);assert.ok(Math.abs(preview.innerRatio-9/16)<.02,JSON.stringify(preview));assert.equal(await page.locator('#arenaHeaderActions').evaluate(n=>n.getBoundingClientRect().bottom),844);assert.equal(await page.locator('#arenaMobileMoreBtn').isVisible(),true);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await page.locator('#arenaMobileMoreBtn').click();assert.equal(await page.locator('[data-forward-control="arenaDualTikTokConnectBtn"]').isDisabled(),await page.locator('#arenaDualTikTokConnectBtn').isDisabled());await page.locator('[data-forward-control="arenaDualTestsToggle"]').click();await unfold('arenaPanelPlayers');const before=(await state()).activeFighters;await page.locator('#arenaPanelPlayers button[onclick="triggerQuickJoin()"]').click();assert.equal((await state()).activeFighters,before+1);assert.equal(await page.locator('#arenaOperatorPopover').isHidden(),true);
  await page.locator('#arenaMobileMoreBtn').click();await page.locator('[data-forward-control="arenaDualSettingsBtn"]').click();assert.equal((await state()).paused,true);await page.keyboard.press('Escape');assert.equal((await state()).paused,false);await shot('mobile');
 });
