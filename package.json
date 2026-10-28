@@ -15,6 +15,7 @@
     "test:performance": "node test/performance-browser.mjs",
     "test:gpu": "node test/performance-browser.mjs --gpu",
     "test:mobile": "node test/mobile-browser.mjs",
+    "verify:release": "npm test && npm run build:mobile && npm run test:browser && npm run test:mobile && npm run test:performance",
     "build:styles": "node tools/build-styles.mjs",
     "build:mobile": "node tools/build-mobile.mjs",
     "clean:branches": "node tools/clean-merged-branches.mjs",
