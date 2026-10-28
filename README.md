@@ -94,7 +94,7 @@ El juego ocupa el centro. A la izquierda están los chats con pestañas **TikTok
 
 ## Barra, pausa y ajustes
 
-La barra horizontal empieza por **Vista, Pantalla, Pruebas y Ajustes**. Incluye **Modo Stream, Chat, Prota, un selector desplegable directo con sus cinco clases, Audio, TikTok, Pausa, Revancha y Lobby**. Ya no hay que abrir otro menú para elegir la clase de Prota; se selecciona antes de entrar o reingresar, conservando las restricciones de clase de la partida.
+La barra horizontal empieza por **Vista, Pantalla, Pruebas y Ajustes**. Incluye **Modo Stream, Chat, Prota, un selector desplegable directo con sus cinco clases, Audio, TikTok, Pausa, Revancha y Lobby**. Ya no hay que abrir otro menú para elegir la clase de Prota: puede seleccionarse antes de entrar y también cambiarse durante la partida, respetando el mismo enfriamiento de cambio de clase y las restricciones de la ronda.
 
 **Prota** permite participar como jugador. **Modo Stream** abre la composición de emisión. Vista alterna la preparación entre 16:9 y 9:16; Pantalla abre una captura individual en pantalla completa.
 
