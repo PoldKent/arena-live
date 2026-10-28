@@ -140,7 +140,7 @@ await check('Panels dock below the game, float, resize, and dock again without l
  await panel.locator('.arena-panel-dock').selectOption('right');assert.equal(await page.locator('#arenaDockRight>#arenaPanelPowers').count(),1);assert.equal(await page.locator('.arena-skill-buttons button').count(),5);
 });
 await check('Dragging a panel handle reorders/docks it and column width is manually adjustable',async()=>{
- const handle=await page.locator('#arenaPanelPlayers .arena-panel-drag').boundingBox(),drop=await page.locator('#arenaPanelSocial>summary').boundingBox();
+ const handle=await page.locator('#arenaPanelPlayers .arena-panel-drag').boundingBox(),drop=await page.locator('#arenaDockRight>#arenaPanelPowers>summary').boundingBox();
  await page.mouse.move(handle.x+6,handle.y+8);await page.mouse.down();await page.mouse.move(drop.x+30,drop.y+14,{steps:12});await page.mouse.up();assert.equal(await page.locator('#arenaDockRight>#arenaPanelPlayers').count(),1);
  const resizer=await page.locator('#arenaLeftResizer').boundingBox();await page.mouse.move(resizer.x+4,resizer.y+80);await page.mouse.down();await page.mouse.move(resizer.x+44,resizer.y+80,{steps:8});await page.mouse.up();
  assert.equal(await page.evaluate(()=>arenaWorkspace.layouts.preparation.leftWidth),300);await page.waitForTimeout(250);
