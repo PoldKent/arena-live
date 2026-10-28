@@ -6,6 +6,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WebSocket, WebSocketServer } from 'ws';
 import { normalizeTikTokChat, normalizeCreatorHandle } from './chat-normalize.mjs';
+import { normalizeTikTokLike } from './social-normalize.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
@@ -19,11 +20,12 @@ const wss = new WebSocketServer({ noServer: true, maxPayload: 8192 });
 const connectedSockets = new Set();
 let controller = null;
 const recentEventIds = new Map();
+const recentLikeIds = new Map();
 
 function snapshot() {
   return {
     type: 'status', ...liveSession.status, account: `@${TIKTOK_USERNAME}`,
-    viewers: connectedSockets.size, localWindows: connectedSockets.size, capabilities:{comments:true,socialEvents:false}, controllerConnected: controller?.readyState === WebSocket.OPEN,
+    viewers: connectedSockets.size, localWindows: connectedSockets.size, capabilities:{comments:true,socialEvents:true,taps:true}, controllerConnected: controller?.readyState === WebSocket.OPEN,
     version: VERSION
   };
 }
@@ -34,7 +36,7 @@ function updateStatus() {
   const message = snapshot();
   for (const ws of connectedSockets) push(ws, { ...message, isController: ws === controller,clientId:ws.clientId,canClaimControl:!controller });
 }
-function sendChat(payload) {
+function sendToController(payload) {
   if (controller?.readyState !== WebSocket.OPEN) return false;
   // Preserve all chat routing / throttles in the game itself: do not call support().
   push(controller, payload);
@@ -53,7 +55,22 @@ function publishChat(event) {
       }
     }
   }
-  sendChat(chat);
+  sendToController(chat);
+}
+function publishLike(event) {
+  const like = normalizeTikTokLike(event);
+  if (!like) return;
+  if (like.eventId) {
+    if (recentLikeIds.has(like.eventId)) return;
+    recentLikeIds.set(like.eventId, Date.now());
+    if (recentLikeIds.size > 2000) {
+      for (const [key, timestamp] of recentLikeIds) {
+        if (Date.now() - timestamp > 120000 || recentLikeIds.size > 1500) recentLikeIds.delete(key);
+        else break;
+      }
+    }
+  }
+  sendToController(like);
 }
 
 const liveSession=new LiveSession({
@@ -64,7 +81,7 @@ const liveSession=new LiveSession({
     // 2.5.0 requires an options object; skip historical chat during reconnections.
     return new C(TIKTOK_USERNAME,{processInitialData:false});
   },
-  onChat:publishChat,onStatus:updateStatus
+  onChat:publishChat,onLike:publishLike,onStatus:updateStatus
 });
 const connectLive=()=>liveSession.connect();
 const disconnectLive=()=>liveSession.disconnect();
@@ -138,7 +155,14 @@ const server = createServer(async (req, res) => {
       const body = await requestBody(req);
       const chat = normalizeTikTokChat({ uniqueId: body.username || 'arena_prueba', comment: body.message || '!guerrero' });
       if (!chat) return json(res, 400, { error: 'Nombre o mensaje inválido.' });
-      return json(res, 200, { sent: sendChat(chat), chat });
+      return json(res, 200, { sent: sendToController(chat), chat });
+    }
+    if (req.method === 'POST' && pathname === '/api/test-like') {
+      if (process.env.NODE_ENV === 'production') return json(res, 403, { error: 'Prueba desactivada.' });
+      const body = await requestBody(req);
+      const like = normalizeTikTokLike({ user: { displayId: body.username || 'arena_prueba' }, count: body.count ?? 10 });
+      if (!like) return json(res, 400, { error: 'Usuario o cantidad de taps inválida.' });
+      return json(res, 200, { sent: sendToController({ ...like, source: 'test' }) });
     }
     json(res, 404, { error: 'Ruta inexistente.' });
   } catch (e) { json(res, 400, { error: String(e?.message || e).slice(0, 200) }); }
