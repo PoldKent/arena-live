@@ -690,6 +690,7 @@ await check('Settings shows the release only in its footer and retains UI/power 
  assert.deepEqual(await page.locator('[data-command-label]').evaluateAll(ns=>Object.fromEntries(ns.map(n=>[n.dataset.commandLabel,n.textContent]))),{'!kame':'Kame','!rasen':'Rasen','!trueno':'Trueno','!enred':'Enredadera','!coloso':'Coloso'});
 });
 await check('Display settings reveal real attack names and damage numbers immediately, persist, and preserve OBS/layout preferences',async()=>{
+ await page.evaluate(()=>selectArenaSettingsTab('audience',false));
  const section=page.locator('.arena-settings-section').filter({has:page.locator('#showPowerTextToggle')});if(!await section.evaluate(n=>n.open))await section.locator('summary').click();
  const calibration=await page.evaluate(()=>localStorage.getItem(ARENA_OBS_CALIBRATION_KEY));
  await page.locator('#showPowerTextToggle').check();await page.locator('#showCombatNumbersToggle').check();assert.equal((await state()).paused,true);
