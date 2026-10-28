@@ -945,7 +945,7 @@ html.arena-mobile-offline #arenaMobileFloating #arenaMobileEditDone{
   position:static!important;min-height:42px!important;font-size:12px!important;
 }
 html.arena-mobile-offline #arenaOperatorPopover{
-  position:fixed!important;top:calc(52px + env(safe-area-inset-top))!important;
+  position:fixed!important;top:calc(62px + env(safe-area-inset-top))!important;
   right:6px!important;bottom:auto!important;left:auto!important;
   width:min(94vw,320px)!important;max-height:min(75dvh,550px)!important;
   z-index:240!important;
@@ -1194,8 +1194,8 @@ html.arena-mobile-offline #card-16x9:fullscreen #arenaMobileGestureGuide{
 }
 html.arena-mobile-offline #card-9x16:fullscreen #arenaOperatorPopover,
 html.arena-mobile-offline #card-16x9:fullscreen #arenaOperatorPopover{
-  position:absolute!important;top:52px!important;right:6px!important;
-  max-height:calc(100% - 60px)!important;z-index:235!important;
+  position:absolute!important;top:62px!important;right:6px!important;
+  max-height:calc(100% - 70px)!important;z-index:235!important;
 }
 html.arena-mobile-offline #arenaMobileArrangeSettings[hidden]{display:none!important}
 html.arena-mobile-offline #arenaMobileTouchModeOptions{
