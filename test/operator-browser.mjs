@@ -1143,6 +1143,9 @@ await check('New settings navigation groups controls without replacing input nod
   const lives=document.getElementById('playerLivesSelect');
   const rule=document.getElementById('arenaRuleDamage');
   const obs=document.getElementById('arenaObsVerticalFormat');
+  const language=document.getElementById('languageSelect');
+  const audience=document.getElementById('showPowerTextToggle');
+  const workspace=document.getElementById('arenaWorkspaceReset');
   const labels=[...document.querySelectorAll('#arenaSettingsTabs button')].map(n=>n.dataset.settingsTab);
   selectArenaSettingsTab('match');
   const livesVisible=!lives.closest('.arena-settings-section').hidden;
@@ -1151,17 +1154,22 @@ await check('New settings navigation groups controls without replacing input nod
   const damageVisible=!rule.closest('.arena-settings-section').hidden;
   selectArenaSettingsTab('broadcast');
   const obsVisible=!obs.closest('.arena-settings-section').hidden;
+  const languageVisible=!language.closest('.arena-settings-section').hidden;
+  selectArenaSettingsTab('audience');
+  const audienceVisible=!audience.closest('.arena-settings-section').hidden;
+  selectArenaSettingsTab('workspace');
+  const workspaceVisible=!workspace.closest('.arena-settings-section').hidden;
   document.getElementById('arenaSettingsSearch').value='vidas';
   selectArenaSettingsTab('broadcast',false);
   const searchFound=!lives.closest('.arena-settings-section').hidden;
   document.getElementById('arenaSettingsSearch').value='';
   selectArenaSettingsTab('match');
-  return {labels,livesVisible,damageHidden,damageVisible,obsVisible,searchFound,
+  return {labels,livesVisible,damageHidden,damageVisible,obsVisible,languageVisible,audienceVisible,workspaceVisible,searchFound,
     stable:lives===document.getElementById('playerLivesSelect')&&rule===document.getElementById('arenaRuleDamage'),
     stored:localStorage.getItem('arenaLiveSettingsNavV1')};
  });
  assert.deepEqual(r,{labels:['match','combat','broadcast','audience','workspace'],
-   livesVisible:true,damageHidden:true,damageVisible:true,obsVisible:true,searchFound:true,stable:true,stored:'match'});
+   livesVisible:true,damageHidden:true,damageVisible:true,obsVisible:true,languageVisible:true,audienceVisible:true,workspaceVisible:true,searchFound:true,stable:true,stored:'match'});
 });
 await check('Real TikTok follower gift subscriber support routes to the real sender rather than the selected actor',async()=>{
  const r=await page.evaluate(()=>{
