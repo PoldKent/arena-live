@@ -60,3 +60,6 @@ body,.font-display {font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
  #arenaPortableStart {margin-top:7px;min-height:42px}
  .arena-portable-card .arena-portable-help {margin-top:7px;font-size:10px}
 }
+
+/* Mobile gameplay profile intentionally excludes OBS and streaming integrations. */
+.arena-mobile-offline #arenaDualTikTokConnectBtn,.arena-mobile-offline #arenaPanelBridge,.arena-mobile-offline #arenaChatTabTikTok,.arena-mobile-offline #arenaObsCalibrationPanel,.arena-mobile-offline #btnFullscreenDual,.arena-mobile-offline #btnViewDual,.arena-mobile-offline [data-forward-control="arenaDualTikTokConnectBtn"],.arena-mobile-offline [data-forward-control="btnFullscreenDual"]{display:none!important}
