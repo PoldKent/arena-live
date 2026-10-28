@@ -149,7 +149,7 @@ function refreshArenaPortableFloatingUI(){
     const fs=document.getElementById('arenaPortableFullscreen');
     const pause=document.getElementById('arenaMobilePause');
     const modeShortcut=document.getElementById('arenaMobileModeShortcut');
-    if(modeShortcut){const player=arenaPortableProfile.mode===ARENA_MOBILE_MODES.PLAYER;modeShortcut.textContent=player?'🎛 Streamer':'🎮 Jugador';modeShortcut.title=player?'Cambiar a Modo Streamer':'Cambiar a Modo jugador';modeShortcut.setAttribute('aria-label',modeShortcut.title);modeShortcut.setAttribute('aria-pressed',String(!player));}
+    if(modeShortcut){const player=arenaPortableProfile.mode===ARENA_MOBILE_MODES.PLAYER;modeShortcut.textContent=player?'🎛':'🎮';modeShortcut.title=player?'Cambiar a Modo Streamer':'Cambiar a Modo jugador';modeShortcut.setAttribute('aria-label',modeShortcut.title);modeShortcut.setAttribute('aria-pressed',String(!player));}
     if(pause){pause.textContent=isGamePaused?'▶':'⏸';pause.title=isGamePaused?'Continuar combate':'Pausar combate';pause.setAttribute('aria-label',pause.title);pause.setAttribute('aria-pressed',String(isGamePaused));}
     const guide=document.getElementById('arenaPortableToggleGuide');
     const menuGuide=document.getElementById('arenaPortableGuideMenu');
@@ -191,10 +191,10 @@ function installArenaPortableFloatingUI(){
     pause.id='arenaMobilePause';pause.type='button';pause.textContent='⏸';pause.setAttribute('aria-label','Pausar combate');
     pause.onclick=()=>{document.getElementById('arenaDualPauseBtn')?.click();refreshArenaPortableFloatingUI();};
     hud.prepend(pause);
-    const shortcut=document.createElement('button');shortcut.id='arenaMobileModeShortcut';shortcut.type='button';shortcut.textContent='🎛 Streamer';
+    const shortcut=document.createElement('button');shortcut.id='arenaMobileModeShortcut';shortcut.type='button';shortcut.textContent='🎛';
     shortcut.onclick=()=>arenaPortableSetMode(arenaPortableProfile.mode===ARENA_MOBILE_MODES.PLAYER?ARENA_MOBILE_MODES.DIRECTOR:ARENA_MOBILE_MODES.PLAYER);
     pause.after(shortcut);
-    const tests=document.createElement('button');tests.id='arenaMobileTestsShortcut';tests.type='button';tests.textContent='🧪 Pruebas';tests.setAttribute('aria-label','Abrir opciones del Modo Streamer');
+    const tests=document.createElement('button');tests.id='arenaMobileTestsShortcut';tests.type='button';tests.textContent='🧪';tests.setAttribute('aria-label','Abrir opciones del Modo Streamer');
     tests.onclick=()=>{if(arenaPortableProfile.mode!==ARENA_MOBILE_MODES.DIRECTOR)arenaPortableSetMode(ARENA_MOBILE_MODES.DIRECTOR);arenaMobileShowTestDrawer(!arenaMobileTestState.open);};
     shortcut.after(tests);
     // The toolbar is outside the battle viewport, including in native fullscreen.
@@ -284,8 +284,10 @@ function arenaPortableReady() {
         if(lobby){lobby.setAttribute('aria-label','Preparar combate');const heading=lobby.querySelector('.arena-onboarding-card h2');if(heading)heading.textContent='Preparar combate';}
     }
     installArenaPortableFloatingUI();
+    const playerShelf=document.createElement('section');playerShelf.id='arenaMobileControlShelf';playerShelf.setAttribute('aria-label','Controles del juego y herramientas');
+    document.getElementById('card-9x16')?.appendChild(playerShelf);
     const gestureGuide=document.createElement('aside');gestureGuide.id='arenaMobileGestureGuide';gestureGuide.setAttribute('aria-label','Cómo controlar el protagonista');
-    gestureGuide.textContent='Táctil total · Mantén y mueve el dedo para desplazarte · Desliza rápido para golpear · Dos toques para saltar · Tres para doble salto · Mantén sin mover para usar poder';
+    gestureGuide.textContent='Táctil total: izquierda, desliza para moverte. Derecha, toca para saltar, dos toques para doble salto; desliza para golpear o mantén pulsado para el poder.';
     document.getElementById('card-9x16')?.appendChild(gestureGuide);
     const unavailable=document.getElementById('arenaTikTokChatStatus');if(unavailable)unavailable.textContent='Sin conexión LIVE';
     selectArenaChatTab('local',false);
@@ -304,7 +306,8 @@ function arenaPortableReady() {
         if(toolbar)(fullscreen?card:header)?.appendChild(toolbar);
         if(menu)(fullscreen?card:document.body)?.appendChild(menu);
         if(guide)card?.appendChild(guide);
-        for(const id of ['arenaHeaderActions','arenaStreamerSkillsDock','arenaPortableTestDrawer']){const node=document.getElementById(id);if(node)view.appendChild(node);}
+        if(playerShelf&&card&&playerShelf.parentElement!==card)card.appendChild(playerShelf);
+        for(const id of ['arenaHeaderActions','touchControlDock','arenaStreamerSkillsDock','arenaPortableTestDrawer']){const node=document.getElementById(id);if(node)playerShelf?.appendChild(node);}
         if(typeof arenaMobileApplyLayout==='function')requestAnimationFrame(arenaMobileApplyLayout);
         const setup=document.getElementById('arenaPortableSetup');
         if(setup)(fullscreen?view:document.body).appendChild(setup);
