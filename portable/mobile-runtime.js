@@ -174,6 +174,10 @@ function arenaPortableReady() {
     document.querySelector('[data-operator-panel="mobile"]')?.prepend(quick);
     const launch=document.createElement('button');launch.type='button';launch.textContent='🎮 Prueba rápida para celular';launch.onclick=arenaPortableOpen;document.querySelector('#arenaPanelScenarios .arena-panel-body')?.appendChild(launch);
     document.documentElement.classList.add('arena-mobile-offline');
+    for(const id of ['lobbyOverlay9','lobbyOverlay16']){
+        const lobby=document.getElementById(id);
+        if(lobby){lobby.setAttribute('aria-label','Preparar combate');const heading=lobby.querySelector('.arena-onboarding-card h2');if(heading)heading.textContent='Preparar combate';}
+    }
     installArenaPortableFloatingUI();
     const unavailable=document.getElementById('arenaTikTokChatStatus');if(unavailable)unavailable.textContent='Sin conexión LIVE';
     selectArenaChatTab('local',false);
