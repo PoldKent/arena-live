@@ -4315,7 +4315,15 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 document.getElementById('victoryStatLikes'+sfx).textContent='❤️ '+(currentWinner?currentWinner.likesReceived:0);
             }
             const runners=currentWinner?arenaRoundResult.podium.slice(1):arenaRoundResult.podium.slice(0,2);
-            document.getElementById('victoryRunnersUp16').innerHTML=runners.map((f,i)=>'<div class="bg-slate-900/80 border border-slate-700/80 rounded-xl p-1.5 flex items-center gap-1.5" data-podium-id="'+escapeHTML(f.id)+'"><span class="text-base">'+(i?'🥉':'🥈')+'</span><div class="overflow-hidden"><div class="text-[10px] font-bold text-slate-100 truncate">'+f.platform.icon+' '+escapeHTML(getFighterDisplayName(f))+'</div><div class="text-[9px] text-slate-400">'+f.kills+' KOs • '+Math.round(f.damageDealt)+' HP</div></div></div>').join('');
+            const runnersMarkup=runners.map((f,i)=>
+                '<div class="arena-victory-runner" data-podium-id="'+escapeHTML(String(f.id))+'">'+
+                (i?'🥉':'🥈')+' <strong>'+escapeHTML(getFighterDisplayName(f))+'</strong>'+
+                '<small>'+Number(f.kills)+' K.O. · '+Math.round(f.damageDealt)+' daño</small></div>'
+            ).join('');
+            for (const sfx of ['16','9']) {
+                document.getElementById('victoryRunnersUp'+sfx).innerHTML=runnersMarkup;
+                document.getElementById('victoryCountdownText'+sfx).textContent=countdownsEnabled?`${victoryCountdown}s`:'∞';
+            }
             confetti=[];const colors=['#00f3ff','#ffbe0b','#ff007f','#4ade80','#a855f7'];
             for(let i=0;i<85;i++)confetti.push({x:arenaVisualRandom()*WORLD_W,y:arenaVisualRandom()*WORLD_H-WORLD_H,vy:1.8+arenaVisualRandom()*2.5,vx:(arenaVisualRandom()-.5)*1.6,size:5+arenaVisualRandom()*5,color:colors[Math.floor(arenaVisualRandom()*colors.length)],angle:arenaVisualRandom()*Math.PI*2,spin:(arenaVisualRandom()-.5)*.15});
             updatePhaseUI();
@@ -4327,6 +4335,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             ['16', '9'].forEach(sfx => {
                 document.getElementById(`lobbyOverlay${sfx}`).classList.toggle('hidden', gameState !== 'LOBBY');
                 document.getElementById(`victoryOverlay${sfx}`).classList.toggle('hidden', gameState !== 'VICTORY');
+                if (gameState !== 'COMBAT') document.getElementById(`arenaStartSplash${sfx}`)?.classList.add('hidden');
                 if (!koSequenceActive) document.getElementById(`koSlowMoOverlay${sfx}`).classList.add('hidden');
 
                 const timerLabel = document.getElementById(`hudTimerLabel${sfx}`);
@@ -4544,8 +4553,27 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         // Presentation events are separate from combat events. Only phase changes of the
         // highest priority may interrupt play; routine mode changes update the HUD instead.
+        const arenaGoSplashTimers=new Map();
         function showDualBanner(title, subtitle, priority = 'routine') {
             if (!['start', 'final', 'victory', 'premium'].includes(priority)) return;
+            if (priority === 'start') {
+                // Unboxed, large and exactly centered in each capture. Does not
+                // consume the top HUD space or change the gameplay camera.
+                for (const sfx of ['16','9']) {
+                    const banner=document.getElementById(`epicBanner${sfx}`);
+                    banner?.classList.add('hidden');
+                    const splash=document.getElementById(`arenaStartSplash${sfx}`);
+                    if (!splash) continue;
+                    clearTimeout(arenaGoSplashTimers.get(sfx));
+                    splash.classList.remove('hidden');
+                    const text=splash.querySelector('span');
+                    if (text) {text.style.animation='none';void text.offsetWidth;text.style.animation='';}
+                    arenaGoSplashTimers.set(sfx,setTimeout(()=>{
+                        splash.classList.add('hidden');arenaGoSplashTimers.delete(sfx);
+                    },1600));
+                }
+                return;
+            }
             ['16', '9'].forEach(sfx => {
                 const banner = document.getElementById(`epicBanner${sfx}`);
                 document.getElementById(`epicBannerTitle${sfx}`).textContent = localizeText(title, currentLanguage);
@@ -7745,7 +7773,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 ['16', '9'].forEach(sfx => {
                     document.getElementById(`hudTimer${sfx}`).textContent = countdownsEnabled ? `00:${secStr}` : '∞';
                 });
-                document.getElementById('victoryCountdownText16').textContent = countdownsEnabled ? `${victoryCountdown}s` : '∞';
+                for(const sfx of ['16','9']) document.getElementById('victoryCountdownText'+sfx).textContent = countdownsEnabled ? `${victoryCountdown}s` : '∞';
                 if (countdownsEnabled && victoryCountdown <= 0) {
                     openLobby(false);
                 }
