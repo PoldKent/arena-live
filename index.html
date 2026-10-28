@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.19 — TikTok LIVE</title>
+    <title>Arena Live v0.20 — TikTok LIVE</title>
     <!--
       ARENA LIVE · GAME RUNTIME
       The classic game script stays here; utility CSS is built locally and
@@ -13,7 +13,7 @@
       have been migrated to explicit event listeners.
     -->
     <!-- Styles are built once; no browser compiler runs during a stream. -->
-    <link rel="stylesheet" href="styles/arena-ui.css?v=0.19">
+    <link rel="stylesheet" href="styles/arena-ui.css?v=0.20">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Fonts: Inter & Orbitron for Arcade/Esports HUD -->
@@ -1176,7 +1176,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                                     <div class="col-span-5 flex flex-col gap-0.5">
                                         <div class="flex justify-between items-center text-[11px] font-bold">
                                             <span id="p1Name1v1_16" class="text-cyan-300 truncate">👑 Prota</span>
-                                            <span id="p1HpText1v1_16" class="font-display text-[10px] text-white">100%</span>
+                                            <span id="p1HpText1v1_16" class="font-display text-[10px] text-white">180 HP</span>
                                         </div>
                                         <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-700 p-0.5">
                                             <div id="p1Bar1v1_16" class="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 rounded-full transition-all duration-150" style="width: 100%"></div>
@@ -1188,7 +1188,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                                     </div>
                                     <div class="col-span-5 flex flex-col gap-0.5">
                                         <div class="flex justify-between items-center text-[11px] font-bold">
-                                            <span id="p2HpText1v1_16" class="font-display text-[10px] text-white">100%</span>
+                                            <span id="p2HpText1v1_16" class="font-display text-[10px] text-white">180 HP</span>
                                             <span id="p2Name1v1_16" class="text-pink-400 truncate">@Retador</span>
                                         </div>
                                         <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-700 p-0.5 flex justify-end">
@@ -1338,13 +1338,13 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <div id="hud1v1Bars9" class="hidden w-full hud-glass p-1.5 rounded-xl border border-amber-500/40">
                                 <div class="grid grid-cols-11 items-center gap-1">
                                     <div class="col-span-5">
-                                        <div class="flex items-center justify-between gap-1"><div id="p1Name1v1_9" class="text-[9px] font-bold text-cyan-300 truncate">👑 Prota</div><span id="p1HpText1v1_9" class="text-[8px] text-white">100%</span></div>
+                                        <div class="flex items-center justify-between gap-1"><div id="p1Name1v1_9" class="text-[9px] font-bold text-cyan-300 truncate">👑 Prota</div><span id="p1HpText1v1_9" class="text-[8px] text-white">180 HP</span></div>
                                         <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-700"><div id="p1Bar1v1_9" class="h-full bg-gradient-to-r from-emerald-500 to-cyan-400" style="width: 100%"></div></div>
                                         <div class="flex items-center gap-1"><span class="text-[7px] text-cyan-300">⚡</span><div class="flex-1 h-1 bg-slate-900 rounded-full overflow-hidden"><div id="p1Energy1v1_9" class="h-full bg-cyan-400" style="width: 50%"></div></div><span id="p1EnergyText1v1_9" class="text-[7px] text-cyan-200">50%</span></div>
                                     </div>
                                     <div class="col-span-1 text-center font-display font-black text-[9px] text-amber-400">VS</div>
                                     <div class="col-span-5 text-right">
-                                        <div class="flex items-center justify-between gap-1"><span id="p2HpText1v1_9" class="text-[8px] text-white">100%</span><div id="p2Name1v1_9" class="text-[9px] font-bold text-pink-400 truncate">@Retador</div></div>
+                                        <div class="flex items-center justify-between gap-1"><span id="p2HpText1v1_9" class="text-[8px] text-white">180 HP</span><div id="p2Name1v1_9" class="text-[9px] font-bold text-pink-400 truncate">@Retador</div></div>
                                         <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-700 flex justify-end"><div id="p2Bar1v1_9" class="h-full bg-gradient-to-l from-rose-500 to-amber-500" style="width: 100%"></div></div>
                                         <div class="flex items-center gap-1"><span class="text-[7px] text-pink-300">⚡</span><div class="flex-1 h-1 bg-slate-900 rounded-full overflow-hidden flex justify-end"><div id="p2Energy1v1_9" class="h-full bg-amber-400" style="width: 50%"></div></div><span id="p2EnergyText1v1_9" class="text-[7px] text-pink-200">50%</span></div>
                                     </div>
@@ -1835,17 +1835,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.19 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.20 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
 
     <!-- ==================== COMPLETE GAME ENGINE, LOBBY & VICTORY SCRIPT ==================== -->
-    <script src="engine/arena-core.js?v=0.19"></script>
-    <script src="engine/arena-render.js?v=0.19"></script>
-    <script src="engine/arena-audio.js?v=0.19"></script>
-    <script src="engine/arena-settings.js?v=0.19"></script>
-    <script src="engine/arena-balance-evidence.js?v=0.19"></script>
+    <script src="engine/arena-core.js?v=0.20"></script>
+    <script src="engine/arena-render.js?v=0.20"></script>
+    <script src="engine/arena-audio.js?v=0.20"></script>
+    <script src="engine/arena-settings.js?v=0.20"></script>
+    <script src="engine/arena-balance-evidence.js?v=0.20"></script>
     <script>
         /*************************************************************************
          * ARENA LIVE · MONOLITHIC ENGINE INDEX
@@ -5708,6 +5708,10 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             // while leaving already-correct localized text nodes untouched.
             if (node && node.textContent !== localizeText(source)) node.textContent = source;
         }
+        // Duel HUD labels show actual remaining health; bar fill still uses percentages.
+        function formatArenaFighterHp(fighter) {
+            return Math.max(0, Math.ceil(fighter.hp)) + ' HP';
+        }
         function writeArenaHudWidth(node, percent) {
             const width = `${percent}%`;
             if (node && node.style.width !== width) node.style.width = width;
@@ -5767,8 +5771,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                         const p2EnergyBar = document.getElementById(`p2Energy1v1_${sfx}`);
                         const p1EnergyText = document.getElementById(`p1EnergyText1v1_${sfx}`);
                         const p2EnergyText = document.getElementById(`p2EnergyText1v1_${sfx}`);
-                        writeArenaHudText(p1HpText, `${p1Pct}%`);
-                        writeArenaHudText(p2HpText, `${p2Pct}%`);
+                        writeArenaHudText(p1HpText, formatArenaFighterHp(p1));
+                        writeArenaHudText(p2HpText, formatArenaFighterHp(p2));
                         writeArenaHudWidth(p1EnergyBar, p1Energy);
                         writeArenaHudWidth(p2EnergyBar, p2Energy);
                         writeArenaHudText(p1EnergyText, `${p1Energy}%`);
@@ -8037,7 +8041,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.19';
+        const ARENA_RELEASE_VERSION = '0.20';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:0, footer:76, format:'21'});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
@@ -8838,7 +8842,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.19.0',
+            version: '0.20.0',
             edition: 'tiktok',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,
             getBalanceRules() {

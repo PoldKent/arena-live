@@ -1,5 +1,11 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-27 — Arena Live v0.20 · Marcadores de vida por HP
+
+- Los dos marcadores superiores de Duelo 1v1 muestran HP restantes en números enteros (`180 HP`, `75 HP`) en las capturas 16:9 y 9:16; ya no indican `100%`.
+- Se conservan la anchura proporcional y los colores de las barras, los porcentajes de energía y el rendimiento existente de ambos lienzos.
+- Prueba de regresión del formato de HP. Versión visible, API y paquete sincronizados en 0.20.0.
+
 ## 2026-10-27 — Arena Live v0.19 · KO y doble salto con recuperación lateral
 
 - KO! centrado y sin marco, como GO!, en horizontal y vertical. Los resultados por tiempo muestran FIN!; el podio conserva su pantalla.

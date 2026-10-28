@@ -1,13 +1,32 @@
 import {readEngineSource} from './read-engine-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import vm from 'node:vm';
 
 const html=await readEngineSource();
-test('the 16:9 duel is wide and the visible HP names, percentages, and energy tracks have large type',()=>{
+test('the 16:9 duel is wide and HP amounts and energy tracks have large type',()=>{
   assert.match(html, /#viewport16x9 #hud1v1Bars16\{width:86%!important;max-width:1480px!important/);
   assert.match(html, /#viewport16x9 #hud1v1Bars16 div:has\(> #p1Bar1v1_16\)/);
   for(const id of ['p1Bar1v1_16','p2Bar1v1_16','p1HpText1v1_16','p2HpText1v1_16','p1Energy1v1_16','p2Energy1v1_16'])
     assert.match(html,new RegExp('id="'+id+'"'));
+});
+
+test('duel HUD displays current HP amounts on both screens, preserving relative fills and energy percentages',()=>{
+  for (const suffix of ['16','9']) for(const side of ['p1','p2'])
+    assert.match(html,new RegExp('id="'+side+'HpText1v1_'+suffix+'"[^>]*>180 HP<'));
+  const match=html.match(/function formatArenaFighterHp\(fighter\) \{[\s\S]*?\n        \}/);
+  assert.ok(match,'pure HP formatter exists');
+  const format=vm.runInNewContext('('+match[0]+')');
+  assert.equal(format({hp:180,maxHp:180}),'180 HP');
+  assert.equal(format({hp:74.01,maxHp:180}),'75 HP');
+  assert.equal(format({hp:0,maxHp:180}),'0 HP');
+  assert.equal(format({hp:-3,maxHp:180}),'0 HP');
+  assert.ok(html.includes('writeArenaHudText(p1HpText, formatArenaFighterHp(p1));'));
+  assert.ok(html.includes('writeArenaHudText(p2HpText, formatArenaFighterHp(p2));'));
+  assert.ok(html.includes('writeArenaHudWidth(document.getElementById('));
+  assert.ok(html.includes('), p1Pct);'));
+  assert.ok(html.includes('), p2Pct);'));
+  assert.ok(html.includes('writeArenaHudText(p1EnergyText, '));
 });
 
 test('GO has exactly one centered unboxed element in each capture',()=>{
