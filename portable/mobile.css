@@ -888,7 +888,7 @@ html.arena-mobile-offline #arenaPortableTestBody{overflow-y:auto!important;min-h
    one external control shelf; never render controls over the capture. */
 html.arena-mobile-offline body>header{
   position:relative!important;top:auto!important;padding:4px 7px!important;
-  min-height:50px!important;z-index:230!important;background:#0b1525!important;
+  min-height:60px!important;z-index:230!important;background:#0b1525!important;
 }
 html.arena-mobile-offline #arenaTopBarInner{
   display:flex!important;flex-wrap:nowrap!important;align-items:center!important;
