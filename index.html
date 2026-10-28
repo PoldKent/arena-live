@@ -13,7 +13,7 @@
       have been migrated to explicit event listeners.
     -->
     <!-- Styles are built once; no browser compiler runs during a stream. -->
-    <link rel="stylesheet" href="styles/arena-ui.css?v=0.26">
+    <link rel="stylesheet" href="styles/arena-ui.css?v=0.27">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Fonts: Inter & Orbitron for Arcade/Esports HUD -->
@@ -1609,17 +1609,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     <div>
                         <div class="flex items-center gap-2">
                             <h2 class="font-display font-black text-base sm:text-lg text-white tracking-wide">
-                                <span id="arenaSettingsTitle" data-operator-label="settingsTitle">Pausa y ajustes</span>
+                                <span id="arenaSettingsTitle">⚙ Ajustes</span>
                             </h2>
                             <span id="settingsModeBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400/40">
-                                ⏸️ JUEGO EN PAUSA
+                                ▶ COMBATE ACTIVO
                             </span>
                         </div>
-                        <p id="settingsModeDescription" class="text-xs text-slate-400" data-operator-label="pauseHint">Los cambios se aplican al instante. Cierra Ajustes para reanudar.</p>
+                        <p id="settingsModeDescription" class="text-xs text-slate-400">Los ajustes se aplican mientras continúa la pelea.</p>
                     </div>
                 </div>
 
-                <button type="button" onclick="toggleSettingsModal(false)" class="arena-settings-resume"><span id="resumeGameLabel">▶ Reanudar</span></button>
+                <button type="button" onclick="toggleSettingsModal(false)" class="arena-settings-resume"><span id="resumeGameLabel">✕ Cerrar ajustes</span></button>
             </div>
 
             <!-- Modal Body: Categorized Grid -->
@@ -1627,10 +1627,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 <div id="arenaSettingsNav" aria-label="Navegación rápida de ajustes">
   <nav id="arenaSettingsTabs" role="tablist" aria-label="Categorías de ajustes">
     <button type="button" data-settings-tab="match" role="tab" aria-selected="true">🎮 Partida</button>
-    <button type="button" data-settings-tab="combat" role="tab" aria-selected="false">⚔️ Combate</button>
-    <button type="button" data-settings-tab="broadcast" role="tab" aria-selected="false">📐 Pantallas</button>
+    <button type="button" data-settings-tab="combat" role="tab" aria-selected="false">⚔️ Combate y Prota</button>
+    <button type="button" data-settings-tab="classes" role="tab" aria-selected="false">⚖️ Clases</button>
     <button type="button" data-settings-tab="audience" role="tab" aria-selected="false">📡 Audiencia</button>
-    <button type="button" data-settings-tab="workspace" role="tab" aria-selected="false">🧩 Espacio</button>
+    <button type="button" data-settings-tab="broadcast" role="tab" aria-selected="false">🖥 Pantallas</button>
+    <button type="button" data-settings-tab="audio" role="tab" aria-selected="false">🔊 Audio</button>
+    <button type="button" data-settings-tab="system" role="tab" aria-selected="false">⚙ Sistema</button>
   </nav>
   <input id="arenaSettingsSearch" type="search" autocomplete="off" placeholder="🔎 Buscar ajuste: vidas, volumen, OBS, daños…" aria-label="Buscar cualquier ajuste" />
   <p id="arenaSettingsNote">Los cambios se guardan automáticamente. Las capturas permanecen visibles fuera de este panel.</p>
@@ -1719,12 +1721,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
                         <i class="fa-solid fa-gamepad text-emerald-400"></i>
                         <h3 class="font-display font-bold text-xs uppercase tracking-wider text-emerald-300">
-                            <span data-operator-label="pace">👑 Prota y combate</span>
+                            <span>🎮 Control de Prota</span>
                         </h3>
                     </div>
 
-                    <div class="flex flex-col gap-1.5">
-                        <span class="text-[11px] font-semibold text-slate-300">Velocidad de Simulación (Ritmo de Pelea):</span>
+                    <div id="arenaPaceSettingsGroup" class="flex flex-col gap-1.5">
+                        <span class="text-[11px] font-semibold text-slate-300">Velocidad de pelea (independiente de Prota):</span>
                         <div class="grid grid-cols-3 gap-2">
                             <button id="paceBtn-0.75" onclick="setGamePace(0.75)" class="pace-btn px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-950 border border-slate-800 text-slate-300 hover:text-white transition-all text-center">
                                 🐢 0.75x Táctico
@@ -1761,9 +1763,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     <div class="flex flex-col gap-1.5">
                         <span class="text-[11px] font-semibold text-slate-300"><span data-operator-label="preparation">Vista de preparación</span></span>
                         <div class="grid grid-cols-3 gap-2">
-                            <button id="btnViewDual" onclick="arenaLaunchStreamFromSettings()" class="px-2.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-cyan-500 text-slate-950 shadow-md">
+                            <button id="btnViewDual" onclick="setMonitorFocus('dual')" class="px-2.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-cyan-500 text-slate-950 shadow-md">
                                 <i class="fa-solid fa-table-columns"></i>
-                                <span data-operator-label="stream">🎥 Modo Stream</span>
+                                <span>▥ Vista dual</span>
                             </button>
                             <button id="btnView16x9" onclick="setMonitorFocus('16:9')" class="px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-950 border border-slate-800 text-slate-300 hover:text-white transition-all flex items-center justify-center gap-1.5">
                                 <i class="fa-solid fa-desktop"></i>
@@ -1920,11 +1922,11 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
     </div>
 
     <!-- ==================== COMPLETE GAME ENGINE, LOBBY & VICTORY SCRIPT ==================== -->
-    <script src="engine/arena-core.js?v=0.26"></script>
-    <script src="engine/arena-render.js?v=0.26"></script>
-    <script src="engine/arena-audio.js?v=0.26"></script>
-    <script src="engine/arena-settings.js?v=0.26"></script>
-    <script src="engine/arena-balance-evidence.js?v=0.26"></script>
+    <script src="engine/arena-core.js?v=0.27"></script>
+    <script src="engine/arena-render.js?v=0.27"></script>
+    <script src="engine/arena-audio.js?v=0.27"></script>
+    <script src="engine/arena-settings.js?v=0.27"></script>
+    <script src="engine/arena-balance-evidence.js?v=0.27"></script>
     <script>
         /*************************************************************************
          * ARENA LIVE · MONOLITHIC ENGINE INDEX
@@ -2869,7 +2871,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             modal.classList.toggle('hidden', !isSettingsOpen);
             document.getElementById('pausedBadgeHeader')?.classList.toggle('hidden', !isGamePaused);
             const badge = document.getElementById('settingsModeBadge');
-            if (badge) badge.textContent = `⏸ ${runtimeCopy('paused')}`;
+            if (badge) badge.textContent = isGamePaused ? `⏸ ${runtimeCopy('paused')}` : (currentLanguage==='es'?'▶ COMBATE ACTIVO':'▶ GAME RUNNING');
+            const hint=document.getElementById('settingsModeDescription');
+            if(hint)hint.textContent=isGamePaused?'Pausa manual activa: los ajustes conservan esta pausa.':'Los ajustes se aplican mientras continúa la pelea.';
             refreshPauseMenuLabels();
             refreshArenaOperatorToolbar();
             updateTouchControlsVisibility();
@@ -2878,7 +2882,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const open = typeof forceState === 'boolean' ? forceState : !isSettingsOpen;
             closeArenaOperatorPopover(false);
             isSettingsOpen = open;
-            isGamePaused = open;
+            // Opening or closing settings must not change a manual pause.
             syncSettingsModalState();
             if(open&&arenaWorkspace.mode==='stream')document.getElementById('arenaStreamLeftTitle').textContent=`⚙ ${arenaOperatorText('settings')}`;
             if (open) {
@@ -3650,7 +3654,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         function setGamePace(pace) {
-            gamePace = pace;
+            if(![0.75,1,1.25].includes(Number(pace)))return;
+            gamePace = Number(pace);
             [0.75, 1, 1.25].forEach(p => {
                 const btn = document.getElementById(`paceBtn-${p}`);
                 if (!btn) return;
@@ -4985,7 +4990,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             maxRangeByClass: Object.freeze({ kame: 260, ninja: 155, titan: 135, trueno: 300, esmeralda: 300 })
         });
         function tryAutonomousFighterSpecial(fighter, target) {
-            if (!arenaClassPowersAllowed() || !autoAttackEnabled || !fighter || fighter.isStreamer || !target || fighter.eliminated
+            if (arenaRuntime.specialSource!=='both' || !arenaClassPowersAllowed() || !autoAttackEnabled || !fighter || fighter.isStreamer || !target || fighter.eliminated
                 || fighter.castingSkill || fighter.recoveryJumpUsed || fighter.edgeRecoveryPending
                 || fighter.knockbackTimer > 0 || fighter.aiSpecialCooldown > 0
                 || fighter.energy < AI_SPECIAL_RULES.minEnergy) return false;
@@ -5009,6 +5014,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         });
         function arenaActionText(key){return (ARENA_ACTION_COPY[currentLanguage]||ARENA_ACTION_COPY.es)[['energy','cooldown','paused','unavailable','charging','queued','skipped','simulation','noData','timeUp'].indexOf(key)]||key;}
         function validateArenaSpecialAction(f,cmd,origin='operator'){
+            if(arenaRuntime.specialSource==='none'||(arenaRuntime.specialSource==='commands'&&origin==='ai'))return {allowed:false,reason:'unavailable'};
             if(!arenaClassPowersAllowed()||!f||f.eliminated||f.fallDrop>0||!getFighterSpecialRule(f)||SKILL_REQUIRED_CLASS[cmd]!==f.archetypeKey||gameState!=='COMBAT'||koSequenceActive||f.castingSkill)return {allowed:false,reason:'unavailable'};
             if(isGamePaused)return {allowed:false,reason:'paused'};
             if(arenaRuntime.specialPolicy==='fair'||origin==='ai'){
@@ -8590,7 +8596,6 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             if(leave)leave.addEventListener('click',()=>{void toggleArenaDualFullscreen();});
             const pause=document.getElementById('arenaDualPauseBtn');
             if(pause)pause.addEventListener('click',()=>{
-                if(isSettingsOpen) { toggleSettingsModal(false); return; }
                 closeArenaOperatorPopover(false);
                 isGamePaused=!isGamePaused;
                 syncSettingsModalState();
@@ -8666,7 +8671,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 arenaDualTestsToggle:`🧰 ${arenaOperatorText('tools')}`,
                 arenaDualChatToggleBtn:`💬 ${arenaOperatorText('chat')}`,
                 arenaDualSettingsBtn:`⚙ ${arenaOperatorText('settings')}`,
-                resumeGameLabel:`▶ ${c[5]}`,
+                resumeGameLabel:currentLanguage==='es'?'✕ Cerrar ajustes':'✕ Close settings',
                 arenaExitFullscreenBtn:`⤡ ${(ARENA_FULLSCREEN_COPY[currentLanguage] || ARENA_FULLSCREEN_COPY.es).exit}`
             };
             for (const [id,text] of Object.entries(labels)) {
@@ -8761,10 +8766,6 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             popover.querySelector(`[data-operator-panel="${name}"] button:not(:disabled),[data-operator-panel="${name}"] select:not(:disabled)`)?.focus({preventScroll:true});
         }
 
-        function arenaLaunchStreamFromSettings() {
-            toggleSettingsModal(false);
-            document.getElementById('btnFullscreenDual')?.click();
-        }
         // MODULE BLOCK: operator workspace, docking and independent layout persistence.
         const ARENA_WORKSPACE_KEYS = Object.freeze({preparation:'arenaLiveWorkspaceV03:preparation',stream:'arenaLiveWorkspaceV03:stream'});
         const arenaWorkspace = {mode:'preparation',ready:false,restoring:false,mobile:false,layouts:{},panels:[],activeStream:null,saveTimer:0,fitFrame:0};
@@ -8996,16 +8997,16 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // v0.26: Reorganize existing Settings sections, never cloning inputs or
         // changing their inline handlers, IDs, saved values or rule semantics.
         const ARENA_SETTINGS_NAV_KEY = 'arenaLiveSettingsNavV1';
-        const ARENA_SETTINGS_GROUPS = Object.freeze(['match','combat','broadcast','broadcast','audience','workspace','combat','combat']);
+        const ARENA_SETTINGS_GROUPS = Object.freeze(['match','combat','broadcast','audio','audience','broadcast','classes','system']);
         const ARENA_SETTINGS_LABELS = Object.freeze({
-            es:['🎮 Partida','⚔️ Combate','📐 Pantallas','📡 Audiencia','🧩 Espacio','Buscar ajuste: vidas, volumen, OBS, daños…','Los cambios se guardan automáticamente. Ajusta sin tapar la pelea.'],
-            en:['🎮 Match','⚔️ Combat','📐 Displays','📡 Audience','🧩 Layout','Find setting: lives, volume, OBS, damage…','Changes are saved automatically. Keep the fight visible.'],
-            fr:['🎮 Partie','⚔️ Combat','📐 Écrans','📡 Public','🧩 Espace','Chercher un réglage…','Modifications sauvegardées. Combat visible.'],
-            de:['🎮 Spiel','⚔️ Kampf','📐 Bildschirme','📡 Publikum','🧩 Layout','Einstellung suchen…','Automatisch gespeichert. Kampf bleibt sichtbar.'],
-            zh:['🎮 对局','⚔️ 战斗','📐 屏幕','📡 观众','🧩 布局','搜索设置…','更改自动保存，战斗保持可见。'],
-            ja:['🎮 対戦','⚔️ 戦闘','📐 画面','📡 視聴者','🧩 配置','設定を検索…','変更は自動保存されます。'],
-            pt:['🎮 Partida','⚔️ Combate','📐 Telas','📡 Público','🧩 Layout','Buscar configuração…','Alterações salvas automaticamente.'],
-            it:['🎮 Partita','⚔️ Combattimento','📐 Schermi','📡 Pubblico','🧩 Layout','Cerca impostazione…','Modifiche salvate automaticamente.']
+            es:['🎮 Partida','⚔️ Combate y Prota','⚖️ Clases','📡 Audiencia','🖥 Pantallas','🔊 Audio','⚙ Sistema','Buscar: vidas, poderes, audio, OBS…','Los ajustes se aplican sin pausar la partida.'],
+            en:['🎮 Match','⚔️ Combat and Prota','⚖️ Classes','📡 Audience','🖥 Displays','🔊 Audio','⚙ System','Find: lives, powers, audio, OBS…','Adjust without pausing the match.'],
+            fr:['🎮 Partie','⚔️ Combat','⚖️ Classes','📡 Public','🖥 Écrans','🔊 Audio','⚙ Système','Chercher un réglage…','Réglages en direct.'],
+            de:['🎮 Spiel','⚔️ Kampf','⚖️ Klassen','📡 Publikum','🖥 Bildschirme','🔊 Audio','⚙ System','Einstellung suchen…','Einstellungen ohne Pause.'],
+            zh:['🎮 对局','⚔️ 战斗','⚖️ 职业','📡 观众','🖥 屏幕','🔊 音频','⚙ 系统','搜索设置…','设置不中断战斗。'],
+            ja:['🎮 対戦','⚔️ 戦闘','⚖️ クラス','📡 観客','🖥 画面','🔊 音声','⚙ システム','設定を検索…','設定中も戦闘を続行。'],
+            pt:['🎮 Partida','⚔️ Combate','⚖️ Classes','📡 Público','🖥 Telas','🔊 Áudio','⚙ Sistema','Buscar configuração…','Ajustes sem pausa.'],
+            it:['🎮 Partita','⚔️ Combattimento','⚖️ Classi','📡 Pubblico','🖥 Schermi','🔊 Audio','⚙ Sistema','Cerca impostazione…','Modifiche senza pausa.']
         });
         let arenaSettingsActiveTab = 'match';
         function refreshArenaSettingsNavigation() {
@@ -9014,9 +9015,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 if(button.textContent!==labels[index])button.textContent=labels[index];
             });
             const search=document.getElementById('arenaSettingsSearch');
-            if(search)search.placeholder='🔎 '+labels[5];
+            if(search)search.placeholder='🔎 '+labels[7];
             const note=document.getElementById('arenaSettingsNote');
-            if(note&&note.textContent!==labels[6])note.textContent=labels[6];
+            if(note&&note.textContent!==labels[8])note.textContent=labels[8];
         }
         function selectArenaSettingsTab(key, remember=true) {
             if(!ARENA_SETTINGS_GROUPS.includes(key))return;
@@ -9048,6 +9049,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             sections.forEach((section,index)=>{
                 section.dataset.settingsCategory=ARENA_SETTINGS_GROUPS[index]||'workspace';
             });
+            // Move the existing elements; do not duplicate any functional buttons.
+            const matchBody=sections[0]?.querySelector('.arena-settings-content');
+            const combatBody=sections[1]?.querySelector('.arena-settings-content');
+            const pace=document.getElementById('arenaPaceSettingsGroup');
+            if(matchBody&&pace)matchBody.appendChild(pace);
+            for(const key of ['specialSource','specialPolicy']){
+                const control=document.getElementById('arenaRuntime_'+key);
+                if(combatBody&&control)combatBody.appendChild(control.closest('label'));
+            }
+            const help=document.getElementById('arenaSpecialPolicyHelp');
+            if(combatBody&&help)combatBody.appendChild(help);
             let stored='match';try{stored=localStorage.getItem(ARENA_SETTINGS_NAV_KEY)||'match';}catch(_){}
             const tabs=document.querySelectorAll('[data-settings-tab]');
             tabs.forEach((button,index)=>{
@@ -9163,7 +9175,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.26.0',
+            version: '0.27.0',
             edition: 'tiktok',
             renderSpriteMode: arenaGpuSpritesEnabled ? 'hardware-candidate' : 'software-safe-vectors',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,
