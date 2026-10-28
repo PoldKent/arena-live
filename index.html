@@ -5286,6 +5286,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         function updatePhysicsAndAI() {
             if(isGamePaused)return;
+            // 128 simultaneous special releases can create hundreds of chat
+            // records. Attach them in one DOM batch when this tick finishes.
+            arenaChatTickBatchActive=true;
             arenaSimulationTick++;drainArenaAudienceQueue();advanceArenaRoundClock();
             const W = WORLD_W;
             const H = WORLD_H;
@@ -5644,6 +5647,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 if (effect.timer > 0) activeEffects[liveEffects++] = effect;
             }
             activeEffects.length = liveEffects;
+            flushArenaTickChatBatch();
         }
 
         function updateSmartCamera9x16() {
@@ -7576,6 +7580,20 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             });
         }
 
+        let arenaChatTickBatchActive=false;
+        let arenaChatTickFragment=null;
+        function flushArenaTickChatBatch() {
+            arenaChatTickBatchActive=false;
+            const fragment=arenaChatTickFragment;
+            arenaChatTickFragment=null;
+            if(!fragment?.firstChild)return;
+            const feed=document.getElementById('chatFeed');
+            if(!feed)return;
+            feed.appendChild(fragment);
+            while(feed.children.length>chatRetention)feed.removeChild(feed.firstChild);
+            followArenaChat(feed);
+        }
+
         function appendChatMessage(username, platformKey, message, styleType = 'normal') {
             const feed = document.getElementById('chatFeed');
             if (!feed) return;
@@ -7608,11 +7626,14 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 const span = item.querySelector('.leading-snug > span');
                 if (span) span.dataset.systemMessage = String(message);
             }
-            feed.appendChild(item);
-            while (feed.children.length > chatRetention) {
-                feed.removeChild(feed.firstChild);
+            if(arenaChatTickBatchActive) {
+                if(!arenaChatTickFragment)arenaChatTickFragment=document.createDocumentFragment();
+                arenaChatTickFragment.appendChild(item);
+            } else {
+                feed.appendChild(item);
+                while(feed.children.length>chatRetention)feed.removeChild(feed.firstChild);
+                followArenaChat(feed);
             }
-            followArenaChat(feed);
             return item;
         }
 
