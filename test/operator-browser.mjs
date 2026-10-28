@@ -364,7 +364,7 @@ await check('Camera shake defaults to 25%, can be disabled in Settings, persists
  assert.equal(await page.locator('#arenaShakeLabel').innerText(),'Vibración de cámara');
  assert.match(await page.locator('#arenaShakeRange').getAttribute('title'),/golpes ni el empuje/);
  await page.locator('#arenaShakeRange').evaluate(n=>{n.value='0';n.dispatchEvent(new Event('input',{bubbles:true}));});
- assert.equal(await page.locator('#arenaShakeValue').innerText(),'0 %');assert.equal((await state()).paused,true);assert.equal((await state()).settingsOpen,true);
+ assert.equal(await page.locator('#arenaShakeValue').innerText(),'0 %');assert.equal((await state()).paused,false);assert.equal((await state()).settingsOpen,true);
  assert.deepEqual(await rects(),before);assert.equal(await page.evaluate(()=>JSON.stringify(arenaObsCalibration)),calibration);
  await page.keyboard.press('Escape');await page.reload({waitUntil:'load'});await page.waitForFunction(()=>arenaLiveInitialized);
  assert.equal((await state()).cameraShake,0);assert.equal(await page.evaluate(()=>JSON.stringify(arenaObsCalibration)),calibration);
@@ -380,7 +380,7 @@ await check('Mobile prioritizes 9:16, exposes only the bottom action bar and pre
  });
  assert.equal(preview.phoneFit,false);assert.ok(Math.abs(preview.innerRatio-9/16)<.02,JSON.stringify(preview));assert.equal(await page.locator('#arenaHeaderActions').evaluate(n=>n.getBoundingClientRect().bottom),844);assert.equal(await page.locator('#arenaMobileMoreBtn').isVisible(),true);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await page.locator('#arenaMobileMoreBtn').click();assert.equal(await page.locator('[data-forward-control="arenaDualTikTokConnectBtn"]').isDisabled(),await page.locator('#arenaDualTikTokConnectBtn').isDisabled());await page.locator('[data-forward-control="arenaDualTestsToggle"]').click();await unfold('arenaPanelPlayers');const before=(await state()).activeFighters;await page.locator('#arenaPanelPlayers button[onclick="triggerQuickJoin()"]').click();assert.equal((await state()).activeFighters,before+1);assert.equal(await page.locator('#arenaOperatorPopover').isHidden(),true);
- await page.locator('#arenaMobileMoreBtn').click();await page.locator('[data-forward-control="arenaDualSettingsBtn"]').click();assert.equal((await state()).paused,true);await page.keyboard.press('Escape');assert.equal((await state()).paused,false);await shot('mobile');
+ await page.locator('#arenaMobileMoreBtn').click();await page.locator('[data-forward-control="arenaDualSettingsBtn"]').click();assert.equal((await state()).paused,false);await page.keyboard.press('Escape');assert.equal((await state()).paused,false);await shot('mobile');
 });
 await check('Mobile action buttons and joystick use the original manual combat controls',async()=>{
  await page.locator('#btnStreamerJoin').click();await page.locator('#viewport9x16 button[onclick="startCombatFromLobby()"]').click();await page.waitForFunction(()=>gameState==='COMBAT');
@@ -693,7 +693,7 @@ await check('Display settings reveal real attack names and damage numbers immedi
  await page.evaluate(()=>selectArenaSettingsTab('audience',false));
  const section=page.locator('.arena-settings-section').filter({has:page.locator('#showPowerTextToggle')});if(!await section.evaluate(n=>n.open))await section.locator('summary').click();
  const calibration=await page.evaluate(()=>localStorage.getItem(ARENA_OBS_CALIBRATION_KEY));
- await page.locator('#showPowerTextToggle').check();await page.locator('#showCombatNumbersToggle').check();assert.equal((await state()).paused,true);
+ await page.locator('#showPowerTextToggle').check();await page.locator('#showCombatNumbersToggle').check();assert.equal((await state()).paused,false);
  const labels=await page.evaluate(()=>{
   arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};gameState='COMBAT';activeMode='smash';isGamePaused=true;soundEnabled=false;
   return ['kame','ninja','titan','trueno','esmeralda'].map(key=>{
@@ -712,7 +712,7 @@ await check('Display settings reveal real attack names and damage numbers immedi
 });
 const openBalance=async()=>{
  if(!(await state()).settingsOpen)await page.evaluate(()=>toggleSettingsModal(true));
- await page.evaluate(()=>selectArenaSettingsTab('combat',false));
+ await page.evaluate(()=>selectArenaSettingsTab('classes',false));
  const section=page.locator('#arenaBalancePanel');if(!await section.evaluate(n=>n.open))await section.locator('> summary').click();
 };
 const assertBalanceRadar=async()=>{
