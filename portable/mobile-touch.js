@@ -204,9 +204,20 @@ function arenaMobileInstallTestDrawer(){
     });
     head.addEventListener('pointermove',event=>{
         if(!drag||drag.id!==event.pointerId)return;
-        const view=drawer.parentElement.getBoundingClientRect(),box=drawer.getBoundingClientRect();
-        drawer.style.right='auto';drawer.style.top=Math.max(4,Math.min(view.height-box.height-4,event.clientY-view.top-drag.y))+'px';
-        drawer.style.left=Math.max(4,Math.min(view.width-box.width-4,event.clientX-view.left-drag.x))+'px';
+        event.preventDefault();
+        // The testing overlay intentionally fills the arena without a background.
+        // Drag only the small selector/target tools; moving the overlay itself
+        // did nothing because its transparent layer is pinned to the viewport.
+        const view=drawer.parentElement.getBoundingClientRect();
+        const width=Math.min(310,view.width*.77);
+        const x=Math.max(6,Math.min(view.width-width-6,event.clientX-view.left-drag.x));
+        const y=Math.max(58,Math.min(view.height*.5,event.clientY-view.top-drag.y));
+        head.style.setProperty('left',x+'px','important');
+        head.style.setProperty('top',y+'px','important');
+        const picker=drawer.querySelector('.arena-portable-test-picker');
+        if(picker){picker.style.setProperty('left',x+'px','important');picker.style.setProperty('top',(y+46)+'px','important');}
+        const card=drawer.querySelector('#arenaTrainingTargetCard');
+        if(card){card.style.setProperty('left',x+'px','important');card.style.setProperty('top',(y+98)+'px','important');}
     });
     const end=()=>{drag=null;};
     head.addEventListener('pointerup',end);head.addEventListener('pointercancel',end);
