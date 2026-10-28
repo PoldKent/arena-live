@@ -106,7 +106,9 @@ try {
         assert.equal(rows.length,4);assert.ok(rows.every(r=>r.count===2));assert.ok(rows.filter(r=>r.portrait).every(r=>r.nameFont===12));assert.ok(rows.filter(r=>!r.portrait).every(r=>r.nameFont===9));
     });
     await check('Session settings remain open, persist choices and preserve calibrated OBS geometry',async()=>{
-        await page.evaluate(()=>{fixture();setArenaObsCalibration('offset',13);setArenaObsCalibration('footer',92);toggleSettingsModal(true);document.getElementById('arenaRuntimeCard').open=true;});
+        await page.evaluate(()=>{fixture();setArenaObsCalibration('offset',13);setArenaObsCalibration('footer',92);toggleSettingsModal(true);
+          const card=document.getElementById('arenaRuntimeCard'),section=card.closest('.arena-settings-section');
+          selectArenaSettingsTab(section.dataset.settingsCategory,false);card.open=true;});
         await page.locator('#arenaRuntime_quality').selectOption('performance');await page.locator('#arenaRuntime_renderFps').selectOption('30');await page.evaluate(()=>document.getElementById('arenaBalancePanel').open=true);await page.locator('#arenaRuntime_warriorTargeting').selectOption('always');
         const r=await page.evaluate(()=>({open:isSettingsOpen,paused:isGamePaused,runtime:JSON.parse(localStorage.getItem(ARENA_RUNTIME_KEY)),obs:{...arenaObsCalibration}}));assert.equal(r.open,true);assert.equal(r.paused,true);assert.equal(r.runtime.quality,'performance');assert.equal(r.runtime.renderFps,30);assert.equal(r.runtime.warriorTargeting,'always');assert.equal(r.obs.offset,13);assert.equal(r.obs.footer,92);assert.ok(['16','19.5','20','21'].includes(r.obs.format));
     });
