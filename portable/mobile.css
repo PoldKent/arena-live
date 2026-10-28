@@ -919,8 +919,8 @@ html.arena-mobile-offline #arenaMobileFloating{
 html.arena-mobile-offline #arenaMobileFloating button:not(#arenaMobileEditDone){
   display:grid!important;place-items:center!important;flex:0 0 42px!important;
   position:static!important;inset:auto!important;transform:none!important;
-  width:42px!important;height:42px!important;min-width:42px!important;
-  min-height:42px!important;max-width:42px!important;padding:0!important;
+  width:44px!important;height:44px!important;min-width:44px!important;
+  min-height:44px!important;max-width:44px!important;padding:0!important;
   border:1px solid #3b7388!important;border-radius:11px!important;
   font:800 19px/1 system-ui,sans-serif!important;color:#dcfaff!important;
   background:linear-gradient(#153d53,#12283d)!important;box-shadow:none!important;
