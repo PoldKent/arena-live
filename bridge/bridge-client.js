@@ -1,7 +1,7 @@
 /* Arena Live: local TikTok chat bridge. Loaded only by bridge/server.mjs. */
 (() => {
   'use strict';
-  const state = { socket: null, connected: false, controller: false, statusReceived: false, phase: 'disconnected', account: '@polkent.live', received: 0,tapsReceived:0,testTapsReceived:0,tapBoosts:0,unassignedTaps:0,droppedTaps:0,clientId:null,canClaimControl:false };
+  const state = { socket: null, connected: false, controller: false, statusReceived: false, phase: 'disconnected', account: '@polkent.live', received: 0,tapsReceived:0,testTapsReceived:0,tapBoosts:0,tapJoins:0,unassignedTaps:0,droppedTaps:0,clientId:null,canClaimControl:false };
   const panel = document.createElement('section');
   panel.id = 'arena-live-bridge-panel';
   panel.setAttribute('aria-label', 'TikTok LIVE — conexión local');
@@ -17,7 +17,7 @@
     <button type="button" id="bridge-send-test">Probar comando</button>
     <button type="button" id="bridge-test-like">Probar 10 taps</button>
     <small id="bridge-count" style="color:#a7b8c9">Mensajes recibidos: 0</small>
-    <small id="bridge-taps-count" style="color:#fda4af">❤️ Taps LIVE: 0 · pruebas: 0 · mejoras: 0</small>
+    <small id="bridge-taps-count" style="color:#fda4af">❤️ Taps LIVE: 0 · inscripciones: 0 · pruebas: 0 · mejoras: 0</small>
     <small id="bridge-taps-note" style="color:#94a3b8" aria-live="polite"></small>`;
   const place = document.getElementById('arenaBridgeMount') || document.getElementById('audienceSimulatorPanel') || document.querySelector('main') || document.body;
   document.getElementById('arenaBridgeUnavailable')?.remove();
@@ -38,14 +38,14 @@
 
   // TikTok sends individual LIKE batches (count), not one event per physical tap.
   // Merge short bursts by viewer, and limit visual/game effects to 12 per flush.
-  // A viewer must already own a living fighter: likes never create combatants.
+  // The first tap joins the current lobby once; subsequent taps can support that fighter.
   const tapBatches = new Map();
   const TAP_FLUSH_MS = 800;
   const MAX_TAP_VIEWERS = 256;
   const MAX_TAP_EFFECTS_PER_FLUSH = 12;
   let tapFlushTimer = null;
   function updateTaps() {
-    tapsCount.textContent = `❤️ Taps LIVE: ${state.tapsReceived.toLocaleString()} · pruebas: ${state.testTapsReceived.toLocaleString()} · mejoras: ${state.tapBoosts.toLocaleString()}`;
+    tapsCount.textContent = `❤️ Taps LIVE: ${state.tapsReceived.toLocaleString()} · inscripciones: ${state.tapJoins.toLocaleString()} · pruebas: ${state.testTapsReceived.toLocaleString()} · mejoras: ${state.tapBoosts.toLocaleString()}`;
     const details = [];
     if (state.unassignedTaps) details.push(`Sin personaje activo: ${state.unassignedTaps.toLocaleString()} taps`);
     if (state.droppedTaps) details.push(`Exceso de espectadores: ${state.droppedTaps.toLocaleString()} taps no procesados`);
@@ -59,14 +59,28 @@
   function flushTapBatches() {
     if (!state.connected || !state.controller) { tapBatches.clear(); updateTaps(); return; }
     const game = window.ArenaLive;
-    const fighters = typeof game?.getFighters === 'function' ? game.getFighters() : [];
+    let fighters = typeof game?.getFighters === 'function' ? game.getFighters() : [];
+    // Read the roster once per flush. Refresh only following a successful join.
+    const indexed = new Map(fighters.filter(f => f.platform === 'tiktok')
+      .map(f => [String(f.name).toLocaleLowerCase(), f]));
     let applied = 0;
     for (const [identity, batch] of tapBatches) {
       if (applied >= MAX_TAP_EFFECTS_PER_FLUSH) break;
       tapBatches.delete(identity);
-      const fighter = fighters.find(f => f.alive && f.platform === 'tiktok'
-        && typeof f.name === 'string' && f.name.toLocaleLowerCase() === identity);
-      if (!fighter || typeof game?.support !== 'function') {
+      let fighter = indexed.get(identity);
+      if (!fighter && typeof game?.joinOnTap === 'function') {
+        try {
+          if (game.joinOnTap({ username: identity, platformKey: 'tiktok' })) {
+            state.tapJoins++;
+            fighters = game.getFighters();
+            fighter = fighters.find(f => f.platform === 'tiktok' && String(f.name).toLocaleLowerCase() === identity);
+            if (fighter) indexed.set(identity, fighter);
+          }
+        } catch (error) {
+          console.warn('Arena Live no pudo inscribir un espectador por tap:', error);
+        }
+      }
+      if (!fighter?.alive || typeof game?.support !== 'function') {
         state.unassignedTaps += batch.received;
         continue;
       }
