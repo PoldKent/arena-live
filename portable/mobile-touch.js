@@ -157,14 +157,20 @@ function arenaMobileTestPanel(){
     return document.getElementById(arenaMobileTestState.active);
 }
 function arenaMobileMountTestDrawer(){
-    const shelf=document.getElementById('arenaMobileControlShelf');
     const drawer=document.getElementById('arenaPortableTestDrawer');
-    if(shelf&&drawer){
-        shelf.appendChild(drawer);
-        const skills=document.getElementById('arenaStreamerSkillsDock');
-        if(skills)shelf.appendChild(skills);
-        drawer.style.top='';drawer.style.left='';drawer.style.right='';
-    }
+    if(!drawer)return;
+    // The 9:16 viewport and the compact skill shelf must never clip advanced tests.
+    // Native fullscreen hides normal document siblings; move the SAME drawer into
+    // the fullscreen card (not into the 9:16 video) and restore it afterward.
+    const fullscreen=document.fullscreenElement;
+    const card=fullscreen?.matches?.('#card-9x16,#card-16x9')
+        ?fullscreen:fullscreen?.querySelector?.('#card-9x16,#card-16x9');
+    const host=card||document.body;
+    if(drawer.parentElement!==host)host.appendChild(drawer);
+    drawer.style.removeProperty('top');
+    drawer.style.removeProperty('left');
+    drawer.style.removeProperty('right');
+    drawer.style.removeProperty('bottom');
 }
 function arenaMobileSelectTestPanel(id){
     const allowed=['arenaPanelPowers','arenaPanelPlayers','arenaPanelScenarios','arenaPanelSocial','arenaPanelSimulation'];
@@ -197,13 +203,19 @@ function arenaMobileShowTestDrawer(open=true){
         if(panel)document.getElementById('arenaMobilePanelHost')?.appendChild(panel);
     }
     drawer.hidden=!open;
+    drawer.classList.remove('is-collapsed'); // Always reopen with actual options visible.
     document.getElementById('arenaMobileControlShelf')?.classList.toggle('has-open-tests',!!open);
+    for(const id of ['card-9x16','card-16x9'])document.getElementById(id)?.classList.toggle('arena-tests-visible',!!open);
+    const shortcut=document.getElementById('arenaMobileTestsShortcut');
+    if(shortcut){shortcut.setAttribute('aria-expanded',String(!!open));shortcut.setAttribute('aria-controls','arenaPortableTestDrawer');}
     const fab=document.getElementById('arenaMobileTestFab');
     if(fab)fab.setAttribute('aria-expanded',String(!!open));
+    // A fixed drawer is already visible: scrolling the document would move the game.
 }
 function arenaMobileInstallTestDrawer(){
     const drawer=document.createElement('aside');
     drawer.id='arenaPortableTestDrawer';drawer.hidden=true;
+    drawer.setAttribute('role','region');drawer.setAttribute('aria-live','off');
     drawer.setAttribute('aria-label','Opciones del Modo Streamer');
     drawer.innerHTML='<div id="arenaPortableTestHead"><span>🎛 Modo Streamer</span><button type="button" id="arenaPortableTestCollapse" aria-label="Minimizar panel">−</button><button type="button" id="arenaPortableTestClose" aria-label="Cerrar pruebas">×</button></div><label class="arena-portable-test-picker">Herramienta<select id="arenaPortableTestSelect"><option value="arenaPanelPowers">Jugador y comandos</option><option value="arenaPanelPlayers">Participantes y K.O.</option><option value="arenaPanelScenarios">Escenarios</option><option value="arenaPanelSocial">Interacciones</option><option value="arenaPanelSimulation">Simulación</option></select></label><div id="arenaPortableTestBody"></div>';
     document.body.appendChild(drawer);
@@ -226,7 +238,7 @@ function arenaMobileInstallTestDrawer(){
         menu.textContent='🎛 Opciones del Modo Streamer';
         menu.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();arenaMobileShowTestDrawer(true);},true);
     }
-    document.addEventListener('fullscreenchange',arenaMobileMountTestDrawer);
+    document.addEventListener('fullscreenchange',()=>requestAnimationFrame(arenaMobileMountTestDrawer));
     window.addEventListener('resize',()=>{
         requestAnimationFrame(()=>{
             arenaMobileMountTestDrawer();

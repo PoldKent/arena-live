@@ -1213,3 +1213,95 @@ html.arena-mobile-offline #arenaMobileArrangeSettings{
     max-height:calc(100dvh - 168px)!important;
   }
 }
+
+
+/* v0.40.1 · Visible, compact Streamer tests outside the video.
+   The old panel lived inside a max-height skill shelf and could be clipped.
+   Keep a single real panel and make its own viewport independently scrollable. */
+html.arena-mobile-offline #arenaPortableTestDrawer[hidden]{display:none!important}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
+  position:fixed!important;
+  inset:auto max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) auto!important;
+  top:auto!important;left:auto!important;
+  display:flex!important;flex-direction:column!important;
+  box-sizing:border-box!important;
+  width:min(94vw,390px)!important;min-width:0!important;max-width:94vw!important;
+  height:min(42dvh,270px)!important;
+  min-height:min(42dvh,160px)!important;
+  max-height:min(42dvh,270px)!important;
+  padding:0!important;margin:0!important;
+  overflow:hidden!important;
+  background:#102a3b!important;color:#f0fcff!important;
+  border:1px solid #64a5b2!important;border-radius:13px!important;
+  box-shadow:0 8px 24px #000a!important;
+  z-index:250!important;visibility:visible!important;opacity:1!important;
+  pointer-events:auto!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]) #arenaPortableTestHead{
+  position:relative!important;inset:auto!important;
+  display:flex!important;flex:0 0 36px!important;
+  height:36px!important;min-height:36px!important;
+  padding:2px 8px!important;font-size:11px!important;
+  border-bottom:1px solid #477489!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]) #arenaPortableTestHead button{
+  width:30px!important;height:30px!important;min-width:30px!important;
+  min-height:30px!important;font-size:16px!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]) .arena-portable-test-picker{
+  display:flex!important;flex:0 0 auto!important;
+  flex-flow:row nowrap!important;align-items:center!important;
+  gap:6px!important;padding:3px 7px!important;
+  font-size:10px!important;max-width:100%!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]) #arenaPortableTestSelect{
+  width:100%!important;min-width:0!important;flex:1 1 auto!important;
+  height:36px!important;min-height:36px!important;
+  font-size:12px!important;padding:2px 6px!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]) #arenaPortableTestBody{
+  flex:1 1 auto!important;display:block!important;
+  min-height:0!important;max-height:none!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  padding:4px 8px 10px!important;
+  overscroll-behavior:contain!important;touch-action:pan-y!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]) #arenaPortableTestBody button{
+  min-height:38px!important;font-size:11px!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed:not([hidden]){
+  height:38px!important;min-height:38px!important;max-height:38px!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed .arena-portable-test-picker,
+html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed #arenaPortableTestBody{
+  display:none!important;
+}
+/* Native fullscreen requires the tests to live inside the fullscreen element.
+   Never place them in the game viewport or the bounded skill shelf. */
+html.arena-mobile-offline #card-9x16:fullscreen #arenaPortableTestDrawer:not([hidden]),
+html.arena-mobile-offline #card-16x9:fullscreen #arenaPortableTestDrawer:not([hidden]){
+  position:absolute!important;top:auto!important;left:auto!important;
+  right:max(8px,env(safe-area-inset-right))!important;
+  bottom:max(8px,env(safe-area-inset-bottom))!important;
+  z-index:280!important;
+  max-height:min(40%,270px)!important;
+}
+@media(max-width:370px){
+  html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
+    width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;
+    right:6px!important;
+  }
+}
+
+/* Reserve the actual drawer height, the skill bar and the upper controls.
+   The 9:16 arena shrinks only while tests are open and never covers them. */
+html.arena-mobile-offline #card-9x16.arena-tests-visible #viewport9x16,
+html.arena-mobile-offline #card-9x16:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
+  width:min(calc(100% - 6px),calc((100dvh - min(42dvh,270px) - 135px) * 9 / 16))!important;
+  max-height:calc(100dvh - min(42dvh,270px) - 135px)!important;
+}
+html.arena-mobile-offline #card-9x16:fullscreen.arena-tests-visible #viewport9x16,
+html.arena-mobile-offline #card-9x16:fullscreen:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
+  width:min(100%,calc((100dvh - min(42dvh,270px) - 135px) * 9 / 16))!important;
+  max-height:calc(100dvh - min(42dvh,270px) - 135px)!important;
+}
