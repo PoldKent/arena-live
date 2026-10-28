@@ -88,3 +88,14 @@ test('audience call-to-action is tap-based, command bubbles remain excluded',()=
  assert.match(html,/joinOnTap\(\{ username = '', platformKey = 'tiktok' \}/);
  assert.match(html,/rejoinRuleMode === 'timed' && matchTimeSeconds <= 0/);
 });
+
+test('result card respects the shared HUD opacity variable in both full-HD viewports',()=>{
+ assert.match(html,/#viewport16x9 \.arena-victory-card, #viewport9x16 \.arena-victory-card,/);
+ assert.match(html,/#viewport16x9 \.arena-audience-guide, #viewport9x16 \.arena-audience-guide \{ opacity: var\(--arena-hud-opacity\); \}/);
+ assert.match(html,/function setArenaHudOpacity\(input\) \{/);
+ assert.match(html,/setArenaRuntimeOption\('hudOpacity',amount\)/);
+ for(const suffix of ['16','9']){
+   assert.match(html,new RegExp('id="victoryOverlay'+suffix+'"'));
+   assert.match(html,new RegExp('id="victoryWinnerName'+suffix+'"'));
+ }
+});

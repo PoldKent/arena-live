@@ -953,6 +953,35 @@ await check('Lobby opacity changes both welcome cards and both audience guides',
  });
  assert.deepEqual(values,[['0.5','0.5'],['0.5','0.5']]);
 });
+await check('Final winner card tracks the HUD transparency slider in 16:9 and 9:16',async()=>{
+ const result=await page.evaluate(()=>{
+   gameState='LOBBY';applyPlayerCountPreset(2);startCombatFromLobby();
+   const champion=fighters[0];triggerVictoryScreen(champion);
+   const readings=[35,70,100].map(opacity=>{
+     setArenaHudOpacity(opacity);
+     return ['16','9'].map(sfx=>{
+       const overlay=document.getElementById('victoryOverlay'+sfx);
+       const card=overlay.querySelector('.arena-victory-card');
+       const buttons=card.querySelectorAll('.arena-victory-buttons button');
+       return {opacity:getComputedStyle(card).opacity,
+          visible:!overlay.classList.contains('hidden'),
+          buttons:buttons.length,
+          clickable:[...buttons].every(btn=>getComputedStyle(btn).pointerEvents!=='none'),
+          winner:!!document.getElementById('victoryWinnerName'+sfx).textContent.trim()};
+     });
+   });
+   setArenaHudOpacity(85);
+   return {readings,restored:getComputedStyle(document.querySelector('#viewport9x16 .arena-victory-card')).opacity};
+ });
+ for(let i=0;i<3;i++){
+   for(const row of result.readings[i]){
+     assert.equal(row.opacity,['0.35','0.7','1'][i]);
+     assert.equal(row.visible,true);assert.equal(row.buttons,2);
+     assert.equal(row.clickable,true);assert.equal(row.winner,true);
+   }
+ }
+ assert.equal(result.restored,'0.85');
+});
 await check('A rapid !jugar rejoin in final duel remains available with remaining lives',async()=>{
  const r=await page.evaluate(()=>{
   gameState='LOBBY';setRejoinRuleMode('free');applyPlayerCountPreset(2);startCombatFromLobby();

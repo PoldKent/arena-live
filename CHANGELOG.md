@@ -1,5 +1,13 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-28 — Arena Live v0.25 · Transparencia del resultado final
+
+- El regulador existente **Opacidad de la información del juego** ahora afecta a la tarjeta completa de victoria en 16:9 y 9:16: nombre del campeón, podio, estadísticas y controles, sin cambiar sus proporciones ni ocultarla.
+- Comparte la misma variable persistida `--arena-hud-opacity` con el lobby (35–100 %); cambios en vivo sin recargar.
+- Pruebas de navegador para los valores 35/70/100 en ambas capturas, restauración de la preferencia y controles de revancha/nuevo lobby.
+- No se modifica física, lógica de victorias ni calibración OBS; versión sincronizada 0.25.0.
+
+
 ## 2026-10-28 — Arena Live v0.24 · Ingreso por TAP TAP durante el combate
 
 - Los dos monitores y las pantallas de lobby invitan a **«¡Dale TAP TAP para unirte!»**, sin exigir escribir el comando de unión.
