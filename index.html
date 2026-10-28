@@ -292,13 +292,13 @@
 .arena-guide-pair b {opacity:.7;font-size:.85em;}
 .arena-guide-warrior {color:#8deefa}.arena-guide-shinobi {color:#d3a6ff}.arena-guide-titan {color:#ffb6c0}
 .arena-guide-rayo {color:#fcd776}.arena-guide-espiritu {color:#8ff0b9}
-#viewport9x16 .arena-audience-guide {gap:5px;padding:7px 6px 9px;font-size:clamp(7.5px,3.9cqw,13px);border-top-color:rgba(244,114,182,.46);}
-#viewport9x16 .arena-guide-intro {gap:5px;flex-wrap:wrap;}
+#viewport9x16 .arena-audience-guide {gap:2px;padding:3px 4px 4px;font-size:clamp(7px,3.6cqw,11px);border-top-color:rgba(244,114,182,.46);}
+#viewport9x16 .arena-guide-intro {gap:4px;flex-wrap:nowrap;line-height:1.05;}
 #viewport9x16 .arena-guide-step {font-size:.9em;}
 #viewport9x16 .arena-guide-intro strong {font-size:1.25em;}
-#viewport9x16 .arena-guide-tip {width:100%;text-align:center;font-size:.9em;}
-#viewport9x16 .arena-guide-commands {grid-template-columns:repeat(2,minmax(0,1fr));gap:3px;}
-#viewport9x16 .arena-guide-pair {padding:3px 1px;gap:2px;}
+#viewport9x16 .arena-guide-tip {width:auto;min-width:0;white-space:nowrap;font-size:.79em;letter-spacing:-.04em;}
+#viewport9x16 .arena-guide-commands {grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;}
+#viewport9x16 .arena-guide-pair {padding:1px 1px;gap:2px;line-height:1.05;}
 #viewport9x16 .arena-guide-pair:last-child {grid-column:1 / -1;justify-self:stretch;}
 #viewport9x16 .arena-guide-pair code {letter-spacing:-.06em;}
 /* Lobby card is deliberately confined to the noncombat center; never shown during combat. */
@@ -1073,7 +1073,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
                         <!-- Always-on audience instructions; independent from game phase and HUD -->
                         <aside id="arenaAudienceGuide16" class="arena-audience-guide arena-audience-guide-landscape" aria-label="Cómo jugar en Arena Live">
-                            <div class="arena-guide-intro"><span class="arena-guide-step">01 · ENTRA</span><strong>!jugar</strong><span class="arena-guide-tip">02 · Elige tu clase &nbsp; 03 · Usa su poder</span></div>
+                            <div class="arena-guide-intro"><span class="arena-guide-step">01 · ENTRA</span><strong>!jugar</strong><span class="arena-guide-tip">02 Clase → 03 Poder</span></div>
                             <div class="arena-guide-commands"><span class="arena-guide-pair arena-guide-warrior"><span aria-hidden="true">⚔</span><code>!guerrero</code><b aria-hidden="true">→</b><code>!kame</code></span>
                                 <span class="arena-guide-pair arena-guide-shinobi"><span aria-hidden="true">🌀</span><code>!shinobi</code><b aria-hidden="true">→</b><code>!rasen</code></span>
                                 <span class="arena-guide-pair arena-guide-titan"><span aria-hidden="true">🛡</span><code>!titan</code><b aria-hidden="true">→</b><code>!coloso</code></span>
@@ -1245,7 +1245,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
                         <!-- Always-on audience instructions; independent from game phase and HUD -->
                         <aside id="arenaAudienceGuide9" class="arena-audience-guide arena-audience-guide-portrait" aria-label="Cómo jugar en Arena Live">
-                            <div class="arena-guide-intro"><span class="arena-guide-step">01 · ENTRA</span><strong>!jugar</strong><span class="arena-guide-tip">02 · Elige tu clase &nbsp; 03 · Usa su poder</span></div>
+                            <div class="arena-guide-intro"><span class="arena-guide-step">01 · ENTRA</span><strong>!jugar</strong><span class="arena-guide-tip">02 Clase → 03 Poder</span></div>
                             <div class="arena-guide-commands"><span class="arena-guide-pair arena-guide-warrior"><span aria-hidden="true">⚔</span><code>!guerrero</code><b aria-hidden="true">→</b><code>!kame</code></span>
                                 <span class="arena-guide-pair arena-guide-shinobi"><span aria-hidden="true">🌀</span><code>!shinobi</code><b aria-hidden="true">→</b><code>!rasen</code></span>
                                 <span class="arena-guide-pair arena-guide-titan"><span aria-hidden="true">🛡</span><code>!titan</code><b aria-hidden="true">→</b><code>!coloso</code></span>
