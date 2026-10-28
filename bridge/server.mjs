@@ -165,6 +165,19 @@ const server = createServer(async (req, res) => {
       res.end(injected);
       return;
     }
+    // PC preview of the *official generated mobile package*, built from the same full game.
+    // Keep bridge routes separate: /mobile uses local simulation, / uses TikTok LIVE.
+    if(req.method==='GET'&&(pathname==='/mobile'||pathname==='/mobile/')){
+      try{
+        const html=await readFile(resolve(ROOT,'dist',`Arena-Live-v${VERSION}-movil.html`),'utf8');
+        res.writeHead(200,{...noCache,'Content-Type':'text/html; charset=utf-8'});
+        res.end(html);
+      }catch(error){
+        if(error?.code!=='ENOENT')throw error;
+        return json(res,404,{error:'Falta el paquete móvil. Ejecuta npm.cmd run build:mobile y vuelve a abrir /mobile.'});
+      }
+      return;
+    }
     if(req.method==='GET'&&['/engine/arena-core.js','/engine/arena-render.js','/engine/arena-audio.js','/engine/arena-settings.js','/engine/arena-balance-evidence.js'].includes(pathname)){res.writeHead(200,{...noCache,'Content-Type':'text/javascript; charset=utf-8'});res.end(await readFile(resolve(ROOT,pathname.slice(1))));return;}
     if (req.method === 'GET' && pathname === '/bridge-client.js') {
       const script = await readFile(resolve(__dirname, 'bridge-client.js'), 'utf8');
