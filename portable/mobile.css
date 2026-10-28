@@ -731,3 +731,10 @@ html.arena-mobile-offline #arenaMobileControlSettings label[for="hudOpacityRange
 html.arena-mobile-offline #arenaMobileControlSettings label[for="hudOpacityRange"] small{
  color:#b5d4dc;font-size:11px;line-height:1.4
 }
+
+/* Keep Director free of player actions; reveal them only while rearranging controls. */
+html.arena-mobile-offline[data-mobile-mode="director"]:not(.arena-mobile-edit-controls) #arenaHeaderActions>#arenaMobileJump,
+html.arena-mobile-offline[data-mobile-mode="director"]:not(.arena-mobile-edit-controls) #arenaHeaderActions>#arenaMobileAttack,
+html.arena-mobile-offline[data-mobile-mode="director"]:not(.arena-mobile-edit-controls) #arenaHeaderActions>#arenaMobilePower{
+ display:none!important
+}
