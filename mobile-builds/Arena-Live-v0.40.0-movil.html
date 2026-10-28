@@ -2164,19 +2164,14 @@ html.arena-mobile-offline #card-9x16{
 html.arena-mobile-offline #card-9x16:not(:fullscreen){
   box-sizing:border-box!important;min-height:max(0px,calc(100dvh - 76px))!important;
 }
-html.arena-mobile-offline #card-9x16.arena-tests-visible:not(:fullscreen){
-  padding-bottom:min(42dvh,270px)!important;
-}
+
 html.arena-mobile-offline #card-9x16 #viewport9x16{
   flex:0 0 auto!important;position:relative!important;box-sizing:border-box!important;
-  width:min(calc(100% - 6px),calc((100dvh - 185px) * 9 / 16))!important;
-  height:auto!important;max-height:calc(100dvh - 185px)!important;
+  width:min(calc(100% - 6px),calc((100dvh - 158px) * 9 / 16))!important;
+  height:auto!important;max-height:calc(100dvh - 158px)!important;
   aspect-ratio:9/16!important;margin:0 auto!important;overflow:hidden!important;
 }
-html.arena-mobile-offline #card-9x16:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
-  width:min(calc(100% - 6px),calc((100dvh - 320px) * 9 / 16))!important;
-  max-height:calc(100dvh - 320px)!important;
-}
+
 html.arena-mobile-offline[data-mobile-mode="player"][data-mobile-touch-mode="touch"] #card-9x16 #viewport9x16{
   width:min(calc(100% - 6px),calc((100dvh - 132px) * 9 / 16))!important;
   max-height:calc(100dvh - 132px)!important;
@@ -2371,9 +2366,7 @@ html.arena-mobile-offline #card-16x9:fullscreen{
 }
 html.arena-mobile-offline #card-9x16:fullscreen >div:first-child,
 html.arena-mobile-offline #card-16x9:fullscreen >div:first-child{display:none!important}
-html.arena-mobile-offline #card-9x16:fullscreen.arena-tests-visible{
-  padding-bottom:calc(min(42dvh,270px) + env(safe-area-inset-bottom))!important;
-}
+
 html.arena-mobile-offline #card-9x16:fullscreen #arenaMobileFloating,
 html.arena-mobile-offline #card-16x9:fullscreen #arenaMobileFloating{
   position:absolute!important;top:calc(8px + env(safe-area-inset-top))!important;
@@ -2384,8 +2377,8 @@ html.arena-mobile-offline #card-16x9:fullscreen #arenaMobileFloating{
 }
 html.arena-mobile-offline #card-9x16:fullscreen #viewport9x16{
   flex:0 1 auto!important;order:0!important;
-  width:min(100%,calc((100dvh - 215px) * 9 / 16))!important;
-  max-height:calc(100dvh - 215px)!important;height:auto!important;
+  width:min(100%,calc((100dvh - 156px) * 9 / 16))!important;
+  max-height:calc(100dvh - 156px)!important;height:auto!important;
   aspect-ratio:9/16!important;overflow:hidden!important;
 }
 html.arena-mobile-offline #card-16x9:fullscreen #viewport16x9{
@@ -2394,10 +2387,7 @@ html.arena-mobile-offline #card-16x9:fullscreen #viewport16x9{
   max-height:calc(100dvh - 215px)!important;height:auto!important;
   aspect-ratio:16/9!important;overflow:hidden!important;
 }
-html.arena-mobile-offline #card-9x16:fullscreen:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
-  width:min(100%,calc((100dvh - 369px) * 9 / 16))!important;
-  max-height:calc(100dvh - 369px)!important;
-}
+
 html.arena-mobile-offline #card-9x16:fullscreen #arenaMobileGestureGuide,
 html.arena-mobile-offline #card-16x9:fullscreen #arenaMobileGestureGuide{
   max-height:52px!important;overflow:auto!important;padding:5px 8px!important;
@@ -2517,15 +2507,44 @@ html.arena-mobile-offline #card-16x9:fullscreen #arenaPortableTestDrawer:not([hi
 
 /* Reserve the actual drawer height, the skill bar and the upper controls.
    The 9:16 arena shrinks only while tests are open and never covers them. */
-html.arena-mobile-offline #card-9x16.arena-tests-visible #viewport9x16,
-html.arena-mobile-offline #card-9x16:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
-  width:min(calc(100% - 6px),calc((100dvh - min(42dvh,270px) - 135px) * 9 / 16))!important;
-  max-height:calc(100dvh - min(42dvh,270px) - 135px)!important;
+
+
+
+
+/* Opening tests NEVER changes the game dimensions. The same five original
+   Streamer skills remain independently visible on their own fixed lower rail. */
+html.arena-mobile-offline #arenaMobileControlShelf:has(#arenaStreamerSkillsDock){
+  z-index:320!important;
 }
-html.arena-mobile-offline #card-9x16:fullscreen.arena-tests-visible #viewport9x16,
-html.arena-mobile-offline #card-9x16:fullscreen:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
-  width:min(100%,calc((100dvh - min(42dvh,270px) - 184px) * 9 / 16))!important;
-  max-height:calc(100dvh - min(42dvh,270px) - 184px)!important;
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf #arenaStreamerSkillsDock{
+  display:block!important;position:relative!important;
+  z-index:325!important;visibility:visible!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
+  position:fixed!important;
+  bottom:var(--arena-tests-bottom,80px)!important;
+  right:max(8px,env(safe-area-inset-right))!important;
+  top:auto!important;left:auto!important;
+  height:min(34dvh,244px)!important;
+  min-height:min(34dvh,150px)!important;
+  max-height:min(34dvh,244px)!important;
+  z-index:280!important;
+}
+html.arena-mobile-offline #card-9x16:fullscreen #arenaPortableTestDrawer:not([hidden]),
+html.arena-mobile-offline #card-16x9:fullscreen #arenaPortableTestDrawer:not([hidden]){
+  position:absolute!important;
+  bottom:var(--arena-tests-bottom,80px)!important;
+  right:max(8px,env(safe-area-inset-right))!important;
+  top:auto!important;left:auto!important;
+  height:min(34dvh,244px)!important;
+  min-height:min(34dvh,150px)!important;
+  max-height:min(34dvh,244px)!important;
+  z-index:280!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed:not([hidden]),
+html.arena-mobile-offline #card-9x16:fullscreen #arenaPortableTestDrawer.is-collapsed:not([hidden]),
+html.arena-mobile-offline #card-16x9:fullscreen #arenaPortableTestDrawer.is-collapsed:not([hidden]){
+  height:38px!important;min-height:38px!important;max-height:38px!important;
 }
 
 </style>
@@ -11402,7 +11421,7 @@ const ARENA_BALANCE_EVIDENCE=Object.freeze({"version":"0.15.0","sample":{"matche
             }
         });
     </script>
-<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze({"version":"0.40.0","edition":"mobile-offline","sourceBlobs":{"index.html":"c7b3378470c94fac771985271c88a5884426f661","styles/arena-ui.css":"c933a9cfb504daa6d27800c6098396b3aa57114f","styles/TAILWIND-LICENSE.txt":"d6a82290738a9f78946cbcb4594535d6984086dd","engine/arena-core.js":"ac22091a1263e294b733a337f8c6ebc4f2e1bc9d","engine/arena-render.js":"6c9603974d2c02d0f0fb52857992211c08cd6725","engine/arena-audio.js":"319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934","engine/arena-settings.js":"f1fbbd2492b4be8cfb725e72cd0ab604894681cf","engine/arena-balance-evidence.js":"0aab05b49f0ef9e80c43810b2bfc929b4f695cdf","portable/mobile.css":"221e0adb8b2814e453bff81dd1c55df9b4742318","portable/mobile-runtime.js":"29f30d79aedf48d51eda169c27b36230be13a2a6","portable/mobile-touch.js":"bf2f5c254744c291d8db1810217d09ca2f9106ec"}});</script>
+<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze({"version":"0.40.0","edition":"mobile-offline","sourceBlobs":{"index.html":"c7b3378470c94fac771985271c88a5884426f661","styles/arena-ui.css":"c933a9cfb504daa6d27800c6098396b3aa57114f","styles/TAILWIND-LICENSE.txt":"d6a82290738a9f78946cbcb4594535d6984086dd","engine/arena-core.js":"ac22091a1263e294b733a337f8c6ebc4f2e1bc9d","engine/arena-render.js":"6c9603974d2c02d0f0fb52857992211c08cd6725","engine/arena-audio.js":"319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934","engine/arena-settings.js":"f1fbbd2492b4be8cfb725e72cd0ab604894681cf","engine/arena-balance-evidence.js":"0aab05b49f0ef9e80c43810b2bfc929b4f695cdf","portable/mobile.css":"bb459c6054e0af99444e58f7ede8ad6c4f945509","portable/mobile-runtime.js":"29f30d79aedf48d51eda169c27b36230be13a2a6","portable/mobile-touch.js":"5c06614965671ecf411afac8911c182c8780a143"}});</script>
 <script id="arena-mobile-runtime">
 // Loaded inline after the unchanged classic engine, before its load bootstrap.
 // This adapter changes presentation and test setup, never combat decisions.
@@ -11906,6 +11925,19 @@ function arenaMobileTouchCancel(event){
 function arenaMobileTestPanel(){
     return document.getElementById(arenaMobileTestState.active);
 }
+function arenaMobilePositionTestDrawer(){
+    const drawer=document.getElementById('arenaPortableTestDrawer');
+    const skills=document.getElementById('arenaStreamerSkillsDock');
+    if(!drawer||!skills)return;
+    // The same five buttons are always a distinct bottom rail. On short screens
+    // the testing panel overlaps part of the video, never this active rail.
+    const fullscreen=document.fullscreenElement;
+    const host=fullscreen?.matches?.('#card-9x16,#card-16x9')?fullscreen:null;
+    const bottom=host?host.getBoundingClientRect().bottom:window.innerHeight;
+    const skillsTop=skills.getBoundingClientRect().top;
+    const clearance=Math.max(72,Math.ceil(bottom-skillsTop+8));
+    drawer.style.setProperty('--arena-tests-bottom',clearance+'px');
+}
 function arenaMobileMountTestDrawer(){
     const drawer=document.getElementById('arenaPortableTestDrawer');
     if(!drawer)return;
@@ -11921,6 +11953,7 @@ function arenaMobileMountTestDrawer(){
     drawer.style.removeProperty('left');
     drawer.style.removeProperty('right');
     drawer.style.removeProperty('bottom');
+    requestAnimationFrame(arenaMobilePositionTestDrawer);
 }
 function arenaMobileSelectTestPanel(id){
     const allowed=['arenaPanelPowers','arenaPanelPlayers','arenaPanelScenarios','arenaPanelSocial','arenaPanelSimulation'];
@@ -11960,7 +11993,8 @@ function arenaMobileShowTestDrawer(open=true){
     if(shortcut){shortcut.setAttribute('aria-expanded',String(!!open));shortcut.setAttribute('aria-controls','arenaPortableTestDrawer');}
     const fab=document.getElementById('arenaMobileTestFab');
     if(fab)fab.setAttribute('aria-expanded',String(!!open));
-    // A fixed drawer is already visible: scrolling the document would move the game.
+    // Do not resize the game or move the existing five active power buttons.
+    if(open)requestAnimationFrame(arenaMobilePositionTestDrawer);
 }
 function arenaMobileInstallTestDrawer(){
     const drawer=document.createElement('aside');
@@ -11988,11 +12022,17 @@ function arenaMobileInstallTestDrawer(){
         menu.textContent='🎛 Opciones del Modo Streamer';
         menu.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();arenaMobileShowTestDrawer(true);},true);
     }
-    document.addEventListener('fullscreenchange',()=>requestAnimationFrame(arenaMobileMountTestDrawer));
+    document.addEventListener('fullscreenchange',()=>requestAnimationFrame(()=>{
+        arenaMobileMountTestDrawer();
+        arenaMobilePositionTestDrawer();
+    }));
     window.addEventListener('resize',()=>{
         requestAnimationFrame(()=>{
             arenaMobileMountTestDrawer();
-            if(arenaMobileTestState.open)arenaMobileSelectTestPanel(arenaMobileTestState.active);
+            if(arenaMobileTestState.open){
+                arenaMobileSelectTestPanel(arenaMobileTestState.active);
+                arenaMobilePositionTestDrawer();
+            }
         });
     });
     const previousFocus=setMonitorFocus;

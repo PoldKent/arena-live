@@ -156,6 +156,19 @@ function arenaMobileTouchCancel(event){
 function arenaMobileTestPanel(){
     return document.getElementById(arenaMobileTestState.active);
 }
+function arenaMobilePositionTestDrawer(){
+    const drawer=document.getElementById('arenaPortableTestDrawer');
+    const skills=document.getElementById('arenaStreamerSkillsDock');
+    if(!drawer||!skills)return;
+    // The same five buttons are always a distinct bottom rail. On short screens
+    // the testing panel overlaps part of the video, never this active rail.
+    const fullscreen=document.fullscreenElement;
+    const host=fullscreen?.matches?.('#card-9x16,#card-16x9')?fullscreen:null;
+    const bottom=host?host.getBoundingClientRect().bottom:window.innerHeight;
+    const skillsTop=skills.getBoundingClientRect().top;
+    const clearance=Math.max(72,Math.ceil(bottom-skillsTop+8));
+    drawer.style.setProperty('--arena-tests-bottom',clearance+'px');
+}
 function arenaMobileMountTestDrawer(){
     const drawer=document.getElementById('arenaPortableTestDrawer');
     if(!drawer)return;
@@ -171,6 +184,7 @@ function arenaMobileMountTestDrawer(){
     drawer.style.removeProperty('left');
     drawer.style.removeProperty('right');
     drawer.style.removeProperty('bottom');
+    requestAnimationFrame(arenaMobilePositionTestDrawer);
 }
 function arenaMobileSelectTestPanel(id){
     const allowed=['arenaPanelPowers','arenaPanelPlayers','arenaPanelScenarios','arenaPanelSocial','arenaPanelSimulation'];
@@ -210,7 +224,8 @@ function arenaMobileShowTestDrawer(open=true){
     if(shortcut){shortcut.setAttribute('aria-expanded',String(!!open));shortcut.setAttribute('aria-controls','arenaPortableTestDrawer');}
     const fab=document.getElementById('arenaMobileTestFab');
     if(fab)fab.setAttribute('aria-expanded',String(!!open));
-    // A fixed drawer is already visible: scrolling the document would move the game.
+    // Do not resize the game or move the existing five active power buttons.
+    if(open)requestAnimationFrame(arenaMobilePositionTestDrawer);
 }
 function arenaMobileInstallTestDrawer(){
     const drawer=document.createElement('aside');
@@ -238,11 +253,17 @@ function arenaMobileInstallTestDrawer(){
         menu.textContent='🎛 Opciones del Modo Streamer';
         menu.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();arenaMobileShowTestDrawer(true);},true);
     }
-    document.addEventListener('fullscreenchange',()=>requestAnimationFrame(arenaMobileMountTestDrawer));
+    document.addEventListener('fullscreenchange',()=>requestAnimationFrame(()=>{
+        arenaMobileMountTestDrawer();
+        arenaMobilePositionTestDrawer();
+    }));
     window.addEventListener('resize',()=>{
         requestAnimationFrame(()=>{
             arenaMobileMountTestDrawer();
-            if(arenaMobileTestState.open)arenaMobileSelectTestPanel(arenaMobileTestState.active);
+            if(arenaMobileTestState.open){
+                arenaMobileSelectTestPanel(arenaMobileTestState.active);
+                arenaMobilePositionTestDrawer();
+            }
         });
     });
     const previousFocus=setMonitorFocus;

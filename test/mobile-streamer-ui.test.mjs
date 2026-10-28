@@ -93,3 +93,17 @@ test('v0.36–v0.37 top-right floating capsule is restored without overlapping 9
   assert.match(runtime,/hud\.insertBefore\(topMenu,fullscreenControl\)/);
   assert.match(touch,/function arenaMobileMountTestDrawer\(\)/);
 });
+
+test('Streamer Pruebas is a compact overlay, never reduces the arena or covers five skills',()=>{
+  assert.match(touch,/function arenaMobilePositionTestDrawer\(\)/);
+  assert.match(touch,/getElementById\('arenaStreamerSkillsDock'\)/);
+  assert.match(touch,/skills\.getBoundingClientRect\(\)\.top/);
+  assert.match(touch,/drawer\.style\.setProperty\('--arena-tests-bottom'/);
+  assert.match(css,/bottom:var\(--arena-tests-bottom,80px\)!important/);
+  assert.match(css,/#arenaMobileControlShelf #arenaStreamerSkillsDock\{/);
+  assert.match(css,/#arenaStreamerSkillsDock>[.]arena-skill-buttons/);
+  assert.doesNotMatch(css,/#card-9x16[.]arena-tests-visible #viewport9x16/);
+  assert.doesNotMatch(css,/#card-9x16:has\(#arenaMobileControlShelf[.]has-open-tests\) #viewport9x16/);
+  assert.doesNotMatch(css,/#card-9x16:fullscreen[.]arena-tests-visible #viewport9x16/);
+  assert.doesNotMatch(css,/#card-9x16:fullscreen:has\(#arenaMobileControlShelf[.]has-open-tests\) #viewport9x16/);
+});

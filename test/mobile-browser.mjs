@@ -311,24 +311,35 @@ try{
     await check('compact Streamer tests sit below the 9:16 frame and retain the original commands',async()=>{
         await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(false);});
         assert.equal(await page.locator('#arenaMobileTestsShortcut').isVisible(),true);
+        const before=await page.evaluate(()=>{
+            const video=document.getElementById('viewport9x16').getBoundingClientRect();
+            const skills=document.getElementById('arenaStreamerSkillsDock').getBoundingClientRect();
+            return {x:video.x,y:video.y,width:video.width,height:video.height,
+                skillX:skills.x,skillY:skills.y,skillWidth:skills.width,skillHeight:skills.height};
+        });
         await page.locator('#arenaMobileTestsShortcut').tap();
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
+        await page.waitForTimeout(100);
         assert.match(await page.locator('#arenaPortableTestHead').innerText(),/Modo Streamer/);
         assert.equal(await page.locator('#arenaPortableTestBody #arenaPanelPowers').count(),1);
         assert.equal(await page.locator('#arenaPortableTestBody #targetFighterSelect').count(),1);
         assert.equal(await page.locator('#arenaStreamerSkillsDock .arena-skill-buttons button').count(),5);
-        const sheet=await page.locator('#arenaPortableTestDrawer').evaluate(n=>{
+        const sheet=await page.locator('#arenaPortableTestDrawer').evaluate((n,before)=>{
             const box=n.getBoundingClientRect(),video=document.getElementById('viewport9x16').getBoundingClientRect();
+            const skills=document.getElementById('arenaStreamerSkillsDock').getBoundingClientRect();
             const body=n.querySelector('#arenaPortableTestBody'),panel=body.querySelector('.arena-panel-body');
             return {border:parseFloat(getComputedStyle(n).borderTopWidth)>0,
                 scroll:getComputedStyle(body).overflowY==='auto',
                 inBody:n.parentElement===document.body,
                 onScreen:box.width>150&&box.height>=120&&box.top>=0&&box.bottom<=innerHeight+2,
-                clearOfVideo:box.top>=video.bottom-1,
+                aboveSkills:box.bottom<=skills.top+1,
+                videoUnchanged:Math.abs(video.x-before.x)<1&&Math.abs(video.y-before.y)<1&&Math.abs(video.width-before.width)<1&&Math.abs(video.height-before.height)<1,
+                skillsUnchanged:Math.abs(skills.x-before.skillX)<1&&Math.abs(skills.y-before.skillY)<1&&Math.abs(skills.width-before.skillWidth)<1&&Math.abs(skills.height-before.skillHeight)<1,
+                skillsVisible:getComputedStyle(document.getElementById('arenaStreamerSkillsDock')).display!=='none',
                 actualOptions:!!n.querySelector('#arenaPortableTestSelect')&&!!n.querySelector('#arenaPanelPowers'),
                 normalPanel:getComputedStyle(panel).position==='static'};
-        });
-        assert.deepEqual(sheet,{border:true,scroll:true,inBody:true,onScreen:true,clearOfVideo:true,actualOptions:true,normalPanel:true},JSON.stringify(sheet));
+        },before);
+        assert.deepEqual(sheet,{border:true,scroll:true,inBody:true,onScreen:true,aboveSkills:true,videoUnchanged:true,skillsUnchanged:true,skillsVisible:true,actualOptions:true,normalPanel:true},JSON.stringify(sheet));
         if(output)await page.screenshot({path:join(output,'mobile-streamer-tests-open.png')});
         assert.equal(await page.locator('#targetFighterSelect').count(),1);
         await page.locator('#arenaPortableTestSelect').selectOption('arenaPanelPlayers');
@@ -351,8 +362,16 @@ try{
         await page.waitForFunction(()=>document.fullscreenElement?.id==='card-9x16');
         assert.equal(await page.locator('#arenaMobileFloating').isVisible(),true);
         assert.equal(await page.locator('#arenaStreamerSkillsDock').isVisible(),true);
+        const geometry=await page.evaluate(()=>{
+            const v=document.getElementById('viewport9x16').getBoundingClientRect();
+            const skills=document.getElementById('arenaStreamerSkillsDock').getBoundingClientRect();
+            return {x:v.x,y:v.y,w:v.width,h:v.height,skillsTop:skills.top};
+        });
         await page.locator('#arenaMobileTestsShortcut').tap();
-        const state=await page.evaluate(()=>{
+        await page.waitForTimeout(100);
+        const state=await page.evaluate(before=>{
+            const v=document.getElementById('viewport9x16').getBoundingClientRect();
+            const skills=document.getElementById('arenaStreamerSkillsDock').getBoundingClientRect();
             const card=document.fullscreenElement;
             const drawer=document.getElementById('arenaPortableTestDrawer');
             const rect=drawer.getBoundingClientRect(),video=document.getElementById('viewport9x16').getBoundingClientRect();
@@ -360,12 +379,17 @@ try{
                 options:!!drawer.querySelector('#arenaPanelPowers')&&!!drawer.querySelector('#arenaPortableTestSelect'),
                 onScreen:rect.width>100&&rect.height>80&&rect.top>=0&&rect.bottom<=innerHeight+1,
                 videoCentered:Math.abs(video.left-(innerWidth-video.width)/2)<6,
-                videoClear:video.bottom<=rect.top+1,videoRatio:video.width/video.height};
-        });
+                powersVisible:getComputedStyle(document.getElementById('arenaStreamerSkillsDock')).display!=='none'&&skills.top<innerHeight,
+                abovePowers:rect.bottom<=skills.top+1,
+                videoUnchanged:Math.abs(v.x-before.x)<1&&Math.abs(v.y-before.y)<1&&Math.abs(v.width-before.w)<1&&Math.abs(v.height-before.h)<1,
+                videoRatio:video.width/video.height};
+        },geometry);
         assert.equal(state.inFullscreen,true);assert.equal(state.options,true);
         assert.equal(state.onScreen,true,JSON.stringify(state));
         assert.equal(state.videoCentered,true,JSON.stringify(state));
-        assert.equal(state.videoClear,true,JSON.stringify(state));
+        assert.equal(state.abovePowers,true,JSON.stringify(state));
+        assert.equal(state.powersVisible,true,JSON.stringify(state));
+        assert.equal(state.videoUnchanged,true,JSON.stringify(state));
         assert.ok(Math.abs(state.videoRatio-9/16)<.02,JSON.stringify(state));
         if(output)await page.screenshot({path:join(output,'mobile-fullscreen-tests.png')});
         await page.locator('#arenaPortableTestClose').tap();
