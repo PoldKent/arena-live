@@ -101,7 +101,7 @@ test('result card respects the shared HUD opacity variable in both full-HD viewp
 });
 
 test('v0.27 keeps all settings by ID while navigating seven coherent categories',()=>{
- for(const name of ['match','combat','classes','audience','broadcast','audio','system'])
+ for(const name of ['match','combat','classes','audience','broadcast','audio','controls','system'])
    assert.match(html,new RegExp('data-settings-tab="'+name+'"'));
  for(const id of ['arenaSettingsSearch','arenaSettingsNav','arenaCombatRulesCard','arenaBalancePanel','arenaObsCalibrationPanel','playerLivesSelect','matchDurationSelect','arenaWorkspaceReset'])
    assert.match(html,new RegExp('id="'+id+'"'));
