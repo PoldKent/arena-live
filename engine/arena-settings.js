@@ -13,6 +13,7 @@ function installArenaRuntimeSettings(){
     const card=document.createElement('div');card.id='arenaRuntimeCard';card.dataset.noTranslate='';card.className='bg-slate-900/75 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3';
     const select=(key,label,values)=>`<label class="flex flex-col gap-1 text-xs"><span data-runtime-copy="${label}"></span><select id="arenaRuntime_${key}" data-runtime-option="${key}">${values.map(([value,index])=>`<option value="${value}"${typeof index==='number'?` data-runtime-copy="${index}"`:''}>${typeof index==='string'?index:''}</option>`).join('')}</select></label>`;
     card.innerHTML='<h3 class="font-bold text-xs" data-runtime-copy="0"></h3>'
+      +'<label class="flex flex-col gap-1 text-xs"><span id="arenaSpecialSourceLabel">Origen de ataques especiales</span><select id="arenaRuntime_specialSource" data-runtime-option="specialSource"><option value="both">IA y comandos</option><option value="commands">Solo comandos y controles</option><option value="none">Desactivados</option></select></label>'
       +select('specialPolicy',1,[['fair',2],['audience',3]])+select('pausePolicy',4,[['queue',5],['show',6]])
       +'<p id="arenaSpecialPolicyHelp" class="text-[10px] text-slate-400" data-runtime-copy="16"></p><p class="text-[10px] text-slate-400" data-runtime-copy="17"></p>'
       +select('quality',7,[['high',8],['balanced',9],['performance',10]])+select('renderFps',11,[['30','30 FPS'],['60','60 FPS']])
@@ -34,6 +35,11 @@ function installArenaRuntimeSettings(){
 }
 function refreshArenaRuntimeControls(){
     const words=ARENA_RUNTIME_COPY[currentLanguage]||ARENA_RUNTIME_COPY.es;
+    const sources={es:['Origen de ataques especiales','IA y comandos','Solo comandos y controles','Desactivados'],en:['Special attack origin','AI and commands','Commands and manual controls only','Disabled'],fr:['Origine des pouvoirs','IA et commandes','Commandes uniquement','Désactivés'],de:['Spezialattacken','KI und Befehle','Nur Befehle','Deaktiviert'],zh:['特殊攻击来源','AI和指令','仅指令','禁用'],ja:['必殺技の発動元','AIとコマンド','コマンドのみ','無効'],pt:['Origem dos especiais','IA e comandos','Apenas comandos','Desativados'],it:['Origine delle abilità','IA e comandi','Solo comandi','Disattivati']};
+    const labels=sources[currentLanguage]||sources.es;
+    const sourceLabel=document.getElementById('arenaSpecialSourceLabel');if(sourceLabel)sourceLabel.textContent=labels[0];
+    const sourceSelect=document.getElementById('arenaRuntime_specialSource');
+    if(sourceSelect)for(const [index,option]of [...sourceSelect.options].entries())option.textContent=labels[index+1];
     for(const node of document.querySelectorAll('[data-runtime-copy]'))writeArenaHudText(node,words[Number(node.dataset.runtimeCopy)]);
     const help={specialPolicy:arenaRuntime.specialPolicy==='fair'?words[16]:(ARENA_PARTICIPATION_HELP[currentLanguage]||ARENA_PARTICIPATION_HELP.es),pausePolicy:words[17],quality:words[18],renderFps:words[18],masterVolume:words[15]+' · 0–100 %'};
     for(const [classKey,key]of Object.entries(ArenaCore.targetingKeys))help[key]=arenaClassPolicyText(classKey);
