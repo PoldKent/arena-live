@@ -1,7 +1,7 @@
 // Loaded inline after the unchanged classic engine, before its load bootstrap.
 // This adapter changes presentation and test setup, never combat decisions.
 const ARENA_PORTABLE_KEY='arenaLivePortableV1';
-let arenaPortableSuspended=false,arenaPortableSetupOpen=false;
+let arenaPortableSuspended=false,arenaPortableSetupOpen=false,arenaPortablePreviousPause=false;
 let arenaPortableProfile={resolution:720,count:32,classKey:'kame',join:true};
 try {
     const saved=JSON.parse(localStorage.getItem(ARENA_PORTABLE_KEY)||'null');
@@ -29,7 +29,7 @@ function arenaPortableResolution(value) {
 }
 function arenaPortableClose() {
     const dialog=document.getElementById('arenaPortableSetup');if(!dialog)return;
-    dialog.hidden=true;arenaPortableSetupOpen=false;isGamePaused=false;
+    dialog.hidden=true;arenaPortableSetupOpen=false;isGamePaused=arenaPortablePreviousPause;
     previousFrameTime=null;simulationAccumulator=0;arenaLastRenderTime=null;
     updateTouchControlsVisibility();document.getElementById('arenaMobileMoreBtn')?.focus({preventScroll:true});
 }
@@ -45,6 +45,7 @@ function arenaPortableOpen() {
     document.getElementById('arenaPortableClass').disabled=!arenaPortableProfile.join||arenaCombatRules.classRule!=='any';
     if(arenaCombatRules.classRule!=='any')document.getElementById('arenaPortableClass').value=arenaCombatRules.classRule;
     document.getElementById('arenaPortableStatus').textContent='';
+    arenaPortablePreviousPause=isGamePaused;
     dialog.hidden=false;arenaPortableSetupOpen=true;isGamePaused=true;
     document.dispatchEvent(new Event('arena-touch-disable'));updateTouchControlsVisibility();
     document.getElementById('arenaPortableCount').focus({preventScroll:true});
@@ -58,13 +59,14 @@ function arenaPortableStart({count=32,classKey='kame',join=true}={}) {
     openLobby(true);applyPlayerCountPreset(actual-(join?1:0));
     if(join){document.getElementById('protagonistClassSelect').value=classKey;if(!streamerManualControl)toggleStreamerManualControl();joinAsStreamer();}
     if(typeof initAudio==='function')initAudio();
+    arenaPortablePreviousPause=false;
     arenaPortableClose();startCombatFromLobby();updateTouchControlsVisibility();
     return true;
 }
 function arenaPortableReady() {
     const host=document.createElement('section');host.id='arenaPortableSetup';host.hidden=true;
     host.setAttribute('role','dialog');host.setAttribute('aria-modal','true');host.setAttribute('aria-labelledby','arenaPortableTitle');host.setAttribute('aria-describedby','arenaPortableDescription');host.setAttribute('data-no-translate','');
-    host.innerHTML=`<div class="arena-portable-card"><button type="button" id="arenaPortableClose" aria-label="Cerrar prueba rápida">×</button><div class="arena-portable-kicker">ARENA LIVE · ARCHIVO SIN CONEXIÓN</div><h2 id="arenaPortableTitle">Listo para tu celular</h2><p id="arenaPortableDescription">Elige una partida. Las clases, sus poderes y las reglas son los mismos del juego principal.</p><form id="arenaPortableForm"><div class="arena-portable-grid"><label>Peleadores<select id="arenaPortableCount">${[2,4,9,32,64,128].map(n=>`<option value="${n}">${n} · ${n===2?'Duelo':n<=8?'Smash':'Arena'}</option>`).join('')}</select></label><label>Tu clase<select id="arenaPortableClass">${Object.keys(CLASS_COMMANDS).map(key=>`<option value="${key}">${escapeHTML(localizedClassName(key))}</option>`).join('')}</select></label><label>Resolución de dibujo<select id="arenaPortableResolution"><option value="540">540p · Ahorro</option><option value="720">720p · Normal</option><option value="1080">1080p · Detalle</option></select></label><label>Fluidez de dibujo<select id="arenaPortableFps"><option value="30">30 FPS · Ahorro</option><option value="60">60 FPS · Fluidez</option></select></label></div><label class="arena-portable-check"><input type="checkbox" id="arenaPortableJoin">Jugar como Prota</label><output id="arenaPortableStatus" role="status"></output><button type="submit" id="arenaPortableStart">▶ Iniciar partida</button></form><p class="arena-portable-help">Mueve el joystick. Usa ↑ Saltar, ⚔ Golpe y ⚡ Poder en la barra inferior. En ☰ Menú están Ajustes, Pruebas y Chat.</p><p class="arena-portable-help">Sin instalar dependencias. TikTok LIVE real requiere el servidor; aquí los comentarios y apoyos son simulados. La calidad cambia el dibujo, no el daño ni la física.</p></div>`;
+    host.innerHTML=`<div class="arena-portable-card"><button type="button" id="arenaPortableClose" aria-label="Cerrar prueba rápida">×</button><div class="arena-portable-kicker">ARENA LIVE · ARCHIVO SIN CONEXIÓN</div><h2 id="arenaPortableTitle">Listo para tu celular</h2><p id="arenaPortableDescription">Elige una partida. Las clases, sus poderes y las reglas son los mismos del juego principal.</p><form id="arenaPortableForm"><div class="arena-portable-grid"><label>Peleadores<select id="arenaPortableCount">${[2,4,9,32,64,128].map(n=>`<option value="${n}">${n} · ${n===2?'Duelo':n<=8?'Smash':'Arena'}</option>`).join('')}</select></label><label>Tu clase<select id="arenaPortableClass">${Object.keys(CLASS_COMMANDS).map(key=>`<option value="${key}">${escapeHTML(localizedClassName(key))}</option>`).join('')}</select></label><label>Resolución de dibujo<select id="arenaPortableResolution"><option value="540">540p · Ahorro</option><option value="720">720p · Normal</option><option value="1080">1080p · Detalle</option></select></label><label>Fluidez de dibujo<select id="arenaPortableFps"><option value="30">30 FPS · Ahorro</option><option value="60">60 FPS · Fluidez</option></select></label></div><label class="arena-portable-check"><input type="checkbox" id="arenaPortableJoin">Jugar como Prota</label><output id="arenaPortableStatus" role="status"></output><button type="submit" id="arenaPortableStart">▶ Iniciar partida</button></form><p class="arena-portable-help">Mueve el joystick. Usa ↑ Saltar, ⚔ Golpe y ⚡ Poder en la barra inferior. En ☰ Menú están Ajustes y Pruebas locales.</p><p class="arena-portable-help">Sin instalar dependencias. No se conecta a TikTok ni a ninguna red; las acciones de espectadores son simuladas. La calidad cambia el dibujo, no el daño ni la física.</p></div>`;
     document.body.appendChild(host);
     document.getElementById('arenaPortableClose').onclick=arenaPortableClose;
     document.getElementById('arenaPortableJoin').onchange=event=>{document.getElementById('arenaPortableClass').disabled=!event.target.checked||arenaCombatRules.classRule!=='any';};
@@ -84,6 +86,7 @@ function arenaPortableReady() {
     const quick=document.createElement('button');quick.type='button';quick.id='arenaPortableQuick';quick.textContent='🎮 Nueva prueba';quick.onclick=arenaPortableOpen;quick.setAttribute('aria-controls',host.id);
     document.querySelector('[data-operator-panel="mobile"]')?.prepend(quick);
     const launch=document.createElement('button');launch.type='button';launch.textContent='🎮 Prueba rápida para celular';launch.onclick=arenaPortableOpen;document.querySelector('#arenaPanelScenarios .arena-panel-body')?.appendChild(launch);
+    document.documentElement.classList.add('arena-mobile-offline');
     const unavailable=document.getElementById('arenaTikTokChatStatus');if(unavailable)unavailable.textContent='Sin conexión LIVE';
     selectArenaChatTab('local',false);
     const footer=document.querySelector('#settingsPauseModal>div>div:last-child');
