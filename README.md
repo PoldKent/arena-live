@@ -36,6 +36,10 @@ Abrir Ajustes pausa y cerrarlo reanuda. Durante la pausa, el chat puede guardar 
 
 ## Rendimiento con 128 jugadores
 
+En ráfagas simultáneas de 128 especiales, el dibujo ahora comparte el índice de personajes entre ambas cámaras y descarta únicamente efectos completamente fuera de la vista, con márgenes de seguridad para rayos, columnas de K.O. y haces que cruzan la pantalla. Las partículas de especiales reservan sus huecos en bloque: mismo límite, orden y aspecto finales, menos desplazamientos del arreglo. El observador de traducción evita recorrer mensajes de chat que ya están normalizados. No se alteraron daño, física, aleatoriedad, duración de los especiales ni resolución de captura. Estas optimizaciones reducen trabajo innecesario; el FPS real depende de CPU, GPU y OBS y debe medirse en la emisión.
+
+
+
 La interfaz sirve sus estilos ya generados desde `styles/arena-ui.css`: el navegador deja de compilar Tailwind y de vigilar el chat para generar CSS. El selector de objetivo conserva sus opciones y retira solo las de los eliminados. El HUD actualiza únicamente los valores que cambiaron.
 
 La física conserva el orden secuencial de los peleadores y evita las llamadas de una función por cada par de cuerpos. Los poderes limitados eligen los mismos uno, dos o tres blancos con distancias calculadas una sola vez. La retirada de partículas, textos y efectos usa un recorrido estable, y los símbolos de estado reutilizan listas acotadas. Las dos capturas comparten orden y tiempo de animación; los fondos estáticos y las medidas de nombres siguen reutilizándose.
@@ -73,7 +77,7 @@ Detén la secuencia si Git avisa de cambios locales o falla algún comando; cons
 
 Después de actualizar, `npm.cmd run clean:branches` retira las cuatro ramas antiguas conocidas. Primero verifica que todo su historial esté en `origin/main`; usa una operación atómica con comprobación de referencias para conservar cualquier trabajo nuevo. Utiliza la autenticación Git de tu equipo y conserva las ramas personales ajenas a esta migración. Puede repetirse cuando ya estén retiradas.
 
-El puente reconecta con espera gradual solo después de pulsar Conectar. Al cerrar la ventana que recibía el chat, las otras ventanas no toman su control automáticamente: usa **Usar esta partida**. LIVE recibe comentarios y taps (Me gusta) reales. Los taps se contabilizan y potencian el empuje del personaje del espectador si está inscrito y vivo; no inscriben automáticamente. Los apoyos sociales manuales del panel siguen siendo simulaciones. El puente agrupa taps en ráfagas breves y limita la frecuencia de efectos.
+El puente reconecta con espera gradual solo después de pulsar Conectar. Al cerrar la ventana que recibía el chat, las otras ventanas no toman su control automáticamente: usa **Usar esta partida**. LIVE recibe comentarios y taps (Me gusta) reales. El primer tap de una cuenta sin personaje la inscribe automáticamente mientras el lobby esté abierto, siempre dentro del cupo de 128 y sin duplicarla. Los siguientes taps pueden potenciar el empuje del personaje activo. Los taps en combate no inscriben automáticamente; se conservan las reglas de reingreso. Los apoyos sociales manuales del panel siguen siendo simulaciones. El puente agrupa taps en ráfagas breves y limita la frecuencia de efectos.
 
 ## Inicio / Pruebas
 
@@ -90,7 +94,7 @@ El juego ocupa el centro. A la izquierda están los chats con pestañas **TikTok
 
 ## Barra, pausa y ajustes
 
-La barra horizontal empieza por **Vista, Pantalla, Pruebas y Ajustes**. Incluye **Modo Stream, Chat, Prota, Clase, Audio, TikTok, Pausa, Revancha y Lobby**, con iconos, nombres cortos y ayuda al pasar el cursor.
+La barra horizontal empieza por **Vista, Pantalla, Pruebas y Ajustes**. Incluye **Modo Stream, Chat, Prota, un selector desplegable directo con sus cinco clases, Audio, TikTok, Pausa, Revancha y Lobby**. Ya no hay que abrir otro menú para elegir la clase de Prota; se selecciona antes de entrar o reingresar, conservando las restricciones de clase de la partida.
 
 **Prota** permite participar como jugador. **Modo Stream** abre la composición de emisión. Vista alterna la preparación entre 16:9 y 9:16; Pantalla abre una captura individual en pantalla completa.
 
