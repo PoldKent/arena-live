@@ -2,13 +2,14 @@
 // Desktop/OBS retains its own controls; this adapter never changes combat rules.
 const ARENA_MOBILE_TAP_GAP=325;
 const ARENA_MOBILE_LAYOUT_KEY='arenaLiveMobileButtonsV1';
-const arenaMobileLayoutDefaults=Object.freeze({arenaMobileJump:[73,82],arenaMobileAttack:[88,73],arenaMobilePower:[56,77]});
+const arenaMobileLayoutDefaults=Object.freeze({touchJoystick:[13,50],arenaMobilePower:[46,50],arenaMobileJump:[67,50],arenaMobileAttack:[89,50]});
 let arenaMobileLayout={size:70,points:Object.fromEntries(Object.entries(arenaMobileLayoutDefaults).map(([k,v])=>[k,[...v]]))};
 let arenaMobileEditing=false;
 try{const saved=JSON.parse(localStorage.getItem(ARENA_MOBILE_LAYOUT_KEY)||'null');if(saved&&Number.isFinite(saved.size))arenaMobileLayout.size=Math.max(56,Math.min(94,saved.size));for(const [id,p]of Object.entries(saved?.points||{})){if(Object.hasOwn(arenaMobileLayoutDefaults,id)&&Array.isArray(p)&&p.length===2&&p.every(Number.isFinite))arenaMobileLayout.points[id]=[Math.max(7,Math.min(93,p[0])),Math.max(8,Math.min(95,p[1]))];}}catch(_){}
 const ARENA_MOBILE_HOLD_MS=460;
 const ARENA_MOBILE_SWIPE_PX=34;
-const arenaMobileTouchState={pointerId:null,startX:0,startY:0,x:0,y:0,startedAt:0,moved:false,special:false,hold:null,tapCount:0,lastTapAt:0,lastTapX:0,lastTapY:0,jumpRetry:null};
+const arenaMobileTouchState={pointerId:null,startX:0,startY:0,x:0,y:0,tapCount:0,lastTapAt:0,lastTapX:0,lastTapY:0,jumpRetry:null};
+const arenaMobileActionState={pointerId:null,startX:0,startY:0,x:0,y:0,startedAt:0,moved:false,special:false,hold:null};
 const arenaMobileTestState={open:false,active:'arenaPanelPowers'};
 function arenaMobileActor(){
     return fighters.find(f=>f.isStreamer&&!f.eliminated)||null;
@@ -41,18 +42,11 @@ function arenaMobileApplyDirection(view,x,y){
     const fighter=arenaMobileActor();
     if(fighter && Math.abs(dx)>dead)fighter.facing=dx>0?1:-1;
 }
-function arenaMobileClearHold(){
-    if(arenaMobileTouchState.hold!==null){clearTimeout(arenaMobileTouchState.hold);arenaMobileTouchState.hold=null;}
-}
-function arenaMobileClearRetry(){
-    if(arenaMobileTouchState.jumpRetry!==null){clearTimeout(arenaMobileTouchState.jumpRetry);arenaMobileTouchState.jumpRetry=null;}
-}
+function arenaMobileClearHold(){const a=arenaMobileActionState;if(a.hold!==null){clearTimeout(a.hold);a.hold=null;}}
+function arenaMobileClearRetry(){if(arenaMobileTouchState.jumpRetry!==null){clearTimeout(arenaMobileTouchState.jumpRetry);arenaMobileTouchState.jumpRetry=null;}}
+function arenaMobileResetAction(){arenaMobileClearHold();const a=arenaMobileActionState;a.pointerId=null;a.moved=false;a.special=false;}
 function arenaMobileResetTouch(){
-    arenaMobileClearHold();
-    arenaMobileTouchState.pointerId=null;
-    arenaMobileTouchState.moved=false;
-    arenaMobileTouchState.special=false;
-    arenaMobileClearDirections();
+    arenaMobileTouchState.pointerId=null;arenaMobileResetAction();arenaMobileClearDirections();
     document.querySelectorAll('.arena-mobile-contact').forEach(n=>n.hidden=true);
 }
 function arenaMobileSecondJump(){
@@ -85,68 +79,90 @@ function arenaMobileTouchPoint(view,x,y){
     const rect=view.getBoundingClientRect();
     dot.hidden=false;dot.style.left=(x-rect.left)+'px';dot.style.top=(y-rect.top)+'px';
 }
+// Táctil total: both thumbs work at the same time, with separate pointer IDs.
+// Left half steers; right half provides instant jump, swipe attack and hold power.
 function arenaMobileTouchStart(event){
-    if(event.pointerType==='mouse'||!arenaMobileCanControl()||arenaMobileTouchState.pointerId!==null)return;
-    if(event.target instanceof Element&&event.target.closest('button,input,select,textarea,summary,a,dialog,#arenaPortableSetup,#arenaMobileFloating,#arenaHeaderActions,#arenaOperatorPopover,#arenaPortableTestDrawer,.arena-onboarding'))return;
+    if(event.pointerType==='mouse'||!arenaMobileCanControl())return;
+    if(event.target instanceof Element&&event.target.closest('button,input,select,textarea,summary,a,dialog,#touchControlDock,#arenaPortableSetup,#arenaMobileFloating,#arenaHeaderActions,#arenaOperatorPopover,#arenaPortableTestDrawer,.arena-onboarding'))return;
     event.preventDefault();event.stopImmediatePropagation();
-    const st=arenaMobileTouchState;
-    st.pointerId=event.pointerId;st.startX=st.x=event.clientX;st.startY=st.y=event.clientY;st.startedAt=performance.now();
-    st.moved=false;st.special=false;arenaMobileClearRetry();
-    try{event.currentTarget.setPointerCapture(event.pointerId);}catch(_){}
-    arenaMobileApplyDirection(event.currentTarget,event.clientX,event.clientY);
-    arenaMobileTouchPoint(event.currentTarget,event.clientX,event.clientY);
-    st.hold=setTimeout(()=>{
-        st.hold=null;
-        if(st.pointerId===event.pointerId&&!st.moved&&arenaMobileCanControl()){
-            st.special=true;arenaMobileClearDirections();
-            if(triggerProtagonistSpecialAttack()&&navigator.vibrate)navigator.vibrate(16);
-        }
-    },ARENA_MOBILE_HOLD_MS);
+    if(arenaPortableProfile.touchMode!=='touch')return;
+    const view=event.currentTarget,rect=view.getBoundingClientRect();
+    if(event.clientX-rect.left>=rect.width*.53){
+        const a=arenaMobileActionState;if(a.pointerId!==null)return;
+        a.pointerId=event.pointerId;a.startX=a.x=event.clientX;a.startY=a.y=event.clientY;
+        a.startedAt=performance.now();a.moved=false;a.special=false;
+        a.hold=setTimeout(()=>{
+            a.hold=null;
+            if(a.pointerId===event.pointerId&&!a.moved&&arenaMobileCanControl()){
+                a.special=true;
+                if(triggerProtagonistSpecialAttack()&&navigator.vibrate)navigator.vibrate(16);
+            }
+        },ARENA_MOBILE_HOLD_MS);
+    }else{
+        const st=arenaMobileTouchState;if(st.pointerId!==null)return;
+        st.pointerId=event.pointerId;st.startX=st.x=event.clientX;st.startY=st.y=event.clientY;
+        arenaMobileTouchPoint(view,st.x,st.y);
+    }
+    try{view.setPointerCapture(event.pointerId);}catch(_){}
 }
 function arenaMobileTouchMove(event){
+    if(arenaMobileActionState.pointerId===event.pointerId){
+        event.preventDefault();event.stopImmediatePropagation();
+        const a=arenaMobileActionState;a.x=event.clientX;a.y=event.clientY;
+        if(Math.hypot(a.x-a.startX,a.y-a.startY)>16){a.moved=true;arenaMobileClearHold();}
+        return;
+    }
     const st=arenaMobileTouchState;
     if(st.pointerId!==event.pointerId)return;
     event.preventDefault();event.stopImmediatePropagation();
     st.x=event.clientX;st.y=event.clientY;
-    if(Math.hypot(st.x-st.startX,st.y-st.startY)>16){st.moved=true;arenaMobileClearHold();}
+    const dx=st.x-st.startX,dy=st.y-st.startY,dead=13;
+    keys.a=dx< -dead;keys.d=dx>dead;
+    keys.w=activeMode==='iso'&&dy< -dead;keys.s=activeMode==='iso'&&dy>dead;
+    const fighter=arenaMobileActor();
+    if(fighter&&Math.abs(dx)>dead)fighter.facing=dx>0?1:-1;
     arenaMobileTouchPoint(event.currentTarget,st.x,st.y);
-    if(!st.special)arenaMobileApplyDirection(event.currentTarget,st.x,st.y);
 }
 function arenaMobileTouchEnd(event){
-    const st=arenaMobileTouchState;
-    if(st.pointerId!==event.pointerId)return;
-    event.preventDefault();event.stopImmediatePropagation();
-    st.x=event.clientX;st.y=event.clientY;
-    const dx=st.x-st.startX,dy=st.y-st.startY;
-    const duration=performance.now()-st.startedAt,special=st.special;
-    arenaMobileResetTouch();
-    if(!arenaMobileCanControl()||special)return;
-    // Fast directional swipes are basic attacks; slower drags guide movement only.
-    if(Math.hypot(dx,dy)>=ARENA_MOBILE_SWIPE_PX&&duration<=380){
-        const fighter=arenaMobileActor();
-        if(fighter){if(Math.abs(dx)>6)fighter.facing=dx>0?1:-1;performMeleeAttack(fighter);}
-        st.tapCount=0;return;
+    if(arenaMobileActionState.pointerId===event.pointerId){
+        event.preventDefault();event.stopImmediatePropagation();
+        const a=arenaMobileActionState;a.x=event.clientX;a.y=event.clientY;
+        const dx=a.x-a.startX,dy=a.y-a.startY,elapsed=performance.now()-a.startedAt;
+        const special=a.special,moved=a.moved;
+        arenaMobileResetAction();
+        if(!arenaMobileCanControl()||special)return;
+        if(!moved&&elapsed>=ARENA_MOBILE_HOLD_MS){
+            if(triggerProtagonistSpecialAttack()&&navigator.vibrate)navigator.vibrate(16);
+        }else if(Math.hypot(dx,dy)>=ARENA_MOBILE_SWIPE_PX&&elapsed<=500){
+            const fighter=arenaMobileActor();
+            if(fighter){if(Math.abs(dx)>6)fighter.facing=dx>0?1:-1;performMeleeAttack(fighter);}
+            arenaMobileTouchState.tapCount=0;
+        }else if(!moved&&elapsed<ARENA_MOBILE_HOLD_MS){
+            arenaMobileJumpTap(a.x,a.y);
+        }
+        return;
     }
-    // A short tap on the ARENA never jumps: it only moves while the finger is down.
-    // Jump is exclusively a tap on the large, movable jump button.
-    st.tapCount=0;
+    if(arenaMobileTouchState.pointerId!==event.pointerId)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    arenaMobileTouchState.pointerId=null;arenaMobileClearDirections();
+    document.querySelectorAll('.arena-mobile-contact').forEach(n=>n.hidden=true);
 }
 function arenaMobileTouchCancel(event){
+    if(arenaMobileActionState.pointerId===event.pointerId){event.stopImmediatePropagation();arenaMobileResetAction();return;}
     if(arenaMobileTouchState.pointerId!==event.pointerId)return;
-    event.stopImmediatePropagation();arenaMobileResetTouch();
+    event.stopImmediatePropagation();arenaMobileTouchState.pointerId=null;arenaMobileClearDirections();
+    document.querySelectorAll('.arena-mobile-contact').forEach(n=>n.hidden=true);
 }
 function arenaMobileTestPanel(){
     return document.getElementById(arenaMobileTestState.active);
 }
 function arenaMobileMountTestDrawer(){
-    const fullscreen=document.fullscreenElement?.id;
-    const viewport=document.getElementById(fullscreen==='card-16x9'||(!fullscreen&&monitorFocus==='16:9')?'viewport16x9':'viewport9x16');
+    const shelf=document.getElementById('arenaMobileControlShelf');
     const drawer=document.getElementById('arenaPortableTestDrawer');
-    if(viewport&&drawer){
-        viewport.appendChild(drawer);
+    if(shelf&&drawer){
+        shelf.appendChild(drawer);
         const skills=document.getElementById('arenaStreamerSkillsDock');
-        if(skills)viewport.appendChild(skills);
-        // Reposition inside the viewport when orientation/ratio changes.
+        if(skills)shelf.appendChild(skills);
         drawer.style.top='';drawer.style.left='';drawer.style.right='';
     }
 }
@@ -181,6 +197,7 @@ function arenaMobileShowTestDrawer(open=true){
         if(panel)document.getElementById('arenaMobilePanelHost')?.appendChild(panel);
     }
     drawer.hidden=!open;
+    document.getElementById('arenaMobileControlShelf')?.classList.toggle('has-open-tests',!!open);
     const fab=document.getElementById('arenaMobileTestFab');
     if(fab)fab.setAttribute('aria-expanded',String(!!open));
 }
@@ -197,27 +214,7 @@ function arenaMobileInstallTestDrawer(){
         drawer.querySelector('#arenaPortableTestCollapse').textContent=drawer.classList.contains('is-collapsed')?'+':'−';
         drawer.querySelector('#arenaPortableTestCollapse').setAttribute('aria-label',drawer.classList.contains('is-collapsed')?'Expandir panel':'Minimizar panel');
     };
-    // Drag the entire panel; selector, target and skill buttons stay inside.
-    const head=drawer.querySelector('#arenaPortableTestHead');let drag=null;
-    head.addEventListener('pointerdown',event=>{
-        if(event.target.closest('button')||(event.pointerType==='mouse'&&event.button!==0))return;
-        const rect=drawer.getBoundingClientRect();
-        drag={id:event.pointerId,dx:event.clientX-rect.left,dy:event.clientY-rect.top};
-        try{head.setPointerCapture(event.pointerId);}catch(_){}
-    });
-    head.addEventListener('pointermove',event=>{
-        if(!drag||drag.id!==event.pointerId)return;
-        event.preventDefault();
-        const viewport=drawer.parentElement.getBoundingClientRect();
-        const rect=drawer.getBoundingClientRect();
-        const x=Math.max(4,Math.min(viewport.width-rect.width-4,event.clientX-viewport.left-drag.dx));
-        const y=Math.max(4,Math.min(viewport.height-rect.height-4,event.clientY-viewport.top-drag.dy));
-        drawer.style.setProperty('left',x+'px','important');
-        drawer.style.setProperty('right','auto','important');
-        drawer.style.setProperty('top',y+'px','important');
-    });
-    const end=()=>{drag=null;};
-    head.addEventListener('pointerup',end);head.addEventListener('pointercancel',end);
+    // Compact tests are docked below the video, not draggable across the fight.
     arenaMobileMountTestDrawer();
     const fab=document.createElement('button');fab.id='arenaMobileTestFab';fab.type='button';
     fab.textContent='🎛 Modo Streamer';fab.title='Opciones del Modo Streamer';fab.setAttribute('aria-label','Abrir opciones del Modo Streamer');fab.setAttribute('aria-expanded','false');fab.hidden=true;
@@ -252,10 +249,12 @@ function arenaMobileInstallStreamerSkills(){
 }
 function arenaMobileSaveLayout(){try{localStorage.setItem(ARENA_MOBILE_LAYOUT_KEY,JSON.stringify(arenaMobileLayout));}catch(_){}}
 function arenaMobileApplyLayout(){
-    const view=document.getElementById(document.fullscreenElement?.id==='card-16x9'||(!document.fullscreenElement&&monitorFocus==='16:9')?'viewport16x9':'viewport9x16');
-    const bar=document.getElementById('arenaHeaderActions');if(!view||!bar)return;
-    if(bar.parentElement!==view)view.appendChild(bar);
-    const bounds=view.getBoundingClientRect();
+    const shelf=document.getElementById('arenaMobileControlShelf');
+    const bar=document.getElementById('arenaHeaderActions');if(!shelf||!bar)return;
+    const analog=document.getElementById('touchControlDock');
+    if(analog&&analog.parentElement!==shelf)shelf.appendChild(analog);
+    if(bar.parentElement!==shelf)shelf.appendChild(bar);
+    const bounds=shelf.getBoundingClientRect();
     // Keep each full hit-target visible on narrow devices, after rotation and
     // when the user increases button size. Percentages remain stored in settings.
     const size=Math.max(56,Math.min(94,arenaMobileLayout.size));
@@ -266,7 +265,8 @@ function arenaMobileApplyLayout(){
         const x=Math.min(Math.max(radius,bounds.width*position[0]/100),Math.max(radius,bounds.width-radius));
         const y=Math.min(Math.max(radius,bounds.height*position[1]/100),Math.max(radius,bounds.height-radius));
         if(id==='arenaMobileMoreBtn')continue; // old layouts may still contain a floating menu position
-        btn.style.setProperty('--mobile-x',x+'px');btn.style.setProperty('--mobile-y',y+'px');
+        if(id==='touchJoystick'){analog?.style.setProperty('--mobile-joy-x',x+'px');analog?.style.setProperty('--mobile-joy-y',y+'px');}
+        else {btn.style.setProperty('--mobile-x',x+'px');btn.style.setProperty('--mobile-y',y+'px');}
         btn.setAttribute('data-mobile-positioned','true');
         btn.setAttribute('aria-description',arenaMobileEditing?'Desliza para colocar el botón':'Posición ajustable desde Ajustes');
     }
@@ -276,6 +276,7 @@ function arenaMobileApplyLayout(){
     const text=document.getElementById('arenaMobileSizeValue');if(text)text.textContent=size+' px';
 }
 function arenaMobileEditButtons(on=true){
+    if(on&&arenaPortableProfile.touchMode!=='joystick')return;
     arenaMobileEditing=!!on;
     if(arenaMobileEditing){
         if(isSettingsOpen)toggleSettingsModal(false);
@@ -299,16 +300,33 @@ function arenaMobileInstallLayoutSettings(){
     const target=section?.querySelector('.arena-settings-content')||document.getElementById('settingsPanelsScroll');
     if(!target)return;
     const control=document.createElement('section');control.id='arenaMobileControlSettings';control.setAttribute('aria-label','Acomodar botones');
-    control.innerHTML='<h3>📱 Controles táctiles</h3><p>Mueve los botones a posiciones cómodas. Guarda cada cambio para próximas partidas.</p><button type="button" id="arenaMobileArrange">✥ Acomodar botones</button><label for="arenaMobileSize">Tamaño de botones <output id="arenaMobileSizeValue">70 px</output></label><input id="arenaMobileSize" type="range" min="56" max="94" step="2" value="70"><button type="button" id="arenaMobileReset">↺ Restablecer posiciones</button><small>Salto: 1 toque. Doble salto: 2 toques rápidos en ↑. Tocar la arena nunca salta.</small>';
+    control.innerHTML='<h3>📱 Modo jugador: controles</h3><fieldset id="arenaMobileTouchModeOptions"><legend>Elige cómo controlar al protagonista</legend><label><input type="radio" name="arenaMobileTouchMode" value="touch"> Táctil total — sin botones sobre el juego</label><label><input type="radio" name="arenaMobileTouchMode" value="joystick"> Joystick — analógico izquierdo y botones acomodables</label></fieldset><p id="arenaMobileTouchHelp">Elige un esquema de controles. Tus preferencias se guardan.</p><div id="arenaMobileArrangeSettings"><p>Mueve el analógico y los botones a posiciones cómodas. Guarda cada cambio para próximas partidas.</p><button type="button" id="arenaMobileArrange">✥ Acomodar analógico y botones</button><label for="arenaMobileSize">Tamaño de botones <output id="arenaMobileSizeValue">70 px</output></label><input id="arenaMobileSize" type="range" min="56" max="94" step="2" value="70"><button type="button" id="arenaMobileReset">↺ Restablecer posiciones</button><small>Salto: 1 toque. Doble salto: 2 toques rápidos en ↑. Mueve el analógico izquierdo para desplazarte.</small></div>';
     target.appendChild(control);
     // HUD transparency has one canonical control in Pantalla y HUD, shared
     // with desktop. Do not create or move a second opacity slider here.
     const note=document.createElement('small');
     note.textContent='La transparencia de menús y HUD está en Pantalla y HUD.';
     control.appendChild(note);
+    control.querySelectorAll('input[name="arenaMobileTouchMode"]').forEach(input=>input.onchange=()=>{if(input.checked)arenaMobileSetTouchMode(input.value);});
+    arenaMobileSyncTouchMode();
     control.querySelector('#arenaMobileArrange').onclick=()=>arenaMobileEditButtons(true);
     control.querySelector('#arenaMobileSize').oninput=e=>arenaMobileSetButtonSize(e.target.value);
     control.querySelector('#arenaMobileReset').onclick=arenaMobileResetButtons;
+}
+function arenaMobileSetTouchMode(mode){
+    if(!['joystick','touch'].includes(mode))return false;
+    document.dispatchEvent(new Event('arena-touch-disable'));
+    if(arenaMobileEditing)arenaMobileEditButtons(false);
+    arenaPortableProfile.touchMode=mode;arenaPortableRemember();
+    arenaMobileSyncTouchMode();return true;
+}
+function arenaMobileSyncTouchMode(){
+    const mode=arenaPortableProfile.touchMode;
+    document.documentElement.dataset.mobileTouchMode=mode;
+    document.querySelectorAll('input[name="arenaMobileTouchMode"]').forEach(input=>input.checked=input.value===mode);
+    const advanced=document.getElementById('arenaMobileArrangeSettings');if(advanced)advanced.hidden=mode!=='joystick';
+    const help=document.getElementById('arenaMobileTouchHelp');if(help)help.textContent=mode==='touch'?'Táctil total: dedo izquierdo para movimiento; con el derecho toca para saltar, dos toques para doble salto, desliza para golpear y mantén para el poder.':'Joystick: mueve el analógico izquierdo y usa Salto, Golpe y Poder. Puedes acomodar los cuatro controles.';
+    if(typeof arenaMobileApplyLayout==='function')arenaMobileApplyLayout();
 }
 function arenaMobileInstallControlDragging(){
     for(const id of Object.keys(arenaMobileLayoutDefaults)){
@@ -323,7 +341,7 @@ function arenaMobileInstallControlDragging(){
         btn.addEventListener('pointermove',event=>{
             if(!arenaMobileEditing||drag!==event.pointerId)return;
             event.preventDefault();event.stopImmediatePropagation();
-            const view=btn.closest('#viewport9x16,#viewport16x9');
+            const view=btn.closest('#arenaMobileControlShelf');
             if(!view)return;
             const rect=view.getBoundingClientRect();
             const radius=arenaMobileLayout.size/2+3;
@@ -335,6 +353,12 @@ function arenaMobileInstallControlDragging(){
         const release=event=>{if(drag!==event.pointerId)return;event.preventDefault();event.stopImmediatePropagation();drag=null;arenaMobileSaveLayout();};
         btn.addEventListener('pointerup',release,true);btn.addEventListener('pointercancel',release,true);
         btn.addEventListener('click',event=>{if(arenaMobileEditing){event.preventDefault();event.stopImmediatePropagation();}},true);
+    }
+    // Action buttons live in the viewport but must not also trigger the legacy
+    // viewport gesture listener when the user presses them.
+    for(const id of ['arenaMobileJump','arenaMobileAttack','arenaMobilePower']){
+        const action=document.getElementById(id);
+        for(const type of ['pointerdown','pointerup','pointercancel'])action?.addEventListener(type,event=>event.stopPropagation());
     }
     const jump=document.getElementById('arenaMobileJump');
     if(jump){
@@ -366,8 +390,9 @@ function installArenaMobileTouch(){
         view.addEventListener('pointercancel',arenaMobileTouchCancel,true);
         view.addEventListener('lostpointercapture',arenaMobileTouchCancel,true);
     }
-    document.getElementById('touchControlDock')?.remove(); // Original analog is not part of Mobile.
-    document.getElementById('arenaPortableSetup')?.querySelector('.arena-portable-help')?.replaceChildren(document.createTextNode('Arena: toca para moverte y desliza para golpear. Botón ↑: un toque salta, dos toques hacen doble salto. Mantén pulsado el escenario para usar el poder.'));
+    // Reuse the original analog, including its existing pointer handling and dead zone.
+    // The same joystick moves between the 9:16 and 16:9 previews.
+    document.getElementById('arenaPortableSetup')?.querySelector('.arena-portable-help')?.replaceChildren(document.createTextNode('En Ajustes → Controles elige Táctil total (gestos sin botones) o Joystick (analógico izquierdo y tres botones ajustables).'));
     const labels={arenaMobileJump:'↑',arenaMobileAttack:'⚔',arenaMobilePower:'⚡',arenaMobileMoreBtn:'☰'};
     for(const [id,label]of Object.entries(labels)){
         const node=document.getElementById(id);if(!node)continue;
@@ -386,6 +411,7 @@ function installArenaMobileTouch(){
 window.addEventListener('load',installArenaMobileTouch,{once:true});
 window.ArenaMobileTouch=Object.freeze({
     openTests:arenaMobileShowTestDrawer,selectTest:arenaMobileSelectTestPanel,editButtons:arenaMobileEditButtons,setButtonSize:arenaMobileSetButtonSize,resetButtons:arenaMobileResetButtons,
+    setTouchMode:arenaMobileSetTouchMode,getTouchMode(){return arenaPortableProfile.touchMode;},
     getLayout(){return JSON.parse(JSON.stringify(arenaMobileLayout));},
-    getState(){return {gestureActive:arenaMobileTouchState.pointerId!==null,tapCount:arenaMobileTouchState.tapCount,testOpen:arenaMobileTestState.open,testPanel:arenaMobileTestState.active};}
+    getState(){return {gestureActive:arenaMobileTouchState.pointerId!==null||arenaMobileActionState.pointerId!==null,tapCount:arenaMobileTouchState.tapCount,testOpen:arenaMobileTestState.open,testPanel:arenaMobileTestState.active};}
 });

@@ -8,13 +8,14 @@ const ARENA_MOBILE_MODES=Object.freeze({PLAYER:'player',DIRECTOR:'director'});
 let arenaPortableSuspended=false,arenaPortableSetupOpen=false,arenaPortablePreviousPause=false;
 let arenaPortableGuideVisible=false;
 try{arenaPortableGuideVisible=localStorage.getItem(ARENA_PORTABLE_GUIDE_KEY)==='1';}catch(_){}
-let arenaPortableProfile={resolution:720,count:32,classKey:'kame',mode:ARENA_MOBILE_MODES.PLAYER,join:true};
+let arenaPortableProfile={resolution:720,count:32,classKey:'kame',mode:ARENA_MOBILE_MODES.PLAYER,join:true,touchMode:'joystick'};
 try {
     const saved=JSON.parse(localStorage.getItem(ARENA_PORTABLE_KEY)||'null');
     if([540,720,1080].includes(saved?.resolution))arenaPortableProfile.resolution=saved.resolution;
     if([2,4,9,32,64,128].includes(saved?.count))arenaPortableProfile.count=saved.count;
     if(Object.hasOwn(CLASS_COMMANDS,saved?.classKey||''))arenaPortableProfile.classKey=saved.classKey;
     if(typeof saved?.join==='boolean')arenaPortableProfile.join=saved.join;
+    if(['joystick','touch'].includes(saved?.touchMode))arenaPortableProfile.touchMode=saved.touchMode;
     arenaPortableProfile.mode=[ARENA_MOBILE_MODES.PLAYER,ARENA_MOBILE_MODES.DIRECTOR].includes(saved?.mode)
         ? saved.mode : arenaPortableProfile.join?ARENA_MOBILE_MODES.PLAYER:ARENA_MOBILE_MODES.DIRECTOR;
     arenaPortableProfile.join=arenaPortableProfile.mode===ARENA_MOBILE_MODES.PLAYER;
@@ -28,6 +29,8 @@ function arenaPortableRemember(){try{localStorage.setItem(ARENA_PORTABLE_KEY,JSO
 function arenaPortableSyncModeControls(){
     const mode=arenaPortableProfile.mode;
     document.documentElement.dataset.mobileMode=mode;
+    document.documentElement.dataset.mobileTouchMode=arenaPortableProfile.touchMode;
+    if(typeof arenaMobileSyncTouchMode==='function')arenaMobileSyncTouchMode();
     const selected=document.querySelector('input[name="arenaPortableMode"]:checked');
     if(selected&&selected.value!==mode){const radio=document.querySelector('input[name="arenaPortableMode"][value="'+mode+'"]');if(radio)radio.checked=true;}
     const cls=document.getElementById('arenaPortableClass');
@@ -39,6 +42,7 @@ function arenaPortableSyncModeControls(){
     const title=document.getElementById('arenaPortableModeCurrent');
     if(title)title.textContent=mode===ARENA_MOBILE_MODES.PLAYER?'Modo jugador':'Modo Streamer';
     document.getElementById('arenaMobileMoreBtn')?.setAttribute('aria-label','Menú · '+(mode==='player'?'Modo jugador':'Modo Streamer'));
+    refreshArenaPortableFloatingUI();
 }
 function arenaPortableSetMode(mode,{remember=true,updateGame=true}={}){
     if(![ARENA_MOBILE_MODES.PLAYER,ARENA_MOBILE_MODES.DIRECTOR].includes(mode))return false;
@@ -144,6 +148,8 @@ function refreshArenaPortableFloatingUI(){
     const fullscreen=!!document.fullscreenElement;
     const fs=document.getElementById('arenaPortableFullscreen');
     const pause=document.getElementById('arenaMobilePause');
+    const modeShortcut=document.getElementById('arenaMobileModeShortcut');
+    if(modeShortcut){const player=arenaPortableProfile.mode===ARENA_MOBILE_MODES.PLAYER;modeShortcut.textContent=player?'🎛':'🎮';modeShortcut.title=player?'Cambiar a Modo Streamer':'Cambiar a Modo jugador';modeShortcut.setAttribute('aria-label',modeShortcut.title);modeShortcut.setAttribute('aria-pressed',String(!player));}
     if(pause){pause.textContent=isGamePaused?'▶':'⏸';pause.title=isGamePaused?'Continuar combate':'Pausar combate';pause.setAttribute('aria-label',pause.title);pause.setAttribute('aria-pressed',String(isGamePaused));}
     const guide=document.getElementById('arenaPortableToggleGuide');
     const menuGuide=document.getElementById('arenaPortableGuideMenu');
@@ -185,7 +191,13 @@ function installArenaPortableFloatingUI(){
     pause.id='arenaMobilePause';pause.type='button';pause.textContent='⏸';pause.setAttribute('aria-label','Pausar combate');
     pause.onclick=()=>{document.getElementById('arenaDualPauseBtn')?.click();refreshArenaPortableFloatingUI();};
     hud.prepend(pause);
-    // Standard mobile top toolbar: Pause, Menu, Fullscreen (help remains in Menu).
+    const shortcut=document.createElement('button');shortcut.id='arenaMobileModeShortcut';shortcut.type='button';shortcut.textContent='🎛';
+    shortcut.onclick=()=>arenaPortableSetMode(arenaPortableProfile.mode===ARENA_MOBILE_MODES.PLAYER?ARENA_MOBILE_MODES.DIRECTOR:ARENA_MOBILE_MODES.PLAYER);
+    pause.after(shortcut);
+    const tests=document.createElement('button');tests.id='arenaMobileTestsShortcut';tests.type='button';tests.textContent='🧪';tests.setAttribute('aria-label','Abrir opciones del Modo Streamer');
+    tests.onclick=()=>{if(arenaPortableProfile.mode!==ARENA_MOBILE_MODES.DIRECTOR)arenaPortableSetMode(ARENA_MOBILE_MODES.DIRECTOR);arenaMobileShowTestDrawer(!arenaMobileTestState.open);};
+    shortcut.after(tests);
+    // The toolbar is outside the battle viewport, including in native fullscreen.
     const topMenu=document.getElementById('arenaMobileMoreBtn');
     const fullscreenControl=hud.querySelector('#arenaPortableFullscreen');
     if(topMenu&&fullscreenControl)hud.insertBefore(topMenu,fullscreenControl);
@@ -210,7 +222,7 @@ function installArenaPortableFloatingUI(){
             document.getElementById('arenaPortableNotice').hidden=false;
         };
         // Offline control menu: omit streaming connections and OBS-specific entries.
-        for(const key of ['arenaViewMenuBtn','arenaFullscreenMenuBtn','arenaDualChatToggleBtn','arenaDualTikTokConnectBtn','btnFullscreenDual']){
+        for(const key of ['arenaViewMenuBtn','arenaFullscreenMenuBtn','arenaDualChatToggleBtn','arenaDualTikTokConnectBtn','arenaDualTestsToggle','btnFullscreenDual']){
             menu.querySelector('[data-forward-control="'+key+'"]')?.remove();
         }
         const round=document.createElement('details');round.className='arena-mobile-match-menu';
@@ -272,6 +284,11 @@ function arenaPortableReady() {
         if(lobby){lobby.setAttribute('aria-label','Preparar combate');const heading=lobby.querySelector('.arena-onboarding-card h2');if(heading)heading.textContent='Preparar combate';}
     }
     installArenaPortableFloatingUI();
+    const playerShelf=document.createElement('section');playerShelf.id='arenaMobileControlShelf';playerShelf.setAttribute('aria-label','Controles del juego y herramientas');
+    document.getElementById('card-9x16')?.appendChild(playerShelf);
+    const gestureGuide=document.createElement('aside');gestureGuide.id='arenaMobileGestureGuide';gestureGuide.setAttribute('aria-label','Cómo controlar el protagonista');
+    gestureGuide.textContent='Táctil total: izquierda, desliza para moverte. Derecha, toca para saltar, dos toques para doble salto; desliza para golpear o mantén pulsado para el poder.';
+    document.getElementById('card-9x16')?.appendChild(gestureGuide);
     const unavailable=document.getElementById('arenaTikTokChatStatus');if(unavailable)unavailable.textContent='Sin conexión LIVE';
     selectArenaChatTab('local',false);
     const footer=document.querySelector('#settingsPauseModal>div>div:last-child');
@@ -281,7 +298,17 @@ function arenaPortableReady() {
         const horizontal=fullscreen==='card-16x9'||(fullscreen!=='card-9x16'&&monitorFocus==='16:9');
         const view=document.getElementById(horizontal?'viewport16x9':'viewport9x16');
         if(!view)return;
-        for(const id of ['arenaMobileFloating','arenaHeaderActions','arenaStreamerSkillsDock','arenaOperatorPopover','arenaPortableTestDrawer']){const node=document.getElementById(id);if(node)view.appendChild(node);}
+        const card=view.closest('#card-9x16,#card-16x9');
+        const toolbar=document.getElementById('arenaMobileFloating');
+        const menu=document.getElementById('arenaOperatorPopover');
+        const guide=document.getElementById('arenaMobileGestureGuide');
+        const header=document.getElementById('arenaTopBarInner');
+        if(toolbar)(fullscreen?card:header)?.appendChild(toolbar);
+        if(menu)(fullscreen?card:document.body)?.appendChild(menu);
+        if(guide)card?.appendChild(guide);
+        if(playerShelf&&card&&playerShelf.parentElement!==card)card.appendChild(playerShelf);
+        for(const id of ['arenaHeaderActions','touchControlDock','arenaStreamerSkillsDock','arenaPortableTestDrawer']){const node=document.getElementById(id);if(node)playerShelf?.appendChild(node);}
+        if(typeof arenaMobileApplyLayout==='function')requestAnimationFrame(arenaMobileApplyLayout);
         const setup=document.getElementById('arenaPortableSetup');
         if(setup)(fullscreen?view:document.body).appendChild(setup);
         refreshArenaPortableFloatingUI();
