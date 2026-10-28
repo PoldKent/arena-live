@@ -9031,7 +9031,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     || [...section.querySelectorAll('input,select,button')].some(el=>
                         (el.title+' '+el.placeholder+' '+el.id).toLocaleLowerCase().includes(query))
                     : section.dataset.settingsCategory===key;
-                section.hidden=!visible;
+                section.hidden=(visible === false);
                 if(searching&&visible)section.open=true;
             });
             document.querySelectorAll('[data-settings-tab]').forEach(button=>{
