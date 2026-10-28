@@ -61,3 +61,17 @@ test('Player supports saved touch-total or joystick controls, with no unwanted g
   assert.match(touch,/const arenaMobileActionState=/);
   assert.match(touch,/pointerId===event.pointerId/);
 });
+
+test('Pruebas is never clipped by the control shelf and stays visible in fullscreen',()=>{
+  assert.match(touch,/const host=card\|\|document\.body/);
+  assert.match(touch,/if\(drawer\.parentElement!==host\)host\.appendChild\(drawer\)/);
+  assert.match(touch,/drawer\.hidden=!open/);
+  assert.match(touch,/drawer\.classList\.remove\('is-collapsed'\)/);
+  assert.match(touch,/arena-tests-visible/);
+  assert.match(css,/#arenaPortableTestDrawer:not\(\[hidden\]\)\{/);
+  assert.match(css,/position:fixed!important/);
+  assert.match(css,/#card-9x16:fullscreen #arenaPortableTestDrawer:not/);
+  assert.match(css,/#arenaPortableTestBody\{/);
+  assert.match(runtime,/arenaMobileMountTestDrawer\(\)/);
+  assert.doesNotMatch(runtime,/\['arenaHeaderActions','touchControlDock','arenaStreamerSkillsDock','arenaPortableTestDrawer'\]/);
+});
