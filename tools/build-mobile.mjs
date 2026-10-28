@@ -52,7 +52,7 @@ export async function buildMobile(output) {
     html=replaceOnce(html,"document.title = `Arena Live v${ARENA_RELEASE_VERSION} · TikTok`;",
         'document.title = `Arena Live v${ARENA_RELEASE_VERSION} · Móvil`;');
     html=replaceOnce(html,'Inicia con npm.cmd start para conectar TikTok LIVE.',
-        'Archivo sin conexión: los comandos y apoyos son pruebas locales. TikTok LIVE real requiere el servidor de Arena Live.');
+        'Archivo autónomo sin conexión a redes: los comandos y apoyos son pruebas locales.');
     html=replaceOnce(html,'</head>',`<meta name="arena-portable-version" content="${version}">\n<style id="arena-mobile-profile">\n${files.get('portable/mobile.css')}\n</style>\n</head>`);
     html=replaceOnce(html,'</body>',`<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze(${JSON.stringify(build)});</script>\n<script id="arena-mobile-runtime">\n${inline(files.get('portable/mobile-runtime.js'))}\n</script>\n</body>`);
     if(/<(?:script|link)\b[^>]+(?:src|href)\s*=/i.test(html))throw Error('Mobile export still has an external runtime asset');
