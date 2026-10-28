@@ -73,7 +73,7 @@ Detén la secuencia si Git avisa de cambios locales o falla algún comando; cons
 
 Después de actualizar, `npm.cmd run clean:branches` retira las cuatro ramas antiguas conocidas. Primero verifica que todo su historial esté en `origin/main`; usa una operación atómica con comprobación de referencias para conservar cualquier trabajo nuevo. Utiliza la autenticación Git de tu equipo y conserva las ramas personales ajenas a esta migración. Puede repetirse cuando ya estén retiradas.
 
-El puente reconecta con espera gradual solo después de pulsar Conectar. Al cerrar la ventana que recibía el chat, las otras ventanas no toman su control automáticamente: usa **Usar esta partida**. LIVE recibe comentarios; los apoyos sociales del panel son simulaciones.
+El puente reconecta con espera gradual solo después de pulsar Conectar. Al cerrar la ventana que recibía el chat, las otras ventanas no toman su control automáticamente: usa **Usar esta partida**. LIVE recibe comentarios y taps (Me gusta) reales. Los taps se contabilizan y potencian el empuje del personaje del espectador si está inscrito y vivo; no inscriben automáticamente. Los apoyos sociales manuales del panel siguen siendo simulaciones. El puente agrupa taps en ráfagas breves y limita la frecuencia de efectos.
 
 ## Inicio / Pruebas
 
@@ -145,7 +145,7 @@ La etiqueta **🎮 Juego** distingue estas acciones observadas de los mensajes r
 
 **Pruebas → TikTok LIVE → Probar comando** comprueba el recorrido local con `!guerrero`. El formulario del chat de pruebas es local: no publica respuestas en TikTok.
 
-El conector de TikTok es no oficial. Una conexión real necesita un LIVE público activo y un comentario desde otra cuenta; sigue pendiente su validación durante una emisión real. La integración recibe texto. Regalos, likes y otros eventos sociales de las herramientas son simulaciones.
+El conector de TikTok es no oficial. Una conexión real necesita un LIVE público activo y un comentario desde otra cuenta; sigue pendiente su validación durante una emisión real. La integración recibe comentarios y el evento LIKE de TikTok (taps). El contador del puente distingue taps reales, pruebas y efectos aplicados. Para probar sin LIVE, envía `!jugar` desde **Probar comando**, luego usa **Probar 10 taps** sobre `@arena_prueba`. Los regalos, las demás interacciones sociales y los botones de prueba siguen simulados.
 
 ## Móvil y controles
 
