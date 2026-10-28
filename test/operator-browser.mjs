@@ -1155,22 +1155,24 @@ await check('New settings navigation groups controls without replacing input nod
   const damageVisible=!rule.closest('.arena-settings-section').hidden;
   selectArenaSettingsTab('broadcast');
   const obsVisible=!obs.closest('.arena-settings-section').hidden;
+  const languageHidden=language.closest('.arena-settings-section').hidden;
+  selectArenaSettingsTab('audio');
   const languageVisible=!language.closest('.arena-settings-section').hidden;
   selectArenaSettingsTab('audience');
   const audienceVisible=!audience.closest('.arena-settings-section').hidden;
-  selectArenaSettingsTab('workspace');
+  selectArenaSettingsTab('system');
   const workspaceVisible=!workspace.closest('.arena-settings-section').hidden;
   document.getElementById('arenaSettingsSearch').value='vidas';
   selectArenaSettingsTab('broadcast',false);
   const searchFound=!lives.closest('.arena-settings-section').hidden;
   document.getElementById('arenaSettingsSearch').value='';
   selectArenaSettingsTab('match');
-  return {labels,livesVisible,damageHidden,damageVisible,obsVisible,languageVisible,audienceVisible,workspaceVisible,searchFound,
+  return {labels,livesVisible,damageHidden,damageVisible,obsVisible,languageHidden,languageVisible,audienceVisible,workspaceVisible,searchFound,
     stable:lives===document.getElementById('playerLivesSelect')&&rule===document.getElementById('arenaRuleDamage'),
     stored:localStorage.getItem('arenaLiveSettingsNavV1')};
  });
- assert.deepEqual(r,{labels:['match','combat','broadcast','audience','workspace'],
-   livesVisible:true,damageHidden:true,damageVisible:true,obsVisible:true,languageVisible:true,audienceVisible:true,workspaceVisible:true,searchFound:true,stable:true,stored:'match'});
+ assert.deepEqual(r,{labels:['match','combat','classes','audience','broadcast','audio','system'],
+   livesVisible:true,damageHidden:true,damageVisible:true,obsVisible:true,languageHidden:true,languageVisible:true,audienceVisible:true,workspaceVisible:true,searchFound:true,stable:true,stored:'match'});
 });
 await check('Real TikTok follower gift subscriber support routes to the real sender rather than the selected actor',async()=>{
  const r=await page.evaluate(()=>{
