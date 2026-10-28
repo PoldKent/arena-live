@@ -64,6 +64,15 @@ Esto ejecuta pruebas Node, reconstruye el móvil con la fuente oficial, comprueb
 - Se añadieron pruebas Playwright para verificar visibilidad real del cajón tanto en móvil como en escritorio, y retorno de nodos al cerrar.
 - Esta es una corrección de interfaz de v0.40, no una modificación de las reglas ni de las capturas OBS.
 
+## Ajuste de usabilidad Streamer móvil: arena de tamaño constante
+
+- Abrir 🧪 Pruebas **no modifica el ancho, alto ni posición** de la arena 9:16 (en pantalla normal y en pantalla completa). Se retiraron todas las reglas que cambiaban la cámara al abrir el panel.
+- La arena se escala únicamente para dejar espacio permanente a la barra superior y a las cinco habilidades inferiores. Se aprovecha más altura que antes sin deformar la imagen.
+- Las cinco habilidades originales (Kame, Rasen, Trueno, Enredadera y Coloso) deben estar siempre visibles en Modo Streamer; el panel avanzado nunca se sitúa encima de esa barra.
+- En pantallas verticales pequeñas es físicamente imposible mostrar una arena 9:16 máxima, las cinco habilidades y todas las opciones avanzadas en franjas separadas de altura completa. Por ello, **Pruebas se superpone temporalmente a una parte de la imagen**, en una ventana compacta desplazable con botón minimizar, mientras la arena conserva exactamente su tamaño y los poderes permanecen accesibles.
+- Se calcula el borde inferior del panel avanzado desde la posición real de los cinco poderes, en modo normal y fullscreen, y se vuelve a calcular al girar el dispositivo.
+- La prueba móvil mide la geometría antes/después de abrir el panel y falla si cambia el tamaño de la cámara o se tapan los cinco poderes.
+
 ## Qué está comprobado y qué falta
 
 Se comprobó que el HTML oficial es autocontenido, que sus scripts integrados no presentan errores de sintaxis y que su manifest apunta a los archivos fuente integrados. **Esto no confirma la interacción en Windows, Android o TikTok LIVE**. Las ejecuciones previas de GitHub Actions terminaron con fallo antes de ejecutar los pasos de prueba; son necesarias pruebas reales de Playwright y una sesión LIVE antes de considerar todas las funciones verificadas.
