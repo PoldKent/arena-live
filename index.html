@@ -325,6 +325,82 @@
 @media (max-width:390px) { #btnProtaClassMenu {min-height:32px; white-space:nowrap;} }
 
 #viewport16x9 #hudRuleSub16, #viewport9x16 #hudRuleSub9 { display:none!important; }
+
+/* Full-game operator tools in native single-monitor fullscreen; original panels,
+   never duplicate controls. The 9:16 or 16:9 broadcast viewport remains separate. */
+#arenaSingleFullscreenTools,#arenaSingleFullscreenDrawer{display:none}
+#card-9x16:fullscreen:not(.arena-mobile-offline),
+#card-16x9:fullscreen:not(.arena-mobile-offline){position:relative}
+#card-9x16:fullscreen #arenaSingleFullscreenTools,
+#card-16x9:fullscreen #arenaSingleFullscreenTools{
+  display:flex;position:absolute;right:10px;top:10px;gap:4px;z-index:200;
+  padding:4px;border-radius:22px;border:1px solid #497789;
+  background:rgba(10,26,43,.91);box-shadow:0 6px 22px #0008;
+}
+#arenaSingleFullscreenTools button{
+  display:grid;place-items:center;width:40px;height:40px;min-width:40px;
+  color:#e7fcff;background:#17384e;border:1px solid #568da1;
+  border-radius:50%;font:700 19px/1 system-ui,sans-serif;
+  cursor:pointer;touch-action:manipulation;
+}
+#arenaSingleFullscreenTools button:focus-visible,
+#arenaSingleFullscreenDrawer button:focus-visible,
+#arenaSingleFullscreenDrawer select:focus-visible{outline:2px solid #80f7ee;outline-offset:2px}
+#card-9x16:fullscreen #arenaSingleFullscreenDrawer:not([hidden]),
+#card-16x9:fullscreen #arenaSingleFullscreenDrawer:not([hidden]){
+  display:flex;flex-direction:column;position:absolute;top:65px;
+  right:10px;bottom:10px;width:min(335px,35vw);min-width:245px;
+  max-height:calc(100% - 75px);z-index:205;background:#0d2134;
+  border:1px solid #438293;border-radius:12px;box-shadow:0 8px 28px #000b;
+  overflow:hidden;color:#e8faff;
+}
+#arenaSingleFullscreenDrawer .arena-single-fs-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 10px;border-bottom:1px solid #375c72;font-weight:700;
+}
+#arenaSingleFullscreenDrawer .arena-single-fs-head button{
+  width:30px;height:30px;min-height:30px;border-radius:8px;
+  background:#213f54;color:#e8faff;border:1px solid #547487;font-size:19px;
+}
+#arenaSingleFullscreenDrawer select{
+  display:block;width:calc(100% - 16px);flex-shrink:0;
+  min-height:40px;margin:8px;background:#122e43;color:#edfaff;
+  border:1px solid #4d849a;border-radius:8px;padding:5px;
+}
+#arenaSingleFullscreenDrawer .arena-single-fs-body{
+  display:block;flex:1 1 auto;min-height:0;overflow:auto;
+  padding:6px 9px 12px;overscroll-behavior:contain;
+}
+#arenaSingleFullscreenDrawer .arena-work-panel{
+  display:block!important;position:relative!important;inset:auto!important;
+  width:100%!important;max-width:100%!important;height:auto!important;
+  min-width:0!important;max-height:none!important;margin:0!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;
+}
+#arenaSingleFullscreenDrawer .arena-work-panel>summary{display:none!important}
+#arenaSingleFullscreenDrawer .arena-work-panel .arena-panel-body{
+  display:block!important;position:static!important;width:100%!important;
+  height:auto!important;max-height:none!important;overflow:visible!important;
+}
+#arenaSingleFullscreenDrawer .arena-work-panel :is(button,select,input,textarea){
+  max-width:100%;min-width:0;box-sizing:border-box;
+}
+#card-9x16:fullscreen.arena-single-fs-panel-open #viewport9x16,
+#card-16x9:fullscreen.arena-single-fs-panel-open #viewport16x9{
+  max-width:calc(100vw - min(360px,38vw))!important;
+}
+@media(max-width:680px),(max-height:520px){
+  #card-9x16:fullscreen #arenaSingleFullscreenDrawer:not([hidden]),
+  #card-16x9:fullscreen #arenaSingleFullscreenDrawer:not([hidden]){
+    width:calc(100vw - 12px);min-width:0;max-height:min(39dvh,270px);
+    height:min(39dvh,270px);top:auto;right:6px;bottom:6px;
+  }
+  #card-9x16:fullscreen.arena-single-fs-panel-open #viewport9x16,
+  #card-16x9:fullscreen.arena-single-fs-panel-open #viewport16x9{
+    max-width:100%!important;max-height:calc(61dvh - 65px)!important;
+  }
+}
+
 </style>
 
 
@@ -8326,6 +8402,72 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             }
         }
 
+        // Native fullscreen only displays descendants of the selected card.
+        // Mount ORIGINAL operator panels there while a desktop 9:16/16:9 view
+        // is fullscreen, and put them back when fullscreen ends. No clones.
+        const arenaSingleFsState={bar:null,drawer:null,active:null,restore:null};
+        function arenaSingleFsRestorePanel(){
+            const state=arenaSingleFsState;
+            if(state.active&&state.restore?.parentNode)state.restore.replaceWith(state.active);
+            state.active=null;state.restore=null;
+        }
+        function arenaSingleFsShowPanel(id){
+            const state=arenaSingleFsState;
+            if(!state.drawer||!document.fullscreenElement)return;
+            if(state.active?.id===id&&!state.drawer.hidden){
+                arenaSingleFsRestorePanel();state.drawer.hidden=true;
+                document.fullscreenElement.classList.remove('arena-single-fs-panel-open');
+                return;
+            }
+            const panel=document.getElementById(id);
+            if(!panel)return;
+            arenaSingleFsRestorePanel();
+            const marker=document.createComment('Return original fullscreen operator panel');
+            panel.before(marker);
+            const body=state.drawer.querySelector('.arena-single-fs-body');
+            body.appendChild(panel);
+            panel.hidden=false;panel.open=true;
+            panel.style.removeProperty('height');
+            state.active=panel;state.restore=marker;
+            state.drawer.hidden=false;
+            document.fullscreenElement.classList.add('arena-single-fs-panel-open');
+            state.drawer.querySelector('select').value=id;
+        }
+        function syncArenaSingleFullscreenPanels(){
+            const state=arenaSingleFsState;
+            const fullscreen=document.fullscreenElement;
+            const isSingle=fullscreen&&['card-9x16','card-16x9'].includes(fullscreen.id);
+            if(!isSingle||document.documentElement.classList.contains('arena-mobile-offline')){
+                arenaSingleFsRestorePanel();
+                state.bar?.remove();state.drawer?.remove();
+                state.bar=null;state.drawer=null;
+                return;
+            }
+            if(state.bar?.parentElement===fullscreen)return;
+            const bar=document.createElement('nav');
+            bar.id='arenaSingleFullscreenTools';
+            bar.setAttribute('aria-label','Herramientas de Arena Live en pantalla completa');
+            bar.innerHTML='<button type="button" data-single-action="tests" aria-label="Pruebas" title="Pruebas">🧪</button><button type="button" data-single-action="chat" aria-label="Chat" title="Chat">💬</button><button type="button" data-single-action="settings" aria-label="Ajustes" title="Ajustes">⚙</button><button type="button" data-single-action="exit" aria-label="Salir de pantalla completa" title="Salir de pantalla completa">⤡</button>';
+            const drawer=document.createElement('aside');
+            drawer.id='arenaSingleFullscreenDrawer';
+            drawer.hidden=true;
+            drawer.setAttribute('aria-label','Panel de herramientas');
+            drawer.innerHTML='<div class="arena-single-fs-head"><span>🧪 Pruebas</span><button type="button" aria-label="Cerrar herramientas" title="Cerrar herramientas">×</button></div><select aria-label="Seleccionar herramienta"><option value="arenaPanelPowers">Jugador, poderes y comandos</option><option value="arenaPanelPlayers">Participantes y K.O.</option><option value="arenaPanelScenarios">Escenarios</option><option value="arenaPanelSocial">Interacciones</option><option value="arenaPanelSimulation">Simulación</option><option value="arenaPanelBridge">TikTok LIVE</option><option value="arenaPanelChat">Chat</option></select><div class="arena-single-fs-body"></div>';
+            bar.addEventListener('click',event=>{
+                const action=event.target.closest('button')?.dataset.singleAction;
+                if(action==='tests')arenaSingleFsShowPanel('arenaPanelPowers');
+                else if(action==='chat')arenaSingleFsShowPanel('arenaPanelChat');
+                else if(action==='settings')document.getElementById('arenaDualSettingsBtn')?.click();
+                else if(action==='exit')void document.exitFullscreen();
+            });
+            drawer.querySelector('select').addEventListener('change',event=>arenaSingleFsShowPanel(event.target.value));
+            drawer.querySelector('button').addEventListener('click',()=>{
+                arenaSingleFsRestorePanel();drawer.hidden=true;
+                fullscreen.classList.remove('arena-single-fs-panel-open');
+            });
+            fullscreen.append(bar,drawer);
+            state.bar=bar;state.drawer=drawer;
+        }
         function installArenaFullscreenControls() {
             [['16','16:9'],['9','9:16']].forEach(([suffix,ratio]) => {
                 const launch = document.getElementById(`btnFullscreen${suffix}`);
@@ -8347,6 +8489,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             });
             document.addEventListener('fullscreenchange', () => {
                 syncArenaSingleFullscreenSettings();
+                syncArenaSingleFullscreenPanels();
                 requestAnimationFrame(fitDualMonitorsSideBySide);
                 updateTouchControlsVisibility();
             });
