@@ -4,7 +4,7 @@ import {EventEmitter} from 'node:events';
 import {LiveSession} from '../bridge/live-session.mjs';
 const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return{promise,resolve,reject};};
 class Connection extends EventEmitter{constructor(promise=Promise.resolve()){super();this.promise=promise;this.closed=0;}connect(){return this.promise;}async disconnect(){this.closed++;}}
-function fixture(connections){const chats=[],likes=[],statuses=[],timers=new Map();let id=0;const session=new LiveSession({createConnection:async()=>connections.shift(),onChat:e=>chats.push(e),onLike:e=>likes.push(e),onStatus:s=>statuses.push(s),setTimer:(fn,ms)=>{const key=++id;timers.set(key,{fn,ms});return key;},clearTimer:key=>timers.delete(key)});return{session,chats,likes,statuses,timers};}
+function fixture(connections){const chats=[],likes=[],shares=[],statuses=[],timers=new Map();let id=0;const session=new LiveSession({createConnection:async()=>connections.shift(),onChat:e=>chats.push(e),onLike:e=>likes.push(e),onShare:e=>shares.push(e),onStatus:s=>statuses.push(s),setTimer:(fn,ms)=>{const key=++id;timers.set(key,{fn,ms});return key;},clearTimer:key=>timers.delete(key)});return{session,chats,likes,shares,statuses,timers};}
 test('disconnect while connecting cannot later restore a connected session or deliver stale chat',async()=>{const d=deferred(),old=new Connection(d.promise),f=fixture([old]);const pending=f.session.connect();await Promise.resolve();await f.session.disconnect();d.resolve();await pending;old.emit('chat','old');old.emit('error',Error('late'));assert.equal(f.session.status.phase,'disconnected');assert.deepEqual(f.chats,[]);assert.equal(old.closed,1);});
 test('a newer generation alone owns events after reconnect',async()=>{const old=new Connection(),current=new Connection(),f=fixture([old,current]);await f.session.connect();old.emit('chat','first');await f.session.disconnect();await f.session.connect();old.emit('chat','stale');current.emit('chat','second');assert.deepEqual(f.chats,['first','second']);assert.equal(f.session.status.phase,'connected');await f.session.disconnect();});
 test('reconnect uses bounded exponential delays and manual disconnect cancels the pending retry',async()=>{const connections=Array.from({length:8},()=>new Connection(Promise.resolve()));const f=fixture(connections);f.session.createConnection=async()=>{throw Error('offline');};await f.session.connect();const delays=[];for(let i=0;i<7;i++){const [key,t]=f.timers.entries().next().value;delays.push(t.ms);f.timers.delete(key);t.fn();await new Promise(r=>setImmediate(r));}assert.deepEqual(delays,[1000,2000,4000,8000,16000,30000,30000]);await f.session.disconnect();assert.equal(f.timers.size,0);});
@@ -26,4 +26,18 @@ test('LIVE likes reach the active session and never leak from a stale connection
   await f.session.disconnect();
   current.emit('like',{count:700});
   assert.deepEqual(f.likes.map(x=>x.count),[3,5]);
+});
+
+test('LIVE shares belong to the active connection and cannot replay after reconnect',async()=>{
+ const old=new Connection(),current=new Connection(),f=fixture([old,current]);
+ await f.session.connect();
+ old.emit('share',{user:{displayId:'first'}});
+ await f.session.disconnect();
+ old.emit('share',{user:{displayId:'stale'}});
+ await f.session.connect();
+ old.emit('share',{user:{displayId:'stale2'}});
+ current.emit('share',{user:{displayId:'second'}});
+ await f.session.disconnect();
+ current.emit('share',{user:{displayId:'late'}});
+ assert.deepEqual(f.shares.map(e=>e.user.displayId),['first','second']);
 });

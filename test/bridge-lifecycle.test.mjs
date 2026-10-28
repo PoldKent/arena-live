@@ -14,6 +14,10 @@ test('one explicit controller receives comments and server shutdown closes activ
         const a=await connect(),b=await connect();const first=await a.until(v=>v.type==='status'),second=await b.until(v=>v.type==='status');assert.equal(first.isController,true);assert.equal(second.isController,false);
         const post=async(path,body={})=>fetch(base+path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
         let response=await post('/api/test-chat',{username:'hello',message:'!jugar'});assert.equal((await response.json()).sent,true);await a.until(v=>v.type==='chat');assert.equal(b.messages.filter(v=>v.type==='chat').length,0);
+        response=await post('/api/test-share',{username:'hello'});assert.equal((await response.json()).sent,true);
+        const share=await a.until(v=>v.type==='social'&&v.eventType==='share');
+        assert.equal(share.username,'@hello');
+        assert.equal(b.messages.filter(v=>v.type==='social').length,0);
         response=await post('/api/claim-control',{clientId:second.clientId});assert.equal(response.status,409);
         a.ws.close();await once(a.ws,'close');await b.until(v=>v.type==='status'&&v.canClaimControl);assert.equal(b.messages.at(-1).isController,false);
         response=await post('/api/test-chat',{message:'!titan'});assert.equal((await response.json()).sent,false);
