@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.23 — TikTok LIVE</title>
+    <title>Arena Live v0.24 — TikTok LIVE</title>
     <!--
       ARENA LIVE · GAME RUNTIME
       The classic game script stays here; utility CSS is built locally and
@@ -13,7 +13,7 @@
       have been migrated to explicit event listeners.
     -->
     <!-- Styles are built once; no browser compiler runs during a stream. -->
-    <link rel="stylesheet" href="styles/arena-ui.css?v=0.23">
+    <link rel="stylesheet" href="styles/arena-ui.css?v=0.24">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Fonts: Inter & Orbitron for Arcade/Esports HUD -->
@@ -1129,7 +1129,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                         <!-- 16:9 TOP PERIMETER HUD -->
                         <div class="relative z-10 p-2 sm:p-2.5 flex flex-col gap-1.5 pointer-events-none">
                             <aside id="arenaAudienceGuide16" class="arena-audience-guide arena-audience-guide-landscape" aria-label="Cómo jugar en directo">
-                                <div class="arena-guide-call">¡ESCRIBE <strong>!jugar</strong> <span>Y ENTRA A LA PELEA!</span></div>
+                                <div class="arena-guide-call">¡DALE <strong>TAP TAP</strong> <span>PARA UNIRTE!</span></div>
                                 <p class="arena-guide-explain">Elige tu clase y usa su poder escribiendo:</p>
                                 <div class="arena-guide-commands"><span class="arena-guide-pair arena-guide-warrior">⚔ <b>Guerrero</b> <code>!guerrero</code> <i>→</i> <code>!kame</code></span>
                                 <span class="arena-guide-pair arena-guide-shinobi">🌀 <b>Shinobi</b> <code>!shinobi</code> <i>→</i> <code>!rasen</code></span>
@@ -1218,7 +1218,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 <div class="arena-onboarding-card">
 <p class="arena-onboarding-kicker">✦ ARENA LIVE · LOBBY ABIERTO</p>
 <h2>¡ESTÁS A UN MENSAJE DE PELEAR!</h2>
-<p class="arena-onboarding-sub">Escribe <strong>!jugar</strong> en el chat de TikTok y tu personaje entrará a la arena.</p>
+<p class="arena-onboarding-sub">¡Dale <strong>tap tap</strong> en el LIVE de TikTok para unirte a la arena, incluso si ya empezó la pelea!</p>
 <p class="arena-onboarding-hint">Después elige tu clase y activa sus poderes con los comandos de arriba.</p><p id="lobbyChampion16" class="arena-onboarding-hint hidden" aria-live="polite"></p>
 <div class="arena-onboarding-meta">
 <span class="arena-onboarding-stat">⚔ <strong id="lobbyDetectedMode16">⚡ SMASH (3-8)</strong></span>
@@ -1299,7 +1299,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                         <!-- 9:16 TOP VERTICAL MOBILE HUD -->
                         <div class="relative z-10 p-2 flex flex-col gap-1.5 pointer-events-none">
                             <aside id="arenaAudienceGuide9" class="arena-audience-guide arena-audience-guide-portrait" aria-label="Cómo jugar en directo">
-                                <div class="arena-guide-call">¡ESCRIBE <strong>!jugar</strong> <span>Y ENTRA A LA PELEA!</span></div>
+                                <div class="arena-guide-call">¡DALE <strong>TAP TAP</strong> <span>PARA UNIRTE!</span></div>
                                 <p class="arena-guide-explain">Elige tu clase y usa su poder escribiendo:</p>
                                 <div class="arena-guide-commands"><span class="arena-guide-pair arena-guide-warrior">⚔ <b>Guerrero</b> <code>!guerrero</code> <i>→</i> <code>!kame</code></span>
                                 <span class="arena-guide-pair arena-guide-shinobi">🌀 <b>Shinobi</b> <code>!shinobi</code> <i>→</i> <code>!rasen</code></span>
@@ -1371,7 +1371,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 <div class="arena-onboarding-card">
 <p class="arena-onboarding-kicker">✦ ARENA LIVE · EN DIRECTO</p>
 <h2>¡TÚ PUEDES PELEAR!</h2>
-<p class="arena-onboarding-sub">Escribe <strong>!jugar</strong> en el chat y tu guerrero aparecerá en la arena.</p>
+<p class="arena-onboarding-sub">¡Dale <strong>tap tap</strong> en TikTok para unirte o reingresar durante la pelea!</p>
 <p class="arena-onboarding-hint">Elige clase y poder con los comandos de arriba.</p><p id="lobbyChampion9" class="arena-onboarding-hint hidden" aria-live="polite"></p>
 <div class="arena-onboarding-meta">
 <strong id="lobbyDetectedMode9">⚡ SMASH (3-8)</strong>
@@ -1837,17 +1837,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.23 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.24 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
 
     <!-- ==================== COMPLETE GAME ENGINE, LOBBY & VICTORY SCRIPT ==================== -->
-    <script src="engine/arena-core.js?v=0.23"></script>
-    <script src="engine/arena-render.js?v=0.23"></script>
-    <script src="engine/arena-audio.js?v=0.23"></script>
-    <script src="engine/arena-settings.js?v=0.23"></script>
-    <script src="engine/arena-balance-evidence.js?v=0.23"></script>
+    <script src="engine/arena-core.js?v=0.24"></script>
+    <script src="engine/arena-render.js?v=0.24"></script>
+    <script src="engine/arena-audio.js?v=0.24"></script>
+    <script src="engine/arena-settings.js?v=0.24"></script>
+    <script src="engine/arena-balance-evidence.js?v=0.24"></script>
     <script>
         /*************************************************************************
          * ARENA LIVE · MONOLITHIC ENGINE INDEX
@@ -3922,7 +3922,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             if (!isStreamer) username = normalizeChatUsername(username);
             platformKey = Object.prototype.hasOwnProperty.call(PLATFORMS, platformKey) ? platformKey : 'tiktok';
             // A finished result cannot lose a bot or eliminated player to admission.
-            if (gameState === 'VICTORY' || koSequenceActive) {
+            if (gameState === 'VICTORY' || koSequenceActive
+                || (gameState === 'COMBAT' && rejoinRuleMode === 'timed' && matchTimeSeconds <= 0 && !isStreamer)) {
                 if (isStreamer) updateStreamerJoinButton();
                 return null;
             }
@@ -5204,19 +5205,19 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     spawnFloatingText(
                         Math.max(120, Math.min(WORLD_W - 120, victim.x)),
                         Math.max(90, victim.y - 24),
-                        `❤️ ${getFighterDisplayName(victim, true)} cayó (${victim.joinsUsed}/${MAX_OPPORTUNITIES}) • ¡Usa !jugar (${remLives} ${remLives === 1 ? 'vida restante' : 'vidas restantes'})!`,
+                        `❤️ ${getFighterDisplayName(victim, true)} cayó (${victim.joinsUsed}/${MAX_OPPORTUNITIES}) • ¡Dale tap tap para reingresar! (${remLives} ${remLives === 1 ? 'vida restante' : 'vidas restantes'})`,
                         '#ffbe0b',
                         14
                     );
-                    addKillFeed(`❤️ ${getFighterDisplayName(victim, true)} ${runtimeCopy('fell')} (${victim.joinsUsed}/${MAX_OPPORTUNITIES}). ${runtimeCopy('mayJoin')} ${localizeVisibleCommands('!jugar', currentLanguage)}`, 'ko');
+                    addKillFeed(`❤️ ${getFighterDisplayName(victim, true)} ${runtimeCopy('fell')} (${victim.joinsUsed}/${MAX_OPPORTUNITIES}). ¡Dale tap tap!`, 'ko');
                 }
             } else {
-                // 'timed' mode: Unlimited re-entries until 00:00
+                // Free: unlimited while the fight remains open. Timed: until 00:00.
                 victim.permanentlyOut = false;
                 spawnFloatingText(
                     Math.max(120, Math.min(WORLD_W - 120, victim.x)),
                     Math.max(90, victim.y - 24),
-                    `♾️ ${getFighterDisplayName(victim, true)} cayó • ¡Escribe !jugar para re-ingresar!`,
+                    `♾️ ${getFighterDisplayName(victim, true)} cayó • ¡Dale tap tap para reingresar!`,
                     '#00f3ff',
                     14
                 );
@@ -7576,8 +7577,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         function showFighterSpeechBubble(fighter, message) {
             if (!fighter || fighter.eliminated || gameState === 'VICTORY') return;
             const text = String(message || '').replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, 90);
-            if (!text) return;
+            if (!text || canonicalizeChatCommandText(text).startsWith('!')) return;
 
+            // Only normal messages can appear over fighters, never chat commands.
             // Draw the same speech bubble in both outputs. The vertical version follows its smart camera.
             const bubbleTargets = [
                 { host: document.getElementById('viewport16x9'), portrait: false },
@@ -8202,7 +8204,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.23';
+        const ARENA_RELEASE_VERSION = '0.24';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:0, footer:76, format:'21'});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
@@ -9003,7 +9005,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.23.0',
+            version: '0.24.0',
             edition: 'tiktok',
             renderSpriteMode: arenaGpuSpritesEnabled ? 'hardware-candidate' : 'software-safe-vectors',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,
@@ -9056,14 +9058,20 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 }));
             },
             setSeed(seed){return setArenaRandomSeed(seed);},
-            // One real LIVE tap admits a previously unseen viewer in the lobby,
-            // without triggering !jugar's repeat healing or bypassing the 128 cap.
+            // A real TikTok tap joins/rejoins throughout lobby and live combat.
+            // Free mode has unlimited entries; timed closes at 00:00; lives
+            // consumes only configured opportunities. Existing active fighters
+            // never receive the separate repeated-!jugar healing through taps.
             joinOnTap({ username = '', platformKey = 'tiktok' } = {}) {
-                if (gameState !== 'LOBBY' || koSequenceActive || platformKey !== 'tiktok') return false;
+                if (!['LOBBY','COMBAT'].includes(gameState) || koSequenceActive || platformKey !== 'tiktok') return false;
                 if (typeof username !== 'string' || !/^@[a-zA-Z0-9_.-]{1,24}$/.test(username)) return false;
+                if (gameState === 'COMBAT' && rejoinRuleMode === 'timed' && matchTimeSeconds <= 0) return false;
                 const identity = viewerIdentityKey(username, platformKey);
-                if (fighters.some(f => viewerIdentityKey(f.name, f.platformKey) === identity)) return false;
-                if (fighters.length >= getArenaPlayerLimit()) return false;
+                const existing = fighters.find(f => viewerIdentityKey(f.name, f.platformKey) === identity);
+                if (existing && !existing.eliminated) return false;
+                if (existing && rejoinRuleMode === '3_lives'
+                    && (existing.permanentlyOut || existing.joinsUsed >= MAX_OPPORTUNITIES)) return false;
+                if (!existing && fighters.length >= getArenaPlayerLimit()) return false;
                 return !!addOrBoostFighter(username, platformKey, false, null, true);
             },
             joinOnShare({username='',platformKey='tiktok'}={}) {

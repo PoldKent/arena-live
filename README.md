@@ -1,10 +1,10 @@
-# Arena Live · v0.23
+# Arena Live · v0.24
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
 ## Versión principal
 
-`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API, el servidor y el paquete identifican la versión 0.23. [Panel único de v0.18](docs/RELEASE-0.18-PANEL-UNICO.md). [Las seis correcciones y su validación](docs/RELEASE-0.15-CORRECCIONES.md).
+`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API, el servidor y el paquete identifican la versión 0.24. [Panel único de v0.18](docs/RELEASE-0.18-PANEL-UNICO.md). [Las seis correcciones y su validación](docs/RELEASE-0.15-CORRECCIONES.md).
 
 En **duelo 1v1**, los marcadores de vida de ambas capturas muestran **HP actuales** (por ejemplo, `180 HP` o `75 HP`) en lugar de porcentajes; las barras siguen reflejando proporcionalmente la vida restante y la energía mantiene su porcentaje.
 
@@ -12,9 +12,11 @@ Las capturas **Full HD 16:9 y 9:16** seleccionan automáticamente la ruta de dib
 
 **v0.23:** La opacidad de Ajustes afecta también al cartel e instrucciones del lobby. Los espectadores pueden entrar o reingresar con `!jugar` mientras el combate siga activo (respetando la regla de vidas y el cupo); la cuenta final solo se cierra cuando el KO decisivo ya está en marcha. Los comentarios normales de TikTok muestran la burbuja de su luchador en ambas cámaras si está activada. El evento real **Compartir** ahora llega desde el puente TikTok y aplica +30 % de HP máximo como curación (sin superar el tope) y 10 s de reducción de daño. Prota puede recuperar espacios de participantes eliminados o bots al estar lleno el cupo, sin expulsar espectadores activos reales. El campeón anterior sigue inscrito y se identifica en el siguiente lobby, incluso con «Nuevo lobby».
 
+**v0.24:** La invitación pública de los dos monitores ahora es **«¡Dale TAP TAP para unirte!»**. Un LIKE/tap real de TikTok puede crear un personaje durante el lobby o un combate en curso; si ya está eliminado, el siguiente tap solicita su reingreso. **Entrada libre:** sin límite de reingresos antes del KO final; **Por tiempo:** reingresos hasta el segundo 00:00; **Por vidas:** cada reingreso gasta una vida y se bloquea al agotar la cantidad configurada. Siempre se respeta el cupo de la arena y la victoria ya declarada. Los taps de jugadores activos conservan su boost y nunca activan la curación de `!jugar`. Los comandos no muestran burbujas sobre los luchadores; solo se muestran mensajes normales.
+
 ## Probar en un celular con un solo archivo
 
-Ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.23.0-movil.html`. Copia ese único HTML al teléfono y ábrelo con un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
+Ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.24.0-movil.html`. Copia ese único HTML al teléfono y ábrelo con un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
 
 La exportación usa el combate de `main`; comienza en 720p, dibujo a 30 FPS y calidad Rendimiento. Permite cambiar a 540p/1080p y 30/60 FPS. TikTok LIVE real sigue necesitando el servidor: este archivo ofrece pruebas locales. [Uso, optimizaciones y límites de la exportación móvil](docs/MOVIL-MONOLITICO.md).
 
@@ -167,9 +169,9 @@ El conector de TikTok es no oficial. Una conexión real necesita un LIVE públic
 
 ## Cómo participar · Guía permanente en ambas emisiones
 
-El lobby muestra una bienvenida simplificada con tipografía grande en **16:9 y 9:16**: escribe `!jugar`, aparece tu personaje y luego elige una clase y activa su ataque. El reloj, modo, reglas y los controles de prueba se mantienen. La tarjeta central desaparece al comenzar el combate.
+El lobby muestra una bienvenida simplificada con tipografía grande en **16:9 y 9:16**: dale **TAP TAP** en TikTok, aparece tu personaje y luego elige una clase y activa su ataque. El reloj, modo, reglas y los controles de prueba se mantienen. La tarjeta central desaparece al comenzar el combate.
 
-Las indicaciones permanecen **arriba** en ambas capturas, también durante el combate, con un llamado visible a escribir `!jugar` y los cinco pares de clase/poder en texto, sin botones: `!guerrero → !kame`, `!shinobi → !rasen`, `!titan → !coloso`, `!rayo → !trueno` y `!espiritu → !enred`. El centro de la arena queda despejado.
+Las indicaciones permanecen **arriba** en ambas capturas, también durante el combate, con un llamado visible a dar **TAP TAP** para unirte y los cinco pares de clase/poder en texto, sin botones: `!guerrero → !kame`, `!shinobi → !rasen`, `!titan → !coloso`, `!rayo → !trueno` y `!espiritu → !enred`. El centro de la arena queda despejado.
 
 En **Pantallas y OBS → Calibración para OBS → Vertical**, elige el marco **9:21, 9:20, 9:19.5 o 9:16** de **Modo Stream dual**. El vídeo sigue siendo **9:16** y se centra dentro del marco seleccionado; 9:16 elimina los márgenes adicionales. El marco no dibuja rótulos de proporciones ni altera la resolución de los dos canvas. El control rosado **Posición horizontal de Vertical** admite desplazamientos **−120 a +120 px** en pasos de 1 px, una entrada numérica exacta y el botón **Centrar** que devuelve a 0. El selector, desplazamiento y espacio inferior se guardan en la calibración de OBS. El sistema migra la configuración anterior con centrado neutral. Configura o revisa el recorte en OBS después de cambiar la proporción exterior. Si OBS captura solo `#viewport9x16`, sigue siendo 9:16 (1080 × 1920). La preparación normal y el HTML móvil permanecen en 9:16.
 

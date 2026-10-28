@@ -80,3 +80,11 @@ test('LIVE chat speech and late duel re-entry are not hidden behind simulator-on
   assert.doesNotMatch(html,/Duelo final: la inscripción y el reingreso están cerrados/);
   assert.match(html,/joinOnShare\(\{username='',platformKey='tiktok'\}=\{\}\)/);
 });
+
+test('audience call-to-action is tap-based, command bubbles remain excluded',()=>{
+ assert.equal((html.match(/¡DALE <strong>TAP TAP<\/strong> <span>PARA UNIRTE!<\/span>/g)||[]).length,2);
+ assert.match(html,/Dale <strong>tap tap<\/strong> en el LIVE de TikTok/);
+ assert.match(html,/canonicalizeChatCommandText\(text\)\.startsWith\('!'\)/);
+ assert.match(html,/joinOnTap\(\{ username = '', platformKey = 'tiktok' \}/);
+ assert.match(html,/rejoinRuleMode === 'timed' && matchTimeSeconds <= 0/);
+});

@@ -49,7 +49,7 @@ await check('Both broadcast views include permanent five-class instructions and 
   guide:document.getElementById('arenaAudienceGuide'+suffix)?.textContent||'',
   visible:getComputedStyle(document.getElementById('arenaAudienceGuide'+suffix)).display!=='none'
  })));
- for(const item of instructions){assert.equal(item.lobby,true);assert.equal(item.visible,true);for(const command of ['!jugar','!guerrero','!kame','!shinobi','!rasen','!titan','!coloso','!rayo','!trueno','!espiritu','!enred'])assert.ok(item.guide.includes(command),command);}
+ for(const item of instructions){assert.equal(item.lobby,true);assert.equal(item.visible,true);assert.match(item.guide,/DALE TAP TAP PARA UNIRTE/i);assert.doesNotMatch(item.guide,/!jugar/);for(const command of ['!guerrero','!kame','!shinobi','!rasen','!titan','!coloso','!rayo','!trueno','!espiritu','!enred'])assert.ok(item.guide.includes(command),command);}
 });
 
 async function unfold(id){const panel=page.locator('#'+id);if(!await panel.evaluate(n=>n.open))await panel.locator('> summary').click({noWaitAfter:true});}
@@ -174,7 +174,7 @@ await check('Stream uses its own reserved left column and contains both correctl
  assert.equal(carrier.centered,true);
  assert.ok(Math.abs(carrier.top-carrier.bottom)<4,JSON.stringify(carrier));
  assert.ok(carrier.top>10&&carrier.bottom>10);
- assert.ok(carrier.instructions.includes('!jugar')&&carrier.instructions.includes('!trueno'));
+ assert.ok(carrier.instructions.includes('TAP TAP')&&carrier.instructions.includes('!trueno'));
 });
 await check('Vertical selector fits 9:21 / 9:20 / 9:19.5 / 9:16 without stretch and pink slider centers precisely',async()=>{
  const select=page.locator('#arenaObsVerticalFormat');
@@ -385,7 +385,7 @@ await check('Mobile action buttons and joystick use the original manual combat c
  await page.locator('#btnStreamerJoin').click();await page.locator('#viewport9x16 button[onclick="startCombatFromLobby()"]').click();await page.waitForFunction(()=>gameState==='COMBAT');
  assert.equal(await page.locator('#lobbyOverlay9').isVisible(),false);
  assert.equal(await page.locator('#arenaAudienceGuide9').isVisible(),true);
- assert.match(await page.locator('#arenaAudienceGuide9').textContent(),/!jugar/);
+ assert.match(await page.locator('#arenaAudienceGuide9').textContent(),/DALE TAP TAP PARA UNIRTE/i);
  assert.equal(await page.locator('#arenaMobileJump').isEnabled(),true);assert.equal(await page.locator('#touchJoystick').isVisible(),true);await page.locator('#arenaMobileJump').click();await page.locator('#arenaMobileAttack').click();await page.locator('#arenaMobilePower').click();assert.equal((await state()).settingsOpen,false);await shot('mobile-combat');
 });
 await check('Mobile special action follows the no-powers rule while movement and normal attacks remain usable',async()=>{
@@ -919,7 +919,7 @@ await check('Prota uses a direct five-class toolbar dropdown instead of a nested
  assert.equal(await page.evaluate(()=>fighters.find(f=>f.isStreamer)?.archetypeKey),'titan');
  await page.evaluate(()=>{isGamePaused=true;});
 });
-await check('First TikTok tap admits one viewer in lobby, never duplicates or bypasses the 128-player cap',async()=>{
+await check('TikTok tap can admit in lobby and in combat without duplicating or bypassing the 128-player cap',async()=>{
  const admission=await page.evaluate(()=>{
   openLobby(true);arenaCombatRules.maxPlayers=128;
   const before=fighters.length;
@@ -931,13 +931,16 @@ await check('First TikTok tap admits one viewer in lobby, never duplicates or by
   applyPlayerCountPreset(128);
   const blocked=ArenaLive.joinOnTap({username:'@overflow_fan',platformKey:'tiktok'});
   gameState='COMBAT';
+  const fullCombat=ArenaLive.joinOnTap({username:'@combat_fan',platformKey:'tiktok'});
+  arenaCombatRules.maxPlayers=128;
+  gameState='LOBBY';applyPlayerCountPreset(2);startCombatFromLobby();
   const late=ArenaLive.joinOnTap({username:'@combat_fan',platformKey:'tiktok'});
-  return {first,again,found,rosterAfter,before,blocked,late,fullCount:fighters.length};
+  return {first,again,found,rosterAfter,before,blocked,fullCombat,late,fullCount:128,actual:fighters.length};
  });
  assert.equal(admission.first,true);assert.equal(admission.again,false);
  assert.equal(admission.found,1);assert.equal(admission.rosterAfter,admission.before+1);
- assert.equal(admission.blocked,false);assert.equal(admission.late,false);
- assert.equal(admission.fullCount,128);
+ assert.equal(admission.blocked,false);assert.equal(admission.fullCombat,false);assert.equal(admission.late,true);
+ assert.equal(admission.fullCount,128);assert.equal(admission.actual,3);
 });
 await check('Lobby opacity changes both welcome cards and both audience guides',async()=>{
  const values=await page.evaluate(()=>{
@@ -1021,6 +1024,86 @@ await check('The champion remains in both new lobby formats after clearing the o
   return {kept,banners,keptAgain:fighters[0].name===name&&fighters[0].archetypeKey===key};
  });
  assert.deepEqual(r,{kept:true,banners:[true,true],keptAgain:true});
+});
+
+await check('Taps keep the three entry rules independent throughout an active match',async()=>{
+ const rows=await page.evaluate(()=>{
+  const rows={};
+  const begin=mode=>{
+   gameState='LOBBY';isGamePaused=false;koSequenceActive=false;
+   arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};
+   setRejoinRuleMode(mode);applyPlayerCountPreset(2);startCombatFromLobby();
+  };
+  begin('free');
+  const entry=ArenaLive.joinOnTap({username:'@free_tap',platformKey:'tiktok'});
+  const free=fighters.find(f=>f.name==='@free_tap');
+  const sameId=free.id;
+  free.eliminated=true;free.hp=0;
+  const rejoin=ArenaLive.joinOnTap({username:'@free_tap',platformKey:'tiktok'});
+  rows.free={entry,rejoin,alive:!free.eliminated,unique:fighters.filter(f=>f.name==='@free_tap').length===1,
+   sameId:free.id===sameId,rule:rejoinRuleMode};
+  begin('timed');
+  matchTimeSeconds=10;
+  const timedEntry=ArenaLive.joinOnTap({username:'@timed_tap',platformKey:'tiktok'});
+  const timed=fighters.find(f=>f.name==='@timed_tap');timed.eliminated=true;
+  const timedRejoin=ArenaLive.joinOnTap({username:'@timed_tap',platformKey:'tiktok'});
+  matchTimeSeconds=0;timed.eliminated=true;
+  const expired=ArenaLive.joinOnTap({username:'@timed_tap',platformKey:'tiktok'});
+  const expiredNew=ArenaLive.joinOnTap({username:'@timed_new',platformKey:'tiktok'});
+  rows.timed={entry:timedEntry,rejoin:timedRejoin,expired,expiredNew,rule:rejoinRuleMode};
+  begin('3_lives');
+  MAX_OPPORTUNITIES=2;setPlayerLives(2);
+  const lifeEntry=ArenaLive.joinOnTap({username:'@lives_tap',platformKey:'tiktok'});
+  const life=fighters.find(f=>f.name==='@lives_tap');life.eliminated=true;
+  const second=ArenaLive.joinOnTap({username:'@lives_tap',platformKey:'tiktok'});
+  life.eliminated=true;
+  const third=ArenaLive.joinOnTap({username:'@lives_tap',platformKey:'tiktok'});
+  rows.lives={entry:lifeEntry,second,third,joinsUsed:life.joinsUsed,rule:rejoinRuleMode};
+  return rows;
+ });
+ assert.deepEqual(rows,{
+  free:{entry:true,rejoin:true,alive:true,unique:true,sameId:true,rule:'free'},
+  timed:{entry:true,rejoin:true,expired:false,expiredNew:false,rule:'timed'},
+  lives:{entry:true,second:true,third:false,joinsUsed:2,rule:'3_lives'}
+ });
+});
+await check('The LIVE bridge re-enters an eliminated fighter on tap, with boosts separate from admission',async()=>{
+ const result=await page.evaluate(()=>new Promise(resolve=>{
+   gameState='LOBBY';koSequenceActive=false;isGamePaused=false;
+   arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};setRejoinRuleMode('free');
+   applyPlayerCountPreset(2);startCombatFromLobby();
+   const name='@bridge_rejoin';const first=ArenaLive.joinOnTap({username:name,platformKey:'tiktok'});
+   const fighter=fighters.find(f=>f.name===name);
+   fighter.eliminated=true;fighter.hp=0;
+   const used=fighter.joinsUsed;
+   window.arenaTestSocket.dispatchEvent(new MessageEvent('message',{data:JSON.stringify({
+    type:'status',phase:'connected',isController:true,platformKey:'tiktok'})}));
+   window.arenaTestSocket.dispatchEvent(new MessageEvent('message',{data:JSON.stringify({
+    type:'social',platformKey:'tiktok',eventType:'taps',username:name,count:2,source:'test'})}));
+   setTimeout(()=>resolve({first,alive:!fighter.eliminated,rejoined:fighter.joinsUsed===used+1,
+    unique:fighters.filter(f=>f.name===name).length===1,
+    counters:document.getElementById('bridge-taps-count').textContent}),1050);
+ }));
+ assert.equal(result.first,true);assert.equal(result.alive,true);assert.equal(result.rejoined,true);assert.equal(result.unique,true);
+ assert.match(result.counters,/entradas\/reingresos:/);
+});
+await check('Bubbles appear for normal TikTok speech, never for any command or power',async()=>{
+ const result=await page.evaluate(()=>{
+  gameState='LOBBY';applyPlayerCountPreset(2);startCombatFromLobby();
+  document.getElementById('showSpeechBubbleToggle').checked=true;
+  document.querySelectorAll('.fighter-speech-bubble').forEach(n=>n.remove());
+  const actor=fighters[0];chatRateLimits.clear();
+  for(const command of ['!jugar','!guerrero','!kame','!rasen','!titan']) {
+    processChatCommand(actor.name,actor.platformKey,command,null,true);
+  }
+  showFighterSpeechBubble(actor,'!trueno');
+  const commands=document.querySelectorAll('.fighter-speech-bubble').length;
+  processChatCommand(actor.name,actor.platformKey,'Un saludo desde el directo',null,true);
+  const spoken=[...document.querySelectorAll('.fighter-speech-bubble')];
+  const normal=spoken.length===2&&spoken.every(n=>n.textContent==='Un saludo desde el directo');
+  return {commands,normal};
+ });
+ assert.deepEqual(result,{commands:0,normal:true});
 });
 assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:release}));
 } finally {await browser?.close();server.kill('SIGKILL');}

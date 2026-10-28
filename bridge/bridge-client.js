@@ -18,7 +18,7 @@
     <button type="button" id="bridge-test-like">Probar 10 taps</button>
     <button type="button" id="bridge-test-share">Probar compartir</button>
     <small id="bridge-count" style="color:#a7b8c9">Mensajes recibidos: 0</small>
-    <small id="bridge-taps-count" style="color:#fda4af">❤️ Taps LIVE: 0 · inscripciones: 0 · pruebas: 0 · mejoras: 0</small>
+    <small id="bridge-taps-count" style="color:#fda4af">❤️ Taps LIVE: 0 · entradas/reingresos: 0 · pruebas: 0 · mejoras: 0</small>
     <small id="bridge-shares-count" style="color:#93c5fd" aria-live="polite">🔁 Compartidos recibidos: 0 · boosts: 0</small>
     <small id="bridge-taps-note" style="color:#94a3b8" aria-live="polite"></small>`;
   const place = document.getElementById('arenaBridgeMount') || document.getElementById('audienceSimulatorPanel') || document.querySelector('main') || document.body;
@@ -42,14 +42,15 @@
 
   // TikTok sends individual LIKE batches (count), not one event per physical tap.
   // Merge short bursts by viewer, and limit visual/game effects to 12 per flush.
-  // The first tap joins the current lobby once; subsequent taps can support that fighter.
+  // A tap joins in lobby or mid-fight, or re-enters a fallen viewer when permitted
+  // by the game's active free, timed or lives rule. Further taps boost an alive fighter.
   const tapBatches = new Map();
   const TAP_FLUSH_MS = 800;
   const MAX_TAP_VIEWERS = 256;
   const MAX_TAP_EFFECTS_PER_FLUSH = 12;
   let tapFlushTimer = null;
   function updateTaps() {
-    tapsCount.textContent = `❤️ Taps LIVE: ${state.tapsReceived.toLocaleString()} · inscripciones: ${state.tapJoins.toLocaleString()} · pruebas: ${state.testTapsReceived.toLocaleString()} · mejoras: ${state.tapBoosts.toLocaleString()}`;
+    tapsCount.textContent = `❤️ Taps LIVE: ${state.tapsReceived.toLocaleString()} · entradas/reingresos: ${state.tapJoins.toLocaleString()} · pruebas: ${state.testTapsReceived.toLocaleString()} · mejoras: ${state.tapBoosts.toLocaleString()}`;
     const details = [];
     if (state.unassignedTaps) details.push(`Sin personaje activo: ${state.unassignedTaps.toLocaleString()} taps`);
     if (state.droppedTaps) details.push(`Exceso de espectadores: ${state.droppedTaps.toLocaleString()} taps no procesados`);
@@ -72,10 +73,10 @@
       if (applied >= MAX_TAP_EFFECTS_PER_FLUSH) break;
       tapBatches.delete(identity);
       let fighter = indexed.get(identity);
-      if (!fighter && typeof game?.joinOnTap === 'function') {
+      if ((!fighter || !fighter.alive) && typeof game?.joinOnTap === 'function') {
         try {
           if (game.joinOnTap({ username: identity, platformKey: 'tiktok' })) {
-            state.tapJoins++;
+            state.tapJoins++; // Includes legal re-entries; the game decides the rule.
             fighters = game.getFighters();
             fighter = fighters.find(f => f.platform === 'tiktok' && String(f.name).toLocaleLowerCase() === identity);
             if (fighter) indexed.set(identity, fighter);

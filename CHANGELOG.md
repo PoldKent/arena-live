@@ -1,5 +1,15 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-28 — Arena Live v0.24 · Ingreso por TAP TAP durante el combate
+
+- Los dos monitores y las pantallas de lobby invitan a **«¡Dale TAP TAP para unirte!»**, sin exigir escribir el comando de unión.
+- El puente procesa taps de espectadores nuevos **y** de participantes eliminados durante lobby y combate, en vez de descartarlos si su personaje existía.
+- Se preservan las reglas independientes: Entrada libre ilimitada, Por tiempo hasta que llegue a cero y Por vidas según oportunidades restantes; no se alteran desde el evento de tap.
+- La victoria/KO decidido y el máximo de participantes siguen cerrando la entrada. Los taps de participantes vivos siguen siendo boosts, no curación repetida de `!jugar`.
+- Las burbujas de cabeza muestran solamente texto normal, nunca comandos de clase/poder/unión, incluso ante llamadas directas del simulador.
+- Pruebas de navegador de los tres modos y del puente, sin alterar física ni capturas 1920×1080 y 1080×1920.
+
+
 ## 2026-10-27 — Arena Live v0.23 · Lobby, reingresos y eventos TikTok
 
 - El regulador de opacidad afecta ahora al cartel y las instrucciones del lobby en los monitores 16:9 y 9:16.
