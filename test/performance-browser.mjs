@@ -177,7 +177,7 @@ try {
         let executed=0;
         for(const actor of [...fighters]){
           const cmd=CLASS_COMMANDS[actor.archetypeKey]?.powers?.[0];
-          if(cmd&&executeFighterSkill(actor,cmd))executed++;
+          if(cmd&&executeFighterSkill(actor,cmd)!==false)executed++;
         }
         const castingMs=performance.now()-start;
         const draw=[],sim=[];
