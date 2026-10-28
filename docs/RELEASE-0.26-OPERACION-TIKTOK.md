@@ -1,6 +1,6 @@
 # Arena Live v0.26 — Puesto de mando y auditoría TikTok LIVE
 
-Fecha: 28 de octubre de 2026. Uso: Binance no aplica; únicamente TikTok LIVE con el puente local de Arena Live.
+Fecha: 28 de octubre de 2026. Alcance: interfaz de operación y puente local de TikTok LIVE de Arena Live.
 
 ## Mapa del puesto de mando
 
