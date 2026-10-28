@@ -146,7 +146,7 @@ function refreshArenaPortableFloatingUI(){
     if(pause){pause.textContent=isGamePaused?'▶':'⏸';pause.title=isGamePaused?'Continuar combate':'Pausar combate';pause.setAttribute('aria-label',pause.title);pause.setAttribute('aria-pressed',String(isGamePaused));}
     const guide=document.getElementById('arenaPortableToggleGuide');
     const menuGuide=document.getElementById('arenaPortableGuideMenu');
-    if(fs){fs.textContent=fullscreen?'⤡':'⛶';fs.title=fullscreen?'Salir de pantalla completa':'Pantalla completa';fs.setAttribute('aria-label',fs.title);fs.setAttribute('aria-pressed',String(fullscreen));}
+    if(fs){fs.textContent=fullscreen?'▣':'⛶';fs.title=fullscreen?'Salir de pantalla completa':'Pantalla completa';fs.setAttribute('aria-label',fs.title);fs.setAttribute('aria-pressed',String(fullscreen));}
     if(guide){guide.textContent=arenaPortableGuideVisible?'◉':'?';guide.title=arenaPortableGuideVisible?'Ocultar instrucciones':'Mostrar instrucciones';guide.setAttribute('aria-label',guide.title);}
     if(menuGuide){menuGuide.textContent=arenaPortableGuideVisible?'🙈 Ocultar instrucciones':'❔ Mostrar instrucciones';menuGuide.setAttribute('aria-pressed',String(arenaPortableGuideVisible));}
 
@@ -208,9 +208,9 @@ function installArenaPortableFloatingUI(){
         for(const key of ['arenaViewMenuBtn','arenaFullscreenMenuBtn','arenaDualChatToggleBtn','arenaDualTikTokConnectBtn','btnFullscreenDual']){
             menu.querySelector('[data-forward-control="'+key+'"]')?.remove();
         }
-        const round=document.createElement('section');round.className='arena-mobile-match-menu';
+        const round=document.createElement('details');round.className='arena-mobile-match-menu';
         round.setAttribute('aria-label','Partida');
-        round.innerHTML='<strong>Partida</strong>';
+        round.innerHTML='<summary>🎮 Partida <span>Lobby · Nueva · Revancha</span></summary>';
         const next=document.getElementById('arenaPortableQuick');
         const lobby=menu.querySelector('[data-forward-control="arenaDualLobbyBtn"]');
         const rematch=menu.querySelector('[data-forward-control="arenaDualRematchBtn"]');
