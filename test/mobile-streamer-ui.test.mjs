@@ -44,7 +44,7 @@ test('Player supports saved touch-total or joystick controls, with no unwanted g
   assert.match(touch,/Táctil total/);
   assert.match(touch,/Joystick/);
   assert.doesNotMatch(touch,/touchControlDock'\)\?\.remove\(\)/);
-  assert.match(touch,/touchJoystick:\[19,82\]/);
+  assert.match(touch,/touchJoystick:\[13,50\]/);
   assert.match(runtime,/const header=document\.getElementById\('arenaTopBarInner'\)/);
   assert.match(runtime,/fullscreen\?card:header/);
   assert.match(runtime,/id='arenaMobileGestureGuide'/);
@@ -52,6 +52,12 @@ test('Player supports saved touch-total or joystick controls, with no unwanted g
   assert.match(css,/data-mobile-touch-mode="touch"/);
   assert.match(css,/data-mobile-touch-mode="joystick"/);
   assert.match(css,/#card-9x16:fullscreen #viewport9x16/);
+  assert.match(runtime,/id='arenaMobileControlShelf'/);
+  assert.match(touch,/const shelf=document.getElementById\('arenaMobileControlShelf'\)/);
+  assert.match(css,/#arenaMobileControlShelf #touchJoystick/);
+  assert.match(css,/#arenaMobileControlShelf #arenaPortableTestDrawer/);
   assert.match(runtime,/id='arenaMobileModeShortcut'/);
   assert.match(runtime,/id='arenaMobileTestsShortcut'/);
+  assert.match(touch,/const arenaMobileActionState=/);
+  assert.match(touch,/pointerId===event.pointerId/);
 });
