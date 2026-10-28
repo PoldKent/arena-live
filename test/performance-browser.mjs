@@ -221,8 +221,8 @@ try {
         :stress.drawing.p95>16.7?'Drawing p95 exceeds 16.7 ms on this environment'
         :'No threshold warning from this environment'
       }));
-      // Restore the original combat mode for the remaining browser checks.
-      setArenaCombatRule('knockback',1);
+      // Restore the rule in the page context, not the Node test runner.
+      await page.evaluate(() => setArenaCombatRule('knockback',1));
     }
     await page.evaluate(()=>{gameState='LOBBY';applyPlayerCountPreset(128);startCombatFromLobby();});
     if (source === 'current') {
