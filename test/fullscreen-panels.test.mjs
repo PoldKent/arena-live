@@ -25,7 +25,7 @@ test('mobile 9:16 is centered as in v0.36/37, and tools stay outside the broadca
   assert.match(block,/#card-9x16\.arena-tests-visible:not\(:fullscreen\)/);
   assert.match(block,/#card-9x16:fullscreen\.arena-tests-visible/);
   assert.match(mobile,/#card-9x16:fullscreen #arenaPortableTestDrawer:not/);
-  assert.match(exportHtml,/arenaSingleFullscreenPanels/);
+  assert.match(exportHtml,/syncArenaSingleFullscreenPanels/);
   assert.match(exportHtml,/arenaMobileControlShelf/);
   assert.match(exportHtml,/arenaPortableTestDrawer/);
 });
