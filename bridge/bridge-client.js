@@ -1,7 +1,7 @@
 /* Arena Live: local TikTok chat bridge. Loaded only by bridge/server.mjs. */
 (() => {
   'use strict';
-  const state = { socket: null, connected: false, controller: false, statusReceived: false, phase: 'disconnected', account: '@polkent.live', received: 0,tapsReceived:0,testTapsReceived:0,tapBoosts:0,tapJoins:0,unassignedTaps:0,droppedTaps:0,clientId:null,canClaimControl:false };
+  const state = { socket: null, connected: false, controller: false, statusReceived: false, phase: 'disconnected', account: '@polkent.live', received: 0,sharesReceived:0,shareBoosts:0,tapsReceived:0,testTapsReceived:0,tapBoosts:0,tapJoins:0,unassignedTaps:0,droppedTaps:0,clientId:null,canClaimControl:false };
   const panel = document.createElement('section');
   panel.id = 'arena-live-bridge-panel';
   panel.setAttribute('aria-label', 'TikTok LIVE — conexión local');
@@ -12,12 +12,14 @@
     <button type="button" id="bridge-connect">Conectar LIVE</button>
     <button type="button" id="bridge-disconnect">Desconectar</button>
     <button type="button" id="bridge-claim" hidden>Usar esta partida</button>
-    <small>LIVE: comentarios y ❤️ taps · Otros apoyos: simulación</small>
+    <small>LIVE: comentarios, ❤️ taps y 🔁 compartidos · Otros apoyos: simulación</small>
     <input id="bridge-test" maxlength="160" value="!guerrero" aria-label="Mensaje de prueba" style="background:#121d2c;color:white;border:1px solid #64748b;border-radius:5px;padding:5px;min-width:105px" />
     <button type="button" id="bridge-send-test">Probar comando</button>
     <button type="button" id="bridge-test-like">Probar 10 taps</button>
+    <button type="button" id="bridge-test-share">Probar compartir</button>
     <small id="bridge-count" style="color:#a7b8c9">Mensajes recibidos: 0</small>
     <small id="bridge-taps-count" style="color:#fda4af">❤️ Taps LIVE: 0 · inscripciones: 0 · pruebas: 0 · mejoras: 0</small>
+    <small id="bridge-shares-count" style="color:#93c5fd" aria-live="polite">🔁 Compartidos recibidos: 0 · boosts: 0</small>
     <small id="bridge-taps-note" style="color:#94a3b8" aria-live="polite"></small>`;
   const place = document.getElementById('arenaBridgeMount') || document.getElementById('audienceSimulatorPanel') || document.querySelector('main') || document.body;
   document.getElementById('arenaBridgeUnavailable')?.remove();
@@ -31,6 +33,8 @@
   const buttonDisconnect = panel.querySelector('#bridge-disconnect');
   const buttonTest = panel.querySelector('#bridge-send-test');
   const buttonTestLike = panel.querySelector('#bridge-test-like');
+  const buttonTestShare = panel.querySelector('#bridge-test-share');
+  const sharesCount = panel.querySelector('#bridge-shares-count');
   const tapsCount = panel.querySelector('#bridge-taps-count');
   const tapsNote = panel.querySelector('#bridge-taps-note');
   const inputTest = panel.querySelector('#bridge-test');
@@ -234,7 +238,8 @@
     buttonDisconnect.disabled = duplicate || !state.connected || state.phase === 'disconnected';
     buttonTest.disabled = duplicate || !state.connected || !state.statusReceived;
     buttonTestLike.disabled = buttonTest.disabled;
-    for (const b of [buttonConnect, buttonDisconnect, buttonTest, buttonTestLike]) b.style.opacity = b.disabled ? '.4' : '1';
+    buttonTestShare.disabled = buttonTest.disabled;
+    for (const b of [buttonConnect, buttonDisconnect, buttonTest, buttonTestLike, buttonTestShare]) b.style.opacity = b.disabled ? '.4' : '1';
     count.textContent = `Mensajes recibidos: ${state.received}`;
     updateLiveChatStatus();
     window.dispatchEvent(new CustomEvent('arena-bridge-status', {detail: {
@@ -266,6 +271,12 @@
       const r = await post('/api/test-like', { username: 'arena_prueba', count: 10 });
       if (!r.sent) refresh('Abre esta página como la ventana principal del juego.');
     } catch (error) { refresh(String(error.message || error)); }
+  });
+  buttonTestShare.addEventListener('click', async () => {
+    try {
+      const r=await post('/api/test-share',{username:'arena_prueba'});
+      if(!r.sent)refresh('Abre esta página como la ventana principal del juego.');
+    } catch(error){refresh(String(error.message||error));}
   });
   buttonClaim.addEventListener('click',async()=>{try{await post('/api/claim-control',{clientId:state.clientId});}catch(error){refresh(error.message);}});
   let reconnectTimer=null,reconnectAttempt=0,stopped=false;
@@ -302,8 +313,10 @@
         // If they have not joined yet, normal admission/reentry rules apply.
         const username=String(data.username||'');
         const game=window.ArenaLive;
+        state.sharesReceived++;
         const targetId=game?.joinOnShare?.({username,platformKey:'tiktok'});
-        if(targetId!=null)game.support({eventType:'share',targetId});
+        if(targetId!=null && game.support({eventType:'share',targetId}))state.shareBoosts++;
+        sharesCount.textContent=`🔁 Compartidos recibidos: ${state.sharesReceived} · boosts: ${state.shareBoosts}`;
       } else if (data.type === 'social' && state.controller && data.platformKey === 'tiktok' && data.eventType === 'taps') {
         recordTaps(data);
       }
