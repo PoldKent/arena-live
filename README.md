@@ -157,7 +157,7 @@ El lobby muestra una bienvenida simplificada con tipografía grande en **16:9 y 
 
 Las indicaciones permanecen **arriba** en ambas capturas, también durante el combate, con un llamado visible a escribir `!jugar` y los cinco pares de clase/poder en texto, sin botones: `!guerrero → !kame`, `!shinobi → !rasen`, `!titan → !coloso`, `!rayo → !trueno` y `!espiritu → !enred`. El centro de la arena queda despejado.
 
-En **Modo Stream dual**, la columna TikTok usa un **marco vertical 9:21** con el vídeo **9:16 centrado** y bandas simétricas arriba y abajo. Puedes usar una fuente de ventana/recorte del marco para adaptarlo, con escala proporcional, a pantallas 9:19.5, 9:20 o 9:21; no deformes el vídeo. Si OBS captura solo `#viewport9x16`, sigue siendo 9:16 (1080 × 1920). La preparación normal y el HTML móvil mantienen 9:16, sin el marco 9:21.
+En **Pantallas y OBS → Calibración para OBS → Vertical**, elige el marco **9:21, 9:20, 9:19.5 o 9:16** de **Modo Stream dual**. El vídeo sigue siendo **9:16** y se centra dentro del marco seleccionado; 9:16 elimina los márgenes adicionales. El marco no dibuja rótulos de proporciones ni altera la resolución de los dos canvas. El control rosado **Posición horizontal de Vertical** admite desplazamientos **−120 a +120 px** en pasos de 1 px, una entrada numérica exacta y el botón **Centrar** que devuelve a 0. El selector, desplazamiento y espacio inferior se guardan en la calibración de OBS. El sistema migra la configuración anterior con centrado neutral. Configura o revisa el recorte en OBS después de cambiar la proporción exterior. Si OBS captura solo `#viewport9x16`, sigue siendo 9:16 (1080 × 1920). La preparación normal y el HTML móvil permanecen en 9:16.
 
 ## Móvil y controles
 
