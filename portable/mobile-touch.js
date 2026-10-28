@@ -2,7 +2,7 @@
 // Desktop/OBS retains its own controls; this adapter never changes combat rules.
 const ARENA_MOBILE_TAP_GAP=325;
 const ARENA_MOBILE_LAYOUT_KEY='arenaLiveMobileButtonsV1';
-const arenaMobileLayoutDefaults=Object.freeze({touchJoystick:[19,82],arenaMobileJump:[77,84],arenaMobileAttack:[87,72],arenaMobilePower:[62,74]});
+const arenaMobileLayoutDefaults=Object.freeze({touchJoystick:[13,50],arenaMobilePower:[46,50],arenaMobileJump:[67,50],arenaMobileAttack:[89,50]});
 let arenaMobileLayout={size:70,points:Object.fromEntries(Object.entries(arenaMobileLayoutDefaults).map(([k,v])=>[k,[...v]]))};
 let arenaMobileEditing=false;
 try{const saved=JSON.parse(localStorage.getItem(ARENA_MOBILE_LAYOUT_KEY)||'null');if(saved&&Number.isFinite(saved.size))arenaMobileLayout.size=Math.max(56,Math.min(94,saved.size));for(const [id,p]of Object.entries(saved?.points||{})){if(Object.hasOwn(arenaMobileLayoutDefaults,id)&&Array.isArray(p)&&p.length===2&&p.every(Number.isFinite))arenaMobileLayout.points[id]=[Math.max(7,Math.min(93,p[0])),Math.max(8,Math.min(95,p[1]))];}}catch(_){}
@@ -149,14 +149,12 @@ function arenaMobileTestPanel(){
     return document.getElementById(arenaMobileTestState.active);
 }
 function arenaMobileMountTestDrawer(){
-    const fullscreen=document.fullscreenElement?.id;
-    const viewport=document.getElementById(fullscreen==='card-16x9'||(!fullscreen&&monitorFocus==='16:9')?'viewport16x9':'viewport9x16');
+    const shelf=document.getElementById('arenaMobileControlShelf');
     const drawer=document.getElementById('arenaPortableTestDrawer');
-    if(viewport&&drawer){
-        viewport.appendChild(drawer);
+    if(shelf&&drawer){
+        shelf.appendChild(drawer);
         const skills=document.getElementById('arenaStreamerSkillsDock');
-        if(skills)viewport.appendChild(skills);
-        // Reposition inside the viewport when orientation/ratio changes.
+        if(skills)shelf.appendChild(skills);
         drawer.style.top='';drawer.style.left='';drawer.style.right='';
     }
 }
@@ -191,6 +189,7 @@ function arenaMobileShowTestDrawer(open=true){
         if(panel)document.getElementById('arenaMobilePanelHost')?.appendChild(panel);
     }
     drawer.hidden=!open;
+    document.getElementById('arenaMobileControlShelf')?.classList.toggle('has-open-tests',!!open);
     const fab=document.getElementById('arenaMobileTestFab');
     if(fab)fab.setAttribute('aria-expanded',String(!!open));
 }
@@ -207,27 +206,7 @@ function arenaMobileInstallTestDrawer(){
         drawer.querySelector('#arenaPortableTestCollapse').textContent=drawer.classList.contains('is-collapsed')?'+':'−';
         drawer.querySelector('#arenaPortableTestCollapse').setAttribute('aria-label',drawer.classList.contains('is-collapsed')?'Expandir panel':'Minimizar panel');
     };
-    // Drag the entire panel; selector, target and skill buttons stay inside.
-    const head=drawer.querySelector('#arenaPortableTestHead');let drag=null;
-    head.addEventListener('pointerdown',event=>{
-        if(event.target.closest('button')||(event.pointerType==='mouse'&&event.button!==0))return;
-        const rect=drawer.getBoundingClientRect();
-        drag={id:event.pointerId,dx:event.clientX-rect.left,dy:event.clientY-rect.top};
-        try{head.setPointerCapture(event.pointerId);}catch(_){}
-    });
-    head.addEventListener('pointermove',event=>{
-        if(!drag||drag.id!==event.pointerId)return;
-        event.preventDefault();
-        const viewport=drawer.parentElement.getBoundingClientRect();
-        const rect=drawer.getBoundingClientRect();
-        const x=Math.max(4,Math.min(viewport.width-rect.width-4,event.clientX-viewport.left-drag.dx));
-        const y=Math.max(4,Math.min(viewport.height-rect.height-4,event.clientY-viewport.top-drag.dy));
-        drawer.style.setProperty('left',x+'px','important');
-        drawer.style.setProperty('right','auto','important');
-        drawer.style.setProperty('top',y+'px','important');
-    });
-    const end=()=>{drag=null;};
-    head.addEventListener('pointerup',end);head.addEventListener('pointercancel',end);
+    // Compact tests are docked below the video, not draggable across the fight.
     arenaMobileMountTestDrawer();
     const fab=document.createElement('button');fab.id='arenaMobileTestFab';fab.type='button';
     fab.textContent='🎛 Modo Streamer';fab.title='Opciones del Modo Streamer';fab.setAttribute('aria-label','Abrir opciones del Modo Streamer');fab.setAttribute('aria-expanded','false');fab.hidden=true;
@@ -262,12 +241,12 @@ function arenaMobileInstallStreamerSkills(){
 }
 function arenaMobileSaveLayout(){try{localStorage.setItem(ARENA_MOBILE_LAYOUT_KEY,JSON.stringify(arenaMobileLayout));}catch(_){}}
 function arenaMobileApplyLayout(){
-    const view=document.getElementById(document.fullscreenElement?.id==='card-16x9'||(!document.fullscreenElement&&monitorFocus==='16:9')?'viewport16x9':'viewport9x16');
-    const bar=document.getElementById('arenaHeaderActions');if(!view||!bar)return;
+    const shelf=document.getElementById('arenaMobileControlShelf');
+    const bar=document.getElementById('arenaHeaderActions');if(!shelf||!bar)return;
     const analog=document.getElementById('touchControlDock');
-    if(analog&&analog.parentElement!==view)view.appendChild(analog);
-    if(bar.parentElement!==view)view.appendChild(bar);
-    const bounds=view.getBoundingClientRect();
+    if(analog&&analog.parentElement!==shelf)shelf.appendChild(analog);
+    if(bar.parentElement!==shelf)shelf.appendChild(bar);
+    const bounds=shelf.getBoundingClientRect();
     // Keep each full hit-target visible on narrow devices, after rotation and
     // when the user increases button size. Percentages remain stored in settings.
     const size=Math.max(56,Math.min(94,arenaMobileLayout.size));
@@ -338,7 +317,7 @@ function arenaMobileSyncTouchMode(){
     document.documentElement.dataset.mobileTouchMode=mode;
     document.querySelectorAll('input[name="arenaMobileTouchMode"]').forEach(input=>input.checked=input.value===mode);
     const advanced=document.getElementById('arenaMobileArrangeSettings');if(advanced)advanced.hidden=mode!=='joystick';
-    const help=document.getElementById('arenaMobileTouchHelp');if(help)help.textContent=mode==='touch'?'Táctil total: tocar para mover, deslizar para golpear, dos toques para saltar, tres para doble salto y pulsación larga para el poder.':'Joystick: mueve el analógico izquierdo y usa los botones Salto, Golpe y Poder. Puedes acomodar los cuatro controles.';
+    const help=document.getElementById('arenaMobileTouchHelp');if(help)help.textContent=mode==='touch'?'Táctil total: dedo izquierdo para movimiento; con el derecho toca para saltar, dos toques para doble salto, desliza para golpear y mantén para el poder.':'Joystick: mueve el analógico izquierdo y usa Salto, Golpe y Poder. Puedes acomodar los cuatro controles.';
     if(typeof arenaMobileApplyLayout==='function')arenaMobileApplyLayout();
 }
 function arenaMobileInstallControlDragging(){
@@ -354,7 +333,7 @@ function arenaMobileInstallControlDragging(){
         btn.addEventListener('pointermove',event=>{
             if(!arenaMobileEditing||drag!==event.pointerId)return;
             event.preventDefault();event.stopImmediatePropagation();
-            const view=btn.closest('#viewport9x16,#viewport16x9');
+            const view=btn.closest('#arenaMobileControlShelf');
             if(!view)return;
             const rect=view.getBoundingClientRect();
             const radius=arenaMobileLayout.size/2+3;
