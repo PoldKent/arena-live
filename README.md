@@ -24,9 +24,11 @@ Las capturas **Full HD 16:9 y 9:16** seleccionan automáticamente la ruta de dib
 
 **v0.28 — Interfaz móvil:** La edición sin conexión presenta un aviso inicial sobre el funcionamiento en streaming, con «No mostrar de nuevo»; oculta las instrucciones de comandos sobre los luchadores por defecto; compacta el lobby; incorpora botones flotantes para pantalla completa y ayuda; y agrupa las opciones de Prota, pausa, pruebas y configuración detrás de ☰ Menú. El joystick y Saltar/Golpe/Poder se mantienen accesibles, con las mismas reglas del motor principal. La pantalla completa depende de los permisos del navegador.
 
+**v0.29 — Prota táctil:** toca el escenario para moverte hacia el punto, desliza rápidamente para golpear, doble toque para saltar, triple toque para el segundo salto y mantén pulsado para activar el poder. Se elimina el joystick móvil. Los controles de acción se conservan como botones circulares flotantes. El botón 🧪 abre un panel arrastrable y minimizable con «Jugador, poderes y comandos», entradas, escenarios, interacciones y simulación sin ocultar toda la arena. [Detalles y límites](docs/MOBILE-TACTIL-V029.md).
+
 ## Probar en un celular con un solo archivo
 
-Descarga directamente la [edición móvil autónoma v0.28](mobile-builds/Arena-Live-v0.28.0-movil.html) (en GitHub usa **Download raw file**) o ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.28.0-movil.html`. Copia ese HTML al teléfono y ábrelo desde Chrome o un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
+Descarga directamente la [edición móvil táctil v0.29](mobile-builds/Arena-Live-v0.29.0-movil.html) (en GitHub usa **Download raw file**) o ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.29.0-movil.html`. Copia ese HTML al teléfono y ábrelo desde Chrome o un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
 
 La exportación usa el combate de `main`; comienza en 720p, dibujo a 30 FPS y calidad Rendimiento. Permite cambiar a 540p/1080p y 30/60 FPS. TikTok LIVE real sigue necesitando el servidor: este archivo ofrece pruebas locales. [Uso, optimizaciones y límites de la exportación móvil](docs/MOVIL-MONOLITICO.md).
 
