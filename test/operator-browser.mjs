@@ -43,6 +43,15 @@ await page.goto(`http://127.0.0.1:${port}/`,{waitUntil:'load'});
 await page.waitForFunction(()=>window.ArenaLive && arenaLiveInitialized);
 await page.evaluate(()=>{countdownsEnabled=false;});
 const shot=async name=>{if(process.env.ARENA_TEST_SCREENSHOTS){await mkdir(process.env.ARENA_TEST_SCREENSHOTS,{recursive:true});await page.screenshot({path:join(process.env.ARENA_TEST_SCREENSHOTS,name+'.png'),timeout:15000});}};
+await check('Both broadcast views include permanent five-class instructions and fresh lobby prompts',async()=>{
+ const instructions=await page.evaluate(()=>['16','9'].map(suffix=>({
+  lobby:!!document.getElementById('lobbyOverlay'+suffix),
+  guide:document.getElementById('arenaAudienceGuide'+suffix)?.textContent||'',
+  visible:getComputedStyle(document.getElementById('arenaAudienceGuide'+suffix)).display!=='none'
+ })));
+ for(const item of instructions){assert.equal(item.lobby,true);assert.equal(item.visible,true);for(const command of ['!jugar','!guerrero','!kame','!shinobi','!rasen','!titan','!coloso','!rayo','!trueno','!espiritu','!enred'])assert.ok(item.guide.includes(command),command);}
+});
+
 async function unfold(id){const panel=page.locator('#'+id);if(!await panel.evaluate(n=>n.open))await panel.locator('> summary').click({noWaitAfter:true});}
 async function settingsSection(index){const section=page.locator('.arena-settings-section').nth(index);if(!await section.evaluate(n=>n.open))await section.locator('> summary').click({noWaitAfter:true});}
 async function streamClick(id){await page.mouse.move(600,20);await page.locator('#'+id).click({noWaitAfter:true});}
@@ -303,12 +312,21 @@ await check('Camera shake defaults to 25%, can be disabled in Settings, persists
 });
 await check('Mobile prioritizes 9:16, exposes only the bottom action bar and preserves all tools in Menu',async()=>{
  await page.setViewportSize({width:390,height:844});const cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:5});await page.reload({waitUntil:'load'});await page.waitForFunction(()=>arenaLiveInitialized);await page.evaluate(()=>countdownsEnabled=false);
- assert.equal(await page.evaluate(()=>monitorFocus),'9:16');assert.equal(await page.locator('#arenaDockRight').isHidden(),true);assert.equal(await page.locator('#arenaHeaderActions').evaluate(n=>n.getBoundingClientRect().bottom),844);assert.equal(await page.locator('#arenaMobileMoreBtn').isVisible(),true);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ assert.equal(await page.evaluate(()=>monitorFocus),'9:16');assert.equal(await page.locator('#arenaDockRight').isHidden(),true);
+ const preview=await page.evaluate(()=>{
+  const frame=document.getElementById('card-9x16'),view=document.getElementById('viewport9x16');
+  const a=frame.getBoundingClientRect(),b=view.getBoundingClientRect();
+  return {phoneFit:frame.classList.contains('arena-phone-fit'),outerRatio:a.width/a.height,innerRatio:b.width/b.height,fit:b.top>=a.top-1&&b.bottom<=a.bottom+1};
+ });
+ assert.equal(preview.phoneFit,true);assert.ok(Math.abs(preview.outerRatio-9/20)<.02,JSON.stringify(preview));assert.ok(Math.abs(preview.innerRatio-9/16)<.02,JSON.stringify(preview));assert.equal(preview.fit,true);assert.equal(await page.locator('#arenaHeaderActions').evaluate(n=>n.getBoundingClientRect().bottom),844);assert.equal(await page.locator('#arenaMobileMoreBtn').isVisible(),true);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await page.locator('#arenaMobileMoreBtn').click();assert.equal(await page.locator('[data-forward-control="arenaDualTikTokConnectBtn"]').isDisabled(),await page.locator('#arenaDualTikTokConnectBtn').isDisabled());await page.locator('[data-forward-control="arenaDualTestsToggle"]').click();await unfold('arenaPanelPlayers');const before=(await state()).activeFighters;await page.locator('#arenaPanelPlayers button[onclick="triggerQuickJoin()"]').click();assert.equal((await state()).activeFighters,before+1);assert.equal(await page.locator('#arenaOperatorPopover').isHidden(),true);
  await page.locator('#arenaMobileMoreBtn').click();await page.locator('[data-forward-control="arenaDualSettingsBtn"]').click();assert.equal((await state()).paused,true);await page.keyboard.press('Escape');assert.equal((await state()).paused,false);await shot('mobile');
 });
 await check('Mobile action buttons and joystick use the original manual combat controls',async()=>{
  await page.locator('#btnStreamerJoin').click();await page.locator('#viewport9x16 button[onclick="startCombatFromLobby()"]').click();await page.waitForFunction(()=>gameState==='COMBAT');
+ assert.equal(await page.locator('#lobbyOverlay9').isVisible(),false);
+ assert.equal(await page.locator('#arenaAudienceGuide9').isVisible(),true);
+ assert.match(await page.locator('#arenaAudienceGuide9').textContent(),/!jugar/);
  assert.equal(await page.locator('#arenaMobileJump').isEnabled(),true);assert.equal(await page.locator('#touchJoystick').isVisible(),true);await page.locator('#arenaMobileJump').click();await page.locator('#arenaMobileAttack').click();await page.locator('#arenaMobilePower').click();assert.equal((await state()).settingsOpen,false);await shot('mobile-combat');
 });
 await check('Mobile special action follows the no-powers rule while movement and normal attacks remain usable',async()=>{
