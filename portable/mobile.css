@@ -738,3 +738,38 @@ html.arena-mobile-offline[data-mobile-mode="director"]:not(.arena-mobile-edit-co
 html.arena-mobile-offline[data-mobile-mode="director"]:not(.arena-mobile-edit-controls) #arenaHeaderActions>#arenaMobilePower{
  display:none!important
 }
+
+/* v0.32 · true open testing canvas: individual widgets, not a giant test card. */
+html.arena-mobile-offline #arenaPortableTestBody #arenaTrainingTargetCard{
+ background:transparent!important;border:0!important;border-radius:0!important;
+ box-shadow:none!important;padding:0!important;overflow:visible!important;
+ max-height:180px!important;
+}
+html.arena-mobile-offline #arenaPortableTestBody #arenaTrainingTargetCard>label{
+ display:block!important;width:max-content;max-width:100%;margin:0 0 5px;
+ border-radius:9px;padding:3px 8px;color:#a7f1f1!important;
+ background:rgba(14,48,68,var(--arena-hud-opacity,.85))!important;
+}
+html.arena-mobile-offline #arenaPortableTestBody #targetFighterSelect{
+ background:rgba(12,39,61,var(--arena-hud-opacity,.85))!important;
+ border:1px solid rgba(114,192,204,.65)!important;
+ border-radius:11px!important;min-height:45px!important;
+}
+html.arena-mobile-offline #arenaPortableTestBody .arena-skill-buttons>button{
+ min-height:53px!important;
+ background:rgba(14,54,74,var(--arena-hud-opacity,.85))!important;
+ border-radius:17px!important;
+}
+html.arena-mobile-offline #arenaPortableTestBody .arena-skill-buttons>button:active{
+ transform:scale(.96);border-color:#8beadf!important;
+}
+/* Menu control surface is the same translucent system as the HUD. */
+html.arena-mobile-offline #arenaPortableTestBody input,
+html.arena-mobile-offline #arenaPortableTestBody select,
+html.arena-mobile-offline #arenaPortableTestBody textarea,
+html.arena-mobile-offline #arenaPortableTestBody button,
+html.arena-mobile-offline #arenaOperatorPopover .arena-mobile-match-menu>summary,
+html.arena-mobile-offline #arenaPortableSetup input:not([type=checkbox]):not([type=radio]):not([type=range]),
+html.arena-mobile-offline #arenaPortableSetup select{
+ background-color:rgba(19,50,72,var(--arena-hud-opacity,.85))!important;
+}
