@@ -56,3 +56,18 @@ test('beam endpoints and KO pillars reach viewport edges at different zooms and 
     assert.ok(ctx.rects[0][1]<b.top);assert.equal(ctx.rects[0][1]+ctx.rects[0][3],300);
   }
 });
+
+test('reusable high-DPI label and body sprites preserve full-HD dual-capture architecture',()=>{
+  assert.match(html,/const ARENA_LABEL_SPRITE_SCALE = 3;/);
+  assert.match(html,/const ARENA_BODY_SPRITE_SCALE = 3;/);
+  assert.match(html,/const MAX_ARENA_BODY_SPRITES = 72;/);
+  assert.match(html,/const arenaFighterBodySprites = new Map\(\)/);
+  assert.match(html,/const arenaFighterLabelCache = new WeakMap\(\)/);
+  assert.match(html,/brush\.fillText\(displayTag, 0, -1\)/);
+  assert.match(html,/brush\.fillText\(classTitle, 0, classFont \+ 1, 90\)/);
+  assert.match(html,/targetCtx\.drawImage\(entry\.sprite, drawX - entry\.spriteWidth \/ 2/);
+  assert.match(html,/targetCtx\.drawImage\(bodySprite\.sprite, drawX - bodySprite\.extent/);
+  assert.match(html,/targetCtx\.fillRect\(drawX - barW \/ 2, plateY \+ 13, barW \* hpPct, 5\)/);
+  assert.match(html,/if \(f\.shieldTimer > 0\)/);
+  assert.match(html,/if \(f\.immunityTimer > 0\)/);
+});

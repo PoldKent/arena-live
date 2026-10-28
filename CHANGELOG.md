@@ -1,5 +1,13 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-27 — Arena Live v0.21 · Composición acelerable por GPU
+
+- Sprites Canvas 2D transparentes reutilizables de las placas de nombre/clase: un dibujo al crear o cambiar el texto, luego composición con `drawImage` para 32, 64 y 128 guerreros en 16:9 y 9:16.
+- Sprites compartidos de cuerpo, ojos y cinta, con claves por color/clase, dirección, radio, daño y Prota. Límite global de 72 variaciones; sombras, animación de cola, aura, escudos, HP y poderes siguen vivos.
+- El navegador sigue utilizando Canvas 2D con `willReadFrequently:false`, elegible para aceleración por GPU; el modo GPU y los controladores determinan si se ejecuta en hardware.
+- Capturas 1920×1080 y 1080×1920 y física intactas; pruebas de cachés, comportamiento y estrés.
+- Versión visible, API y paquete sincronizados en 0.21.0.
+
 ## 2026-10-27 — Arena Live v0.20 · Marcadores de vida por HP
 
 - Los dos marcadores superiores de Duelo 1v1 muestran HP restantes en números enteros (`180 HP`, `75 HP`) en las capturas 16:9 y 9:16; ya no indican `100%`.

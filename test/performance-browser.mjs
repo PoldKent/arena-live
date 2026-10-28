@@ -336,6 +336,36 @@ try {
         assert.ok(result.renamed >= 2); assert.ok(result.lifeChanged > result.renamed);
         assert.ok(result.fontsChanged > result.lifeChanged);
       });
+      await check('128 fighters reuse name and body textures on successive Full HD draws', async () => {
+        const result = await page.evaluate(() => {
+          gameState = 'LOBBY';
+          applyPlayerCountPreset(128);
+          startCombatFromLobby();
+          setMonitorFocus('dual');
+          renderBothScreensSimultaneously();
+          const original = CanvasRenderingContext2D.prototype.fillText;
+          let calls = 0;
+          CanvasRenderingContext2D.prototype.fillText = function(...args) {
+            calls++; return original.apply(this,args);
+          };
+          try {
+            renderBothScreensSimultaneously();
+            return { calls, players:fighters.length,
+              bodyAtlas:arenaFighterBodySprites.size,
+              cached16:fighters.filter(f=>Boolean(arenaFighterLabelCache.get(f)?.[0]?.sprite)).length,
+              cached9:fighters.filter(f=>Boolean(arenaFighterLabelCache.get(f)?.[1]?.sprite)).length,
+              dimensions:[[canvas16.width,canvas16.height],[canvas9.width,canvas9.height]] };
+          } finally {
+            CanvasRenderingContext2D.prototype.fillText = original;
+          }
+        });
+        assert.equal(result.players,128);
+        assert.equal(result.cached16,128);
+        assert.ok(result.cached9>0&&result.cached9<=128);
+        assert.ok(result.bodyAtlas>0&&result.bodyAtlas<=72);
+        assert.ok(result.calls<30,'steady frames avoid repeated text rasterization');
+        assert.deepEqual(result.dimensions,[[1920,1080],[1080,1920]]);
+      });
       await check('unchanged duel HUD values do not recreate text or trigger localization each frame', async () => {
         const mutations = await page.evaluate(() => {
           applyPlayerCountPreset(2); renderBothScreensSimultaneously();

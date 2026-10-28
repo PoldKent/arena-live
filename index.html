@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.20 — TikTok LIVE</title>
+    <title>Arena Live v0.21 — TikTok LIVE</title>
     <!--
       ARENA LIVE · GAME RUNTIME
       The classic game script stays here; utility CSS is built locally and
@@ -13,7 +13,7 @@
       have been migrated to explicit event listeners.
     -->
     <!-- Styles are built once; no browser compiler runs during a stream. -->
-    <link rel="stylesheet" href="styles/arena-ui.css?v=0.20">
+    <link rel="stylesheet" href="styles/arena-ui.css?v=0.21">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Fonts: Inter & Orbitron for Arcade/Esports HUD -->
@@ -1835,17 +1835,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.20 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.21 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
 
     <!-- ==================== COMPLETE GAME ENGINE, LOBBY & VICTORY SCRIPT ==================== -->
-    <script src="engine/arena-core.js?v=0.20"></script>
-    <script src="engine/arena-render.js?v=0.20"></script>
-    <script src="engine/arena-audio.js?v=0.20"></script>
-    <script src="engine/arena-settings.js?v=0.20"></script>
-    <script src="engine/arena-balance-evidence.js?v=0.20"></script>
+    <script src="engine/arena-core.js?v=0.21"></script>
+    <script src="engine/arena-render.js?v=0.21"></script>
+    <script src="engine/arena-audio.js?v=0.21"></script>
+    <script src="engine/arena-settings.js?v=0.21"></script>
+    <script src="engine/arena-balance-evidence.js?v=0.21"></script>
     <script>
         /*************************************************************************
          * ARENA LIVE · MONOLITHIC ENGINE INDEX
@@ -6029,9 +6029,10 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         const MAX_STATUS_ICON_SETS = 64;
         let arenaRenderFontRevision = 0;
         document.fonts?.addEventListener('loadingdone', () => { arenaRenderFontRevision++; });
+        // Textures use three pixels per world unit for crisp dual Full HD crops.
+        // The WeakMap follows each fighter and invalidates on identity/font/class changes.
+        const ARENA_LABEL_SPRITE_SCALE = 3;
         function drawFighterLabel(targetCtx, f, drawX, plateY, nameFont, classFont, packedFighterCount) {
-            targetCtx.textAlign = 'center';
-            targetCtx.textBaseline = 'alphabetic';
             const oppShort = rejoinRuleMode === '3_lives' ? `${f.joinsUsed}/${MAX_OPPORTUNITIES}` : `#${f.joinsUsed}`;
             const displayName = getFighterDisplayName(f, true);
             const nameLimit = packedFighterCount >= 70 ? 9 : packedFighterCount >= 30 ? 11 : 16;
@@ -6039,29 +6040,39 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const displayTag = f.coopCount > 1
                 ? `${f.platform.icon} ${compactName} ${oppShort} x${f.coopCount}`
                 : `${f.platform.icon} ${compactName} ${oppShort}`;
-
-            targetCtx.font = `700 ${nameFont}px "Inter", sans-serif`;
-            const key = `${arenaRenderFontRevision}|${currentLanguage}|${nameFont}|${classFont}|${displayTag}|${f.archetypeKey}|${f.classTitle}`;
+            const key = `${arenaRenderFontRevision}|${currentLanguage}|${nameFont}|${classFont}|${displayTag}|${f.archetypeKey}|${f.classTitle}|${f.color}|${f.isStreamer}|${rejoinRuleMode}`;
             let entries = arenaFighterLabelCache.get(f);
             if (!entries) { entries = []; arenaFighterLabelCache.set(f, entries); }
             const slot = targetCtx === ctx9 ? 1 : 0;
             if (!entries[slot] || entries[slot].key !== key) {
-                entries[slot] = {key, width: targetCtx.measureText(displayTag).width + 10,
-                    classTitle: ARCHETYPES.find(archetype => archetype.key === f.archetypeKey)?.title || getFighterClassTitle(f),
-                    classFont: `700 ${classFont}px "Inter", sans-serif`};
+                targetCtx.font = `700 ${nameFont}px "Inter", sans-serif`;
+                const textWidth = targetCtx.measureText(displayTag).width + 10;
+                const classTitle = ARCHETYPES.find(archetype => archetype.key === f.archetypeKey)?.title || getFighterClassTitle(f);
+                const spriteWidth = Math.max(textWidth, 94) + 8;
+                const spriteTop = -(nameFont + 4);
+                const spriteHeight = nameFont + classFont + 11;
+                const sprite = document.createElement('canvas');
+                sprite.width = Math.ceil(spriteWidth * ARENA_LABEL_SPRITE_SCALE);
+                sprite.height = Math.ceil(spriteHeight * ARENA_LABEL_SPRITE_SCALE);
+                const brush = sprite.getContext('2d', {alpha:true, willReadFrequently:false});
+                brush.setTransform(sprite.width / spriteWidth, 0, 0, sprite.height / spriteHeight, 0, 0);
+                brush.translate(spriteWidth / 2, -spriteTop);
+                brush.textAlign = 'center';
+                brush.textBaseline = 'alphabetic';
+                brush.fillStyle = 'rgba(9, 13, 22, 0.82)';
+                brush.beginPath();
+                brush.roundRect(-textWidth / 2, -(nameFont + 2), textWidth, nameFont + 5, 3);
+                brush.fill();
+                brush.font = `700 ${nameFont}px "Inter", sans-serif`;
+                brush.fillStyle = f.isStreamer ? '#ffbe0b' : (f.joinsUsed === MAX_OPPORTUNITIES && rejoinRuleMode === '3_lives' ? '#fda4af' : '#f8fafc');
+                brush.fillText(displayTag, 0, -1);
+                brush.font = `700 ${classFont}px "Inter", sans-serif`;
+                brush.fillStyle = f.color;
+                brush.fillText(classTitle, 0, classFont + 1, 90);
+                entries[slot] = {key, sprite, spriteWidth, spriteTop, spriteHeight};
             }
-            const textWidth = entries[slot].width;
-            targetCtx.fillStyle = 'rgba(9, 13, 22, 0.82)';
-            targetCtx.beginPath();
-            targetCtx.roundRect(drawX - textWidth / 2, plateY - (nameFont + 2), textWidth, nameFont + 5, 3);
-            targetCtx.fill();
-            targetCtx.fillStyle = f.isStreamer ? '#ffbe0b' : (f.joinsUsed === MAX_OPPORTUNITIES && rejoinRuleMode === '3_lives' ? '#fda4af' : '#f8fafc');
-            targetCtx.fillText(displayTag, drawX, plateY - 1);
-
-            targetCtx.font = entries[slot].classFont;
-            targetCtx.fillStyle = f.color;
-            targetCtx.fillText(entries[slot].classTitle, drawX, plateY + classFont + 1, 90);
-
+            const entry = entries[slot];
+            targetCtx.drawImage(entry.sprite, drawX - entry.spriteWidth / 2, plateY + entry.spriteTop, entry.spriteWidth, entry.spriteHeight);
         }
 
 
@@ -6084,6 +6095,51 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 }
             }
             return icons;
+        }
+
+        // Static bodies are painted once and reused as transparent, high-DPI
+        // textures by both GPU-compositable Canvas 2D broadcast outputs.
+        const arenaFighterBodySprites = new Map();
+        const MAX_ARENA_BODY_SPRITES = 72;
+        const ARENA_BODY_SPRITE_SCALE = 3;
+        function getArenaFighterBodySprite(f) {
+            const hurt = f.hurtTimer > 0;
+            const key = `${f.radius}|${f.color}|${f.headband}|${f.isStreamer}|${f.facing}|${hurt}`;
+            let entry = arenaFighterBodySprites.get(key);
+            if (entry) return entry;
+            const r = f.radius, extent = r + 5, size = extent * 2;
+            const sprite = document.createElement('canvas');
+            sprite.width = Math.ceil(size * ARENA_BODY_SPRITE_SCALE);
+            sprite.height = Math.ceil(size * ARENA_BODY_SPRITE_SCALE);
+            const brush = sprite.getContext('2d', {alpha:true, willReadFrequently:false});
+            brush.setTransform(sprite.width / size, 0, 0, sprite.height / size, 0, 0);
+            brush.translate(extent, extent);
+            brush.lineCap = 'round';
+            brush.fillStyle = hurt ? '#ffffff' : f.color;
+            brush.beginPath();
+            brush.arc(0, 0, r, 0, Math.PI * 2);
+            brush.fill();
+            brush.lineWidth = 2.5;
+            brush.strokeStyle = f.isStreamer ? '#ffffff' : '#0f172a';
+            brush.stroke();
+            brush.strokeStyle = f.headband;
+            brush.lineWidth = 4.5;
+            brush.beginPath();
+            brush.moveTo(-r * 0.92, -r * 0.32);
+            brush.lineTo(r * 0.92, -r * 0.32);
+            brush.stroke();
+            const eyeOffsetX = f.facing * (r * 0.35);
+            brush.fillStyle = '#090d16';
+            brush.beginPath();
+            brush.arc(eyeOffsetX - 3, -1, 2.7, 0, Math.PI * 2);
+            brush.arc(eyeOffsetX + 4, -1, 2.7, 0, Math.PI * 2);
+            brush.fill();
+            entry = {sprite, extent, size};
+            arenaFighterBodySprites.set(key, entry);
+            // Bound memory if a long broadcast switches many classes/colors.
+            if (arenaFighterBodySprites.size > MAX_ARENA_BODY_SPRITES)
+                arenaFighterBodySprites.delete(arenaFighterBodySprites.keys().next().value);
+            return entry;
         }
 
         function drawFighterOnCtx(targetCtx, f, animationTime = Date.now()) {
@@ -6153,27 +6209,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             targetCtx.stroke();
 
             const bob = Math.sin(f.walkCycle) * 2.2;
-            targetCtx.fillStyle = f.hurtTimer > 0 ? '#ffffff' : f.color;
-            targetCtx.beginPath();
-            targetCtx.arc(drawX, drawY + bob, r, 0, Math.PI * 2);
-            targetCtx.fill();
-            targetCtx.lineWidth = 2.5;
-            targetCtx.strokeStyle = f.isStreamer ? '#ffffff' : '#0f172a';
-            targetCtx.stroke();
-
-            targetCtx.strokeStyle = f.headband;
-            targetCtx.lineWidth = 4.5;
-            targetCtx.beginPath();
-            targetCtx.moveTo(drawX - r * 0.92, drawY - r * 0.32 + bob);
-            targetCtx.lineTo(drawX + r * 0.92, drawY - r * 0.32 + bob);
-            targetCtx.stroke();
-
-            const eyeOffsetX = f.facing * (r * 0.35);
-            targetCtx.fillStyle = '#090d16';
-            targetCtx.beginPath();
-            targetCtx.arc(drawX + eyeOffsetX - 3, drawY - 1 + bob, 2.7, 0, Math.PI * 2);
-            targetCtx.arc(drawX + eyeOffsetX + 4, drawY - 1 + bob, 2.7, 0, Math.PI * 2);
-            targetCtx.fill();
+            const bodySprite = getArenaFighterBodySprite(f);
+            targetCtx.drawImage(bodySprite.sprite, drawX - bodySprite.extent,
+                drawY + bob - bodySprite.extent, bodySprite.size, bodySprite.size);
 
             if (f.attackAnimTimer > 0) {
                 targetCtx.strokeStyle = f.berserkTimer > 0 ? '#ffbe0b' : '#ffffff';
@@ -8041,7 +8079,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.20';
+        const ARENA_RELEASE_VERSION = '0.21';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:0, footer:76, format:'21'});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
@@ -8842,7 +8880,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.20.0',
+            version: '0.21.0',
             edition: 'tiktok',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,
             getBalanceRules() {
