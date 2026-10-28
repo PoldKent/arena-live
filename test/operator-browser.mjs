@@ -1139,40 +1139,54 @@ await check('Bubbles appear for normal TikTok speech, never for any command or p
  });
  assert.deepEqual(result,{commands:0,normal:true});
 });
-await check('New settings navigation groups controls without replacing input nodes and remembers selection',async()=>{
+await check('Settings categories keep match, combat, HUD, audience, controls and audio in their proper tabs',async()=>{
  const r=await page.evaluate(()=>{
   const lives=document.getElementById('playerLivesSelect');
-  const rule=document.getElementById('arenaRuleDamage');
+  const capacity=document.getElementById('arenaMaxPlayers');
+  const classRule=document.getElementById('arenaClassRule');
+  const damageRule=document.getElementById('arenaRuleDamage');
   const obs=document.getElementById('arenaObsVerticalFormat');
+  const numbers=document.getElementById('showCombatNumbersToggle');
+  const powerText=document.getElementById('showPowerTextToggle');
+  const names=document.getElementById('showFighterNamesToggle');
+  const audience=document.getElementById('autoAudienceRateSettings');
   const language=document.getElementById('languageSelect');
-  const audience=document.getElementById('showPowerTextToggle');
+  const prota=document.getElementById('btnStreamerControl');
   const workspace=document.getElementById('arenaWorkspaceReset');
   const labels=[...document.querySelectorAll('#arenaSettingsTabs button')].map(n=>n.dataset.settingsTab);
-  selectArenaSettingsTab('match');
-  const livesVisible=!lives.closest('.arena-settings-section').hidden;
-  const damageHidden=rule.closest('.arena-settings-section').hidden;
-  selectArenaSettingsTab('combat');
-  const damageVisible=!rule.closest('.arena-settings-section').hidden;
-  selectArenaSettingsTab('broadcast');
-  const obsVisible=!obs.closest('.arena-settings-section').hidden;
-  const languageHidden=language.closest('.arena-settings-section').hidden;
-  selectArenaSettingsTab('audio');
-  const languageVisible=!language.closest('.arena-settings-section').hidden;
-  selectArenaSettingsTab('audience');
-  const audienceVisible=!audience.closest('.arena-settings-section').hidden;
-  selectArenaSettingsTab('system');
-  const workspaceVisible=!workspace.closest('.arena-settings-section').hidden;
+  const visibleIn=(tab,node)=>{
+   selectArenaSettingsTab(tab,false);
+   return !node.closest('.arena-settings-section').hidden;
+  };
+  const namesDefault=names.checked;
+  const mapping={
+   match:visibleIn('match',lives)&&visibleIn('match',capacity)&&visibleIn('match',classRule),
+   combat:visibleIn('combat',damageRule),
+   display:visibleIn('broadcast',obs)&&visibleIn('broadcast',numbers)&&visibleIn('broadcast',powerText)&&visibleIn('broadcast',names),
+   audience:visibleIn('audience',audience)&&!visibleIn('audience',numbers),
+   audio:visibleIn('audio',language),
+   controls:visibleIn('controls',prota),
+   system:visibleIn('system',workspace)
+  };
+  const sameNodes=names===document.getElementById('showFighterNamesToggle')&&numbers===document.getElementById('showCombatNumbersToggle');
+  const saved=JSON.parse(localStorage.getItem(ARENA_COMBAT_DISPLAY_KEY)||'{}');
+  setCombatDisplayOption('names',false);
+  const hidden=!showFighterNames&&document.getElementById('showFighterNamesToggle').checked===false;
+  setCombatDisplayOption('names',true);
+  const persisted=JSON.parse(localStorage.getItem(ARENA_COMBAT_DISPLAY_KEY)||'{}').names===true;
   document.getElementById('arenaSettingsSearch').value='vidas';
   selectArenaSettingsTab('broadcast',false);
   const searchFound=!lives.closest('.arena-settings-section').hidden;
   document.getElementById('arenaSettingsSearch').value='';
   selectArenaSettingsTab('match');
-  return {labels,livesVisible,damageHidden,damageVisible,obsVisible,languageHidden,languageVisible,audienceVisible,workspaceVisible,searchFound,
-    stable:lives===document.getElementById('playerLivesSelect')&&rule===document.getElementById('arenaRuleDamage'),
-    stored:localStorage.getItem('arenaLiveSettingsNavV1')};
+  return {labels,mapping,namesDefault,hidden,persisted,searchFound,sameNodes,
+   stored:localStorage.getItem('arenaLiveSettingsNavV1')};
  });
- assert.deepEqual(r,{labels:['match','combat','classes','audience','broadcast','audio','system'],
-   livesVisible:true,damageHidden:true,damageVisible:true,obsVisible:true,languageHidden:true,languageVisible:true,audienceVisible:true,workspaceVisible:true,searchFound:true,stable:true,stored:'match'});
+ assert.deepEqual(r,{
+  labels:['match','combat','classes','audience','broadcast','audio','controls','system'],
+  mapping:{match:true,combat:true,display:true,audience:true,audio:true,controls:true,system:true},
+  namesDefault:true,hidden:true,persisted:true,searchFound:true,sameNodes:true,stored:'match'
+ });
 });
 await check('Real TikTok follower gift subscriber support routes to the real sender rather than the selected actor',async()=>{
  const r=await page.evaluate(()=>{
