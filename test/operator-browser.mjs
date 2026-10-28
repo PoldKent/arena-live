@@ -1169,8 +1169,8 @@ await check('Optional HUD labels show only confirmed TikTok taps, !jugar and Pro
  });
  assert.deepEqual(r,{botHidden:true,tapVisible:true,playVisible:true,protaVisible:true,allHidden:true,persisted:true,oldViewRestored:true});
 });
-await check('LIVE participant filter hides simulated HP/energy above fighters and on both 1v1 HUDs',async()=>{
- const result=await page.evaluate(()=>{
+await check('LIVE participant filter hides only overhead indicators, preserving both 1v1 HUDs',async()=>{
+ const r=await page.evaluate(()=>{
    gameState='LOBBY';koSequenceActive=false;isGamePaused=false;
    arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS,maxPlayers:128};
    setRejoinRuleMode('free');applyPlayerCountPreset(2);startCombatFromLobby();
@@ -1178,34 +1178,31 @@ await check('LIVE participant filter hides simulated HP/energy above fighters an
    setCombatDisplayOption('tiktokNamesOnly',true);
    const [bot1,bot2]=fighters.filter(f=>!f.eliminated);
    renderBothScreensSimultaneously();
-   const bothSimulated=![bot1,bot2].some(shouldShowFighterInformation);
-   const bothCardsHidden=['16','9'].every(sfx=>document.getElementById('hud1v1Bars'+sfx).classList.contains('hidden'));
-   const firstConfirm=ArenaLive.joinOnTap({username:bot1.name,platformKey:bot1.platformKey});
-   renderBothScreensSimultaneously();
-   const oneConfirmed=!firstConfirm&&shouldShowFighterInformation(bot1)&&!shouldShowFighterInformation(bot2);
-   const oneCard=['16','9'].every(sfx=>{
+   const botsHiddenAbove=!shouldShowFighterInformation(bot1)&&!shouldShowFighterInformation(bot2);
+   const duetVisible=sfx=>{
      const card=document.getElementById('hud1v1Bars'+sfx);
      const first=document.getElementById('p1Name1v1_'+sfx).closest('.col-span-5');
      const second=document.getElementById('p2Name1v1_'+sfx).closest('.col-span-5');
-     return !card.classList.contains('hidden')&&card.classList.contains('arena-duel-single')&&
-       !first.classList.contains('hidden')&&second.classList.contains('hidden')&&
-       card.querySelector('.col-span-1').classList.contains('hidden');
-   });
-   setCombatDisplayOption('names',false);
-   const filterStillWorks=shouldShowFighterInformation(bot1)&&!shouldShowFighterInformation(bot2)&&
-     document.getElementById('showTikTokParticipantNamesOnlyToggle').disabled===false;
-   setCombatDisplayOption('tiktokNamesOnly',false);
+     const p1Hp=document.getElementById('p1HpText1v1_'+sfx).textContent;
+     const p2Hp=document.getElementById('p2HpText1v1_'+sfx).textContent;
+     return !card.classList.contains('hidden')&&!first.classList.contains('hidden')&&
+       !second.classList.contains('hidden')&&p1Hp.includes('HP')&&p2Hp.includes('HP');
+   };
+   const bothVisible=['16','9'].every(duetVisible);
+   // A real tap confirms an already-active preset without removing the rival's duel bars.
+   const tapResult=ArenaLive.joinOnTap({username:bot1.name,platformKey:bot1.platformKey});
    renderBothScreensSimultaneously();
-   const bothRestored=['16','9'].every(sfx=>{
-     const card=document.getElementById('hud1v1Bars'+sfx);
-     return !card.classList.contains('hidden')&&!card.classList.contains('arena-duel-single')&&
-       !document.getElementById('p1Name1v1_'+sfx).closest('.col-span-5').classList.contains('hidden')&&
-       !document.getElementById('p2Name1v1_'+sfx).closest('.col-span-5').classList.contains('hidden');
-   });
+   const afterTap=!tapResult&&shouldShowFighterInformation(bot1)&&
+     !shouldShowFighterInformation(bot2)&&['16','9'].every(duetVisible);
+   setCombatDisplayOption('names',false);
+   const independentOfNames=shouldShowFighterInformation(bot1)&&!shouldShowFighterInformation(bot2);
+   setCombatDisplayOption('tiktokNamesOnly',false);
+   const restoredOverhead=shouldShowFighterInformation(bot1)&&shouldShowFighterInformation(bot2)&&
+     ['16','9'].every(duetVisible);
    setCombatDisplayOption('names',true);
-   return {bothSimulated,bothCardsHidden,oneConfirmed,oneCard,filterStillWorks,bothRestored};
+   return {botsHiddenAbove,bothVisible,afterTap,independentOfNames,restoredOverhead};
  });
- assert.deepEqual(result,{bothSimulated:true,bothCardsHidden:true,oneConfirmed:true,oneCard:true,filterStillWorks:true,bothRestored:true});
+ assert.deepEqual(r,{botsHiddenAbove:true,bothVisible:true,afterTap:true,independentOfNames:true,restoredOverhead:true});
 });
 await check('Protagonist can join and rejoin mid-fight in free mode at a full simulated 128 roster',async()=>{
  const r=await page.evaluate(()=>{

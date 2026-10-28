@@ -119,24 +119,26 @@ test('real TikTok LIVE follow gift and subscription events have isolated viewer-
  assert.match(bridge,/ARENA_SOCIAL_EVENT_TYPES = Object\.freeze\(\['taps', 'likes', 'share', 'follow', 'subscribe'/);
 });
 
-test('simulated fighters keep fighting but hide overhead HP/energy and duel panels when the LIVE filter is enabled',()=>{
+test('LIVE filter hides only overhead health; 1v1 HUD remains complete for simulated fighters',()=>{
  const info=html.match(/function shouldShowFighterInformation\(fighter\) \{[\s\S]*?\n        \}/)?.[0];
- assert.ok(info,'common fighter information filter is present');
+ assert.ok(info,'shared overhead information filter exists');
  const ctx=vm.createContext({});
  vm.runInContext('let showTikTokParticipantNamesOnly=true; '+info,ctx);
- const bot={isStreamer:false,joinedByTikTok:false};
- const real={isStreamer:false,joinedByTikTok:true};
- const prota={isStreamer:true,joinedByTikTok:false};
- assert.equal(vm.runInContext('shouldShowFighterInformation',ctx)(bot),false);
- assert.equal(vm.runInContext('shouldShowFighterInformation',ctx)(real),true);
- assert.equal(vm.runInContext('shouldShowFighterInformation',ctx)(prota),true);
+ const visible=vm.runInContext('shouldShowFighterInformation',ctx);
+ assert.equal(visible({isStreamer:false,joinedByTikTok:false}),false);
+ assert.equal(visible({isStreamer:false,joinedByTikTok:true}),true);
+ assert.equal(visible({isStreamer:true,joinedByTikTok:false}),true);
  vm.runInContext('showTikTokParticipantNamesOnly=false',ctx);
- assert.equal(vm.runInContext('shouldShowFighterInformation',ctx)(bot),true);
+ assert.equal(visible({isStreamer:false,joinedByTikTok:false}),true);
  assert.match(html,/if \(gameState !== 'LOBBY' && shouldShowFighterInformation\(f\)\) \{/);
- assert.match(html,/syncArenaDuelFighterInformation\(sfx, p1, p2\)/);
- assert.match(html,/card\.classList\.toggle\('hidden', !showFirst && !showSecond\)/);
- assert.match(html,/classList\.toggle\('hidden', !showFirst\)/);
- assert.match(html,/classList\.toggle\('hidden', !showSecond\)/);
- assert.match(html,/arena-duel-single/);
- assert.match(html,/Los simulados siguen peleando sin etiquetas ni barras/);
+ assert.doesNotMatch(html,/syncArenaDuelFighterInformation/);
+ assert.doesNotMatch(html,/arena-duel-single/);
+ for(const suffix of ['16','9']){
+   assert.match(html,new RegExp('id="hud1v1Bars'+suffix+'"'));
+   assert.match(html,new RegExp('id="p1Bar1v1_'+suffix+'"'));
+   assert.match(html,new RegExp('id="p2Bar1v1_'+suffix+'"'));
+ }
+ assert.match(html,/writeArenaHudText\(p1HpText, formatArenaFighterHp\(p1\)\)/);
+ assert.match(html,/writeArenaHudText\(p2HpText, formatArenaFighterHp\(p2\)\)/);
+ assert.match(html,/barras superiores del duelo 1v1 siguen visibles/);
 });

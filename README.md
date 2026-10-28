@@ -1,10 +1,10 @@
-# Arena Live · v0.35
+# Arena Live · v0.36
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
 ## Versión principal
 
-`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API y el paquete identifican la versión 0.33. [Panel único de v0.18](docs/RELEASE-0.18-PANEL-UNICO.md). [Las seis correcciones y su validación](docs/RELEASE-0.15-CORRECCIONES.md).
+`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API y el paquete identifican la versión 0.36. [Panel único de v0.18](docs/RELEASE-0.18-PANEL-UNICO.md). [Las seis correcciones y su validación](docs/RELEASE-0.15-CORRECCIONES.md).
 
 En **duelo 1v1**, los marcadores de vida de ambas capturas muestran **HP actuales** (por ejemplo, `180 HP` o `75 HP`) en lugar de porcentajes; las barras siguen reflejando proporcionalmente la vida restante y la energía mantiene su porcentaje.
 
@@ -36,11 +36,13 @@ Las capturas **Full HD 16:9 y 9:16** seleccionan automáticamente la ruta de dib
 
 **v0.34 — Participación LIVE visible:** Pantalla y HUD permite mostrar los nombres solo de quienes entraron con taps o `!jugar` de TikTok, además del Protagonista. Los bots siguen combatiendo aunque sus etiquetas estén ocultas; no cambia el daño ni la cantidad de jugadores. En Entrada libre, los taps permiten entrar y reingresar durante el combate (mientras no haya comenzado el K.O. final) y el Protagonista puede incorporarse incluso con los 128 cupos ocupados por bots. Se añadieron pruebas automatizadas para comprobar estas rutas; se requiere un LIVE real para validar la recepción desde TikTok.
 
-**v0.35 — HUD limpio para simulados:** el ajuste de participantes LIVE ahora oculta también las barras de vida y energía sobre los bots y los datos de los bots en el HUD superior de duelos (ambas capturas 16:9 y 9:16). Si solo un luchador del duelo es participante confirmado, únicamente aparece su panel de vida; si ambos son bots, el panel se oculta entero. El filtro se puede activar aunque el control general de nombres esté apagado y conserva las preferencias guardadas. Las estadísticas y reglas reales del combate permanecen intactas.
+**v0.35 — HUD limpio para simulados:** el ajuste de participantes LIVE ahora oculta también las barras de vida y energía sobre los bots y los datos de los bots en el HUD superior de duelos (ambas capturas 16:9 y 9:16). Si solo un luchador del duelo es participante confirmado, únicamente aparece su panel de vida; si ambos son bots, el panel se oculta entero. Ese comportamiento del HUD 1v1 se corrigió en v0.36. El filtro se puede activar aunque el control general de nombres esté apagado y conserva las preferencias guardadas. Las estadísticas y reglas reales del combate permanecen intactas.
+
+**v0.36 — Duelo 1v1 completo:** el filtro de nombres, vida y energía de jugadores simulados se aplica únicamente a los indicadores **sobre los luchadores**. Las barras superiores de vida, HP actuales y energía de **ambos** contrincantes en duelos 1v1 permanecen siempre visibles, sean bots, espectadores LIVE o el Protagonista, en 16:9 y 9:16. Se mantienen las reglas de combate y todas las preferencias existentes.
 
 ## Probar en un celular con un solo archivo
 
-Descarga directamente la [edición móvil v0.35: HUD limpio y participantes LIVE](mobile-builds/Arena-Live-v0.35.0-movil.html) (en GitHub usa **Download raw file**) o ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.35.0-movil.html`. Copia ese HTML al teléfono y ábrelo desde Chrome o un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
+Descarga directamente la [edición móvil v0.36: HUD 1v1 siempre visible](mobile-builds/Arena-Live-v0.36.0-movil.html) (en GitHub usa **Download raw file**) o ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.36.0-movil.html`. Copia ese HTML al teléfono y ábrelo desde Chrome o un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
 
 La exportación usa el combate de `main`; comienza en 720p, dibujo a 30 FPS y calidad Rendimiento. Permite cambiar a 540p/1080p y 30/60 FPS. TikTok LIVE real sigue necesitando el servidor: este archivo ofrece pruebas locales. [Uso, optimizaciones y límites de la exportación móvil](docs/MOVIL-MONOLITICO.md).
 

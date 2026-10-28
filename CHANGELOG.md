@@ -1,5 +1,12 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-28 — Arena Live v0.36 · Mantener barras superiores en 1v1
+
+- Se corrige el alcance del filtro LIVE de v0.35: **solo** oculta nombres, HP y energía dibujados sobre personajes simulados. Las barras superiores del marcador de duelos 1v1 continúan mostrando a **ambos** participantes, incluidos bots, en 16:9 y 9:16.
+- Se elimina el código que ocultaba paneles y cambiaba el ancho del marcador en 1v1. El daño, las reglas, las preferencias y la incorporación por taps o `!jugar` permanecen intactos.
+- HTML móvil autónomo v0.36 y pruebas de regresión actualizados. Siguen pendientes las comprobaciones completas de navegador, Android y TikTok LIVE real.
+
+
 ## 2026-10-28 — Arena Live v0.35 · Ocultar vida y energía de luchadores simulados
 
 - El filtro de participantes LIVE de Pantalla y HUD ahora oculta nombres, barras de vida y energía a los bots que no hayan entrado con taps o `!jugar`, en ambas capturas. Mantiene visibles los indicadores de participantes confirmados y Protagonista.
