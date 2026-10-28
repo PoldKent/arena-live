@@ -2,7 +2,7 @@
 // Desktop/OBS retains its own controls; this adapter never changes combat rules.
 const ARENA_MOBILE_TAP_GAP=325;
 const ARENA_MOBILE_LAYOUT_KEY='arenaLiveMobileButtonsV1';
-const arenaMobileLayoutDefaults=Object.freeze({arenaMobileJump:[73,82],arenaMobileAttack:[88,73],arenaMobilePower:[56,77]});
+const arenaMobileLayoutDefaults=Object.freeze({touchJoystick:[19,82],arenaMobileJump:[77,84],arenaMobileAttack:[87,72],arenaMobilePower:[62,74]});
 let arenaMobileLayout={size:70,points:Object.fromEntries(Object.entries(arenaMobileLayoutDefaults).map(([k,v])=>[k,[...v]]))};
 let arenaMobileEditing=false;
 try{const saved=JSON.parse(localStorage.getItem(ARENA_MOBILE_LAYOUT_KEY)||'null');if(saved&&Number.isFinite(saved.size))arenaMobileLayout.size=Math.max(56,Math.min(94,saved.size));for(const [id,p]of Object.entries(saved?.points||{})){if(Object.hasOwn(arenaMobileLayoutDefaults,id)&&Array.isArray(p)&&p.length===2&&p.every(Number.isFinite))arenaMobileLayout.points[id]=[Math.max(7,Math.min(93,p[0])),Math.max(8,Math.min(95,p[1]))];}}catch(_){}
@@ -87,7 +87,10 @@ function arenaMobileTouchPoint(view,x,y){
 }
 function arenaMobileTouchStart(event){
     if(event.pointerType==='mouse'||!arenaMobileCanControl()||arenaMobileTouchState.pointerId!==null)return;
-    if(event.target instanceof Element&&event.target.closest('button,input,select,textarea,summary,a,dialog,#arenaPortableSetup,#arenaMobileFloating,#arenaHeaderActions,#arenaOperatorPopover,#arenaPortableTestDrawer,.arena-onboarding'))return;
+    if(event.target instanceof Element&&event.target.closest('button,input,select,textarea,summary,a,dialog,#touchControlDock,#arenaPortableSetup,#arenaMobileFloating,#arenaHeaderActions,#arenaOperatorPopover,#arenaPortableTestDrawer,.arena-onboarding'))return;
+    // Joystick mode only accepts input from the analog and the three action buttons.
+    // Block the older viewport tap-to-jump listener without affecting the joystick.
+    if(arenaPortableProfile.touchMode==='joystick'){event.preventDefault();event.stopImmediatePropagation();return;}
     event.preventDefault();event.stopImmediatePropagation();
     const st=arenaMobileTouchState;
     st.pointerId=event.pointerId;st.startX=st.x=event.clientX;st.startY=st.y=event.clientY;st.startedAt=performance.now();
@@ -127,9 +130,16 @@ function arenaMobileTouchEnd(event){
         if(fighter){if(Math.abs(dx)>6)fighter.facing=dx>0?1:-1;performMeleeAttack(fighter);}
         st.tapCount=0;return;
     }
-    // A short tap on the ARENA never jumps: it only moves while the finger is down.
-    // Jump is exclusively a tap on the large, movable jump button.
-    st.tapCount=0;
+    // Táctil total: one tap moves; two taps jump; a third triggers the aerial jump.
+    // This does not interfere with long-press powers or swipe attacks.
+    if(Math.hypot(dx,dy)<18&&duration<ARENA_MOBILE_HOLD_MS){
+        const now=performance.now();
+        if(now-st.lastTapAt<=ARENA_MOBILE_TAP_GAP&&Math.hypot(st.x-st.lastTapX,st.y-st.lastTapY)<65)st.tapCount++;
+        else st.tapCount=1;
+        st.lastTapAt=now;st.lastTapX=st.x;st.lastTapY=st.y;
+        if(st.tapCount===2)triggerManualJump();
+        if(st.tapCount>=3){arenaMobileSecondJump();st.tapCount=0;}
+    }else st.tapCount=0;
 }
 function arenaMobileTouchCancel(event){
     if(arenaMobileTouchState.pointerId!==event.pointerId)return;
@@ -254,6 +264,8 @@ function arenaMobileSaveLayout(){try{localStorage.setItem(ARENA_MOBILE_LAYOUT_KE
 function arenaMobileApplyLayout(){
     const view=document.getElementById(document.fullscreenElement?.id==='card-16x9'||(!document.fullscreenElement&&monitorFocus==='16:9')?'viewport16x9':'viewport9x16');
     const bar=document.getElementById('arenaHeaderActions');if(!view||!bar)return;
+    const analog=document.getElementById('touchControlDock');
+    if(analog&&analog.parentElement!==view)view.appendChild(analog);
     if(bar.parentElement!==view)view.appendChild(bar);
     const bounds=view.getBoundingClientRect();
     // Keep each full hit-target visible on narrow devices, after rotation and
@@ -266,7 +278,8 @@ function arenaMobileApplyLayout(){
         const x=Math.min(Math.max(radius,bounds.width*position[0]/100),Math.max(radius,bounds.width-radius));
         const y=Math.min(Math.max(radius,bounds.height*position[1]/100),Math.max(radius,bounds.height-radius));
         if(id==='arenaMobileMoreBtn')continue; // old layouts may still contain a floating menu position
-        btn.style.setProperty('--mobile-x',x+'px');btn.style.setProperty('--mobile-y',y+'px');
+        if(id==='touchJoystick'){analog?.style.setProperty('--mobile-joy-x',x+'px');analog?.style.setProperty('--mobile-joy-y',y+'px');}
+        else {btn.style.setProperty('--mobile-x',x+'px');btn.style.setProperty('--mobile-y',y+'px');}
         btn.setAttribute('data-mobile-positioned','true');
         btn.setAttribute('aria-description',arenaMobileEditing?'Desliza para colocar el botón':'Posición ajustable desde Ajustes');
     }
@@ -276,6 +289,7 @@ function arenaMobileApplyLayout(){
     const text=document.getElementById('arenaMobileSizeValue');if(text)text.textContent=size+' px';
 }
 function arenaMobileEditButtons(on=true){
+    if(on&&arenaPortableProfile.touchMode!=='joystick')return;
     arenaMobileEditing=!!on;
     if(arenaMobileEditing){
         if(isSettingsOpen)toggleSettingsModal(false);
@@ -299,16 +313,33 @@ function arenaMobileInstallLayoutSettings(){
     const target=section?.querySelector('.arena-settings-content')||document.getElementById('settingsPanelsScroll');
     if(!target)return;
     const control=document.createElement('section');control.id='arenaMobileControlSettings';control.setAttribute('aria-label','Acomodar botones');
-    control.innerHTML='<h3>📱 Controles táctiles</h3><p>Mueve los botones a posiciones cómodas. Guarda cada cambio para próximas partidas.</p><button type="button" id="arenaMobileArrange">✥ Acomodar botones</button><label for="arenaMobileSize">Tamaño de botones <output id="arenaMobileSizeValue">70 px</output></label><input id="arenaMobileSize" type="range" min="56" max="94" step="2" value="70"><button type="button" id="arenaMobileReset">↺ Restablecer posiciones</button><small>Salto: 1 toque. Doble salto: 2 toques rápidos en ↑. Tocar la arena nunca salta.</small>';
+    control.innerHTML='<h3>📱 Modo jugador: controles</h3><fieldset id="arenaMobileTouchModeOptions"><legend>Elige cómo controlar al protagonista</legend><label><input type="radio" name="arenaMobileTouchMode" value="touch"> Táctil total — sin botones sobre el juego</label><label><input type="radio" name="arenaMobileTouchMode" value="joystick"> Joystick — analógico izquierdo y botones acomodables</label></fieldset><p id="arenaMobileTouchHelp">Elige un esquema de controles. Tus preferencias se guardan.</p><div id="arenaMobileArrangeSettings"><p>Mueve el analógico y los botones a posiciones cómodas. Guarda cada cambio para próximas partidas.</p><button type="button" id="arenaMobileArrange">✥ Acomodar analógico y botones</button><label for="arenaMobileSize">Tamaño de botones <output id="arenaMobileSizeValue">70 px</output></label><input id="arenaMobileSize" type="range" min="56" max="94" step="2" value="70"><button type="button" id="arenaMobileReset">↺ Restablecer posiciones</button><small>Salto: 1 toque. Doble salto: 2 toques rápidos en ↑. Mueve el analógico izquierdo para desplazarte.</small></div>';
     target.appendChild(control);
     // HUD transparency has one canonical control in Pantalla y HUD, shared
     // with desktop. Do not create or move a second opacity slider here.
     const note=document.createElement('small');
     note.textContent='La transparencia de menús y HUD está en Pantalla y HUD.';
     control.appendChild(note);
+    control.querySelectorAll('input[name="arenaMobileTouchMode"]').forEach(input=>input.onchange=()=>{if(input.checked)arenaMobileSetTouchMode(input.value);});
+    arenaMobileSyncTouchMode();
     control.querySelector('#arenaMobileArrange').onclick=()=>arenaMobileEditButtons(true);
     control.querySelector('#arenaMobileSize').oninput=e=>arenaMobileSetButtonSize(e.target.value);
     control.querySelector('#arenaMobileReset').onclick=arenaMobileResetButtons;
+}
+function arenaMobileSetTouchMode(mode){
+    if(!['joystick','touch'].includes(mode))return false;
+    document.dispatchEvent(new Event('arena-touch-disable'));
+    if(arenaMobileEditing)arenaMobileEditButtons(false);
+    arenaPortableProfile.touchMode=mode;arenaPortableRemember();
+    arenaMobileSyncTouchMode();return true;
+}
+function arenaMobileSyncTouchMode(){
+    const mode=arenaPortableProfile.touchMode;
+    document.documentElement.dataset.mobileTouchMode=mode;
+    document.querySelectorAll('input[name="arenaMobileTouchMode"]').forEach(input=>input.checked=input.value===mode);
+    const advanced=document.getElementById('arenaMobileArrangeSettings');if(advanced)advanced.hidden=mode!=='joystick';
+    const help=document.getElementById('arenaMobileTouchHelp');if(help)help.textContent=mode==='touch'?'Táctil total: tocar para mover, deslizar para golpear, dos toques para saltar, tres para doble salto y pulsación larga para el poder.':'Joystick: mueve el analógico izquierdo y usa los botones Salto, Golpe y Poder. Puedes acomodar los cuatro controles.';
+    if(typeof arenaMobileApplyLayout==='function')arenaMobileApplyLayout();
 }
 function arenaMobileInstallControlDragging(){
     for(const id of Object.keys(arenaMobileLayoutDefaults)){
@@ -366,8 +397,9 @@ function installArenaMobileTouch(){
         view.addEventListener('pointercancel',arenaMobileTouchCancel,true);
         view.addEventListener('lostpointercapture',arenaMobileTouchCancel,true);
     }
-    document.getElementById('touchControlDock')?.remove(); // Original analog is not part of Mobile.
-    document.getElementById('arenaPortableSetup')?.querySelector('.arena-portable-help')?.replaceChildren(document.createTextNode('Arena: toca para moverte y desliza para golpear. Botón ↑: un toque salta, dos toques hacen doble salto. Mantén pulsado el escenario para usar el poder.'));
+    // Reuse the original analog, including its existing pointer handling and dead zone.
+    // The same joystick moves between the 9:16 and 16:9 previews.
+    document.getElementById('arenaPortableSetup')?.querySelector('.arena-portable-help')?.replaceChildren(document.createTextNode('En Ajustes → Controles elige Táctil total (gestos sin botones) o Joystick (analógico izquierdo y tres botones ajustables).'));
     const labels={arenaMobileJump:'↑',arenaMobileAttack:'⚔',arenaMobilePower:'⚡',arenaMobileMoreBtn:'☰'};
     for(const [id,label]of Object.entries(labels)){
         const node=document.getElementById(id);if(!node)continue;
@@ -386,6 +418,7 @@ function installArenaMobileTouch(){
 window.addEventListener('load',installArenaMobileTouch,{once:true});
 window.ArenaMobileTouch=Object.freeze({
     openTests:arenaMobileShowTestDrawer,selectTest:arenaMobileSelectTestPanel,editButtons:arenaMobileEditButtons,setButtonSize:arenaMobileSetButtonSize,resetButtons:arenaMobileResetButtons,
+    setTouchMode:arenaMobileSetTouchMode,getTouchMode(){return arenaPortableProfile.touchMode;},
     getLayout(){return JSON.parse(JSON.stringify(arenaMobileLayout));},
     getState(){return {gestureActive:arenaMobileTouchState.pointerId!==null,tapCount:arenaMobileTouchState.tapCount,testOpen:arenaMobileTestState.open,testPanel:arenaMobileTestState.active};}
 });
