@@ -194,6 +194,21 @@ try{
         });
         assert.equal(result.editing,true);assert.equal(result.changed,true);assert.equal(result.size,88);assert.equal(result.restored,70);assert.equal(result.settings,true);
     });
+    await check('large draggable buttons stay entirely inside the narrow portrait capture',async()=>{
+        const bounds=await page.evaluate(()=>{
+            ArenaMobileTouch.setButtonSize(94);
+            const parent=document.getElementById('viewport9x16').getBoundingClientRect();
+            const buttons=['arenaMobileJump','arenaMobileAttack','arenaMobilePower','arenaMobileMoreBtn'];
+            const values=buttons.map(id=>{
+                const r=document.getElementById(id).getBoundingClientRect();
+                return {id,left:r.left,right:r.right,top:r.top,bottom:r.bottom,
+                    inside:r.left>=parent.left-1&&r.right<=parent.right+1&&r.top>=parent.top-1&&r.bottom<=parent.bottom+1};
+            });
+            ArenaMobileTouch.resetButtons();
+            return values;
+        });
+        assert.ok(bounds.every(item=>item.inside),JSON.stringify(bounds));
+    });
     await check('long press invokes the active class special without a separate analog control',async()=>{
         await page.evaluate(()=>{
             ArenaPortable.start({count:4,join:true});
