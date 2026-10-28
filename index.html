@@ -4797,16 +4797,13 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         function getFighterSpecialTargets(fighter, inRange) {
+            const candidates = fighters.filter(other => canFighterAttack(fighter, other) && inRange(other));
             const limit = getFighterSpecialRule(fighter)?.targets;
-            // The old path built a 128-actor candidates array, then rescanned
-            // it and allocated another sorted list for every simultaneous power.
-            // Stream the same eligible actors in original roster order instead.
-            // Exact Math.hypot distances and >= tie ordering remain unchanged.
-            const result = [];
-            const nearest = limit == null ? null : [];
-            for (const other of fighters) {
-                if (!canFighterAttack(fighter, other) || !inRange(other)) continue;
-                if (limit == null) {result.push(other);continue;}
+            if (limit == null) return candidates;
+            // Finite class powers hit at most three targets. Compute the exact
+            // same distances once, retaining roster order for equal distances.
+            const nearest = [];
+            for (const other of candidates) {
                 const distance = Math.hypot(other.x - fighter.x, other.y - fighter.y);
                 let index = 0;
                 while (index < nearest.length && distance >= nearest[index].distance) index++;
@@ -4815,9 +4812,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     if (nearest.length > limit) nearest.pop();
                 }
             }
-            if (limit == null) return result;
-            for (const entry of nearest) result.push(entry.fighter);
-            return result;
+            return nearest.map(entry => entry.fighter);
         }
 
         function canFighterAttack(attacker, target) {
@@ -4827,7 +4822,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         function findPreferredCombatTarget(attacker, inRange = null) {
-            if (!attacker) return null;
+            if (!attacker || attacker.eliminated || attacker.fallDrop > 0) return null;
             // One scan and cached policies preserve nearest ties and all default
             // narrative choices while allowing an independent policy per class.
             const policy = ArenaCore.combatTargetPolicy(attacker.archetypeKey,arenaRuntime);
@@ -4837,7 +4832,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             let preferred = null;
             let preferredDistanceSq = Infinity;
             for (const other of fighters) {
-                if (!canFighterAttack(attacker, other)) continue;
+                // Filter in place: at 128 fighters this avoids ~16,000 helper
+                // calls per physics tick while retaining live roster order.
+                if (other.id === attacker.id || other.eliminated || other.fallDrop > 0) continue;
                 if (inRange && !inRange(other)) continue;
                 const sameClass = other.archetypeKey === attacker.archetypeKey;
                 const dx = other.x - attacker.x, dy = other.y - attacker.y;
@@ -5649,31 +5646,22 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         function updateSmartCamera9x16() {
-            // Avoid constructing a fresh array of up to 128 fighters on every
-            // 60 Hz physics tick; retain exactly the previous extrema/zoom math.
-            if (gameState === 'VICTORY') {
+            const alive = fighters.filter(f => !f.eliminated);
+            if (alive.length === 0 || gameState === 'VICTORY') {
                 camera9x16.x += (WORLD_W * 0.5 - camera9x16.x) * 0.1;
                 camera9x16.y += (WORLD_H * 0.64 - camera9x16.y) * 0.1;
                 camera9x16.zoom += (1.15 - camera9x16.zoom) * 0.1;
                 return;
             }
 
-            let aliveCount = 0;
             let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-            for (const f of fighters) {
-                if (f.eliminated) continue;
-                aliveCount++;
+
+            alive.forEach(f => {
                 minX = Math.min(minX, f.x - 75);
                 maxX = Math.max(maxX, f.x + 75);
                 minY = Math.min(minY, f.y - 90);
                 maxY = Math.max(maxY, f.y + 60);
-            }
-            if (!aliveCount) {
-                camera9x16.x += (WORLD_W * 0.5 - camera9x16.x) * 0.1;
-                camera9x16.y += (WORLD_H * 0.64 - camera9x16.y) * 0.1;
-                camera9x16.zoom += (1.15 - camera9x16.zoom) * 0.1;
-                return;
-            }
+            });
 
             const centerX = (minX + maxX) * 0.5;
             const centerY = (minY + maxY) * 0.5;
