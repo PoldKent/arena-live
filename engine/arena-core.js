@@ -59,7 +59,7 @@
     }
     function normalizeRuntime(value={}) {
         const v=value&&typeof value==='object'?value:{};
-        return {specialPolicy:v.specialPolicy==='audience'?'audience':'fair',pausePolicy:v.pausePolicy==='show'?'show':'queue',
+        return {specialSource:['both','commands','none'].includes(v.specialSource)?v.specialSource:'both',specialPolicy:v.specialPolicy==='audience'?'audience':'fair',pausePolicy:v.pausePolicy==='show'?'show':'queue',
             renderFps:Number(v.renderFps)===30?30:60,quality:['high','balanced','performance'].includes(v.quality)?v.quality:'balanced',
             ...Object.fromEntries(Object.entries(targetingKeys).map(([classKey,key])=>[key,targetingMode(classKey,v)])),testAdaptClass:v.testAdaptClass!==false,masterVolume:Number.isFinite(Number(v.masterVolume))?Math.round(Math.min(100,Math.max(0,Number(v.masterVolume)))/5)*5:70,
             hudOpacity:Number.isFinite(Number(v.hudOpacity))?Math.round(Math.min(100,Math.max(35,Number(v.hudOpacity)))):85};
