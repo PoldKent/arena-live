@@ -1619,11 +1619,28 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <strong class="text-[11px] text-cyan-200" id="arenaObsCalibrationTitle">📐 Calibración para OBS</strong>
                             <button type="button" id="arenaObsResetCalibration" onclick="resetArenaObsCalibration()" class="rounded-md px-2 py-1 border border-slate-700 bg-slate-900 text-slate-200 text-[10px]">Restablecer</button>
                         </div>
-                        <p class="text-[10px] text-slate-400" id="arenaObsCalibrationHint">Ajusta esto antes de emitir; los recortes de OBS deben configurarse después. Abrir las herramientas no modificará las dimensiones.</p>
-                        <label class="flex flex-col gap-1 text-[11px] text-slate-300" for="arenaObsVerticalOffset">
-                            <span id="arenaObsVerticalOffsetLabel">Desplazamiento vertical hacia la derecha: <output id="arenaObsVerticalOffsetValue">10 px</output></span>
-                            <input type="range" id="arenaObsVerticalOffset" min="0" max="16" step="1" value="10" oninput="setArenaObsCalibration('offset',this.value)" class="w-full accent-pink-400" />
+                        <p class="text-[10px] text-slate-400" id="arenaObsCalibrationHint">Elige la proporción vertical y centra su posición antes de configurar el recorte en OBS.</p>
+                        <label class="flex flex-col gap-1 text-[11px] text-slate-200" for="arenaObsVerticalFormat">
+                            <span id="arenaObsVerticalFormatLabel" class="font-bold text-cyan-200">📱 Vertical</span>
+                            <select id="arenaObsVerticalFormat" onchange="setArenaObsCalibration('format',this.value)" class="w-full rounded-lg border border-cyan-700/70 bg-slate-900 px-3 py-2 text-sm font-semibold text-slate-100" title="Proporción del marco vertical en Modo Stream">
+                                <option value="21">9:21</option>
+                                <option value="20">9:20</option>
+                                <option value="19.5">9:19.5</option>
+                                <option value="16">9:16 (sin márgenes)</option>
+                            </select>
                         </label>
+                        <div class="flex flex-col gap-1 text-[11px] text-slate-300">
+                            <div class="flex items-center justify-between gap-2">
+                                <label for="arenaObsVerticalOffset" id="arenaObsVerticalOffsetLabel">Centrado horizontal del vertical: <output id="arenaObsVerticalOffsetValue">0 px</output></label>
+                                <button type="button" id="arenaObsCenterVertical" onclick="centerArenaObsVertical()" class="rounded-md border border-pink-400/50 bg-pink-950/40 px-2 py-1 font-bold text-pink-200">Centrar</button>
+                            </div>
+                            <input type="range" id="arenaObsVerticalOffset" min="-120" max="120" step="1" value="0" oninput="setArenaObsCalibration('offset',this.value)" class="w-full accent-pink-400" aria-label="Ajustar el marco vertical hacia la izquierda o derecha" />
+                            <div class="flex items-center justify-between gap-2 text-[10px] text-slate-400">
+                                <span>← Izquierda</span>
+                                <label class="flex items-center gap-1" for="arenaObsVerticalOffsetExact">Precisión <input type="number" id="arenaObsVerticalOffsetExact" min="-120" max="120" step="1" value="0" onchange="setArenaObsCalibration('offset',this.value)" class="w-16 rounded border border-slate-600 bg-slate-900 px-1 py-0.5 text-right text-slate-100" aria-label="Desplazamiento horizontal exacto en píxeles"> px</label>
+                                <span>Derecha →</span>
+                            </div>
+                        </div>
                         <label class="flex flex-col gap-1 text-[11px] text-slate-300" for="arenaObsFooterHeight">
                             <span id="arenaObsFooterHeightLabel">Espacio inferior para herramientas: <output id="arenaObsFooterHeightValue">76 px</output></span>
                             <input type="range" id="arenaObsFooterHeight" min="72" max="148" step="4" value="76" oninput="setArenaObsCalibration('footer',this.value)" class="w-full accent-cyan-400" />
