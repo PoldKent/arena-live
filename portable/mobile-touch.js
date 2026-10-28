@@ -341,7 +341,7 @@ function installArenaMobileTouch(){
         view.addEventListener('lostpointercapture',arenaMobileTouchCancel,true);
     }
     document.getElementById('touchControlDock')?.remove(); // Original analog is not part of Mobile.
-    document.getElementById('arenaPortableSetup')?.querySelector('.arena-portable-help')?.replaceChildren(document.createTextNode('Toca para moverte · desliza rápido para golpear · 2 toques: salto · 3 toques: doble salto · mantén pulsado: poder.'));
+    document.getElementById('arenaPortableSetup')?.querySelector('.arena-portable-help')?.replaceChildren(document.createTextNode('Arena: toca para moverte y desliza para golpear. Botón ↑: un toque salta, dos toques hacen doble salto. Mantén pulsado el escenario para usar el poder.'));
     const labels={arenaMobileJump:'↑',arenaMobileAttack:'⚔',arenaMobilePower:'⚡',arenaMobileMoreBtn:'☰'};
     for(const [id,label]of Object.entries(labels)){
         const node=document.getElementById(id);if(!node)continue;
