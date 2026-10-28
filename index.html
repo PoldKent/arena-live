@@ -1236,7 +1236,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <div class="arena-victory-card">
                                 <p class="arena-victory-kicker">✦ ARENA LIVE · RESULTADO FINAL ✦</p>
                                 <div class="arena-victory-crown" aria-hidden="true">🏆</div>
-                                <h2 class="arena-victory-heading">¡CAMPEÓN DE LA ARENA!</h2>
+                                <h2 id="victoryHeading16" class="arena-victory-heading">¡CAMPEÓN DE LA ARENA!</h2>
                                 <div id="victoryWinnerName16" class="arena-victory-name" aria-live="polite"></div>
                                 <div id="victoryWinnerPlatform16" class="arena-victory-identity"></div>
                                 <div class="arena-victory-scoreboard" aria-label="Estadísticas del campeón">
@@ -1389,7 +1389,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <div class="arena-victory-card">
                                 <p class="arena-victory-kicker">✦ ARENA LIVE · RESULTADO FINAL ✦</p>
                                 <div class="arena-victory-crown" aria-hidden="true">🏆</div>
-                                <h2 class="arena-victory-heading">¡CAMPEÓN DE LA ARENA!</h2>
+                                <h2 id="victoryHeading9" class="arena-victory-heading">¡CAMPEÓN DE LA ARENA!</h2>
                                 <div id="victoryWinnerName9" class="arena-victory-name" aria-live="polite"></div>
                                 <div id="victoryWinnerPlatform9" class="arena-victory-identity"></div>
                                 <div class="arena-victory-scoreboard" aria-label="Estadísticas del campeón">
@@ -4308,6 +4308,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 vx:0,vy:0,z:0,vz:0,fallDrop:0,ringOutTimer:0,castingSkill:null,shieldTimer:0,shieldHP:0,hurtTimer:0,attackAnimTimer:0,knockbackTimer:0}:null;
             playSound('victory');
             for(const sfx of ['16','9']) {
+                document.getElementById('victoryHeading'+sfx).textContent=currentWinner?'¡CAMPEÓN DE LA ARENA!':'¡EMPATE EN LA ARENA!';
                 document.getElementById('victoryWinnerName'+sfx).textContent=currentWinner?getFighterDisplayName(currentWinner):arenaResultText('draw');
                 document.getElementById('victoryWinnerPlatform'+sfx).textContent=currentWinner?currentWinner.platform.icon+' '+currentWinner.platform.name+' • '+getFighterClassTitle(currentWinner):arenaResultText('help');
                 document.getElementById('victoryStatKills'+sfx).textContent=currentWinner?currentWinner.kills:0;
@@ -4317,7 +4318,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const runners=currentWinner?arenaRoundResult.podium.slice(1):arenaRoundResult.podium.slice(0,2);
             const runnersMarkup=runners.map((f,i)=>
                 '<div class="arena-victory-runner" data-podium-id="'+escapeHTML(String(f.id))+'">'+
-                (i?'🥉':'🥈')+' <strong>'+escapeHTML(getFighterDisplayName(f))+'</strong>'+
+                (currentWinner?(i?'🥉':'🥈'):'🏅')+' <strong>'+escapeHTML(getFighterDisplayName(f))+'</strong>'+
                 '<small>'+Number(f.kills)+' K.O. · '+Math.round(f.damageDealt)+' daño</small></div>'
             ).join('');
             for (const sfx of ['16','9']) {
