@@ -15,6 +15,8 @@ Esta edición sincroniza `package.json`, `npm-shrinkwrap.json`, título, ajustes
 - Se preserva una sola simulación, todas las clases, las dos capturas OBS, el puente TikTok, historial de comandos, paneles de pruebas, el guardado de ajustes y las reglas del juego.
 - Para probar en PC el mismo paquete portátil, el servidor expone `/mobile` leyendo el artefacto generado en `dist/`; la interfaz principal sigue en `/`. Se añadió `verify:release` para ejecutar el conjunto de pruebas.
 
+**`npm.cmd start` y `npm.cmd run dev` regeneran automáticamente el HTML móvil desde la fuente completa** antes de levantar el servidor, por lo que `/mobile` no depende de una versión anterior. `npm.cmd run build:mobile` sigue disponible para generar el archivo sin iniciar el servidor.
+
 ## Windows PowerShell
 
 Necesitas Git y Node.js 20 o superior (recomendado Node.js 24).
@@ -26,7 +28,6 @@ cd $HOME
 git clone https://github.com/PoldKent/arena-live.git
 cd arena-live
 npm.cmd ci
-npm.cmd run build:mobile
 npm.cmd start
 ```
 
@@ -39,7 +40,6 @@ Para actualizar después:
 git switch main
 git pull --ff-only origin main
 npm.cmd ci
-npm.cmd run build:mobile
 npm.cmd start
 ```
 
