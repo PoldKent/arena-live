@@ -8,7 +8,9 @@
     "node": ">=20"
   },
   "scripts": {
+    "prestart": "node tools/build-mobile.mjs",
     "start": "node bridge/server.mjs",
+    "predev": "node tools/build-mobile.mjs",
     "dev": "node bridge/server.mjs",
     "test": "node --test test/*.test.mjs",
     "test:browser": "node test/operator-browser.mjs && node test/integrity-browser.mjs && node test/training-browser.mjs",
