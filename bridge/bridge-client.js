@@ -81,7 +81,9 @@
       if (applied >= MAX_TAP_EFFECTS_PER_FLUSH) break;
       tapBatches.delete(identity);
       let fighter = indexed.get(identity);
-      if ((!fighter || !fighter.alive) && typeof game?.joinOnTap === 'function') {
+      // Confirm taps even for already-active spectators, including preset bots.
+      // Only a successful admission increments the entry counter.
+      if (typeof game?.joinOnTap === 'function') {
         try {
           if (game.joinOnTap({ username: identity, platformKey: 'tiktok' })) {
             state.tapJoins++; // Includes legal re-entries; the game decides the rule.

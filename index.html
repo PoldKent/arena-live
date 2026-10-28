@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.33 — TikTok LIVE</title>
+    <title>Arena Live v0.34 — TikTok LIVE</title>
     <!--
       ARENA LIVE · GAME RUNTIME
       The classic game script stays here; utility CSS is built locally and
@@ -13,7 +13,7 @@
       have been migrated to explicit event listeners.
     -->
     <!-- Styles are built once; no browser compiler runs during a stream. -->
-    <link rel="stylesheet" href="styles/arena-ui.css?v=0.33">
+    <link rel="stylesheet" href="styles/arena-ui.css?v=0.34">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Fonts: Inter & Orbitron for Arcade/Esports HUD -->
@@ -219,7 +219,7 @@
 #viewport16x9 .arena-victory-card, #viewport9x16 .arena-victory-card,
 #viewport16x9 .arena-audience-guide, #viewport9x16 .arena-audience-guide { opacity: var(--arena-hud-opacity); }
 #verticalEventHistory { display: none !important; }
-/* v0.33 · Operator-first layout. No game canvas, OBS crop or rule logic is modified. */
+/* v0.34 · Operator-first layout. No game canvas, OBS crop or rule logic is modified. */
 #arenaSettingsNav {position:sticky;top:-10px;z-index:4;display:grid;gap:7px;padding:9px 1px 11px;background:#0b101e;border-bottom:1px solid #34495b;margin-bottom:11px}
 #arenaSettingsTabs {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
 #arenaSettingsTabs button {padding:9px 4px;min-height:37px;border:1px solid #30465b;border-radius:7px;background:#152131;color:#d2e0eb;font:650 11px Inter,system-ui;white-space:normal}
@@ -1913,17 +1913,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.33 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.34 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
 
     <!-- ==================== COMPLETE GAME ENGINE, LOBBY & VICTORY SCRIPT ==================== -->
-    <script src="engine/arena-core.js?v=0.33"></script>
-    <script src="engine/arena-render.js?v=0.33"></script>
-    <script src="engine/arena-audio.js?v=0.33"></script>
-    <script src="engine/arena-settings.js?v=0.33"></script>
-    <script src="engine/arena-balance-evidence.js?v=0.33"></script>
+    <script src="engine/arena-core.js?v=0.34"></script>
+    <script src="engine/arena-render.js?v=0.34"></script>
+    <script src="engine/arena-audio.js?v=0.34"></script>
+    <script src="engine/arena-settings.js?v=0.34"></script>
+    <script src="engine/arena-balance-evidence.js?v=0.34"></script>
     <script>
         /*************************************************************************
          * ARENA LIVE · MONOLITHIC ENGINE INDEX
@@ -3221,13 +3221,18 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let showCombatNumbers = false;
         let showPowerText = false;
         let showFighterNames = true;
+        let showTikTokParticipantNamesOnly = false;
+        function shouldShowFighterLabel(fighter) {
+            return showFighterNames && (!showTikTokParticipantNamesOnly || fighter.isStreamer || fighter.joinedByTikTok === true);
+        }
         const ARENA_COMBAT_DISPLAY_KEY = 'arenaLiveCombatDisplayV1';
 
         function setCombatDisplayOption(option, enabled, remember = true) {
-            if (!['numbers', 'powerText', 'names'].includes(option)) return;
+            if (!['numbers', 'powerText', 'names', 'tiktokNamesOnly'].includes(option)) return;
             if (option === 'numbers') showCombatNumbers = !!enabled;
             if (option === 'powerText') showPowerText = !!enabled;
             if (option === 'names') showFighterNames = !!enabled;
+            if (option === 'tiktokNamesOnly') showTikTokParticipantNamesOnly = !!enabled;
             for (const ft of floatingTexts) {
                 const visible = (ft.kind === 'number' && showCombatNumbers) || (ft.kind === 'power' && showPowerText);
                 ft.text = visible ? ft.labelText : ft.iconText;
@@ -3238,7 +3243,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             if (power) power.checked = showPowerText;
             const names=document.getElementById('showFighterNamesToggle');
             if(names)names.checked=showFighterNames;
-            if (remember) try { localStorage.setItem(ARENA_COMBAT_DISPLAY_KEY, JSON.stringify({numbers:showCombatNumbers, powerText:showPowerText, names:showFighterNames})); } catch (_) {}
+            const onlyParticipants=document.getElementById('showTikTokParticipantNamesOnlyToggle');
+            if(onlyParticipants){onlyParticipants.checked=showTikTokParticipantNamesOnly;onlyParticipants.disabled=!showFighterNames;}
+            if (remember) try { localStorage.setItem(ARENA_COMBAT_DISPLAY_KEY, JSON.stringify({numbers:showCombatNumbers, powerText:showPowerText, names:showFighterNames, tiktokNamesOnly:showTikTokParticipantNamesOnly})); } catch (_) {}
         }
         function loadCombatDisplayOptions() {
             let saved;
@@ -3246,6 +3253,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             setCombatDisplayOption('numbers', saved?.numbers === true, false);
             setCombatDisplayOption('powerText', saved?.powerText === true, false);
             setCombatDisplayOption('names', saved?.names !== false, false);
+            setCombatDisplayOption('tiktokNamesOnly', saved?.tiktokNamesOnly === true, false);
         }
         let activeEffects = [];
 
@@ -3687,6 +3695,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 this.isStreamer = isStreamer;
                 // Las cuentas de simulación son espectadores de prueba; las identidades reales siguen separadas.
                 this.isNPC = isBuiltInSpectatorBot(username);
+                this.joinedByTikTok = false; // Explicit TikTok tap or !jugar, not a preset or ordinary message.
 
                 const preferredArch = preferredClassKey
                     ? (ARCHETYPES.find(a => a.key === preferredClassKey) || ARCHETYPES[0])
@@ -4303,6 +4312,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const champion = currentWinner || arenaRoundResult?.winner || arenaLobbyChampion;
             arenaLobbyChampion = champion ? {
                 name:champion.name,platformKey:champion.platformKey,isStreamer:!!champion.isStreamer,
+                joinedByTikTok:!!champion.joinedByTikTok,
                 archetypeKey:champion.archetypeKey,preferredArchetypeKey:champion.preferredArchetypeKey,
                 coopCount:champion.coopCount||1
             } : null;
@@ -4326,6 +4336,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     const retained = new Fighter(title.name,title.platformKey,title.isStreamer,
                         title.preferredArchetypeKey||title.archetypeKey);
                     retained.coopCount=title.coopCount;
+                    retained.joinedByTikTok=!!title.joinedByTikTok;
                     fighters.push(retained);
                     totalParticipants=retained.coopCount;
                 }
@@ -6472,7 +6483,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 ? (packedFighterCount <= 8 ? 9 : packedFighterCount <= 32 ? 8 : 7)
                 : (packedFighterCount <= 8 ? 8 : 7);
             const plateY = drawY - r - (portraitLabel ? 24 : 22);
-            if(showFighterNames)drawFighterLabel(targetCtx, f, drawX, plateY, nameFont, classFont, packedFighterCount);
+            if(shouldShowFighterLabel(f))drawFighterLabel(targetCtx, f, drawX, plateY, nameFont, classFont, packedFighterCount);
 
             if (gameState !== 'LOBBY') {
                 const barW = 44;
@@ -7590,8 +7601,11 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
             // Joining remains available independently from class selection.
             if (lower === '!jugar') {
-                if(explicitFighter&&fighters.includes(explicitFighter))return !!addOrBoostFighter(explicitFighter.name,explicitFighter.platformKey,!!explicitFighter.isStreamer,explicitFighter.preferredArchetypeKey||explicitFighter.archetypeKey);
-                return !!addOrBoostFighter(username,platformKey,false);
+                const joined = explicitFighter && fighters.includes(explicitFighter)
+                    ? addOrBoostFighter(explicitFighter.name,explicitFighter.platformKey,!!explicitFighter.isStreamer,explicitFighter.preferredArchetypeKey||explicitFighter.archetypeKey)
+                    : addOrBoostFighter(username,platformKey,false);
+                if(joined && joined.platformKey === 'tiktok' && !joined.isStreamer)joined.joinedByTikTok=true;
+                return !!joined;
             }
 
             // A viewer who speaks for the first time enters automatically; !jugar remains
@@ -8296,7 +8310,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.33';
+        const ARENA_RELEASE_VERSION = '0.34';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:0, footer:76, format:'21'});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
@@ -9000,7 +9014,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             refreshArenaTrainingControls();
         }
 
-        // v0.33: Reorganize existing Settings sections, never cloning inputs or
+        // v0.34: Reorganize existing Settings sections, never cloning inputs or
         // changing their inline handlers, IDs, saved values or rule semantics.
         const ARENA_SETTINGS_NAV_KEY = 'arenaLiveSettingsNavV1';
         const ARENA_SETTINGS_GROUPS = Object.freeze(['match','controls','broadcast','audio','audience','system','combat','classes','system']);
@@ -9120,6 +9134,10 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 names.className='flex items-center gap-2';
                 names.innerHTML='<input id="showFighterNamesToggle" type="checkbox" class="accent-cyan-400" onchange="setCombatDisplayOption(\'names\',this.checked)"> <span id="arenaHudNamesLabel">Mostrar nombres y clases de jugadores</span>';
                 toggles.appendChild(names);
+                const audienceOnly=document.createElement('label');
+                audienceOnly.className='flex items-start gap-2 pl-4 text-cyan-100';
+                audienceOnly.innerHTML='<input id="showTikTokParticipantNamesOnlyToggle" type="checkbox" class="mt-0.5 accent-cyan-400" onchange="setCombatDisplayOption(\'tiktokNamesOnly\',this.checked)"> <span id="arenaHudParticipantsLabel">Solo participantes que entraron con taps o !jugar de TikTok (y Protagonista). Los bots siguen peleando sin etiqueta.</span>';
+                toggles.appendChild(audienceOnly);
                 move('showCombatNumbersToggle',toggles);
                 move('showPowerTextToggle',toggles);
                 if(oldContainer&&!oldContainer.querySelector('input,select,button'))oldContainer.remove();
@@ -9129,6 +9147,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 // synchronize newly-created controls with the existing source of truth.
                 const namesToggle=document.getElementById('showFighterNamesToggle');
                 if(namesToggle)namesToggle.checked=showFighterNames;
+                const tiktokNamesToggle=document.getElementById('showTikTokParticipantNamesOnlyToggle');
+                if(tiktokNamesToggle){tiktokNamesToggle.checked=showTikTokParticipantNamesOnly;tiktokNamesToggle.disabled=!showFighterNames;}
             }
 
             let stored='match';try{stored=localStorage.getItem(ARENA_SETTINGS_NAV_KEY)||'match';}catch(_){}
@@ -9250,7 +9270,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.33.0',
+            version: '0.34.0',
             edition: 'tiktok',
             renderSpriteMode: arenaGpuSpritesEnabled ? 'hardware-candidate' : 'software-safe-vectors',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,
@@ -9293,6 +9313,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     name: getFighterDisplayName(fighter),
                     platform: fighter.platformKey,
                     isStreamer: !!fighter.isStreamer,
+                    joinedByTikTok: !!fighter.joinedByTikTok,
                     classKey: fighter.archetypeKey,
                     hp: fighter.hp,
                     maxHp: fighter.maxHp,
@@ -9313,11 +9334,16 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 if (gameState === 'COMBAT' && rejoinRuleMode === 'timed' && matchTimeSeconds <= 0) return false;
                 const identity = viewerIdentityKey(username, platformKey);
                 const existing = fighters.find(f => viewerIdentityKey(f.name, f.platformKey) === identity);
-                if (existing && !existing.eliminated) return false;
+                if (existing && !existing.eliminated) {
+                    existing.joinedByTikTok = true; // A tap confirms even an already-active preset fighter.
+                    return false;
+                }
                 if (existing && rejoinRuleMode === '3_lives'
                     && (existing.permanentlyOut || existing.joinsUsed >= MAX_OPPORTUNITIES)) return false;
                 if (!existing && fighters.length >= getArenaPlayerLimit()) return false;
-                return !!addOrBoostFighter(username, platformKey, false, null, true);
+                const joined=addOrBoostFighter(username, platformKey, false, null, true);
+                if(joined)joined.joinedByTikTok=true;
+                return !!joined;
             },
             joinOnShare({username='',platformKey='tiktok'}={}) {
                 if(platformKey!=='tiktok'||!/^@[a-zA-Z0-9_.-]{1,24}$/.test(username)

@@ -1139,6 +1139,54 @@ await check('Bubbles appear for normal TikTok speech, never for any command or p
  });
  assert.deepEqual(result,{commands:0,normal:true});
 });
+await check('Optional HUD labels show only confirmed TikTok taps, !jugar and Prota',async()=>{
+ const r=await page.evaluate(()=>{
+   gameState='LOBBY';koSequenceActive=false;isGamePaused=false;
+   arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS,maxPlayers:128};setRejoinRuleMode('free');
+   applyPlayerCountPreset(4);startCombatFromLobby();
+   const bot=fighters[0];
+   setCombatDisplayOption('names',true);
+   setCombatDisplayOption('tiktokNamesOnly',true);
+   const botHidden=!shouldShowFighterLabel(bot);
+   const entered=ArenaLive.joinOnTap({username:'@joined_by_tap',platformKey:'tiktok'});
+   const tapped=fighters.find(f=>f.name==='@joined_by_tap');
+   const tapVisible=entered&&shouldShowFighterLabel(tapped)&&tapped.joinedByTikTok;
+   const played=ArenaLive.sendChat({username:'@joined_by_play',platformKey:'tiktok',message:'!jugar'});
+   const playedFighter=fighters.find(f=>f.name==='@joined_by_play');
+   const playVisible=played&&shouldShowFighterLabel(playedFighter)&&playedFighter.joinedByTikTok;
+   joinAsStreamer();
+   const prota=fighters.find(f=>f.isStreamer&&!f.eliminated);
+   const protaVisible=!!prota&&shouldShowFighterLabel(prota);
+   setCombatDisplayOption('names',false);
+   const allHidden=![bot,tapped,playedFighter,prota].some(shouldShowFighterLabel);
+   setCombatDisplayOption('names',true);
+   const saved=JSON.parse(localStorage.getItem(ARENA_COMBAT_DISPLAY_KEY)||'{}');
+   const setting=document.getElementById('showTikTokParticipantNamesOnlyToggle');
+   const persisted=saved.tiktokNamesOnly===true&&setting?.checked===true;
+   setCombatDisplayOption('tiktokNamesOnly',false);
+   const oldViewRestored=shouldShowFighterLabel(bot);
+   return {botHidden,tapVisible,playVisible,protaVisible,allHidden,persisted,oldViewRestored};
+ });
+ assert.deepEqual(r,{botHidden:true,tapVisible:true,playVisible:true,protaVisible:true,allHidden:true,persisted:true,oldViewRestored:true});
+});
+await check('Protagonist can join and rejoin mid-fight in free mode at a full simulated 128 roster',async()=>{
+ const r=await page.evaluate(()=>{
+   gameState='LOBBY';koSequenceActive=false;isGamePaused=false;
+   arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS,maxPlayers:128};
+   setRejoinRuleMode('free');applyPlayerCountPreset(128);startCombatFromLobby();
+   const fullBefore=fighters.length===128&&gameState==='COMBAT';
+   joinAsStreamer();
+   const prota=fighters.find(f=>f.isStreamer&&!f.eliminated);
+   const joined=!!prota&&fighters.length===128;
+   const id=prota?.id;
+   if(prota){prota.eliminated=true;prota.hp=0;}
+   joinAsStreamer();
+   const rejoined=!!prota&&!prota.eliminated&&fighters.filter(f=>f.isStreamer).length===1&&prota.id===id;
+   const finalCount=fighters.length;
+   return {fullBefore,joined,rejoined,finalCount};
+ });
+ assert.deepEqual(r,{fullBefore:true,joined:true,rejoined:true,finalCount:128});
+});
 await check('Settings categories keep match, combat, HUD, audience, controls and audio in their proper tabs',async()=>{
  const r=await page.evaluate(()=>{
   const lives=document.getElementById('playerLivesSelect');

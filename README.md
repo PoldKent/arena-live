@@ -1,4 +1,4 @@
-# Arena Live · v0.33
+# Arena Live · v0.34
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
@@ -34,9 +34,11 @@ Las capturas **Full HD 16:9 y 9:16** seleccionan automáticamente la ruta de dib
 
 **v0.33 — Ajustes reorganizados en Stream y Mobile:** Partida, Combate, Clases, Audiencia, Pantalla y HUD, Audio e idioma, Controles y Sistema. Los nombres/clases, números de daño/curación y texto de poderes ahora pertenecen a **Pantalla y HUD**, no a Audiencia. Se añade el ajuste de mostrar nombres y clases, que no cambia la física. Cupo y clase de la ronda pasan a Partida; controles de Protagonista y organización táctil a Controles; transparencia tiene un único slider compartido. [Auditoría completa y mapa de controles](docs/SETTINGS-TAXONOMY-V033.md).
 
+**v0.34 — Participación LIVE visible:** Pantalla y HUD permite mostrar los nombres solo de quienes entraron con taps o `!jugar` de TikTok, además del Protagonista. Los bots siguen combatiendo aunque sus etiquetas estén ocultas; no cambia el daño ni la cantidad de jugadores. En Entrada libre, los taps permiten entrar y reingresar durante el combate (mientras no haya comenzado el K.O. final) y el Protagonista puede incorporarse incluso con los 128 cupos ocupados por bots. Se añadieron pruebas automatizadas para comprobar estas rutas; se requiere un LIVE real para validar la recepción desde TikTok.
+
 ## Probar en un celular con un solo archivo
 
-Descarga directamente la [edición móvil v0.33: Ajustes organizados y Pantalla/HUD](mobile-builds/Arena-Live-v0.33.0-movil.html) (en GitHub usa **Download raw file**) o ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.33.0-movil.html`. Copia ese HTML al teléfono y ábrelo desde Chrome o un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
+Descarga directamente la [edición móvil v0.34: participantes LIVE y Protagonista](mobile-builds/Arena-Live-v0.34.0-movil.html) (en GitHub usa **Download raw file**) o ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.34.0-movil.html`. Copia ese HTML al teléfono y ábrelo desde Chrome o un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
 
 La exportación usa el combate de `main`; comienza en 720p, dibujo a 30 FPS y calidad Rendimiento. Permite cambiar a 540p/1080p y 30/60 FPS. TikTok LIVE real sigue necesitando el servidor: este archivo ofrece pruebas locales. [Uso, optimizaciones y límites de la exportación móvil](docs/MOVIL-MONOLITICO.md).
 

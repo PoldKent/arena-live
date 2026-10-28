@@ -32,6 +32,7 @@ function fixture(source) {
   let timerId = 0;
   const effects = [];
   const joins = [];
+  const tapObservations = [];
   let gamePhase = 'LOBBY';
   const fighters = [
     { id:'f1',name:'@viewer_one',platform:'tiktok',alive:true },
@@ -50,6 +51,7 @@ function fixture(source) {
     ArenaLive:{
       getFighters: () => fighters,
       joinOnTap: ({ username, platformKey }) => {
+        tapObservations.push(username);
         if (!['LOBBY','COMBAT'].includes(gamePhase) || platformKey !== 'tiktok') return false;
         const existing=fighters.find(f=>f.platform===platformKey&&f.name.toLowerCase()===username.toLowerCase());
         if(existing){
@@ -91,7 +93,7 @@ function fixture(source) {
       if(task.ms === 800) { timers.delete(id); task.callback(); }
     }
   }
-  return {send,flush,effects,joins,nodes,combat:()=>{gamePhase='COMBAT';},fighters};
+  return {send,flush,effects,joins,tapObservations,nodes,combat:()=>{gamePhase='COMBAT';},fighters};
 }
 
 const source = await readFile(new URL('../bridge/bridge-client.js', import.meta.url),'utf8');
@@ -106,6 +108,7 @@ test('LIVE taps admit and rejoin their owner during lobby or combat, without dup
   send('@fallen',2); // A fallen fighter must rejoin on tap if this mode permits it.
   f.flush();
   assert.deepEqual(f.joins,['@new_fan','@fallen']);
+  assert.ok(f.tapObservations.includes('@viewer_one'),'active fighters also receive tap confirmation');
   assert.equal(f.effects.length,3);
   assert.deepEqual(JSON.parse(JSON.stringify(f.effects[0])),{
     eventType:'taps',targetId:'f1',tapCount:10

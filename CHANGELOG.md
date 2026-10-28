@@ -1,5 +1,13 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-28 — Arena Live v0.34 · Etiquetas de espectadores LIVE y entradas en combate
+
+- Nuevo filtro opcional en Pantalla y HUD: mantener visibles solo nombres y clases de personas que hicieron tap o enviaron `!jugar` en TikTok, además del Protagonista. Los bots y participantes sin esas señales siguen peleando sin etiqueta. No modifica estadísticas, cupo, clasificación ni barras de vida.
+- Los taps también confirman participación de luchadores ya activos, sin contabilizarlos otra vez como nuevas entradas. Se persiste la preferencia junto a los otros controles del HUD.
+- Se comprueba la ruta de ingreso y reingreso por taps durante combate con Entrada libre, y la incorporación/reincorporación de Prota incluso cuando 128 plazas están ocupadas por bots; las victorias ya declaradas y los límites para espectadores reales permanecen protegidos.
+- Edición monolítica Mobile 0.34.0 actualizada (solo pruebas locales: no conecta a TikTok por sí misma). Pruebas de integración agregadas, pendientes de ejecución completa en navegador y en un LIVE real.
+
+
 ## 2026-10-28 — Arena Live v0.26 · Puesto de mando y TikTok LIVE
 
 - Ajustes reorganizados mediante cinco pestañas, buscador, selección persistente y carril lateral que reserva espacio para ver las capturas en escritorio; se reutilizan los controles, listeners y claves existentes.
