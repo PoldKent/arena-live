@@ -959,6 +959,14 @@ html.arena-mobile-offline #card-9x16 #viewport9x16{
   height:auto!important;max-height:calc(100dvh - 185px)!important;
   aspect-ratio:9/16!important;margin:0 auto!important;overflow:hidden!important;
 }
+html.arena-mobile-offline #card-9x16:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
+  width:min(calc(100% - 6px),calc((100dvh - 320px) * 9 / 16))!important;
+  max-height:calc(100dvh - 320px)!important;
+}
+html.arena-mobile-offline[data-mobile-mode="player"][data-mobile-touch-mode="touch"] #card-9x16 #viewport9x16{
+  width:min(calc(100% - 6px),calc((100dvh - 132px) * 9 / 16))!important;
+  max-height:calc(100dvh - 132px)!important;
+}
 html.arena-mobile-offline #card-9x16 .arena-fullscreen-exit-button,
 html.arena-mobile-offline #card-16x9 .arena-fullscreen-exit-button{display:none!important}
 html.arena-mobile-offline #arenaMobileControlShelf{
