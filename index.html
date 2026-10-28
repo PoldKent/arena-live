@@ -997,6 +997,15 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
                         <!-- 16:9 TOP PERIMETER HUD -->
                         <div class="relative z-10 p-2 sm:p-2.5 flex flex-col gap-1.5 pointer-events-none">
+                            <aside id="arenaAudienceGuide16" class="arena-audience-guide arena-audience-guide-landscape" aria-label="Cómo jugar en directo">
+                                <div class="arena-guide-call">¡ESCRIBE <strong>!jugar</strong> <span>Y ENTRA A LA PELEA!</span></div>
+                                <p class="arena-guide-explain">Elige tu clase y usa su poder escribiendo:</p>
+                                <div class="arena-guide-commands"><span class="arena-guide-pair arena-guide-warrior">⚔ <b>Guerrero</b> <code>!guerrero</code> <i>→</i> <code>!kame</code></span>
+                                <span class="arena-guide-pair arena-guide-shinobi">🌀 <b>Shinobi</b> <code>!shinobi</code> <i>→</i> <code>!rasen</code></span>
+                                <span class="arena-guide-pair arena-guide-titan">🛡 <b>Titán</b> <code>!titan</code> <i>→</i> <code>!coloso</code></span>
+                                <span class="arena-guide-pair arena-guide-rayo">⚡ <b>Rayo</b> <code>!rayo</code> <i>→</i> <code>!trueno</code></span>
+                                <span class="arena-guide-pair arena-guide-espiritu">🌿 <b>Espíritu</b> <code>!espiritu</code> <i>→</i> <code>!enred</code></span></div>
+                            </aside>
                             <div class="flex items-center justify-between gap-2">
                                 <div class="hud-glass px-2.5 py-1 rounded-xl flex items-center gap-2 border border-cyan-500/30">
                                     <span id="hudModeIcon16" class="text-sm">⚡</span>
@@ -1071,39 +1080,29 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <div id="killFeed16" class="self-end flex flex-col items-end gap-1 max-w-[240px]"></div>
                         </div>
 
-                        <!-- Always-on audience instructions; independent from game phase and HUD -->
-                        <aside id="arenaAudienceGuide16" class="arena-audience-guide arena-audience-guide-landscape" aria-label="Cómo jugar en Arena Live">
-                            <div class="arena-guide-intro"><span class="arena-guide-step">01 · ENTRA</span><strong>!jugar</strong><span class="arena-guide-tip">02 Clase → 03 Poder</span></div>
-                            <div class="arena-guide-commands"><span class="arena-guide-pair arena-guide-warrior"><span aria-hidden="true">⚔</span><code>!guerrero</code><b aria-hidden="true">→</b><code>!kame</code></span>
-                                <span class="arena-guide-pair arena-guide-shinobi"><span aria-hidden="true">🌀</span><code>!shinobi</code><b aria-hidden="true">→</b><code>!rasen</code></span>
-                                <span class="arena-guide-pair arena-guide-titan"><span aria-hidden="true">🛡</span><code>!titan</code><b aria-hidden="true">→</b><code>!coloso</code></span>
-                                <span class="arena-guide-pair arena-guide-rayo"><span aria-hidden="true">⚡</span><code>!rayo</code><b aria-hidden="true">→</b><code>!trueno</code></span>
-                                <span class="arena-guide-pair arena-guide-espiritu"><span aria-hidden="true">🌿</span><code>!espiritu</code><b aria-hidden="true">→</b><code>!enred</code></span></div>
-                        </aside>
+
 
                         <!-- Redesigned 16:9 entry lobby: audience first, operator tools secondary. -->
-                        <section id="lobbyOverlay16" class="arena-onboarding arena-onboarding-wide" aria-label="Cómo entrar a Arena Live">
-                            <div class="arena-onboarding-card">
-                                <p class="arena-onboarding-kicker">✦ ARENA LIVE · PARTICIPA EN EL DIRECTO</p>
-                                <h2>¡TU PERSONAJE TE ESPERA!</h2>
-                                <p class="arena-onboarding-sub">Escribe <strong>!jugar</strong> en el chat de TikTok para entrar. Luego elige tu clase y usa su poder durante la pelea.</p>
-                                <div class="arena-onboarding-steps" aria-hidden="true"><span>01 <b>ENTRA</b></span><span>02 <b>ELIGE CLASE</b></span><span>03 <b>ATACA</b></span></div>
-                                <div class="arena-onboarding-meta">
-                                    <span class="arena-onboarding-stat">⚔ <strong id="lobbyDetectedMode16">⚡ SMASH (3-8)</strong></span>
-                                    <span class="arena-onboarding-stat">⏱ Inicio <strong id="lobbyCountdownText16">25s</strong><button type="button" onclick="toggleLobbyTimerPause()" id="btnPauseLobbyTimer16" aria-label="Pausar o reanudar cuenta regresiva">⏸</button></span>
-                                </div>
-                                <div class="arena-onboarding-rules" aria-label="Reglas de entrada">
-                                    <button type="button" onclick="setRejoinRuleMode('3_lives')" id="lobbyRuleBtn16_3lives">❤️ <span id="lobbyLivesRuleLabel">1 vida</span></button>
-                                    <button type="button" onclick="setRejoinRuleMode('timed')" id="lobbyRuleBtn16_timed">⏱ Por tiempo</button>
-                                    <button type="button" onclick="setRejoinRuleMode('free')" id="lobbyRuleBtn16_free">🌐 Entrada libre</button>
-                                </div>
-                                <div class="arena-onboarding-tools" aria-label="Controles del operador para pruebas y comienzo">
-                                    <button type="button" onclick="triggerQuickJoin()">+1 prueba</button>
-                                    <button type="button" onclick="triggerBatchJoin(4)">+4 pruebas</button>
-                                    <button type="button" class="arena-onboarding-start" onclick="startCombatFromLobby()">⚔ Iniciar pelea</button>
-                                </div>
-                            </div>
-                        </section>
+                        <section id="lobbyOverlay16" class="arena-onboarding arena-onboarding-wide" aria-label="Instrucciones del lobby">
+<div class="arena-onboarding-card">
+<p class="arena-onboarding-kicker">✦ ARENA LIVE · LOBBY ABIERTO</p>
+<h2>¡ESTÁS A UN MENSAJE DE PELEAR!</h2>
+<p class="arena-onboarding-sub">Escribe <strong>!jugar</strong> en el chat de TikTok y tu personaje entrará a la arena.</p>
+<p class="arena-onboarding-hint">Después elige tu clase y activa sus poderes con los comandos de arriba.</p>
+<div class="arena-onboarding-meta">
+<span class="arena-onboarding-stat">⚔ <strong id="lobbyDetectedMode16">⚡ SMASH (3-8)</strong></span>
+<span class="arena-onboarding-stat">⏱ Inicio <strong id="lobbyCountdownText16">25s</strong><button type="button" onclick="toggleLobbyTimerPause()" id="btnPauseLobbyTimer16" aria-label="Pausar o reanudar cuenta regresiva">⏸</button></span>
+</div>
+<div class="arena-onboarding-rules">
+<button type="button" onclick="setRejoinRuleMode('3_lives')" id="lobbyRuleBtn16_3lives">❤️ <span id="lobbyLivesRuleLabel">1 vida</span></button>
+<button type="button" onclick="setRejoinRuleMode('timed')" id="lobbyRuleBtn16_timed">⏱ Por tiempo</button>
+<button type="button" onclick="setRejoinRuleMode('free')" id="lobbyRuleBtn16_free">🌐 Entrada libre</button>
+</div>
+<div class="arena-onboarding-tools" aria-label="Controles del operador">
+<button type="button" onclick="triggerQuickJoin()">+1 prueba</button>
+<button type="button" onclick="triggerBatchJoin(4)">+4 pruebas</button>
+<button type="button" class="arena-onboarding-start" onclick="startCombatFromLobby()">⚔ Iniciar pelea</button>
+</div></div></section>
 
                         <!-- 16:9 FINAL K.O. SLOW-MO OVERLAY -->
                         <div id="koSlowMoOverlay16" class="hidden relative z-30 my-auto mx-auto pointer-events-none text-center">
@@ -1186,6 +1185,15 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
                         <!-- 9:16 TOP VERTICAL MOBILE HUD -->
                         <div class="relative z-10 p-2 flex flex-col gap-1.5 pointer-events-none">
+                            <aside id="arenaAudienceGuide9" class="arena-audience-guide arena-audience-guide-portrait" aria-label="Cómo jugar en directo">
+                                <div class="arena-guide-call">¡ESCRIBE <strong>!jugar</strong> <span>Y ENTRA A LA PELEA!</span></div>
+                                <p class="arena-guide-explain">Elige tu clase y usa su poder escribiendo:</p>
+                                <div class="arena-guide-commands"><span class="arena-guide-pair arena-guide-warrior">⚔ <b>Guerrero</b> <code>!guerrero</code> <i>→</i> <code>!kame</code></span>
+                                <span class="arena-guide-pair arena-guide-shinobi">🌀 <b>Shinobi</b> <code>!shinobi</code> <i>→</i> <code>!rasen</code></span>
+                                <span class="arena-guide-pair arena-guide-titan">🛡 <b>Titán</b> <code>!titan</code> <i>→</i> <code>!coloso</code></span>
+                                <span class="arena-guide-pair arena-guide-rayo">⚡ <b>Rayo</b> <code>!rayo</code> <i>→</i> <code>!trueno</code></span>
+                                <span class="arena-guide-pair arena-guide-espiritu">🌿 <b>Espíritu</b> <code>!espiritu</code> <i>→</i> <code>!enred</code></span></div>
+                            </aside>
                             <div class="flex items-center justify-between gap-1">
                                 <div class="hud-glass px-2 py-1 rounded-xl flex items-center gap-1.5 border border-pink-500/40">
                                     <span id="hudModeIcon9" class="text-xs">⚡</span>
@@ -1243,35 +1251,24 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <div id="verticalEventHistory" class="self-end flex flex-col items-end gap-0.5 max-w-[190px]" aria-live="polite"></div>
                         </div>
 
-                        <!-- Always-on audience instructions; independent from game phase and HUD -->
-                        <aside id="arenaAudienceGuide9" class="arena-audience-guide arena-audience-guide-portrait" aria-label="Cómo jugar en Arena Live">
-                            <div class="arena-guide-intro"><span class="arena-guide-step">01 · ENTRA</span><strong>!jugar</strong><span class="arena-guide-tip">02 Clase → 03 Poder</span></div>
-                            <div class="arena-guide-commands"><span class="arena-guide-pair arena-guide-warrior"><span aria-hidden="true">⚔</span><code>!guerrero</code><b aria-hidden="true">→</b><code>!kame</code></span>
-                                <span class="arena-guide-pair arena-guide-shinobi"><span aria-hidden="true">🌀</span><code>!shinobi</code><b aria-hidden="true">→</b><code>!rasen</code></span>
-                                <span class="arena-guide-pair arena-guide-titan"><span aria-hidden="true">🛡</span><code>!titan</code><b aria-hidden="true">→</b><code>!coloso</code></span>
-                                <span class="arena-guide-pair arena-guide-rayo"><span aria-hidden="true">⚡</span><code>!rayo</code><b aria-hidden="true">→</b><code>!trueno</code></span>
-                                <span class="arena-guide-pair arena-guide-espiritu"><span aria-hidden="true">🌿</span><code>!espiritu</code><b aria-hidden="true">→</b><code>!enred</code></span></div>
-                        </aside>
+
 
                         <!-- Dedicated readable 9:16 audience lobby. -->
-                        <section id="lobbyOverlay9" class="arena-onboarding arena-onboarding-portrait" aria-label="Cómo entrar a Arena Live">
-                            <div class="arena-onboarding-card">
-                                <p class="arena-onboarding-kicker">✦ ARENA LIVE · TIKTOK</p>
-                                <h2>¡ENTRA A LA ARENA!</h2>
-                                <p class="arena-onboarding-sub">Escribe <strong>!jugar</strong> en el chat y aparecerás como peleador.</p>
-                                <div class="arena-onboarding-steps" aria-hidden="true"><span>1 <b>ENTRA</b></span><span>2 <b>CLASE</b></span><span>3 <b>PODER</b></span></div>
-                                <p class="arena-onboarding-hint">Debajo están los comandos de las 5 clases.</p>
-                                <div class="arena-onboarding-meta">
-                                    <strong id="lobbyDetectedMode9">⚡ SMASH (3-8)</strong>
-                                    <span id="lobbyRuleText9">🌐 Entrada libre</span>
-                                    <span>⏱ <strong id="lobbyCountdownText9">25s</strong></span>
-                                </div>
-                                <div class="arena-onboarding-tools" aria-label="Controles del operador">
-                                    <button type="button" onclick="triggerQuickJoin()">+1 prueba</button>
-                                    <button type="button" class="arena-onboarding-start" onclick="startCombatFromLobby()">⚔ Empezar</button>
-                                </div>
-                            </div>
-                        </section>
+                        <section id="lobbyOverlay9" class="arena-onboarding arena-onboarding-portrait" aria-label="Instrucciones del lobby">
+<div class="arena-onboarding-card">
+<p class="arena-onboarding-kicker">✦ ARENA LIVE · EN DIRECTO</p>
+<h2>¡TÚ PUEDES PELEAR!</h2>
+<p class="arena-onboarding-sub">Escribe <strong>!jugar</strong> en el chat y tu guerrero aparecerá en la arena.</p>
+<p class="arena-onboarding-hint">Elige clase y poder con los comandos de arriba.</p>
+<div class="arena-onboarding-meta">
+<strong id="lobbyDetectedMode9">⚡ SMASH (3-8)</strong>
+<span id="lobbyRuleText9">🌐 Entrada libre</span>
+<span>⏱ <strong id="lobbyCountdownText9">25s</strong></span>
+</div>
+<div class="arena-onboarding-tools" aria-label="Controles del operador">
+<button type="button" onclick="triggerQuickJoin()">+1 prueba</button>
+<button type="button" class="arena-onboarding-start" onclick="startCombatFromLobby()">⚔ Empezar</button>
+</div></div></section>
 
                         <!-- 9:16 FINAL K.O. SLOW-MO OVERLAY -->
                         <div id="koSlowMoOverlay9" class="hidden relative z-30 my-auto mx-auto w-[90%] pointer-events-none text-center">
