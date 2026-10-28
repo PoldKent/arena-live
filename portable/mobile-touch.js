@@ -235,7 +235,7 @@ function installArenaMobileTouch(){
     const labels={arenaMobileJump:'↑',arenaMobileAttack:'⚔',arenaMobilePower:'⚡',arenaMobileMoreBtn:'☰'};
     for(const [id,label]of Object.entries(labels)){
         const node=document.getElementById(id);if(!node)continue;
-        node.textContent=label;node.classList.add('arena-portable-round-control');
+        node.textContent=label;node.removeAttribute('data-workspace-copy');node.classList.add('arena-portable-round-control');
         node.title=({arenaMobileJump:'Saltar',arenaMobileAttack:'Golpe básico',arenaMobilePower:'Poder especial',arenaMobileMoreBtn:'Abrir menú'}[id]);
         node.setAttribute('aria-label',node.title);
     }
