@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.25 — TikTok LIVE</title>
+    <title>Arena Live v0.26 — TikTok LIVE</title>
     <!--
       ARENA LIVE · GAME RUNTIME
       The classic game script stays here; utility CSS is built locally and
@@ -13,7 +13,7 @@
       have been migrated to explicit event listeners.
     -->
     <!-- Styles are built once; no browser compiler runs during a stream. -->
-    <link rel="stylesheet" href="styles/arena-ui.css?v=0.25">
+    <link rel="stylesheet" href="styles/arena-ui.css?v=0.26">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Fonts: Inter & Orbitron for Arcade/Esports HUD -->
@@ -218,7 +218,61 @@
 #viewport16x9 .arena-onboarding-card, #viewport9x16 .arena-onboarding-card,
 #viewport16x9 .arena-victory-card, #viewport9x16 .arena-victory-card,
 #viewport16x9 .arena-audience-guide, #viewport9x16 .arena-audience-guide { opacity: var(--arena-hud-opacity); }
-#verticalEventHistory { display: none !important; } /* social events belong in Live Chat only */
+#verticalEventHistory { display: none !important; }
+/* v0.26 · Operator-first layout. No game canvas, OBS crop or rule logic is modified. */
+#arenaSettingsNav {position:sticky;top:-10px;z-index:4;display:grid;gap:7px;padding:9px 1px 11px;background:#0b101e;border-bottom:1px solid #34495b;margin-bottom:11px}
+#arenaSettingsTabs {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+#arenaSettingsTabs button {padding:9px 4px;min-height:37px;border:1px solid #30465b;border-radius:7px;background:#152131;color:#d2e0eb;font:650 11px Inter,system-ui;white-space:normal}
+#arenaSettingsTabs button[aria-selected="true"] {background:#174759;border-color:#41c5d3;color:white}
+#arenaSettingsSearch {width:100%;height:35px;min-width:0;padding:7px 10px;border:1px solid #41576b;border-radius:7px;background:#0c1623;color:#f0f9ff;font-size:12px}
+#arenaSettingsSearch:focus-visible {outline:2px solid #49bfda}
+#arenaSettingsNote {color:#9bb4c6;font-size:10px;margin:0;line-height:1.35}
+#settingsGeneralPanel>.arena-settings-section[hidden] {display:none!important}
+#settingsGeneralPanel>.arena-settings-section {border:1px solid #3a4e61;background:#101c2b}
+#settingsGeneralPanel>.arena-settings-section>summary {position:sticky;top:0;z-index:1;background:#162336}
+#settingsGeneralPanel>.arena-settings-section>.arena-settings-content {display:grid;gap:12px;min-width:0}
+#arenaTestCenter {padding:9px;background:#121c2b;border:1px solid #344b62;border-radius:8px;display:grid;gap:7px}
+#arenaTestCenter strong{font:750 12px Inter,system-ui;color:#a9dff4}
+#arenaTestCenterNav {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+#arenaTestCenterNav button {padding:8px 4px;min-height:32px;background:#1c2d42;border:1px solid #37516d;border-radius:6px;color:#e6effb;font:650 11px Inter,system-ui}
+#arenaTestCenterNav button:hover,#arenaTestCenterNav button:focus-visible{background:#25506b;outline-color:#69d4ef}
+#arenaTestCenter small{font-size:10px;color:#91a8be}
+@media(min-width:1024px){
+ #arenaTopBarInner {display:grid!important;grid-template-columns:minmax(180px,auto) minmax(0,1fr);gap:9px;align-items:center}
+ #arenaTopBarInner>.hidden.md\:flex {display:none!important}
+ #arenaHeaderActions.arena-operator-toolbar {width:100%;max-width:none;overflow-x:auto;scrollbar-width:thin;padding:3px 1px;gap:4px}
+ #arenaHeaderActions #arenaDualTikTokConnectBtn {order:-12;border-color:#39a7a0}
+ #arenaHeaderActions #btnStreamerJoin {order:-11}
+ #arenaHeaderActions #arenaProtaClassToolbar {order:-10}
+ #arenaHeaderActions #arenaDualPauseBtn {order:-9}
+ #arenaHeaderActions #arenaDualSettingsBtn {order:-8;border-color:#42b8d0}
+ #arenaHeaderActions #arenaDualTestsToggle {order:-7}
+ #arenaHeaderActions #arenaDualChatToggleBtn {order:-6}
+ #arenaHeaderActions #arenaDualLobbyBtn {order:-5}
+ #arenaHeaderActions #arenaDualRematchBtn {order:-4}
+ #arenaHeaderActions #btnFullscreenDual {order:-3}
+ #arenaHeaderActions #arenaViewMenuBtn {order:-2}
+ #arenaHeaderActions #arenaFullscreenMenuBtn {order:-1}
+ #arenaHeaderActions .arena-toolbar-separator {display:none}
+ #arenaHeaderActions button {min-height:33px;font-size:11px}
+ /* An editor rail reserves space for both video previews instead of dimming/covering them. */
+ body:has(#settingsPauseModal:not(.hidden)):not(:has(#broadcastStageSection:fullscreen)) #arenaWorkspace {
+     width:calc(100% - min(450px,38vw));margin-left:0;margin-right:auto;
+ }
+ body:not(:has(#broadcastStageSection:fullscreen)) #settingsPauseModal {
+     left:auto;right:0;top:0;bottom:0;width:min(450px,38vw);padding:6px!important;
+     background:#0a1420!important;backdrop-filter:none!important;box-shadow:-10px 0 40px #0005;
+ }
+ body:not(:has(#broadcastStageSection:fullscreen)) #settingsPauseModal>div {
+     width:100%;height:calc(100dvh - 12px);max-width:none;max-height:none;
+ }
+}
+@media(max-width:700px){
+ #arenaSettingsTabs {grid-template-columns:repeat(3,minmax(0,1fr))}
+ #arenaSettingsTabs button {font-size:10px}
+ #arenaSettingsNav {top:-10px}
+}
+ /* social events belong in Live Chat only */
 #viewport16x9 .hud-taps-metric, #viewport9x16 .hud-taps-metric { display: none !important; }
 #viewport16x9 .hud-player-metric, #viewport9x16 .hud-player-metric { display: block !important; }
 #viewport16x9 .hud-player-metric #hudCoopBadge16, #viewport9x16 .hud-player-metric #hudCoopBadge9 { display: none !important; }
@@ -1102,7 +1156,18 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
     <!-- ==================== MAIN WORKSPACE: DUAL SIMULTANEOUS MONITORS + MULTI-CHAT SIMULATOR ==================== -->
     <main id="arenaWorkspace" class="flex-1 max-w-[1920px] w-full mx-auto p-2 sm:p-3 flex flex-col items-stretch justify-start gap-3 overflow-visible">
 
-<aside id="arenaDockLeft" class="arena-dock" data-dock-zone="left" aria-label="Paneles izquierdos"></aside><aside id="arenaDockRight" class="arena-dock" data-dock-zone="right" aria-label="Paneles derechos"></aside><aside id="arenaDockBottom" class="arena-dock" data-dock-zone="bottom" aria-label="Paneles inferiores"></aside><div id="arenaDockFloat" aria-label="Paneles flotantes"></div><div id="arenaLeftResizer" class="arena-dock-resizer" role="separator" tabindex="0" aria-label="Ancho de columna izquierda" aria-orientation="vertical" aria-valuemin="200" aria-valuemax="500" aria-valuenow="260"></div><div id="arenaRightResizer" class="arena-dock-resizer" role="separator" tabindex="0" aria-label="Ancho de columna derecha" aria-orientation="vertical" aria-valuemin="200" aria-valuemax="500" aria-valuenow="300"></div>
+<aside id="arenaDockLeft" class="arena-dock" data-dock-zone="left" aria-label="Paneles izquierdos"></aside><aside id="arenaDockRight" class="arena-dock" data-dock-zone="right" aria-label="Paneles derechos"><nav id="arenaTestCenter" aria-label="Centro de pruebas" data-no-translate>
+  <strong>🧪 Centro de pruebas · un panel a la vez</strong>
+  <div id="arenaTestCenterNav">
+    <button type="button" data-workspace-reveal="arenaPanelPowers">⚡ Jugador y poderes</button>
+    <button type="button" data-workspace-reveal="arenaPanelSocial">❤️ Interacciones</button>
+    <button type="button" data-workspace-reveal="arenaPanelPlayers">👥 Entradas y K.O.</button>
+    <button type="button" data-workspace-reveal="arenaPanelScenarios">🏟 Escenarios</button>
+    <button type="button" data-workspace-reveal="arenaPanelSimulation">🤖 Simulación</button>
+    <button type="button" data-workspace-reveal="arenaPanelBridge">📡 TikTok LIVE</button>
+  </div>
+  <small>Las pruebas quedan fuera de la captura; puedes acoplar o mover cada panel como antes.</small>
+</nav></aside><aside id="arenaDockBottom" class="arena-dock" data-dock-zone="bottom" aria-label="Paneles inferiores"></aside><div id="arenaDockFloat" aria-label="Paneles flotantes"></div><div id="arenaLeftResizer" class="arena-dock-resizer" role="separator" tabindex="0" aria-label="Ancho de columna izquierda" aria-orientation="vertical" aria-valuemin="200" aria-valuemax="500" aria-valuenow="260"></div><div id="arenaRightResizer" class="arena-dock-resizer" role="separator" tabindex="0" aria-label="Ancho de columna derecha" aria-orientation="vertical" aria-valuemin="200" aria-valuemax="500" aria-valuenow="300"></div>
         <!-- LEFT/CENTER: SIMULTANEOUS DUAL-BROADCAST STAGE (LEFT: 16:9 HORIZONTAL | RIGHT: 9:16 VERTICAL) -->
         <section id="broadcastStageSection" class="w-full min-w-0 shrink-0 flex flex-col justify-between bg-[#090d18] rounded-2xl border border-slate-800/90 p-2 sm:p-3 relative overflow-hidden shadow-2xl gap-1.5">
 
@@ -1559,6 +1624,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
             <!-- Modal Body: Categorized Grid -->
             <div id="settingsPanelsScroll" class="p-4 sm:p-5 overflow-y-auto">
+<div id="arenaSettingsNav" aria-label="Navegación rápida de ajustes">
+  <nav id="arenaSettingsTabs" role="tablist" aria-label="Categorías de ajustes">
+    <button type="button" data-settings-tab="match" role="tab" aria-selected="true">🎮 Partida</button>
+    <button type="button" data-settings-tab="combat" role="tab" aria-selected="false">⚔️ Combate</button>
+    <button type="button" data-settings-tab="broadcast" role="tab" aria-selected="false">📐 Pantallas</button>
+    <button type="button" data-settings-tab="audience" role="tab" aria-selected="false">📡 Audiencia</button>
+    <button type="button" data-settings-tab="workspace" role="tab" aria-selected="false">🧩 Espacio</button>
+  </nav>
+  <input id="arenaSettingsSearch" type="search" autocomplete="off" placeholder="🔎 Buscar ajuste: vidas, volumen, OBS, daños…" aria-label="Buscar cualquier ajuste" />
+  <p id="arenaSettingsNote">Los cambios se guardan automáticamente. Las capturas permanecen visibles fuera de este panel.</p>
+</div>
             <div id="settingsGeneralPanel" class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                 <!-- CATEGORÍA 1: REGLAS DE PARTIDA Y RE-INGRESO -->
@@ -1838,17 +1914,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.25 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.26 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
 
     <!-- ==================== COMPLETE GAME ENGINE, LOBBY & VICTORY SCRIPT ==================== -->
-    <script src="engine/arena-core.js?v=0.25"></script>
-    <script src="engine/arena-render.js?v=0.25"></script>
-    <script src="engine/arena-audio.js?v=0.25"></script>
-    <script src="engine/arena-settings.js?v=0.25"></script>
-    <script src="engine/arena-balance-evidence.js?v=0.25"></script>
+    <script src="engine/arena-core.js?v=0.26"></script>
+    <script src="engine/arena-render.js?v=0.26"></script>
+    <script src="engine/arena-audio.js?v=0.26"></script>
+    <script src="engine/arena-settings.js?v=0.26"></script>
+    <script src="engine/arena-balance-evidence.js?v=0.26"></script>
     <script>
         /*************************************************************************
          * ARENA LIVE · MONOLITHIC ENGINE INDEX
@@ -3684,6 +3760,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         function setRejoinRuleMode(mode) {
             const previousMode = rejoinRuleMode;
             rejoinRuleMode = ['timed', 'free'].includes(mode) ? mode : '3_lives';
+            try {localStorage.setItem('arenaLiveRejoinModeV1',rejoinRuleMode);}catch(_e){}
             // Keep the configured lives count (1 by default); changing rule mode never silently changes it.
             updateRuleSpecificSettings();
             if (gameState === 'COMBAT') {
@@ -8062,7 +8139,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             loadViewerProfiles();
             bindManualSpectatorIdentity();
             openLobby(true);
-            setRejoinRuleMode('free'); // Free to Join is the default rule on every fresh load.
+            let savedRejoinMode = 'free';
+            try { savedRejoinMode=localStorage.getItem('arenaLiveRejoinModeV1')||'free'; } catch (_e) {}
+            setRejoinRuleMode(savedRejoinMode); // Restore the operator's rule across updates.
             syncManualSpectatorIdentity(); // The manual viewer takes one spot without requiring !jugar.
             updateRuleLabels();
             updateStreamerJoinButton();
@@ -8205,7 +8284,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.25';
+        const ARENA_RELEASE_VERSION = '0.26';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:0, footer:76, format:'21'});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
@@ -8630,6 +8709,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             };
             for(const [id,title] of Object.entries(hints)){const button=document.getElementById(id);if(button)button.title=title;}
             refreshArenaWorkspaceLabels();
+            refreshArenaSettingsNavigation();
             const view = document.getElementById('arenaViewMenuBtn');
             if (view) {view.disabled=dual;view.title=dual ? `16:9 + 9:16 · ${arenaOperatorText('stream')}` : `${arenaOperatorText('view')} · ${monitorFocus}`;}
             const tiktok = document.getElementById('arenaDualTikTokConnectBtn');
@@ -8808,6 +8888,10 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
         function revealArenaWorkspacePanel(id) {
             const panel=document.getElementById(id);if(!panel)return;
+            // Navigating the test center keeps one relevant test panel open;
+            // chat is independent and retains its own scroll/state.
+            if(id!=='arenaPanelChat') for(const other of arenaWorkspace.panels)
+                if(other!==panel&&other.id!=='arenaPanelChat')other.open=false;
             if(arenaWorkspace.mode==='stream'||arenaWorkspace.mobile)showArenaWorkspacePanels(id==='arenaPanelChat'?'chat':'tools',document.getElementById(id==='arenaPanelChat'?'arenaDualChatToggleBtn':'arenaDualTestsToggle'));
             else closeArenaOperatorPopover(false);
             panel.open=true;panel.scrollIntoView({block:'nearest'});
@@ -8908,6 +8992,78 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             writeArenaHudText(document.getElementById('arenaPowerTargetState'),target?`${target.eliminated?'K.O.':'●'} · ${Math.max(0,Math.ceil(target.hp))}/${Math.ceil(target.maxHp)} HP · ${Math.floor(target.energy)} ⚡`:'—');
             refreshArenaTrainingControls();
         }
+
+        // v0.26: Reorganize existing Settings sections, never cloning inputs or
+        // changing their inline handlers, IDs, saved values or rule semantics.
+        const ARENA_SETTINGS_NAV_KEY = 'arenaLiveSettingsNavV1';
+        const ARENA_SETTINGS_GROUPS = Object.freeze(['match','combat','broadcast','audience','workspace','match','combat']);
+        const ARENA_SETTINGS_LABELS = Object.freeze({
+            es:['🎮 Partida','⚔️ Combate','📐 Pantallas','📡 Audiencia','🧩 Espacio','Buscar ajuste: vidas, volumen, OBS, daños…','Los cambios se guardan automáticamente. Ajusta sin tapar la pelea.'],
+            en:['🎮 Match','⚔️ Combat','📐 Displays','📡 Audience','🧩 Layout','Find setting: lives, volume, OBS, damage…','Changes are saved automatically. Keep the fight visible.'],
+            fr:['🎮 Partie','⚔️ Combat','📐 Écrans','📡 Public','🧩 Espace','Chercher un réglage…','Modifications sauvegardées. Combat visible.'],
+            de:['🎮 Spiel','⚔️ Kampf','📐 Bildschirme','📡 Publikum','🧩 Layout','Einstellung suchen…','Automatisch gespeichert. Kampf bleibt sichtbar.'],
+            zh:['🎮 对局','⚔️ 战斗','📐 屏幕','📡 观众','🧩 布局','搜索设置…','更改自动保存，战斗保持可见。'],
+            ja:['🎮 対戦','⚔️ 戦闘','📐 画面','📡 視聴者','🧩 配置','設定を検索…','変更は自動保存されます。'],
+            pt:['🎮 Partida','⚔️ Combate','📐 Telas','📡 Público','🧩 Layout','Buscar configuração…','Alterações salvas automaticamente.'],
+            it:['🎮 Partita','⚔️ Combattimento','📐 Schermi','📡 Pubblico','🧩 Layout','Cerca impostazione…','Modifiche salvate automaticamente.']
+        });
+        let arenaSettingsActiveTab = 'match';
+        function refreshArenaSettingsNavigation() {
+            const labels=ARENA_SETTINGS_LABELS[currentLanguage]||ARENA_SETTINGS_LABELS.es;
+            document.querySelectorAll('[data-settings-tab]').forEach((button,index)=>{
+                if(button.textContent!==labels[index])button.textContent=labels[index];
+            });
+            const search=document.getElementById('arenaSettingsSearch');
+            if(search)search.placeholder='🔎 '+labels[5];
+            const note=document.getElementById('arenaSettingsNote');
+            if(note&&note.textContent!==labels[6])note.textContent=labels[6];
+        }
+        function selectArenaSettingsTab(key, remember=true) {
+            if(!ARENA_SETTINGS_GROUPS.includes(key))return;
+            arenaSettingsActiveTab=key;
+            const search=document.getElementById('arenaSettingsSearch');
+            const searching=!!search?.value.trim();
+            const query=search?.value.trim().toLocaleLowerCase()||'';
+            document.querySelectorAll('#settingsGeneralPanel>.arena-settings-section').forEach(section=>{
+                // When searching, show only whole sections that contain matching
+                // controls; never destroy hidden control state or event handlers.
+                const visible=searching ? section.textContent.toLocaleLowerCase().includes(query)
+                    || [...section.querySelectorAll('input,select,button')].some(el=>
+                        (el.title+' '+el.placeholder+' '+el.id).toLocaleLowerCase().includes(query))
+                    : section.dataset.settingsCategory===key;
+                section.hidden=!visible;
+                if(searching&&visible)section.open=true;
+            });
+            document.querySelectorAll('[data-settings-tab]').forEach(button=>{
+                const active=button.dataset.settingsTab===key;
+                button.setAttribute('aria-selected',String(active));
+                button.tabIndex=active?0:-1;
+            });
+            if(remember)try{localStorage.setItem(ARENA_SETTINGS_NAV_KEY,key);}catch(_){}
+            const scroll=document.getElementById('settingsPanelsScroll');
+            if(scroll)scroll.scrollTop=0;
+        }
+        function installArenaSettingsNavigator() {
+            const sections=[...document.querySelectorAll('#settingsGeneralPanel>.arena-settings-section')];
+            sections.forEach((section,index)=>{
+                section.dataset.settingsCategory=ARENA_SETTINGS_GROUPS[index]||'workspace';
+            });
+            let stored='match';try{stored=localStorage.getItem(ARENA_SETTINGS_NAV_KEY)||'match';}catch(_){}
+            const tabs=document.querySelectorAll('[data-settings-tab]');
+            tabs.forEach((button,index)=>{
+                button.addEventListener('click',()=>{document.getElementById('arenaSettingsSearch').value='';selectArenaSettingsTab(button.dataset.settingsTab);});
+                button.addEventListener('keydown',event=>{
+                    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+                    event.preventDefault();
+                    const target=event.key==='Home'?0:event.key==='End'?tabs.length-1:
+                        (index+(event.key==='ArrowLeft'?-1:1)+tabs.length)%tabs.length;
+                    tabs[target].click();tabs[target].focus({preventScroll:true});
+                });
+            });
+            document.getElementById('arenaSettingsSearch')?.addEventListener('input',()=>selectArenaSettingsTab(arenaSettingsActiveTab,false));
+            selectArenaSettingsTab(ARENA_SETTINGS_GROUPS.includes(stored)?stored:'match',false);
+            refreshArenaSettingsNavigation();
+        }
         function installArenaWorkspace(){
             installArenaRuntimeSettings();
             installArenaTrainingControls();
@@ -8939,6 +9095,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 body.append(...card.childNodes);section.append(summary,body);card.replaceWith(section);
                 section.addEventListener('toggle',()=>{if(section.contains(document.getElementById('arenaBalancePanel'))&&section.open)refreshArenaBalancePanel(true);if(arenaWorkspace.restoring)return;arenaWorkspace.layouts[arenaWorkspace.mode].settings[index]=section.open;scheduleArenaWorkspaceSave();});
             });
+            installArenaSettingsNavigator();
             for(const args of [['arenaLeftResizer','leftWidth'],['arenaRightResizer','rightWidth'],['arenaStreamResizer','leftWidth']])installArenaDockResizer(...args);
             document.getElementById('arenaStreamClose').addEventListener('click',()=>{closeArenaOperatorPopover();if(isSettingsOpen)toggleSettingsModal(false);});
             const stage=document.getElementById('broadcastStageSection');
@@ -9006,7 +9163,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.25.0',
+            version: '0.26.0',
             edition: 'tiktok',
             renderSpriteMode: arenaGpuSpritesEnabled ? 'hardware-candidate' : 'software-safe-vectors',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,

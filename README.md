@@ -1,10 +1,10 @@
-# Arena Live · v0.25
+# Arena Live · v0.26
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
 ## Versión principal
 
-`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API, el servidor y el paquete identifican la versión 0.25. [Panel único de v0.18](docs/RELEASE-0.18-PANEL-UNICO.md). [Las seis correcciones y su validación](docs/RELEASE-0.15-CORRECCIONES.md).
+`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API, el servidor y el paquete identifican la versión 0.26. [Panel único de v0.18](docs/RELEASE-0.18-PANEL-UNICO.md). [Las seis correcciones y su validación](docs/RELEASE-0.15-CORRECCIONES.md).
 
 En **duelo 1v1**, los marcadores de vida de ambas capturas muestran **HP actuales** (por ejemplo, `180 HP` o `75 HP`) en lugar de porcentajes; las barras siguen reflejando proporcionalmente la vida restante y la energía mantiene su porcentaje.
 
@@ -16,9 +16,11 @@ Las capturas **Full HD 16:9 y 9:16** seleccionan automáticamente la ruta de dib
 
 **v0.25:** El ajuste de **opacidad del HUD** en Ajustes controla ahora también **todo el cartel de resultado final** (campeón, estadísticas, podio y botones) en ambas capturas 16:9 y 9:16, utilizando el mismo porcentaje del lobby (35–100 %). No cambia el cronómetro de victoria ni las acciones de revancha/nuevo lobby.
 
+**v0.26 — Puesto de mando:** Ajustes tiene cinco categorías navegables (Partida, Combate, Pantallas, Audiencia y Espacio), buscador y pestaña recordada. Los ajustes originales y la calibración OBS se conservan sin duplicar controles. En escritorio, Ajustes abre como carril lateral y deja visible la arena; la barra prioriza TikTok, Prota, Pausa, Ajustes, Pruebas y Chat. El nuevo **Centro de pruebas** reúne los seis grupos y al navegar abre solo el elegido (el chat sigue independiente). El modo de ingreso por vidas/tiempo/libre ahora se recuerda entre versiones en el mismo navegador.
+
 ## Probar en un celular con un solo archivo
 
-Ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.25.0-movil.html`. Copia ese único HTML al teléfono y ábrelo con un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
+Ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.26.0-movil.html`. Copia ese único HTML al teléfono y ábrelo con un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
 
 La exportación usa el combate de `main`; comienza en 720p, dibujo a 30 FPS y calidad Rendimiento. Permite cambiar a 540p/1080p y 30/60 FPS. TikTok LIVE real sigue necesitando el servidor: este archivo ofrece pruebas locales. [Uso, optimizaciones y límites de la exportación móvil](docs/MOVIL-MONOLITICO.md).
 

@@ -1,5 +1,14 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-28 — Arena Live v0.26 · Puesto de mando y TikTok LIVE
+
+- Ajustes reorganizados mediante cinco pestañas, buscador, selección persistente y carril lateral que reserva espacio para ver las capturas en escritorio; se reutilizan los controles, listeners y claves existentes.
+- Centro de pruebas consolidado con seis accesos rápidos y un solo panel de pruebas expandido al navegar, manteniendo el chat independiente y la libertad de acoplar paneles.
+- Barra de arriba reordenada por frecuencia: TikTok, Prota, Pausa, Ajustes, Pruebas y Chat, con menos espacio perdido y acceso a opciones secundarias por desplazamiento.
+- La regla de ingreso se restaura del navegador después de actualizar en lugar de forzarse a Entrada libre.
+- Auditoría y nueva recepción de eventos LIVE (seguir, regalos y suscripciones), con deduplicación y controles de diagnóstico.
+
+
 ## 2026-10-28 — Arena Live v0.25 · Transparencia del resultado final
 
 - El regulador existente **Opacidad de la información del juego** ahora afecta a la tarjeta completa de victoria en 16:9 y 9:16: nombre del campeón, podio, estadísticas y controles, sin cambiar sus proporciones ni ocultarla.

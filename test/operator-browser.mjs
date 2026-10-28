@@ -1134,5 +1134,30 @@ await check('Bubbles appear for normal TikTok speech, never for any command or p
  });
  assert.deepEqual(result,{commands:0,normal:true});
 });
+await check('New settings navigation groups controls without replacing input nodes and remembers selection',async()=>{
+ const r=await page.evaluate(()=>{
+  const lives=document.getElementById('playerLivesSelect');
+  const rule=document.getElementById('arenaRuleDamage');
+  const obs=document.getElementById('arenaObsVerticalFormat');
+  const labels=[...document.querySelectorAll('#arenaSettingsTabs button')].map(n=>n.dataset.settingsTab);
+  selectArenaSettingsTab('match');
+  const livesVisible=!lives.closest('.arena-settings-section').hidden;
+  const damageHidden=rule.closest('.arena-settings-section').hidden;
+  selectArenaSettingsTab('combat');
+  const damageVisible=!rule.closest('.arena-settings-section').hidden;
+  selectArenaSettingsTab('broadcast');
+  const obsVisible=!obs.closest('.arena-settings-section').hidden;
+  document.getElementById('arenaSettingsSearch').value='vidas';
+  selectArenaSettingsTab('broadcast',false);
+  const searchFound=!lives.closest('.arena-settings-section').hidden;
+  document.getElementById('arenaSettingsSearch').value='';
+  selectArenaSettingsTab('match');
+  return {labels,livesVisible,damageHidden,damageVisible,obsVisible,searchFound,
+    stable:lives===document.getElementById('playerLivesSelect')&&rule===document.getElementById('arenaRuleDamage'),
+    stored:localStorage.getItem('arenaLiveSettingsNavV1')};
+ });
+ assert.deepEqual(r,{labels:['match','combat','broadcast','audience','workspace'],
+   livesVisible:true,damageHidden:true,damageVisible:true,obsVisible:true,searchFound:true,stable:true,stored:'match'});
+});
 assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:release}));
 } finally {await browser?.close();server.kill('SIGKILL');}

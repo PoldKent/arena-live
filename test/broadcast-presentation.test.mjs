@@ -99,3 +99,16 @@ test('result card respects the shared HUD opacity variable in both full-HD viewp
    assert.match(html,new RegExp('id="victoryWinnerName'+suffix+'"'));
  }
 });
+
+test('v0.26 keeps all original settings by ID while navigating five persistent sections',()=>{
+ for(const name of ['match','combat','broadcast','audience','workspace'])
+   assert.match(html,new RegExp('data-settings-tab="'+name+'"'));
+ for(const id of ['arenaSettingsSearch','arenaSettingsNav','arenaCombatRulesCard','arenaBalancePanel','arenaObsCalibrationPanel','playerLivesSelect','matchDurationSelect','arenaWorkspaceReset'])
+   assert.match(html,new RegExp('id="'+id+'"'));
+ assert.match(html,/function installArenaSettingsNavigator\(\)/);
+ assert.match(html,/installArenaSettingsNavigator\(\);\s*for\(const args/);
+ assert.match(html,/localStorage\.getItem\('arenaLiveRejoinModeV1'\)/);
+ assert.match(html,/localStorage\.setItem\('arenaLiveRejoinModeV1',rejoinRuleMode\)/);
+ for(const id of ['arenaPanelPowers','arenaPanelPlayers','arenaPanelSocial','arenaPanelScenarios','arenaPanelSimulation','arenaPanelBridge'])
+   assert.match(html,new RegExp('data-workspace-reveal="'+id+'"'));
+});
