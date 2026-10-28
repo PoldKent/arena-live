@@ -78,7 +78,7 @@ try{
         await page.locator('#arenaMobileMoreBtn').tap();
         assert.equal(await page.locator('#arenaPortableFullscreenMenu').isVisible(),true);
         assert.equal(await page.locator('#arenaPortableGuideMenu').isVisible(),true);
-        assert.equal(await page.locator('#arenaProtaClassToolbar #protagonistClassSelect').count(),1);
+        assert.equal(await page.locator('#protagonistClassSelect').count(),1);
         await page.locator('#arenaMobileMoreBtn').tap();
     });
     await check('only the visible portrait capture allocates pixels; 720p uses 56% fewer pixels than full HD',async()=>{
@@ -130,21 +130,62 @@ try{
         await page.evaluate(()=>ArenaPortable.start({count:128,join:false}));assert.equal(await page.evaluate(()=>fighters.length),64);
         await page.evaluate(()=>setArenaCombatRule('maxPlayers',128));
     });
-    await check('rotating a phone keeps a horizontal action bar and moves the same joystick into the active view',async()=>{
+    await check('direct touch replaces the analog, directions move Prota and a fast swipe performs melee',async()=>{
+        assert.equal(await page.locator('#touchJoystick').count(),0);
+        const result=await page.evaluate(()=>{
+            ArenaPortable.start({count:4,join:true});
+            const actor=fighters.find(f=>f.isStreamer),view=document.getElementById('viewport9x16'),rect=view.getBoundingClientRect();
+            actor.attackCooldown=0;
+            const center=arenaMobileTouchTarget(view);
+            const x=Math.min(rect.right-15,rect.left+center.x+75),y=Math.max(rect.top+15,Math.min(rect.bottom-15,rect.top+center.y));
+            const dispatch=(type,clientX,clientY)=>view.dispatchEvent(new PointerEvent(type,{bubbles:true,pointerType:'touch',pointerId:54,clientX,clientY}));
+            dispatch('pointerdown',x,y);
+            const moving=keys.d&&!keys.a;
+            dispatch('pointermove',Math.min(rect.right-10,x+45),y);
+            dispatch('pointerup',Math.min(rect.right-10,x+45),y);
+            return {moving,released:!keys.d&&!keys.a,attack:actor.attackAnimTimer>0};
+        });
+        assert.equal(result.moving,true);assert.equal(result.released,true);assert.equal(result.attack,true);
+    });
+    await check('double and triple taps select first jump and second jump without a joystick',async()=>{
+        const outcome=await page.evaluate(()=>{
+            ArenaPortable.start({count:4,join:true});const actor=fighters.find(f=>f.isStreamer);
+            const view=document.getElementById('viewport9x16'),rect=view.getBoundingClientRect();
+            const x=rect.left+rect.width/2+65,y=rect.top+rect.height/2;
+            const tap=()=>{view.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'touch',pointerId:58,clientX:x,clientY:y}));view.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch',pointerId:58,clientX:x,clientY:y}));};
+            tap();tap();const first=actor.jumpsLeft;
+            for(let i=0;i<12;i++)updatePhysicsAndAI();
+            tap();const queued=arenaMobileTouchState.jumpRetry!==null||actor.jumpsLeft<first;
+            return {first,queued,tapCount:ArenaMobileTouch.getState().tapCount};
+        });
+        assert.ok(outcome.first>=0);assert.equal(outcome.queued,true);assert.equal(outcome.tapCount,0);
+    });
+    await check('live mobile tests float over combat and reuse real target, power and command controls',async()=>{
+        await page.locator('#arenaMobileTestFab').tap();
+        assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
+        assert.equal(await page.locator('#arenaPortableTestBody #arenaPanelPowers').count(),1);
+        assert.equal(await page.locator('#arenaPortableTestBody #targetFighterSelect').count(),1);
+        assert.equal(await page.locator('#targetFighterSelect').count(),1);
+        await page.locator('#arenaPortableTestSelect').selectOption('arenaPanelPlayers');
+        assert.equal(await page.locator('#arenaPortableTestBody #arenaPanelPlayers').count(),1);
+        await page.locator('#arenaPortableTestSelect').selectOption('arenaPanelPowers');
+        await page.locator('#arenaPortableTestCollapse').tap();
+        assert.ok(await page.locator('#arenaPortableTestDrawer').evaluate(n=>n.classList.contains('is-collapsed')));
+        await page.locator('#arenaPortableTestCollapse').tap();
+        await page.locator('#arenaPortableTestClose').tap();
+        assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),false);
+    });
+    await check('phone rotation keeps floating buttons and tests within the active capture',async()=>{
         await page.setViewportSize({width:844,height:390});
         await page.evaluate(()=>{setMonitorFocus('16:9');ArenaPortable.start({count:9,join:true});renderBothScreensSimultaneously();});
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
         assert.deepEqual(await page.evaluate(()=>[canvas16.width,canvas16.height,canvas9.width,canvas9.height]),[1280,720,1,1]);
-        assert.equal(await page.evaluate(()=>document.getElementById('touchControlDock').parentElement.id),'viewport16x9');
+        assert.equal(await page.locator('#touchJoystick').count(),0);
         assert.equal(await page.locator('#arenaMobileMoreBtn').isVisible(),true);
         const bar=await page.locator('#arenaHeaderActions').boundingBox();assert.ok(bar.y+bar.height<=391);
-        const joy=await page.locator('#touchJoystick').boundingBox();
-        assert.ok(joy.x>=0&&joy.y>=0&&joy.x+joy.width<=844&&joy.y+joy.height<bar.y);
-        const touch=await context.newCDPSession(page);
-        await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:joy.x+joy.width*.88,y:joy.y+joy.height*.5,id:1}]});
-        assert.equal(await page.evaluate(()=>keys.d),true);
-        await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});assert.equal(await page.evaluate(()=>keys.d),false);
-        await touch.detach();
+        await page.evaluate(()=>ArenaMobileTouch.openTests(true));
+        assert.equal(await page.locator('#arenaPortableTestDrawer').evaluate(n=>n.parentElement.id),'viewport16x9');
+        await page.evaluate(()=>ArenaMobileTouch.openTests(false));
         if(output)await page.screenshot({path:join(output,'mobile-landscape.png')});
         await page.locator('#arenaMobileMoreBtn').tap();await page.locator('#arenaPortableQuick').tap();
         assert.equal(await page.locator('#arenaPortableSetup').isVisible(),true);
