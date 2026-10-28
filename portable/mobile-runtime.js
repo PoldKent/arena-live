@@ -91,12 +91,16 @@ function refreshArenaPortableFloatingUI(){
     const menuFS=document.getElementById('arenaPortableFullscreenMenu');
     if(menuFS)menuFS.textContent=fullscreen?'⤡ Salir de pantalla completa':'⛶ Pantalla completa';
 }
+function arenaPortableReport(message){
+    const toast=document.getElementById('arenaPortableToast');
+    if(toast){toast.textContent=message;toast.hidden=false;}
+    const status=document.getElementById('arenaPortableFeedback');if(status)status.textContent=message;
+}
 async function arenaPortableToggleFullscreen(){
     closeArenaOperatorPopover(false);
     const ratio=arenaPortableActiveRatio();
     if(!document.fullscreenEnabled){
-        const status=document.getElementById('arenaPortableFeedback');
-        if(status)status.textContent='Este navegador no permite ocultar sus barras. Prueba Chrome y la opción Pantalla completa.';
+        arenaPortableReport('El navegador no permite pantalla completa. Abre el archivo en Chrome y prueba de nuevo.');
         return false;
     }
     try{
@@ -106,8 +110,7 @@ async function arenaPortableToggleFullscreen(){
         refreshArenaPortableFloatingUI();
         return true;
     }catch(_){
-        const status=document.getElementById('arenaPortableFeedback');
-        if(status)status.textContent='No fue posible activar pantalla completa en este navegador.';
+        arenaPortableReport('No se pudo activar pantalla completa en este navegador.');
         return false;
     }
 }
@@ -115,10 +118,11 @@ function installArenaPortableFloatingUI(){
     const hud=document.createElement('nav');
     hud.id='arenaMobileFloating';
     hud.setAttribute('aria-label','Accesos flotantes del juego');
-    hud.innerHTML='<button type="button" id="arenaPortableToggleGuide" aria-label="Mostrar instrucciones" title="Mostrar instrucciones">?</button><button type="button" id="arenaPortableFullscreen" aria-label="Pantalla completa" title="Pantalla completa">⛶</button>';
+    hud.innerHTML='<button type="button" id="arenaPortableToggleGuide" aria-label="Mostrar instrucciones" title="Mostrar instrucciones">?</button><button type="button" id="arenaPortableFullscreen" aria-label="Pantalla completa" title="Pantalla completa">⛶</button><output id="arenaPortableToast" role="status" hidden></output>';
     document.body.appendChild(hud);
     hud.querySelector('#arenaPortableToggleGuide').addEventListener('click',()=>setArenaPortableGuideVisible(!arenaPortableGuideVisible));
     hud.querySelector('#arenaPortableFullscreen').addEventListener('click',()=>{void arenaPortableToggleFullscreen();});
+    hud.querySelector('#arenaPortableToast').onclick=event=>{event.currentTarget.hidden=true;};
     const menu=document.querySelector('#arenaOperatorPopover [data-operator-panel="mobile"]');
     if(menu){
         const heading=document.createElement('div');
