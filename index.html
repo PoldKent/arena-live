@@ -270,6 +270,94 @@
 #viewport16x9 #hudRuleSub16, #viewport9x16 #hudRuleSub9 { display:none!important; }
 </style>
 
+
+<style id="arena-audience-onboarding-v019">
+/* Broadcast-safe viewer onboarding: no central obstruction once the lobby ends. */
+#viewport16x9,#viewport9x16 { isolation:isolate; container-type:inline-size; }
+#viewport16x9 .arena-audience-guide,#viewport9x16 .arena-audience-guide {
+    position:absolute;left:0;right:0;bottom:0;z-index:27;pointer-events:none;
+    display:flex;flex-direction:column;gap:4px;padding:7px 10px 9px;
+    color:#eef8ff;background:linear-gradient(0deg,#060d18 0%,rgba(6,13,24,.96) 76%,rgba(6,13,24,.88) 100%);
+    border-top:1px solid rgba(103,232,249,.44);font:600 clamp(8px,1.68cqw,13px)/1.25 Inter,system-ui,sans-serif;
+    box-shadow:0 -5px 18px rgba(1,7,15,.25);
+}
+.arena-guide-intro {display:flex;align-items:center;gap:9px;justify-content:center;white-space:nowrap;}
+.arena-guide-step {color:#6ee7e8;font-weight:900;letter-spacing:.05em;}
+.arena-guide-intro strong {display:inline-block;color:#081826;background:#6ee7e8;border-radius:5px;padding:2px 7px;font-weight:900;font-size:1.25em;}
+.arena-guide-tip {color:#bfd4e8;font-weight:650;}
+.arena-guide-commands {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;align-items:stretch;}
+.arena-guide-pair {display:flex;align-items:center;justify-content:center;gap:3px;min-width:0;
+    padding:3px 2px;border:1px solid rgba(148,163,184,.28);border-radius:6px;background:#111e2c;white-space:nowrap;}
+.arena-guide-pair code {font:800 1em/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:-.04em;}
+.arena-guide-pair b {opacity:.7;font-size:.85em;}
+.arena-guide-warrior {color:#8deefa}.arena-guide-shinobi {color:#d3a6ff}.arena-guide-titan {color:#ffb6c0}
+.arena-guide-rayo {color:#fcd776}.arena-guide-espiritu {color:#8ff0b9}
+#viewport9x16 .arena-audience-guide {gap:5px;padding:7px 6px 9px;font-size:clamp(7.5px,3.9cqw,13px);border-top-color:rgba(244,114,182,.46);}
+#viewport9x16 .arena-guide-intro {gap:5px;flex-wrap:wrap;}
+#viewport9x16 .arena-guide-step {font-size:.9em;}
+#viewport9x16 .arena-guide-intro strong {font-size:1.25em;}
+#viewport9x16 .arena-guide-tip {width:100%;text-align:center;font-size:.9em;}
+#viewport9x16 .arena-guide-commands {grid-template-columns:repeat(2,minmax(0,1fr));gap:3px;}
+#viewport9x16 .arena-guide-pair {padding:3px 1px;gap:2px;}
+#viewport9x16 .arena-guide-pair:last-child {grid-column:1 / -1;justify-self:stretch;}
+#viewport9x16 .arena-guide-pair code {letter-spacing:-.06em;}
+/* Lobby card is deliberately confined to the noncombat center; never shown during combat. */
+#viewport16x9 .arena-onboarding,#viewport9x16 .arena-onboarding {
+    position:absolute;left:4%;right:4%;top:45%;transform:translateY(-50%);margin:0;z-index:21;
+    width:auto;max-width:none;min-width:0;pointer-events:auto;
+}
+#viewport16x9 .arena-onboarding[hidden],#viewport9x16 .arena-onboarding[hidden],
+#viewport16x9 .arena-onboarding.hidden,#viewport9x16 .arena-onboarding.hidden {display:none!important;}
+.arena-onboarding-card {display:flex;flex-direction:column;align-items:center;gap:6px;
+    max-width:100%;min-width:0;padding:13px 14px 10px;
+    border:1px solid rgba(103,232,249,.65);border-radius:13px;text-align:center;color:white;
+    background:linear-gradient(155deg,rgba(11,30,44,.97),rgba(7,15,29,.96));
+    box-shadow:0 10px 24px #02061799,0 0 0 1px #0c2845;line-height:1.22;
+    font:600 clamp(9px,1.7cqw,13px)/1.3 Inter,system-ui,sans-serif;
+}
+.arena-onboarding-kicker {margin:0;color:#7fe7f4;font-size:.8em;font-weight:850;letter-spacing:.08em;}
+.arena-onboarding-card h2 {margin:0;font:900 1.5em/1.1 Orbitron,Inter,system-ui,sans-serif;color:#fff;letter-spacing:.015em;}
+.arena-onboarding-sub {margin:0;color:#cbdbe9;max-width:60ch;font-size:.96em;}
+.arena-onboarding-sub strong {display:inline-block;padding:2px 7px;border-radius:6px;color:#031523;background:#71f3ee;font:900 1.18em ui-monospace,Consolas,monospace;}
+.arena-onboarding-steps {display:flex;align-items:center;justify-content:center;gap:5px;width:100%;flex-wrap:wrap;}
+.arena-onboarding-steps span {padding:3px 6px;border:1px solid #2a4d63;border-radius:6px;background:#102434;color:#70e0e5;font-size:.8em;}
+.arena-onboarding-steps b {color:#f1f7ff;}
+.arena-onboarding-meta {display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:5px;font-size:.88em;}
+.arena-onboarding-stat,.arena-onboarding-meta>span,.arena-onboarding-meta>strong {padding:3px 8px;background:#0c2030;border:1px solid #38546b;border-radius:7px;color:#b8c8db;}
+.arena-onboarding-meta strong {color:#fef08a;font-weight:850;}
+.arena-onboarding-meta button {margin-left:4px;padding:0 4px;min-height:18px;color:#d7f4ff;border:1px solid #42647a;border-radius:4px;background:#17314a;cursor:pointer;}
+.arena-onboarding-rules,.arena-onboarding-tools {display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px;}
+.arena-onboarding-rules button {padding:4px 7px!important;border:1px solid #43576d;border-radius:6px;font-size:.85em;cursor:pointer;}
+.arena-onboarding-tools {border-top:1px solid #2a4056;padding-top:5px;width:100%;margin-top:1px;}
+.arena-onboarding-tools button {padding:5px 9px!important;border:1px solid #3d5974;border-radius:6px;color:#bfd7e8;background:#162a3c;font-size:.85em;font-weight:750;cursor:pointer;}
+.arena-onboarding-tools .arena-onboarding-start {background:#5eead4;color:#05232a;border-color:#5eead4;font-weight:900;}
+#viewport9x16 .arena-onboarding {left:5%;right:5%;top:42%;}
+#viewport9x16 .arena-onboarding-card {gap:5px;padding:10px 7px 9px;
+    font-size:clamp(8px,4cqw,13px);border-color:rgba(244,114,182,.64);}
+#viewport9x16 .arena-onboarding-card h2 {font-size:1.28em;}
+#viewport9x16 .arena-onboarding-sub {font-size:1.04em;}
+#viewport9x16 .arena-onboarding-steps span {padding:3px 4px;}
+#viewport9x16 .arena-onboarding-hint {margin:0;color:#a9cbdc;font-size:.8em;}
+#viewport9x16 .arena-onboarding-meta {gap:3px;}
+#viewport9x16 .arena-onboarding-meta>span,#viewport9x16 .arena-onboarding-meta>strong {padding:2px 5px;}
+#viewport9x16 .arena-onboarding-tools button {padding:4px 7px!important;}
+/* 9:20 is a PREVIEW FRAME for tall mobile devices, not an OBS capture format.
+   The real portrait video stays 9:16 and is centered with top/bottom letterboxing. */
+@media (max-width:767px) and (orientation:portrait) {
+    #card-9x16.arena-phone-fit {position:relative;align-self:center;flex:none!important;
+        overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center;
+        background:linear-gradient(180deg,#071524 0%,#030914 12%,#030914 88%,#071524 100%);
+        border:1px solid rgba(244,114,182,.28);border-radius:12px;
+        box-shadow:0 7px 24px #0008;}
+    #card-9x16.arena-phone-fit #viewport9x16 {margin:auto 0!important;flex:none!important;}
+}
+@media (max-width:767px) and (orientation:portrait) {
+    #card-9x16:fullscreen {border:0!important;border-radius:0!important;}
+    #card-9x16:fullscreen #viewport9x16 {max-width:100vw!important;max-height:100dvh!important;object-fit:contain;}
+}
+@media (prefers-reduced-motion:reduce) {.arena-onboarding-card {scroll-behavior:auto;}}
+</style>
+
 <style id="arena-clean-broadcast">
 /* MODULE BLOCK: BROADCAST CAPTURE OVERRIDES. Future file: styles/broadcast.css */
 /* Clean in-game capture: remove labels surrounding the playfield and redundant roster cards. */
@@ -983,51 +1071,39 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <div id="killFeed16" class="self-end flex flex-col items-end gap-1 max-w-[240px]"></div>
                         </div>
 
-                        <!-- 16:9 LOBBY OVERLAY -->
-                        <div id="lobbyOverlay16" class="relative z-20 my-auto mx-auto w-[92%] max-w-xl flex flex-col items-center justify-between gap-2 pointer-events-auto">
-                            <div class="w-full hud-glass rounded-2xl p-3 border-2 border-cyan-400/60 glow-cyan text-center shadow-2xl">
-                                <h2 class="font-display font-black text-sm sm:text-lg text-white tracking-wide">
-                                    ¡ESCRIBE <span class="text-cyan-300 underline">!jugar</span> EN EL CHAT PARA ENTRAR!
-                                </h2>
-                                <p class="text-[10px] text-slate-300 mt-0.5">
-                                    Clase → ataque: <span class="text-cyan-300 font-bold">!guerrero → !kame</span> • <span class="text-purple-300 font-bold">!shinobi → !rasen</span> • <span class="text-rose-300 font-bold">!titan → !coloso</span> • <span class="text-amber-300 font-bold">!rayo → !trueno</span> • <span class="text-emerald-300 font-bold">!espiritu → !enred</span>
-                                </p>
-                                <div class="mt-2 flex flex-wrap items-center justify-center gap-2">
-                                    <div class="px-2.5 py-0.5 rounded-lg bg-slate-900/90 border border-slate-700 text-[10px] font-bold flex items-center gap-1.5">
-                                        <span class="text-slate-400">Modo Auto por Jugadores:</span>
-                                        <span id="lobbyDetectedMode16" class="text-amber-300 font-display">⚡ SMASH (3-8)</span>
-                                    </div>
-                                    <div class="px-2.5 py-0.5 rounded-lg bg-slate-900/90 border border-slate-700 text-[10px] font-bold flex items-center gap-1">
-                                        <span class="text-slate-400">Inicio:</span>
-                                        <span id="lobbyCountdownText16" class="text-cyan-300 font-display">25s</span>
-                                        <button onclick="toggleLobbyTimerPause()" id="btnPauseLobbyTimer16" class="ml-1 px-1 py-0.2 rounded bg-slate-800 hover:bg-slate-700 text-[9px] text-slate-200 border border-slate-600">⏸️</button>
-                                    </div>
+                        <!-- Always-on audience instructions; independent from game phase and HUD -->
+                        <aside id="arenaAudienceGuide16" class="arena-audience-guide arena-audience-guide-landscape" aria-label="Cómo jugar en Arena Live">
+                            <div class="arena-guide-intro"><span class="arena-guide-step">01 · ENTRA</span><strong>!jugar</strong><span class="arena-guide-tip">02 · Elige tu clase &nbsp; 03 · Usa su poder</span></div>
+                            <div class="arena-guide-commands"><span class="arena-guide-pair arena-guide-warrior"><span aria-hidden="true">⚔</span><code>!guerrero</code><b aria-hidden="true">→</b><code>!kame</code></span>
+                                <span class="arena-guide-pair arena-guide-shinobi"><span aria-hidden="true">🌀</span><code>!shinobi</code><b aria-hidden="true">→</b><code>!rasen</code></span>
+                                <span class="arena-guide-pair arena-guide-titan"><span aria-hidden="true">🛡</span><code>!titan</code><b aria-hidden="true">→</b><code>!coloso</code></span>
+                                <span class="arena-guide-pair arena-guide-rayo"><span aria-hidden="true">⚡</span><code>!rayo</code><b aria-hidden="true">→</b><code>!trueno</code></span>
+                                <span class="arena-guide-pair arena-guide-espiritu"><span aria-hidden="true">🌿</span><code>!espiritu</code><b aria-hidden="true">→</b><code>!enred</code></span></div>
+                        </aside>
+
+                        <!-- Redesigned 16:9 entry lobby: audience first, operator tools secondary. -->
+                        <section id="lobbyOverlay16" class="arena-onboarding arena-onboarding-wide" aria-label="Cómo entrar a Arena Live">
+                            <div class="arena-onboarding-card">
+                                <p class="arena-onboarding-kicker">✦ ARENA LIVE · PARTICIPA EN EL DIRECTO</p>
+                                <h2>¡TU PERSONAJE TE ESPERA!</h2>
+                                <p class="arena-onboarding-sub">Escribe <strong>!jugar</strong> en el chat de TikTok para entrar. Luego elige tu clase y usa su poder durante la pelea.</p>
+                                <div class="arena-onboarding-steps" aria-hidden="true"><span>01 <b>ENTRA</b></span><span>02 <b>ELIGE CLASE</b></span><span>03 <b>ATACA</b></span></div>
+                                <div class="arena-onboarding-meta">
+                                    <span class="arena-onboarding-stat">⚔ <strong id="lobbyDetectedMode16">⚡ SMASH (3-8)</strong></span>
+                                    <span class="arena-onboarding-stat">⏱ Inicio <strong id="lobbyCountdownText16">25s</strong><button type="button" onclick="toggleLobbyTimerPause()" id="btnPauseLobbyTimer16" aria-label="Pausar o reanudar cuenta regresiva">⏸</button></span>
                                 </div>
-                                <!-- Lobby Rule Selector Pill -->
-                                <div class="mt-1.5 flex flex-wrap items-center justify-center gap-1.5">
-                                    <button onclick="setRejoinRuleMode('3_lives')" id="lobbyRuleBtn16_3lives" class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold border border-amber-400 bg-amber-500/20 text-amber-200 transition-all">
-                                        ❤️ <span id="lobbyLivesRuleLabel">1 vida</span>
-                                    </button>
-                                    <button onclick="setRejoinRuleMode('timed')" id="lobbyRuleBtn16_timed" class="px-2.5 py-0.5 rounded-lg text-[10px] font-bold border border-slate-700 bg-slate-900/80 text-slate-400 hover:text-white transition-all">
-                                        ⏱️ Por tiempo
-                                    </button>
-                                    <button onclick="setRejoinRuleMode('free')" id="lobbyRuleBtn16_free" class="px-2.5 py-0.5 rounded-lg text-[10px] font-bold border border-slate-700 bg-slate-900/80 text-slate-400 hover:text-white transition-all">
-                                        🌐 Entrada libre
-                                    </button>
+                                <div class="arena-onboarding-rules" aria-label="Reglas de entrada">
+                                    <button type="button" onclick="setRejoinRuleMode('3_lives')" id="lobbyRuleBtn16_3lives">❤️ <span id="lobbyLivesRuleLabel">1 vida</span></button>
+                                    <button type="button" onclick="setRejoinRuleMode('timed')" id="lobbyRuleBtn16_timed">⏱ Por tiempo</button>
+                                    <button type="button" onclick="setRejoinRuleMode('free')" id="lobbyRuleBtn16_free">🌐 Entrada libre</button>
                                 </div>
-                                <div class="mt-2.5 flex flex-wrap items-center justify-center gap-1.5">
-                                    <button onclick="triggerQuickJoin()" class="px-2.5 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[10px] flex items-center gap-1 shadow active:scale-95 transition-all">
-                                        <i class="fa-solid fa-user-plus"></i> +1 (!jugar)
-                                    </button>
-                                    <button onclick="triggerBatchJoin(4)" class="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-[10px] flex items-center gap-1 shadow active:scale-95 transition-all">
-                                        <i class="fa-solid fa-users"></i> +4 Espectadores
-                                    </button>
-                                    <button onclick="startCombatFromLobby()" class="px-3 py-1 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-400 hover:brightness-110 text-slate-950 font-display font-black text-[10px] sm:text-xs shadow-lg active:scale-95 transition-all">
-                                        ⚔️ ¡PELEAR AHORA!
-                                    </button>
+                                <div class="arena-onboarding-tools" aria-label="Controles del operador para pruebas y comienzo">
+                                    <button type="button" onclick="triggerQuickJoin()">+1 prueba</button>
+                                    <button type="button" onclick="triggerBatchJoin(4)">+4 pruebas</button>
+                                    <button type="button" class="arena-onboarding-start" onclick="startCombatFromLobby()">⚔ Iniciar pelea</button>
                                 </div>
                             </div>
-                        </div>
+                        </section>
 
                         <!-- 16:9 FINAL K.O. SLOW-MO OVERLAY -->
                         <div id="koSlowMoOverlay16" class="hidden relative z-30 my-auto mx-auto pointer-events-none text-center">
@@ -1167,31 +1243,35 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             <div id="verticalEventHistory" class="self-end flex flex-col items-end gap-0.5 max-w-[190px]" aria-live="polite"></div>
                         </div>
 
-                        <!-- 9:16 VERTICAL LOBBY OVERLAY -->
-                        <div id="lobbyOverlay9" class="relative z-20 my-auto mx-auto w-[92%] flex flex-col items-center gap-1.5 pointer-events-auto">
-                            <div class="w-full hud-glass rounded-2xl p-2.5 border-2 border-pink-500/60 glow-pink text-center shadow-2xl">
-                                <h3 class="font-display font-black text-xs text-white mt-0.5">
-                                    ¡COMENTA <span class="text-cyan-300">!jugar</span>!
-                                </h3>
-                                <div class="text-[9px] text-amber-300 font-display font-bold mt-1" id="lobbyDetectedMode9">
-                                    ⚡ MODO SMASH (3-8)
+                        <!-- Always-on audience instructions; independent from game phase and HUD -->
+                        <aside id="arenaAudienceGuide9" class="arena-audience-guide arena-audience-guide-portrait" aria-label="Cómo jugar en Arena Live">
+                            <div class="arena-guide-intro"><span class="arena-guide-step">01 · ENTRA</span><strong>!jugar</strong><span class="arena-guide-tip">02 · Elige tu clase &nbsp; 03 · Usa su poder</span></div>
+                            <div class="arena-guide-commands"><span class="arena-guide-pair arena-guide-warrior"><span aria-hidden="true">⚔</span><code>!guerrero</code><b aria-hidden="true">→</b><code>!kame</code></span>
+                                <span class="arena-guide-pair arena-guide-shinobi"><span aria-hidden="true">🌀</span><code>!shinobi</code><b aria-hidden="true">→</b><code>!rasen</code></span>
+                                <span class="arena-guide-pair arena-guide-titan"><span aria-hidden="true">🛡</span><code>!titan</code><b aria-hidden="true">→</b><code>!coloso</code></span>
+                                <span class="arena-guide-pair arena-guide-rayo"><span aria-hidden="true">⚡</span><code>!rayo</code><b aria-hidden="true">→</b><code>!trueno</code></span>
+                                <span class="arena-guide-pair arena-guide-espiritu"><span aria-hidden="true">🌿</span><code>!espiritu</code><b aria-hidden="true">→</b><code>!enred</code></span></div>
+                        </aside>
+
+                        <!-- Dedicated readable 9:16 audience lobby. -->
+                        <section id="lobbyOverlay9" class="arena-onboarding arena-onboarding-portrait" aria-label="Cómo entrar a Arena Live">
+                            <div class="arena-onboarding-card">
+                                <p class="arena-onboarding-kicker">✦ ARENA LIVE · TIKTOK</p>
+                                <h2>¡ENTRA A LA ARENA!</h2>
+                                <p class="arena-onboarding-sub">Escribe <strong>!jugar</strong> en el chat y aparecerás como peleador.</p>
+                                <div class="arena-onboarding-steps" aria-hidden="true"><span>1 <b>ENTRA</b></span><span>2 <b>CLASE</b></span><span>3 <b>PODER</b></span></div>
+                                <p class="arena-onboarding-hint">Debajo están los comandos de las 5 clases.</p>
+                                <div class="arena-onboarding-meta">
+                                    <strong id="lobbyDetectedMode9">⚡ SMASH (3-8)</strong>
+                                    <span id="lobbyRuleText9">🌐 Entrada libre</span>
+                                    <span>⏱ <strong id="lobbyCountdownText9">25s</strong></span>
                                 </div>
-                                <div id="lobbyRuleText9" class="text-[8px] font-bold text-cyan-300 mt-0.5">
-                                    ❤️ Regla: 1 vida
-                                </div>
-                                <div class="text-[9px] text-slate-300 mt-0.5">
-                                    Inicia en <strong id="lobbyCountdownText9" class="text-cyan-300 font-display">25s</strong>
-                                </div>
-                                <div class="mt-2 flex flex-col gap-1">
-                                    <button onclick="triggerQuickJoin()" class="w-full py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[10px]">
-                                        + Unir Espectador (!jugar)
-                                    </button>
-                                    <button onclick="startCombatFromLobby()" class="w-full py-1 rounded-lg bg-gradient-to-r from-pink-500 to-amber-500 text-slate-950 font-display font-black text-[10px]">
-                                        ⚔️ ¡INICIAR YA!
-                                    </button>
+                                <div class="arena-onboarding-tools" aria-label="Controles del operador">
+                                    <button type="button" onclick="triggerQuickJoin()">+1 prueba</button>
+                                    <button type="button" class="arena-onboarding-start" onclick="startCombatFromLobby()">⚔ Empezar</button>
                                 </div>
                             </div>
-                        </div>
+                        </section>
 
                         <!-- 9:16 FINAL K.O. SLOW-MO OVERLAY -->
                         <div id="koSlowMoOverlay9" class="hidden relative z-30 my-auto mx-auto w-[90%] pointer-events-none text-center">
