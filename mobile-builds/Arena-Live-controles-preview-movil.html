@@ -1931,17 +1931,18 @@ html.arena-mobile-offline #arenaMobileFloating{
 }
 html.arena-mobile-offline #arenaMobileFloating #arenaMobilePause{
   position:static!important;inset:auto!important;transform:none!important;
-  flex:0 0 44px!important;width:44px!important;height:44px!important;
-  min-width:44px!important;min-height:44px!important;max-width:44px!important;
-  z-index:auto!important;border-radius:11px!important;font-size:21px!important;
+  flex:0 0 40px!important;width:40px!important;height:40px!important;
+  min-width:40px!important;min-height:40px!important;max-width:40px!important;
+  z-index:auto!important;border-radius:50%!important;font-size:19px!important;
   background:rgba(79,52,32,var(--arena-hud-opacity,.9))!important;
 }
 html.arena-mobile-offline #arenaMobileFloating #arenaMobileMoreBtn,
 html.arena-mobile-offline #arenaMobileFloating #arenaPortableFullscreen{
   position:static!important;inset:auto!important;transform:none!important;
-  display:flex!important;flex:0 0 44px!important;width:44px!important;height:44px!important;
-  min-width:44px!important;min-height:44px!important;max-width:44px!important;
-  border-radius:11px!important;font-size:21px!important;
+  display:grid!important;place-items:center!important;flex:0 0 40px!important;
+  width:40px!important;height:40px!important;min-width:40px!important;
+  min-height:40px!important;max-width:40px!important;
+  border-radius:50%!important;font-size:18px!important;
 }
 html.arena-mobile-offline #arenaMobileFloating #arenaPortableToggleGuide,
 html.arena-mobile-offline #arenaMobileTestFab{display:none!important}
@@ -2010,7 +2011,7 @@ html.arena-mobile-offline #arenaPortableTestBody{overflow-y:auto!important;min-h
    one external control shelf; never render controls over the capture. */
 html.arena-mobile-offline body>header{
   position:relative!important;top:auto!important;padding:4px 7px!important;
-  min-height:50px!important;z-index:230!important;background:#0b1525!important;
+  min-height:60px!important;z-index:230!important;background:#0b1525!important;
 }
 html.arena-mobile-offline #arenaTopBarInner{
   display:flex!important;flex-wrap:nowrap!important;align-items:center!important;
@@ -2030,24 +2031,30 @@ html.arena-mobile-offline #arenaTopBarInner .arena-brand-meta{gap:3px!important;
 html.arena-mobile-offline #arenaTopBarInner #headerStateBadge{
   padding:2px 4px!important;font-size:8px!important;letter-spacing:0!important;white-space:nowrap!important;
 }
+/* Restore the v0.36–v0.37 compact top-right capsule, away from the 9:16 frame.
+   The toolbar is fixed in the existing header band, not a row of square header buttons. */
 html.arena-mobile-offline #arenaMobileFloating{
-  position:relative!important;inset:auto!important;left:auto!important;right:auto!important;
-  top:auto!important;bottom:auto!important;transform:none!important;
+  position:fixed!important;
+  top:calc(8px + env(safe-area-inset-top))!important;
+  right:max(8px,env(safe-area-inset-right))!important;
+  left:auto!important;bottom:auto!important;transform:none!important;
   display:flex!important;flex:0 0 auto!important;flex-flow:row nowrap!important;
-  align-items:center!important;justify-content:flex-end!important;gap:4px!important;
-  width:auto!important;height:auto!important;margin:0!important;padding:0!important;
-  max-width:100%!important;border:0!important;border-radius:0!important;
-  background:none!important;box-shadow:none!important;z-index:220!important;
+  align-items:center!important;justify-content:flex-end!important;gap:3px!important;
+  width:max-content!important;height:auto!important;margin:0!important;padding:3px!important;
+  max-width:calc(100vw - 10px)!important;
+  border:1px solid rgba(98,180,200,.38)!important;border-radius:24px!important;
+  background:rgba(9,24,44,var(--arena-hud-opacity,.85))!important;
+  box-shadow:0 4px 15px rgba(0,0,0,.36)!important;z-index:220!important;
 }
 html.arena-mobile-offline #arenaMobileFloating button:not(#arenaMobileEditDone){
-  display:grid!important;place-items:center!important;flex:0 0 42px!important;
+  display:grid!important;place-items:center!important;flex:0 0 40px!important;
   position:static!important;inset:auto!important;transform:none!important;
-  width:44px!important;height:44px!important;min-width:44px!important;
-  min-height:44px!important;max-width:44px!important;padding:0!important;
-  border:1px solid #3b7388!important;border-radius:11px!important;
-  font:800 19px/1 system-ui,sans-serif!important;color:#dcfaff!important;
-  background:linear-gradient(#153d53,#12283d)!important;box-shadow:none!important;
-  touch-action:manipulation!important;
+  width:40px!important;height:40px!important;min-width:40px!important;
+  min-height:40px!important;max-width:40px!important;padding:0!important;
+  border:1px solid rgba(107,215,231,.5)!important;border-radius:50%!important;
+  font:800 17px/1 system-ui,sans-serif!important;color:#e6ffff!important;
+  background:rgba(21,72,88,var(--arena-hud-opacity,.85))!important;
+  box-shadow:inset 0 1px 2px #b5efff16!important;touch-action:manipulation!important;
 }
 html.arena-mobile-offline #arenaMobileFloating #arenaMobileModeShortcut{color:#70e7e0!important}
 html.arena-mobile-offline #arenaMobileFloating #arenaMobileTestsShortcut{color:#ffe2a4!important}
@@ -2061,7 +2068,7 @@ html.arena-mobile-offline #arenaMobileFloating #arenaMobileEditDone{
   position:static!important;min-height:42px!important;font-size:12px!important;
 }
 html.arena-mobile-offline #arenaOperatorPopover{
-  position:fixed!important;top:calc(52px + env(safe-area-inset-top))!important;
+  position:fixed!important;top:calc(62px + env(safe-area-inset-top))!important;
   right:6px!important;bottom:auto!important;left:auto!important;
   width:min(94vw,320px)!important;max-height:min(75dvh,550px)!important;
   z-index:240!important;
@@ -2272,32 +2279,37 @@ html.arena-mobile-offline #card-16x9:fullscreen{
   display:flex!important;flex-direction:column!important;align-items:center!important;
   justify-content:flex-start!important;gap:5px!important;
   width:100vw!important;height:100dvh!important;box-sizing:border-box!important;
-  overflow:hidden!important;padding:max(5px,env(safe-area-inset-top))
-  5px max(5px,env(safe-area-inset-bottom))!important;
+  overflow:hidden!important;
+  /* Fullscreen has no site header: reserve a top band for the v0.37 icon capsule. */
+  padding:calc(53px + env(safe-area-inset-top)) 5px
+    max(5px,env(safe-area-inset-bottom))!important;
   background:#080f1c!important;
 }
 html.arena-mobile-offline #card-9x16:fullscreen >div:first-child,
 html.arena-mobile-offline #card-16x9:fullscreen >div:first-child{display:none!important}
 html.arena-mobile-offline #card-9x16:fullscreen #arenaMobileFloating,
 html.arena-mobile-offline #card-16x9:fullscreen #arenaMobileFloating{
-  order:-2!important;flex:0 0 auto!important;max-width:100%!important;
-  align-self:center!important;margin:0 auto 1px!important;
+  position:absolute!important;top:calc(8px + env(safe-area-inset-top))!important;
+  right:max(8px,env(safe-area-inset-right))!important;
+  left:auto!important;bottom:auto!important;
+  max-width:calc(100% - 16px)!important;margin:0!important;
+  order:initial!important;
 }
 html.arena-mobile-offline #card-9x16:fullscreen #viewport9x16{
   flex:0 1 auto!important;order:0!important;
-  width:min(100%,calc((100dvh - 166px) * 9 / 16))!important;
-  max-height:calc(100dvh - 166px)!important;height:auto!important;
+  width:min(100%,calc((100dvh - 215px) * 9 / 16))!important;
+  max-height:calc(100dvh - 215px)!important;height:auto!important;
   aspect-ratio:9/16!important;overflow:hidden!important;
 }
 html.arena-mobile-offline #card-16x9:fullscreen #viewport16x9{
   flex:0 1 auto!important;order:0!important;
-  width:min(100%,calc((100dvh - 166px) * 16 / 9))!important;
-  max-height:calc(100dvh - 166px)!important;height:auto!important;
+  width:min(100%,calc((100dvh - 215px) * 16 / 9))!important;
+  max-height:calc(100dvh - 215px)!important;height:auto!important;
   aspect-ratio:16/9!important;overflow:hidden!important;
 }
 html.arena-mobile-offline #card-9x16:fullscreen:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
-  width:min(100%,calc((100dvh - 320px) * 9 / 16))!important;
-  max-height:calc(100dvh - 320px)!important;
+  width:min(100%,calc((100dvh - 369px) * 9 / 16))!important;
+  max-height:calc(100dvh - 369px)!important;
 }
 html.arena-mobile-offline #card-9x16:fullscreen #arenaMobileGestureGuide,
 html.arena-mobile-offline #card-16x9:fullscreen #arenaMobileGestureGuide{
@@ -2305,8 +2317,8 @@ html.arena-mobile-offline #card-16x9:fullscreen #arenaMobileGestureGuide{
 }
 html.arena-mobile-offline #card-9x16:fullscreen #arenaOperatorPopover,
 html.arena-mobile-offline #card-16x9:fullscreen #arenaOperatorPopover{
-  position:absolute!important;top:52px!important;right:6px!important;
-  max-height:calc(100% - 60px)!important;z-index:235!important;
+  position:absolute!important;top:62px!important;right:6px!important;
+  max-height:calc(100% - 70px)!important;z-index:235!important;
 }
 html.arena-mobile-offline #arenaMobileArrangeSettings[hidden]{display:none!important}
 html.arena-mobile-offline #arenaMobileTouchModeOptions{
@@ -2425,8 +2437,8 @@ html.arena-mobile-offline #card-9x16:has(#arenaMobileControlShelf.has-open-tests
 }
 html.arena-mobile-offline #card-9x16:fullscreen.arena-tests-visible #viewport9x16,
 html.arena-mobile-offline #card-9x16:fullscreen:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
-  width:min(100%,calc((100dvh - min(42dvh,270px) - 135px) * 9 / 16))!important;
-  max-height:calc(100dvh - min(42dvh,270px) - 135px)!important;
+  width:min(100%,calc((100dvh - min(42dvh,270px) - 184px) * 9 / 16))!important;
+  max-height:calc(100dvh - min(42dvh,270px) - 184px)!important;
 }
 
 </style>
@@ -11236,7 +11248,7 @@ const ARENA_BALANCE_EVIDENCE=Object.freeze({"version":"0.15.0","sample":{"matche
             }
         });
     </script>
-<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze({"version":"0.39.0","edition":"mobile-offline-preview","sourceBlobs":{"index.html":"74044e80b48a9a125d846c1e2516f8338e8c50ab","styles/arena-ui.css":"c933a9cfb504daa6d27800c6098396b3aa57114f","styles/TAILWIND-LICENSE.txt":"d6a82290738a9f78946cbcb4594535d6984086dd","engine/arena-core.js":"ac22091a1263e294b733a337f8c6ebc4f2e1bc9d","engine/arena-render.js":"6c9603974d2c02d0f0fb52857992211c08cd6725","engine/arena-audio.js":"319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934","engine/arena-settings.js":"f1fbbd2492b4be8cfb725e72cd0ab604894681cf","engine/arena-balance-evidence.js":"0aab05b49f0ef9e80c43810b2bfc929b4f695cdf","portable/mobile.css":"c7f9fe49aab178868cc056d28ca65b1d78fdf447","portable/mobile-runtime.js":"29f30d79aedf48d51eda169c27b36230be13a2a6","portable/mobile-touch.js":"bf2f5c254744c291d8db1810217d09ca2f9106ec"},"preview":"PR-mobile-tests-visible"});</script>
+<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze({"version":"0.39.0","edition":"mobile-offline-preview","sourceBlobs":{"index.html":"74044e80b48a9a125d846c1e2516f8338e8c50ab","styles/arena-ui.css":"c933a9cfb504daa6d27800c6098396b3aa57114f","styles/TAILWIND-LICENSE.txt":"d6a82290738a9f78946cbcb4594535d6984086dd","engine/arena-core.js":"ac22091a1263e294b733a337f8c6ebc4f2e1bc9d","engine/arena-render.js":"6c9603974d2c02d0f0fb52857992211c08cd6725","engine/arena-audio.js":"319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934","engine/arena-settings.js":"f1fbbd2492b4be8cfb725e72cd0ab604894681cf","engine/arena-balance-evidence.js":"0aab05b49f0ef9e80c43810b2bfc929b4f695cdf","portable/mobile.css":"200fcae92c03e7625c248f6b79c37d52c093c9e2","portable/mobile-runtime.js":"29f30d79aedf48d51eda169c27b36230be13a2a6","portable/mobile-touch.js":"bf2f5c254744c291d8db1810217d09ca2f9106ec"},"preview":"PR-v037-toolbar-restored"});</script>
 <script id="arena-mobile-runtime">
 // Loaded inline after the unchanged classic engine, before its load bootstrap.
 // This adapter changes presentation and test setup, never combat decisions.
