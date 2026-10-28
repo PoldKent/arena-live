@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeTikTokLike } from '../bridge/social-normalize.mjs';
+import { normalizeTikTokLike, normalizeTikTokShare } from '../bridge/social-normalize.mjs';
 
 test('v2.5 LIKE event becomes viewer-targeted tap delta', () => {
   assert.deepEqual(normalizeTikTokLike({
@@ -39,4 +39,12 @@ test('bounds huge batches and strips dangerous control characters', () => {
   assert.equal(like.username, '@meta');
   assert.equal(like.count, 10000);
   assert.equal(like.eventId, '77');
+});
+
+test('a verified share uses its account handle and event id without applying a tap',()=>{
+  assert.deepEqual(normalizeTikTokShare({user:{displayId:'some_viewer'},common:{msgId:'share-123'}}),{
+    type:'social',platformKey:'tiktok',eventType:'share',username:'@some_viewer',eventId:'share-123'
+  });
+  assert.equal(normalizeTikTokShare({user:{displayId:''}}),null);
+  assert.equal(normalizeTikTokShare({user:{displayId:'bad name'}}),null);
 });

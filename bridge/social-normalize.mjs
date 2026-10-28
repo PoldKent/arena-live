@@ -22,3 +22,16 @@ export function normalizeTikTokLike(event) {
     eventId: String(event.common?.msgId ?? event.msgId ?? event.messageId ?? event.id ?? '').slice(0, 100)
   };
 }
+
+/** A genuine SHARE event targets its own viewer, never a random spectator. */
+export function normalizeTikTokShare(event) {
+  if(!event||typeof event!=='object')return null;
+  const user=event.user&&typeof event.user==='object'?event.user:{};
+  const raw=user.uniqueId||user.displayId||user.unique_id||user.display_id
+    ||event.uniqueId||event.displayId||event.unique_id||event.display_id;
+  const username=String(raw??'').replace(/^@+/,'')
+    .replace(/[\u0000-\u001f\u007f\u200e\u200f\u202a-\u202e]/g,'').trim().slice(0,24);
+  if(!username||!/^[a-zA-Z0-9_.-]+$/.test(username))return null;
+  return {type:'social',platformKey:'tiktok',eventType:'share',username:'@'+username,
+    eventId:String(event.common?.msgId??event.msgId??event.messageId??event.id??'').slice(0,100)};
+}

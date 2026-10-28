@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.22 — TikTok LIVE</title>
+    <title>Arena Live v0.23 — TikTok LIVE</title>
     <!--
       ARENA LIVE · GAME RUNTIME
       The classic game script stays here; utility CSS is built locally and
@@ -13,7 +13,7 @@
       have been migrated to explicit event listeners.
     -->
     <!-- Styles are built once; no browser compiler runs during a stream. -->
-    <link rel="stylesheet" href="styles/arena-ui.css?v=0.22">
+    <link rel="stylesheet" href="styles/arena-ui.css?v=0.23">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Fonts: Inter & Orbitron for Arcade/Esports HUD -->
@@ -214,7 +214,9 @@
 
 /* ===== Phase 3 · visual hierarchy, mobile layout and toolbar taxonomy ===== */
 :root { --arena-hud-opacity: .85; }
-#viewport16x9 .hud-glass, #viewport9x16 .hud-glass { opacity: var(--arena-hud-opacity); }
+#viewport16x9 .hud-glass, #viewport9x16 .hud-glass,
+#viewport16x9 .arena-onboarding-card, #viewport9x16 .arena-onboarding-card,
+#viewport16x9 .arena-audience-guide, #viewport9x16 .arena-audience-guide { opacity: var(--arena-hud-opacity); }
 #verticalEventHistory { display: none !important; } /* social events belong in Live Chat only */
 #viewport16x9 .hud-taps-metric, #viewport9x16 .hud-taps-metric { display: none !important; }
 #viewport16x9 .hud-player-metric, #viewport9x16 .hud-player-metric { display: block !important; }
@@ -1217,7 +1219,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 <p class="arena-onboarding-kicker">✦ ARENA LIVE · LOBBY ABIERTO</p>
 <h2>¡ESTÁS A UN MENSAJE DE PELEAR!</h2>
 <p class="arena-onboarding-sub">Escribe <strong>!jugar</strong> en el chat de TikTok y tu personaje entrará a la arena.</p>
-<p class="arena-onboarding-hint">Después elige tu clase y activa sus poderes con los comandos de arriba.</p>
+<p class="arena-onboarding-hint">Después elige tu clase y activa sus poderes con los comandos de arriba.</p><p id="lobbyChampion16" class="arena-onboarding-hint hidden" aria-live="polite"></p>
 <div class="arena-onboarding-meta">
 <span class="arena-onboarding-stat">⚔ <strong id="lobbyDetectedMode16">⚡ SMASH (3-8)</strong></span>
 <span class="arena-onboarding-stat">⏱ Inicio <strong id="lobbyCountdownText16">25s</strong><button type="button" onclick="toggleLobbyTimerPause()" id="btnPauseLobbyTimer16" aria-label="Pausar o reanudar cuenta regresiva">⏸</button></span>
@@ -1370,7 +1372,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 <p class="arena-onboarding-kicker">✦ ARENA LIVE · EN DIRECTO</p>
 <h2>¡TÚ PUEDES PELEAR!</h2>
 <p class="arena-onboarding-sub">Escribe <strong>!jugar</strong> en el chat y tu guerrero aparecerá en la arena.</p>
-<p class="arena-onboarding-hint">Elige clase y poder con los comandos de arriba.</p>
+<p class="arena-onboarding-hint">Elige clase y poder con los comandos de arriba.</p><p id="lobbyChampion9" class="arena-onboarding-hint hidden" aria-live="polite"></p>
 <div class="arena-onboarding-meta">
 <strong id="lobbyDetectedMode9">⚡ SMASH (3-8)</strong>
 <span id="lobbyRuleText9">🌐 Entrada libre</span>
@@ -1835,17 +1837,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.22 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.23 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
 
     <!-- ==================== COMPLETE GAME ENGINE, LOBBY & VICTORY SCRIPT ==================== -->
-    <script src="engine/arena-core.js?v=0.22"></script>
-    <script src="engine/arena-render.js?v=0.22"></script>
-    <script src="engine/arena-audio.js?v=0.22"></script>
-    <script src="engine/arena-settings.js?v=0.22"></script>
-    <script src="engine/arena-balance-evidence.js?v=0.22"></script>
+    <script src="engine/arena-core.js?v=0.23"></script>
+    <script src="engine/arena-render.js?v=0.23"></script>
+    <script src="engine/arena-audio.js?v=0.23"></script>
+    <script src="engine/arena-settings.js?v=0.23"></script>
+    <script src="engine/arena-balance-evidence.js?v=0.23"></script>
     <script>
         /*************************************************************************
          * ARENA LIVE · MONOLITHIC ENGINE INDEX
@@ -2930,6 +2932,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let matchElapsedSeconds = 0;
         let victoryCountdown = DEFAULT_VICTORY_COUNTDOWN;
         let currentWinner=null,pendingArenaResult=null,arenaRoundResult=null,arenaVictoryActor=null;
+        let arenaLobbyChampion=null; // Previous round's winner remains in the next lobby.
         let arenaSimulationTick=0;
         const ARENA_RESULT_COPY=Object.freeze({es:['🤝 Empate','Sin un ganador único'],en:['🤝 Draw','No single winner'],fr:['🤝 Égalité','Aucun vainqueur unique'],de:['🤝 Unentschieden','Kein eindeutiger Sieger'],zh:['🤝 平局','没有唯一获胜者'],ja:['🤝 引き分け','単独の勝者なし'],pt:['🤝 Empate','Sem vencedor único'],it:['🤝 Pareggio','Nessun vincitore unico']});
         function arenaResultText(key){return (ARENA_RESULT_COPY[currentLanguage]||ARENA_RESULT_COPY.es)[key==='draw'?0:1];}
@@ -3923,9 +3926,23 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             // The configured capacity includes Prota and eliminated registered slots.
             // Existing identities keep their slot; no new body bypasses the operator limit.
             if (!alreadyRegistered && fighters.length >= getArenaPlayerLimit()) {
-                if (!silentBanner) appendChatMessage('@ArenaSystem', platformKey,
-                    `⛔ ${arenaCombatRuleText('fullCapacity')} (${fighters.length}/${getArenaPlayerLimit()}).`, 'normal');
-                return null;
+                if (isStreamer) {
+                    // Prota has first right to an unused place, without ever
+                    // displacing a real, active viewer or allowing 129 bodies.
+                    const slot = fighters.findIndex(f => !f.isStreamer && f.eliminated)
+                        !== -1 ? fighters.findIndex(f => !f.isStreamer && f.eliminated)
+                        : fighters.findIndex(f => !f.isStreamer && isBuiltInSpectatorBot(f.name));
+                    if (slot >= 0) {
+                        const displaced = fighters.splice(slot, 1)[0];
+                        if (manualSpectatorFighter === displaced) manualSpectatorFighter = null;
+                        totalParticipants = fighters.reduce((sum, fighter) => sum + (fighter.coopCount || 1), 0);
+                    }
+                }
+                if (fighters.length >= getArenaPlayerLimit()) {
+                    if (!silentBanner) appendChatMessage('@ArenaSystem', platformKey,
+                        `⛔ ${arenaCombatRuleText('fullCapacity')} (${fighters.length}/${getArenaPlayerLimit()}).`, 'normal');
+                    return null;
+                }
             }
             if (!preferredClassKey && !isStreamer) {
                 preferredClassKey = BOT_PROFILE_BY_HANDLE.get(username.toLocaleLowerCase())?.classKey || null;
@@ -3943,14 +3960,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             }
 
             if(gameState==='VICTORY'||koSequenceActive)return null;
-            const incomingIdentityKey = viewerIdentityKey(username, platformKey);
-            if (!arenaRosterBatchDepth && !isStreamer && gameState === 'COMBAT' && fighters.filter(f => !f.eliminated).length <= 2) {
-                const alreadyAlive = fighters.some(f => !f.eliminated && viewerIdentityKey(f.name, f.platformKey) === incomingIdentityKey);
-                if (!alreadyAlive) {
-                    appendChatMessage('@ArenaSystem', platformKey, '🏁 Duelo final: la inscripción y el reingreso están cerrados.', 'normal');
-                    return null;
-                }
-            }
+            // The final duel can be interrupted by a legal !jugar admission.
+            // Only an actual final K.O. or victory locks the roster.
             // Identity is platform-scoped: the same handle on two platforms is a different profile.
             const identityPlatform = Object.prototype.hasOwnProperty.call(PLATFORMS, platformKey) ? platformKey : 'tiktok';
             const normalizedIdentity = String(username ?? '').trim().toLocaleLowerCase();
@@ -4200,6 +4211,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         function openLobby(clearFighters = false) {
+            const champion = currentWinner || arenaRoundResult?.winner || arenaLobbyChampion;
+            arenaLobbyChampion = champion ? {
+                name:champion.name,platformKey:champion.platformKey,isStreamer:!!champion.isStreamer,
+                archetypeKey:champion.archetypeKey,preferredArchetypeKey:champion.preferredArchetypeKey,
+                coopCount:champion.coopCount||1
+            } : null;
             arenaRoundRevision++;
             arenaRoundClockTicks=0;arenaAudienceQueue.length=0;arenaNextQueueTick=arenaSimulationTick;
             currentWinner=pendingArenaResult=arenaRoundResult=arenaVictoryActor=null;
@@ -4214,6 +4231,15 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             if (clearFighters) {
                 fighters = [];
                 totalParticipants = 0;
+                if (arenaLobbyChampion) {
+                    // Keep the champion's character and class even with "new lobby".
+                    const title = arenaLobbyChampion;
+                    const retained = new Fighter(title.name,title.platformKey,title.isStreamer,
+                        title.preferredArchetypeKey||title.archetypeKey);
+                    retained.coopCount=title.coopCount;
+                    fighters.push(retained);
+                    totalParticipants=retained.coopCount;
+                }
                 document.getElementById('hudCoopBadge16')?.classList.add('hidden');
                 document.getElementById('hudCoopBadge9')?.classList.add('hidden');
                 // Saved profiles keep class preferences; admission belongs to this round.
@@ -4226,6 +4252,10 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 fighters.forEach(f => {
                     ArenaCore.resetLife(f,{round:true});
                 });
+                if(arenaLobbyChampion) {
+                    const index=fighters.findIndex(f=>f.name===arenaLobbyChampion.name&&f.platformKey===arenaLobbyChampion.platformKey);
+                    if(index>0)fighters.unshift(fighters.splice(index,1)[0]);
+                }
                 ensureMinimumLobbyRoster();
             }
 
@@ -4336,6 +4366,11 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
             ['16', '9'].forEach(sfx => {
                 document.getElementById(`lobbyOverlay${sfx}`).classList.toggle('hidden', gameState !== 'LOBBY');
+                const championLabel = document.getElementById(`lobbyChampion${sfx}`);
+                if (championLabel) {
+                    championLabel.classList.toggle('hidden', gameState!=='LOBBY'||!arenaLobbyChampion);
+                    writeArenaHudText(championLabel,arenaLobbyChampion?`🏆 Campeón anterior: ${arenaLobbyChampion.isStreamer?protagonistLabel():arenaLobbyChampion.name}`:'');
+                }
                 document.getElementById(`victoryOverlay${sfx}`).classList.toggle('hidden', gameState !== 'VICTORY');
                 if (gameState !== 'COMBAT') document.getElementById(`arenaStartSplash${sfx}`)?.classList.add('hidden');
                 if (!koSequenceActive) document.getElementById(`koSlowMoOverlay${sfx}`).classList.add('hidden');
@@ -7064,7 +7099,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const protagonist = fighters.find(f => f.isStreamer);
             const alive = !!protagonist && !protagonist.eliminated;
             const finalizing = koSequenceActive;
-            const hasSlot=!!protagonist||fighters.length<getArenaPlayerLimit();
+            const hasSlot=!!protagonist||fighters.length<getArenaPlayerLimit()||
+                fighters.some(f=>!f.isStreamer&&(f.eliminated||isBuiltInSpectatorBot(f.name)));
             const allowed = gameState !== 'VICTORY' && !finalizing && !alive && hasSlot;
             button.disabled = !allowed;
             button.classList.toggle('opacity-50', !allowed);
@@ -7524,7 +7560,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 if(arenaAudienceQueue.length>=ARENA_AUDIENCE_QUEUE_LIMIT)arenaAudienceQueue.shift();
                 arenaAudienceQueue.push({identity,username,platformKey,clean,targetId:explicitFighter?.id||null,receivedAt:Date.now(),round:arenaRoundRevision});return true;
             }
-            return executeArenaChatAction(username,platformKey,clean,explicitFighter);
+            const accepted = executeArenaChatAction(username,platformKey,clean,explicitFighter);
+            if(accepted!==false&&!lower.startsWith('!')&&document.getElementById('showSpeechBubbleToggle')?.checked) {
+                const owner=fighters.find(f=>!f.eliminated&&viewerIdentityKey(f.name,f.platformKey)===identity);
+                if(owner)showFighterSpeechBubble(owner,clean);
+            }
+            return accepted;
         }
 
         function showFighterSpeechBubble(fighter, message) {
@@ -7650,17 +7691,13 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
             try {
                 // Commit a pending name edit before routing the chat message.
-                const senderSlot = syncManualSpectatorIdentity();
-                const identityKey = viewerIdentityKey(username, platformKey);
-                const senderFighter = (senderSlot && !senderSlot.eliminated ? senderSlot : null)
-                    || fighters.find(f => !f.eliminated && viewerIdentityKey(f.name, f.platformKey) === identityKey);
+                syncManualSpectatorIdentity();
+                // Keep the simulator's identity synchronized before processing chat.
                 const skillCommand = getMatchedSkillCommand(text);
                 const selectedSkillTarget = skillCommand ? getSelectedTargetFighter(SKILL_REQUIRED_CLASS[skillCommand]) : null;
 
-                if (!text.startsWith('!') && document.getElementById('showSpeechBubbleToggle')?.checked && senderFighter) {
-                    // Plain chat is spoken by the sender's own fighter; it does not steal another player's voice.
-                    showFighterSpeechBubble(senderFighter, text);
-                }
+                // All local and LIVE comments use the same speech-bubble route
+                // in processChatCommand, so a message is drawn only once.
 
                 // Joining and lobby class selection belong to the sender's @. During play, a skill command
                 // is applied to the selected supported fighter; this mirrors the quick-skill test buttons.
@@ -8160,7 +8197,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.22';
+        const ARENA_RELEASE_VERSION = '0.23';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:0, footer:76, format:'21'});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
@@ -8961,7 +8998,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.22.0',
+            version: '0.23.0',
             edition: 'tiktok',
             renderSpriteMode: arenaGpuSpritesEnabled ? 'hardware-candidate' : 'software-safe-vectors',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,
@@ -9023,6 +9060,14 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 if (fighters.some(f => viewerIdentityKey(f.name, f.platformKey) === identity)) return false;
                 if (fighters.length >= getArenaPlayerLimit()) return false;
                 return !!addOrBoostFighter(username, platformKey, false, null, true);
+            },
+            joinOnShare({username='',platformKey='tiktok'}={}) {
+                if(platformKey!=='tiktok'||!/^@[a-zA-Z0-9_.-]{1,24}$/.test(username)
+                    ||gameState==='VICTORY'||koSequenceActive)return null;
+                const existing=fighters.find(f=>viewerIdentityKey(f.name,f.platformKey)===viewerIdentityKey(username,platformKey));
+                if(existing&&!existing.eliminated)return existing.id;
+                const result=addOrBoostFighter(username,platformKey,false,null,true);
+                return result&&!result.eliminated?result.id:null;
             },
             sendChat({ username = '@Espectador', platformKey = 'tiktok', message = '', targetId = null } = {}) {
                 const skillCommand = getMatchedSkillCommand(message);

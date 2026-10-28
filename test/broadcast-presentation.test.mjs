@@ -66,3 +66,17 @@ test('victory has newly designed, legible cards in both capture formats',()=>{
   assert.match(html,/#viewport9x16 \.arena-victory-name\{font-size:clamp\(26px,7\.3cqw,44px\)/);
   assert.match(html,/for\(const sfx of \['16','9'\]\) document\.getElementById\('victoryCountdownText'\+sfx\)/);
 });
+
+test('lobby opacity and champion persistence are integrated on both broadcasts',()=>{
+  assert.match(html,/#viewport16x9 \.arena-onboarding-card, #viewport9x16 \.arena-onboarding-card/);
+  assert.match(html,/#viewport16x9 \.arena-audience-guide, #viewport9x16 \.arena-audience-guide \{ opacity: var\(--arena-hud-opacity\)/);
+  for(const id of ['lobbyChampion16','lobbyChampion9'])assert.match(html,new RegExp('id="'+id+'"'));
+  assert.match(html,/const champion = currentWinner \|\| arenaRoundResult\?\.winner \|\| arenaLobbyChampion/);
+  assert.match(html,/if \(arenaLobbyChampion\) \{[\s\S]*?const retained = new Fighter/);
+});
+test('LIVE chat speech and late duel re-entry are not hidden behind simulator-only routing',()=>{
+  assert.match(html,/const accepted = executeArenaChatAction\(username,platformKey,clean,explicitFighter\)/);
+  assert.match(html,/if\(owner\)showFighterSpeechBubble\(owner,clean\)/);
+  assert.doesNotMatch(html,/Duelo final: la inscripción y el reingreso están cerrados/);
+  assert.match(html,/joinOnShare\(\{username='',platformKey='tiktok'\}=\{\}\)/);
+});

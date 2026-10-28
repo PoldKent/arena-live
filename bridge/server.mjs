@@ -6,7 +6,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WebSocket, WebSocketServer } from 'ws';
 import { normalizeTikTokChat, normalizeCreatorHandle } from './chat-normalize.mjs';
-import { normalizeTikTokLike } from './social-normalize.mjs';
+import { normalizeTikTokLike, normalizeTikTokShare } from './social-normalize.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
@@ -21,6 +21,7 @@ const connectedSockets = new Set();
 let controller = null;
 const recentEventIds = new Map();
 const recentLikeIds = new Map();
+const recentShareIds = new Map();
 
 function snapshot() {
   return {
@@ -57,6 +58,19 @@ function publishChat(event) {
   }
   sendToController(chat);
 }
+function publishShare(event) {
+  const share=normalizeTikTokShare(event);
+  if(!share)return;
+  if(share.eventId) {
+    if(recentShareIds.has(share.eventId))return;
+    recentShareIds.set(share.eventId,Date.now());
+    if(recentShareIds.size>2000)for(const [key,time] of recentShareIds) {
+      if(Date.now()-time>120000||recentShareIds.size>1500)recentShareIds.delete(key);
+      else break;
+    }
+  }
+  sendToController(share);
+}
 function publishLike(event) {
   const like = normalizeTikTokLike(event);
   if (!like) return;
@@ -81,7 +95,7 @@ const liveSession=new LiveSession({
     // 2.5.0 requires an options object; skip historical chat during reconnections.
     return new C(TIKTOK_USERNAME,{processInitialData:false});
   },
-  onChat:publishChat,onLike:publishLike,onStatus:updateStatus
+  onChat:publishChat,onLike:publishLike,onShare:publishShare,onStatus:updateStatus
 });
 const connectLive=()=>liveSession.connect();
 const disconnectLive=()=>liveSession.disconnect();
@@ -156,6 +170,13 @@ const server = createServer(async (req, res) => {
       const chat = normalizeTikTokChat({ uniqueId: body.username || 'arena_prueba', comment: body.message || '!guerrero' });
       if (!chat) return json(res, 400, { error: 'Nombre o mensaje inválido.' });
       return json(res, 200, { sent: sendToController(chat), chat });
+    }
+    if(req.method==='POST'&&pathname==='/api/test-share'){
+      if(process.env.NODE_ENV==='production')return json(res,403,{error:'Prueba desactivada.'});
+      const body=await requestBody(req);
+      const share=normalizeTikTokShare({user:{displayId:body.username||'arena_prueba'}});
+      if(!share)return json(res,400,{error:'Usuario inválido.'});
+      return json(res,200,{sent:sendToController({...share,source:'test'})});
     }
     if (req.method === 'POST' && pathname === '/api/test-like') {
       if (process.env.NODE_ENV === 'production') return json(res, 403, { error: 'Prueba desactivada.' });

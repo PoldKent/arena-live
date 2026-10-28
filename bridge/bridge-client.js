@@ -297,6 +297,13 @@
         // Connection state did not change. Rebuilding/distributing toolbar state
         // per comment used to flood the DOM/localization observer during bursts.
         scheduleInboxRefresh();
+      } else if(data.type==='social'&&state.controller&&data.platformKey==='tiktok'&&data.eventType==='share') {
+        // A real share heals and protects the sharing viewer's own fighter.
+        // If they have not joined yet, normal admission/reentry rules apply.
+        const username=String(data.username||'');
+        const game=window.ArenaLive;
+        const targetId=game?.joinOnShare?.({username,platformKey:'tiktok'});
+        if(targetId!=null)game.support({eventType:'share',targetId});
       } else if (data.type === 'social' && state.controller && data.platformKey === 'tiktok' && data.eventType === 'taps') {
         recordTaps(data);
       }

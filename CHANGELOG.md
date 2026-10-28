@@ -1,5 +1,16 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-27 — Arena Live v0.23 · Lobby, reingresos y eventos TikTok
+
+- El regulador de opacidad afecta ahora al cartel y las instrucciones del lobby en los monitores 16:9 y 9:16.
+- La entrada y el reingreso siguen disponibles durante Duelo 1v1, hasta que se activa el KO final; las vidas y el máximo de participantes siguen aplicándose.
+- Los comentarios reales de TikTok generan burbujas sobre el luchador emisor, sin duplicar mensajes del simulador y respetando el interruptor.
+- El puente se suscribe al evento SHARE y lo envía exclusivamente al propietario de la cuenta TikTok que compartió; aplica curación y diez segundos de protección. Endpoint local de prueba /api/test-share.
+- Prota puede entrar durante el combate y liberar una plaza de un eliminado o de un bot al alcanzar capacidad, sin expulsar a espectadores reales activos.
+- El campeón anterior queda incluido, con su clase y nombre, en el nuevo lobby incluso al limpiar la lista; indicador visible en ambas capturas.
+- Sin cambios en física, daño de clases, resoluciones Full HD ni reglas de 3 vidas.
+
+
 ## 2026-10-27 — Arena Live v0.22 · Selección segura GPU / software
 
 - Comparación de v0.21 con v0.20: el dibujo de sprites resultó más lento en el Chromium Linux que utiliza **SwiftShader**, por lo que la ruta acelerada ahora se usa **solo** si se detecta GPU física mediante WebGL; si no, vuelve al dibujo vectorial probado.
