@@ -31,9 +31,14 @@ try{
         assert.equal(await page.locator('#arenaPortableResolution').inputValue(),'720');
         assert.equal(await page.locator('#arenaPortableFps').inputValue(),'30');
         assert.equal(await page.evaluate(()=>ArenaLive.getState().paused),true);
+        assert.equal(await page.locator('#arenaPortableTitle').innerText(),'Nueva partida');
+        assert.equal(await page.locator('#arenaPortableNotice').isVisible(),true);
+        assert.match(await page.locator('#arenaPortableNotice').innerText(),/streaming.*chat.*comandos/s);
+        assert.equal(await page.locator('#arenaPortableDontShow').isChecked(),false);
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
         if(output)await page.screenshot({path:join(output,'mobile-start.png')});
     });
+    await page.locator('#arenaPortableDontShow').check();
     await page.locator('#arenaPortableClass').selectOption('ninja');await page.locator('#arenaPortableStart').tap();
     await check('quick start includes Prota in the selected count and preserves class selection',async()=>{
         const state=await page.evaluate(()=>({state:ArenaLive.getState(),profile:ArenaPortable.getProfile(),fighters:ArenaLive.getFighters()}));
@@ -43,7 +48,7 @@ try{
         const size=await page.locator('#arenaMobilePower').boundingBox();assert.ok(size.height>=44&&size.width>=44);
         assert.equal(await page.locator('#arenaMobilePower').isEnabled(),true);
     });
-    await check('Mobile preview stays native 9:16 with an always-visible top instruction guide',async()=>{
+    await check('Mobile preview hides viewer instructions by default and can reveal them on demand',async()=>{
         const layout=await page.evaluate(()=>{
             const frame=document.getElementById('card-9x16'),video=document.getElementById('viewport9x16'),guide=document.getElementById('arenaAudienceGuide9');
             const inner=video.getBoundingClientRect();
@@ -54,10 +59,27 @@ try{
         });
         assert.equal(layout.phoneFit,false);
         assert.ok(Math.abs(layout.videoRatio-9/16)<.02,JSON.stringify(layout));
-        assert.equal(layout.guideVisible,true);
-        assert.ok(layout.guideTop>=layout.viewportTop-2,JSON.stringify(layout));
+        assert.equal(layout.guideVisible,false);
+        await page.locator('#arenaPortableToggleGuide').tap();
+        assert.equal(await page.locator('#arenaAudienceGuide9').isVisible(),true);
+        await page.locator('#arenaPortableToggleGuide').tap();
+        assert.equal(await page.locator('#arenaAudienceGuide9').isVisible(),false);
         assert.match(layout.commands,/DALE TAP TAP PARA UNIRTE/i);
         for(const command of ['!guerrero','!kame','!shinobi','!rasen','!titan','!coloso','!rayo','!trueno','!espiritu','!enred'])assert.ok(layout.commands.includes(command),command);
+    });
+    await check('floating action dock and app menu fit without horizontal clipping',async()=>{
+        const result=await page.evaluate(()=>{
+            const ids=['arenaMobileJump','arenaMobileAttack','arenaMobilePower','arenaMobileMoreBtn'];
+            const rects=ids.map(id=>{const r=document.getElementById(id).getBoundingClientRect();return [r.left,r.right,r.width,r.height];});
+            return {rects,screen:innerWidth,visible:[...document.querySelectorAll('#arenaHeaderActions>button')].filter(n=>getComputedStyle(n).display!=='none').map(n=>n.id)};
+        });
+        assert.deepEqual(result.visible,['arenaMobileJump','arenaMobileAttack','arenaMobilePower','arenaMobileMoreBtn']);
+        assert.ok(result.rects.every(([left,right,width,height])=>left>=0&&right<=result.screen&&width>=44&&height>=44),JSON.stringify(result));
+        await page.locator('#arenaMobileMoreBtn').tap();
+        assert.equal(await page.locator('#arenaPortableFullscreenMenu').isVisible(),true);
+        assert.equal(await page.locator('#arenaPortableGuideMenu').isVisible(),true);
+        assert.equal(await page.locator('#arenaProtaClassToolbar #protagonistClassSelect').count(),1);
+        await page.locator('#arenaMobileMoreBtn').tap();
     });
     await check('only the visible portrait capture allocates pixels; 720p uses 56% fewer pixels than full HD',async()=>{
         const dimensions=await page.evaluate(()=>{renderBothScreensSimultaneously();return [canvas16.width,canvas16.height,canvas9.width,canvas9.height];});
@@ -131,6 +153,7 @@ try{
     await check('profile settings survive reopening the downloaded file',async()=>{
         await page.evaluate(()=>{ArenaPortable.setResolution(540);setArenaRuntimeOption('renderFps',60);});await page.reload({waitUntil:'load'});
         assert.equal(await page.locator('#arenaPortableResolution').inputValue(),'540');assert.equal(await page.locator('#arenaPortableFps').inputValue(),'60');
+        assert.equal(await page.locator('#arenaPortableNotice').isVisible(),false);
     });
     await check('returning from another app resets the wall clock without changing a manual pause',async()=>{
         const clock=await page.evaluate(()=>{
