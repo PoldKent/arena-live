@@ -80,13 +80,19 @@ try{
         const result=await page.evaluate(()=>{
             const ids=['arenaMobileJump','arenaMobileAttack','arenaMobilePower','arenaMobileMoreBtn','arenaMobilePause','arenaPortableFullscreen'];
             const rects=ids.map(id=>{const r=document.getElementById(id).getBoundingClientRect();return [r.left,r.right,r.width,r.height];});
+            const video=document.getElementById('viewport9x16').getBoundingClientRect();
+            const shelf=document.getElementById('arenaMobileControlShelf').getBoundingClientRect();
+            const toolbar=document.getElementById('arenaMobileFloating').getBoundingClientRect();
             const top=[...document.querySelectorAll('#arenaMobileFloating>button')].filter(n=>getComputedStyle(n).display!=='none').map(n=>n.id);
             const bottom=[...document.querySelectorAll('#arenaHeaderActions>button')].filter(n=>getComputedStyle(n).display!=='none').map(n=>n.id);
-            return {rects,screen:innerWidth,top,bottom,menuInTop:document.getElementById('arenaMobileMoreBtn').parentElement.id==='arenaMobileFloating',topOutside:document.getElementById('arenaMobileFloating').parentElement.id==='arenaTopBarInner'};
+            return {rects,screen:innerWidth,top,bottom,menuInTop:document.getElementById('arenaMobileMoreBtn').parentElement.id==='arenaMobileFloating',topOutside:document.getElementById('arenaMobileFloating').parentElement.id==='arenaTopBarInner',video:{top:video.top,bottom:video.bottom,width:video.width,height:video.height},shelf:{top:shelf.top,bottom:shelf.bottom},toolbar:{bottom:toolbar.bottom}};
         });
         assert.deepEqual(result.top,['arenaMobilePause','arenaMobileModeShortcut','arenaMobileMoreBtn','arenaPortableFullscreen']);
         assert.deepEqual(result.bottom,['arenaMobileJump','arenaMobileAttack','arenaMobilePower']);
         assert.equal(result.menuInTop,true);assert.equal(result.topOutside,true);
+        assert.ok(result.toolbar.bottom<result.video.top,JSON.stringify(result));
+        assert.ok(result.shelf.top>=result.video.bottom-1,JSON.stringify(result));
+        assert.ok(Math.abs(result.video.width/result.video.height-9/16)<.02,JSON.stringify(result));
         assert.ok(result.rects.every(([left,right,width,height])=>left>=0&&right<=result.screen&&width>=44&&height>=44),JSON.stringify(result));
         await page.locator('#arenaMobileMoreBtn').tap();
         assert.equal(await page.locator('#arenaPortableModePlayer').isVisible(),true);
@@ -191,36 +197,39 @@ try{
             ArenaPortable.start({count:4,join:true});
             const actor=fighters.find(f=>f.isStreamer),view=document.getElementById('viewport9x16'),rect=view.getBoundingClientRect();
             actor.attackCooldown=0;actor.x=camera9x16.x;actor.y=camera9x16.y;
-            const center=arenaMobileTouchTarget(view);
-            const x=Math.min(rect.right-15,rect.left+center.x+75),y=Math.max(rect.top+15,Math.min(rect.bottom-15,rect.top+center.y));
-            const dispatch=(type,clientX,clientY)=>view.dispatchEvent(new PointerEvent(type,{bubbles:true,pointerType:'touch',pointerId:54,clientX,clientY}));
-            dispatch('pointerdown',x,y);
+            const x=rect.left+rect.width*.20,y=rect.top+rect.height*.45;
+            const dispatch=(type,id,clientX,clientY)=>view.dispatchEvent(new PointerEvent(type,{bubbles:true,pointerType:'touch',pointerId:id,clientX,clientY}));
+            dispatch('pointerdown',54,x,y);
+            dispatch('pointermove',54,x+45,y);
             const moving=keys.d&&!keys.a;
-            dispatch('pointermove',Math.min(rect.right-10,x+45),y);
-            dispatch('pointerup',Math.min(rect.right-10,x+45),y);
-            return {moving,released:!keys.d&&!keys.a,attack:actor.attackAnimTimer>0};
+            actor.attackCooldown=0;
+            const ax=rect.left+rect.width*.75;
+            dispatch('pointerdown',55,ax,y);
+            dispatch('pointermove',55,ax+45,y);
+            dispatch('pointerup',55,ax+45,y);
+            const concurrent=keys.d&&!keys.a;
+            dispatch('pointerup',54,x+45,y);
+            return {moving,released:!keys.d&&!keys.a,attack:actor.attackAnimTimer>0,concurrent};
         });
-        assert.equal(result.moving,true);assert.equal(result.released,true);assert.equal(result.attack,true);
+        assert.equal(result.moving,true);assert.equal(result.released,true);assert.equal(result.attack,true);assert.equal(result.concurrent,true);
     });
-    await check('Táctil total jumps with two taps and double-jumps with three',async()=>{
+    await check('Táctil total jumps immediately with a right tap and requests aerial jump on second tap',async()=>{
         const result=await page.evaluate(()=>{
             ArenaPortable.start({count:4,join:true});
             const actor=fighters.find(f=>f.isStreamer),view=document.getElementById('viewport9x16'),rect=view.getBoundingClientRect();
-            const x=rect.left+rect.width*.47,y=rect.top+rect.height*.46;
+            const x=rect.left+rect.width*.75,y=rect.top+rect.height*.46;
             const tapArena=()=>{
                 view.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'touch',pointerId:58,clientX:x,clientY:y}));
                 view.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch',pointerId:58,clientX:x,clientY:y}));
             };
             const initial=actor.jumpsLeft;
             tapArena();
-            const noAccidentalJump=actor.jumpsLeft===initial;
-            tapArena();
             const afterOne=actor.jumpsLeft;
             tapArena();
             const doubleRequested=actor.jumpsLeft<afterOne||arenaMobileTouchState.jumpRetry!==null;
-            return {initial,noAccidentalJump,afterOne,doubleRequested};
+            return {initial,afterOne,doubleRequested};
         });
-        assert.equal(result.noAccidentalJump,true);assert.ok(result.afterOne<result.initial);assert.equal(result.doubleRequested,true);
+        assert.ok(result.afterOne<result.initial);assert.equal(result.doubleRequested,true);
     });
     await check('joystick plus action button positions can be saved, modified and restored',async()=>{
         const result=await page.evaluate(()=>{
@@ -229,7 +238,7 @@ try{
             ArenaMobileTouch.setButtonSize(88);
             ArenaMobileTouch.editButtons(true);
             const editing=document.documentElement.classList.contains('arena-mobile-edit-controls');
-            const node=document.getElementById('arenaMobileAttack'),rect=document.getElementById('viewport9x16').getBoundingClientRect();
+            const node=document.getElementById('arenaMobileAttack'),rect=document.getElementById('arenaMobileControlShelf').getBoundingClientRect();
             node.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'touch',pointerId:90,clientX:rect.left+rect.width*.8,clientY:rect.top+rect.height*.73}));
             node.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerType:'touch',pointerId:90,clientX:rect.left+rect.width*.64,clientY:rect.top+rect.height*.70}));
             node.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch',pointerId:90,clientX:rect.left+rect.width*.64,clientY:rect.top+rect.height*.70}));
@@ -243,7 +252,7 @@ try{
     await check('large draggable buttons stay entirely inside the narrow portrait capture',async()=>{
         const bounds=await page.evaluate(()=>{
             ArenaMobileTouch.setButtonSize(94);
-            const parent=document.getElementById('viewport9x16').getBoundingClientRect();
+            const parent=document.getElementById('arenaMobileControlShelf').getBoundingClientRect();
             const buttons=['touchJoystick','arenaMobileJump','arenaMobileAttack','arenaMobilePower'];
             const values=buttons.map(id=>{
                 const r=document.getElementById(id).getBoundingClientRect();
@@ -279,7 +288,7 @@ try{
         assert.equal(await page.locator('#arenaStreamerSkillsDock').isVisible(),true);
         const bar=await page.locator('#arenaStreamerSkillsDock').boundingBox();
         const view=await page.locator('#viewport9x16').boundingBox();
-        assert.ok(bar.y>view.y+view.height*.78&&bar.height<80);
+        assert.ok(bar.y>=view.y+view.height-1&&bar.height<80);
         assert.equal(await page.locator('#arenaStreamerSkillsDock .arena-skill-buttons>button').count(),5);
         assert.equal(await page.locator('#arenaMobileJump').isVisible(),false);
         assert.equal(await page.locator('#arenaMobilePause').isVisible(),true);
@@ -288,10 +297,10 @@ try{
         assert.equal(await page.locator('#arenaMobilePower').isVisible(),true);
         assert.equal(await page.evaluate(()=>streamerManualControl),true);
     });
-    await check('live mobile tests float over combat and reuse real target, power and command controls',async()=>{
+    await check('compact Streamer tests sit below the 9:16 frame and retain the original commands',async()=>{
         await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(false);});
-        await page.locator('#arenaMobileMoreBtn').tap();
-        await page.locator('#arenaOperatorPopover [data-forward-control="arenaDualTestsToggle"]').tap();
+        assert.equal(await page.locator('#arenaMobileTestsShortcut').isVisible(),true);
+        await page.locator('#arenaMobileTestsShortcut').tap();
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
         assert.match(await page.locator('#arenaPortableTestHead').innerText(),/Modo Streamer/);
         assert.equal(await page.locator('#arenaPortableTestBody #arenaPanelPowers').count(),1);
@@ -305,7 +314,7 @@ try{
                 scroll:getComputedStyle(body).overflowY==='auto',
                 contained:box.width<=viewport.width&&box.height<=viewport.height,
                 normalPanel:getComputedStyle(panel).position==='static',
-                noScreenOverlay:box.width<viewport.width&&box.height<viewport.height};
+                noScreenOverlay:box.height<viewport.height&&box.height<170};
         });
         assert.deepEqual(sheet,{border:true,scroll:true,contained:true,normalPanel:true,noScreenOverlay:true});
         assert.equal(await page.locator('#targetFighterSelect').count(),1);
@@ -326,9 +335,9 @@ try{
         assert.deepEqual(await page.evaluate(()=>[canvas16.width,canvas16.height,canvas9.width,canvas9.height]),[1280,720,1,1]);
         assert.equal(await page.locator('#touchJoystick').count(),1);
         assert.equal(await page.locator('#arenaMobileMoreBtn').isVisible(),true);
-        const bar=await page.locator('#arenaHeaderActions').boundingBox();assert.ok(bar.y+bar.height<=391);
+        const bar=await page.locator('#arenaMobileFloating').boundingBox();assert.ok(bar.y+bar.height<=391);
         await page.evaluate(()=>ArenaMobileTouch.openTests(true));
-        assert.equal(await page.locator('#arenaPortableTestDrawer').evaluate(n=>n.parentElement.id),'viewport16x9');
+        assert.equal(await page.locator('#arenaPortableTestDrawer').evaluate(n=>n.parentElement.id),'arenaMobileControlShelf');
         await page.evaluate(()=>ArenaMobileTouch.openTests(false));
         if(output)await page.screenshot({path:join(output,'mobile-landscape.png')});
         await page.locator('#arenaMobileMoreBtn').tap();await page.locator('.arena-mobile-match-menu summary').tap();await page.locator('#arenaPortableQuick').tap();
