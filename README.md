@@ -149,11 +149,11 @@ El conector de TikTok es no oficial. Una conexión real necesita un LIVE públic
 
 ## Cómo participar · Guía permanente en ambas emisiones
 
-El lobby muestra una tarjeta de bienvenida adaptada a **16:9 y 9:16** con los pasos para entrar desde TikTok: escribe `!jugar`, elige una clase y activa su ataque. Conserva el reloj, modo, reglas y botones del operador. Al comenzar el combate, la tarjeta central desaparece.
+El lobby muestra una bienvenida simplificada con tipografía grande en **16:9 y 9:16**: escribe `!jugar`, aparece tu personaje y luego elige una clase y activa su ataque. El reloj, modo, reglas y los controles de prueba se mantienen. La tarjeta central desaparece al comenzar el combate.
 
-Una franja compacta al pie de **ambas capturas** permanece visible en lobby, combate y victoria: `!jugar`; `!guerrero → !kame`, `!shinobi → !rasen`, `!titan → !coloso`, `!rayo → !trueno` y `!espiritu → !enred`. En 9:16 se organiza en dos columnas para no atravesar el centro del escenario; los espectadores que llegan tarde siguen viendo las instrucciones.
+Las indicaciones permanecen **arriba** en ambas capturas, también durante el combate, con un llamado visible a escribir `!jugar` y los cinco pares de clase/poder en texto, sin botones: `!guerrero → !kame`, `!shinobi → !rasen`, `!titan → !coloso`, `!rayo → !trueno` y `!espiritu → !enred`. El centro de la arena queda despejado.
 
-El teléfono vertical usa un **marco de previsualización 9:20** al preparar la vista 9:16. El vídeo interior permanece 9:16, centrado y sin deformación. El encuadre extra solo se usa en la pantalla del teléfono: la captura vertical de OBS y TikTok sigue siendo **1080 × 1920 (9:16)**, sin barras nuevas grabadas en el vídeo.
+En **Modo Stream dual**, la columna TikTok usa un **marco vertical 9:21** con el vídeo **9:16 centrado** y bandas simétricas arriba y abajo. Puedes usar una fuente de ventana/recorte del marco para adaptarlo, con escala proporcional, a pantallas 9:19.5, 9:20 o 9:21; no deformes el vídeo. Si OBS captura solo `#viewport9x16`, sigue siendo 9:16 (1080 × 1920). La preparación normal y el HTML móvil mantienen 9:16, sin el marco 9:21.
 
 ## Móvil y controles
 
