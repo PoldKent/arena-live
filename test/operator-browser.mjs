@@ -176,6 +176,49 @@ await check('Stream uses its own reserved left column and contains both correctl
  assert.ok(carrier.top>10&&carrier.bottom>10);
  assert.ok(carrier.instructions.includes('!jugar')&&carrier.instructions.includes('!trueno'));
 });
+await check('Vertical selector fits 9:21 / 9:20 / 9:19.5 / 9:16 without stretch and pink slider centers precisely',async()=>{
+ const select=page.locator('#arenaObsVerticalFormat');
+ assert.equal(await select.locator('option').count(),4);
+ await page.evaluate(()=>centerArenaObsVertical());
+ for(const height of ['21','20','19.5','16']){
+  await select.evaluate((element,value)=>{
+   element.value=value;
+   element.dispatchEvent(new Event('change',{bubbles:true}));
+  },height);
+  const snapshot=await page.evaluate(()=>{
+   const a=document.getElementById('card-9x16').getBoundingClientRect();
+   const b=document.getElementById('viewport9x16').getBoundingClientRect();
+   const r=document.getElementById('arenaDualUltrawideVerticalStage').getBoundingClientRect();
+   return {outer:a.width/a.height,inner:b.width/b.height,
+    centeredY:Math.abs((a.top+a.bottom-b.top-b.bottom)/2),
+    centeredX:Math.abs((a.left+a.right-r.left-r.right)/2),
+    marginTop:b.top-a.top,marginBottom:a.bottom-b.bottom,
+    saved:JSON.parse(localStorage.getItem('arenaLiveObsCalibrationV01')),
+    labels:document.getElementById('arenaObsGeometrySummary').textContent};
+  });
+  assert.ok(Math.abs(snapshot.outer-9/Number(height))<.015,JSON.stringify(snapshot));
+  assert.ok(Math.abs(snapshot.inner-9/16)<.015,JSON.stringify(snapshot));
+  assert.ok(snapshot.centeredX<2 && snapshot.centeredY<2,JSON.stringify(snapshot));
+  assert.ok(Math.abs(snapshot.marginTop-snapshot.marginBottom)<4,JSON.stringify(snapshot));
+  assert.equal(snapshot.saved.format,height);
+  assert.ok(snapshot.labels.includes('9:'+height));
+ }
+ const baseline=await page.locator('#card-9x16').evaluate(n=>n.getBoundingClientRect().x);
+ await page.locator('#arenaObsVerticalOffset').evaluate(n=>{
+  n.value='-19';n.dispatchEvent(new Event('input',{bubbles:true}));
+ });
+ const left=await page.locator('#card-9x16').evaluate(n=>n.getBoundingClientRect().x);
+ assert.ok(Math.abs(left-baseline+19)<2,{baseline,left});
+ await page.locator('#arenaObsVerticalOffsetExact').evaluate(n=>{
+  n.value='27';n.dispatchEvent(new Event('change',{bubbles:true}));
+ });
+ const right=await page.locator('#card-9x16').evaluate(n=>n.getBoundingClientRect().x);
+ assert.ok(Math.abs(right-baseline-27)<2,{baseline,right});
+ await page.locator('#arenaObsCenterVertical').evaluate(n=>n.click());
+ assert.equal(await page.locator('#arenaObsVerticalOffset').inputValue(),'0');
+ assert.equal(await page.locator('#arenaObsVerticalOffsetExact').inputValue(),'0');
+ await page.evaluate(()=>{setArenaObsCalibration('format','21');setArenaObsCalibration('offset',8);});
+});
 await check('Stream keeps the selected panel through actions and outside clicks, replaces it with another menu, and closes with ×',async()=>{
  const before=await rects();await streamClick('arenaDualTestsToggle');assert.deepEqual(await rects(),before);
  const left=await page.locator('#arenaStreamLeftColumn').boundingBox();assert.ok(left.x+left.width<=before.viewport16x9[0]);
