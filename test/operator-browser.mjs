@@ -120,14 +120,14 @@ await check('Tabbed chats distinguish commands and always follow new messages',a
  assert.equal(await page.locator('#chatFeed').evaluate(n=>n.scrollHeight-n.scrollTop-n.clientHeight<3),true);
 });
 await check('Preparation settings apply multiple changes without closing and resume on explicit close',async()=>{
- await page.locator('#arenaDualSettingsBtn').click();assert.equal((await state()).paused,true);
- await page.locator('#ruleBtn-3_lives').click();await page.locator('#playerLivesSelect').selectOption('3');assert.equal((await state()).settingsOpen,true);assert.equal((await state()).paused,true);
+ await page.locator('#arenaDualSettingsBtn').click();assert.equal((await state()).paused,false);
+ await page.locator('#ruleBtn-3_lives').click();await page.locator('#playerLivesSelect').selectOption('3');assert.equal((await state()).settingsOpen,true);assert.equal((await state()).paused,false);
  await settingsSection(2);await page.locator('#hudOpacityRange').evaluate(n=>{n.value='60';n.dispatchEvent(new Event('input',{bubbles:true}));n.dispatchEvent(new Event('change',{bubbles:true}));});
  assert.equal(await page.locator('#hudOpacityValue').innerText(),'60 %');assert.equal((await state()).settingsOpen,true);assert.match(await page.locator('#hudOpacityRange').getAttribute('title'),/textos y barras/);
  await shot('settings');await page.keyboard.press('Escape');assert.equal((await state()).paused,false);
 });
-await check('Closing settings resumes even after an earlier manual pause',async()=>{
- await page.locator('#arenaDualPauseBtn').click();assert.equal((await state()).paused,true);await page.locator('#arenaDualSettingsBtn').click();await page.keyboard.press('Escape');assert.equal((await state()).paused,false);
+await check('Closing settings preserves an earlier manual pause',async()=>{
+ await page.locator('#arenaDualPauseBtn').click();assert.equal((await state()).paused,true);await page.locator('#arenaDualSettingsBtn').click();await page.keyboard.press('Escape');assert.equal((await state()).paused,true);await page.locator('#arenaDualPauseBtn').click();assert.equal((await state()).paused,false);
  const before=await page.evaluate(()=>soundEnabled);await page.locator('#btnQuickSound').click();assert.equal(await page.evaluate(()=>soundEnabled),!before);
 });
 await check('Panels dock below the game, float, resize, and dock again without losing controls',async()=>{
@@ -153,7 +153,7 @@ await check('OBS calibration keeps the established key and applies exact saved v
  await page.locator('#arenaDualSettingsBtn').click();await settingsSection(2);
  await page.locator('#arenaObsVerticalOffset').evaluate(n=>{n.value='8';n.dispatchEvent(new Event('input',{bubbles:true}));n.dispatchEvent(new Event('change',{bubbles:true}));});
  assert.equal((await state()).settingsOpen,true);assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('arenaLiveObsCalibrationV01')).offset),8);
- await page.locator('#btnViewDual').click();await page.waitForFunction(()=>document.fullscreenElement?.id==='broadcastStageSection');assert.equal((await state()).paused,false);
+ await page.locator('#btnViewDual').click();assert.equal(await page.evaluate(()=>monitorFocus),'dual');assert.equal((await state()).paused,false);await page.locator('#btnFullscreenDual').click();await page.waitForFunction(()=>document.fullscreenElement?.id==='broadcastStageSection');
 });
 await check('Stream uses its own reserved left column and contains both correctly proportioned canvases',async()=>{
  await page.waitForTimeout(150);assert.equal(await page.locator('#arenaStreamToolbarMount #arenaHeaderActions').count(),1);assert.equal(await page.locator('#arenaStreamPanelHost').isHidden(),true);
@@ -229,9 +229,9 @@ await check('Stream keeps the selected panel through actions and outside clicks,
  await page.locator('#arenaStreamClose').click();assert.equal(await page.locator('#arenaStreamPanelHost').isHidden(),true);assert.deepEqual(await rects(),before);
 });
 await check('Stream settings remain open while changing values, expose ×, and resume when deliberately closed',async()=>{
- const before=await rects();await streamClick('arenaDualSettingsBtn');assert.equal((await state()).paused,true);await settingsSection(2);assert.deepEqual(await rects(),before);
+ const before=await rects();await streamClick('arenaDualSettingsBtn');assert.equal((await state()).paused,false);await settingsSection(2);assert.deepEqual(await rects(),before);
  const modal=await page.locator('#settingsPauseModal').boundingBox();assert.ok(modal.x+modal.width<=before.viewport16x9[0]);assert.equal(await page.locator('#arenaStreamClose').isVisible(),true);
- await page.locator('#hudOpacityRange').evaluate(n=>{n.value='70';n.dispatchEvent(new Event('input',{bubbles:true}));n.dispatchEvent(new Event('change',{bubbles:true}));});assert.equal((await state()).settingsOpen,true);assert.equal((await state()).paused,true);
+ await page.locator('#hudOpacityRange').evaluate(n=>{n.value='70';n.dispatchEvent(new Event('input',{bubbles:true}));n.dispatchEvent(new Event('change',{bubbles:true}));});assert.equal((await state()).settingsOpen,true);assert.equal((await state()).paused,false);
  await streamClick('arenaDualSettingsBtn');assert.equal((await state()).settingsOpen,true);await page.locator('#arenaStreamClose').click();assert.equal((await state()).settingsOpen,false);assert.equal((await state()).paused,false);
  await streamClick('arenaDualSettingsBtn');await page.keyboard.press('Escape');assert.equal(await page.evaluate(()=>document.fullscreenElement?.id),'broadcastStageSection');
 });
@@ -354,7 +354,7 @@ await check('Saved rule validation bounds capacity/parameters, rejects unknown c
 });
 await check('Resetting the current layout preserves OBS calibration and the other workspace',async()=>{
  await page.locator('#arenaDualSettingsBtn').click();await settingsSection(5);await page.locator('#arenaWorkspaceReset').click();
- assert.equal((await state()).settingsOpen,true);assert.equal((await state()).paused,true);assert.equal(await page.evaluate(()=>arenaWorkspace.layouts.preparation.leftWidth),260);assert.equal(await page.evaluate(()=>arenaWorkspace.layouts.stream.leftWidth),320);assert.equal(await page.evaluate(()=>arenaObsCalibration.offset),8);
+ assert.equal((await state()).settingsOpen,true);assert.equal((await state()).paused,false);assert.equal(await page.evaluate(()=>arenaWorkspace.layouts.preparation.leftWidth),260);assert.equal(await page.evaluate(()=>arenaWorkspace.layouts.stream.leftWidth),320);assert.equal(await page.evaluate(()=>arenaObsCalibration.offset),8);
  assert.deepEqual(await page.locator('.arena-work-panel[open]').evaluateAll(ns=>ns.map(n=>n.id).sort()),['arenaPanelChat','arenaPanelSocial']);await page.keyboard.press('Escape');
 });
 await check('Camera shake defaults to 25%, can be disabled in Settings, persists independently and leaves captures unchanged',async()=>{
