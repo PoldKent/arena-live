@@ -23,7 +23,7 @@ test('lobby overlays have no redundant streaming format tags', () => {
   for (const id of ['arenaAudienceGuide16','arenaAudienceGuide9','lobbyDetectedMode16','lobbyDetectedMode9','lobbyCountdownText16','lobbyCountdownText9']) {
     assert.match(html, new RegExp('id="' + id + '"'));
   }
-  assert.ok(lobby16[0].includes('!jugar') && lobby9[0].includes('!jugar'));
+  assert.ok(lobby16[0].toLowerCase().includes('tap tap') && lobby9[0].toLowerCase().includes('tap tap'));
   for (const command of ['!guerrero','!kame','!shinobi','!rasen','!titan','!coloso','!rayo','!trueno','!espiritu','!enred']) {
     const guides = [...html.matchAll(/<aside id="arenaAudienceGuide(?:16|9)"[\s\S]*?<\/aside>/g)];
     assert.equal(guides.length,2);

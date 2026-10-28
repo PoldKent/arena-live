@@ -50,9 +50,13 @@ function fixture(source) {
     ArenaLive:{
       getFighters: () => fighters,
       joinOnTap: ({ username, platformKey }) => {
-        if (gamePhase !== 'LOBBY' || platformKey !== 'tiktok'
-          || fighters.some(f => f.platform === platformKey && f.name.toLowerCase() === username.toLowerCase())
-          || fighters.length >= 128) return false;
+        if (!['LOBBY','COMBAT'].includes(gamePhase) || platformKey !== 'tiktok') return false;
+        const existing=fighters.find(f=>f.platform===platformKey&&f.name.toLowerCase()===username.toLowerCase());
+        if(existing){
+          if(existing.alive)return false;
+          existing.alive=true;joins.push(username);return true;
+        }
+        if(fighters.length>=128)return false;
         fighters.push({id:'f'+(fighters.length+1),name:username,platform:platformKey,alive:true});
         joins.push(username);
         return true;
@@ -92,34 +96,41 @@ function fixture(source) {
 
 const source = await readFile(new URL('../bridge/bridge-client.js', import.meta.url),'utf8');
 
-test('first LIVE tap joins the spectator to the lobby exactly once, without duplicating fighters',()=>{
+test('LIVE taps admit and rejoin their owner during lobby or combat, without duplicating fighters',()=>{
   const f=fixture(source);
   const send=(username,count,source)=>
     f.send({type:'social',platformKey:'tiktok',eventType:'taps',username,count,source});
   send('@viewer_one',4);
   send('@VIEWER_ONE',6);
   send('@new_fan',3);
-  send('@fallen',2); // A fallen registered fighter is NOT automatically rejoined.
+  send('@fallen',2); // A fallen fighter must rejoin on tap if this mode permits it.
   f.flush();
-  assert.deepEqual(f.joins,['@new_fan']);
-  assert.equal(f.effects.length,2);
+  assert.deepEqual(f.joins,['@new_fan','@fallen']);
+  assert.equal(f.effects.length,3);
   assert.deepEqual(JSON.parse(JSON.stringify(f.effects[0])),{
     eventType:'taps',targetId:'f1',tapCount:10
   });
   assert.equal(f.effects[1].tapCount,3);
+  assert.equal(f.effects[2].tapCount,2);
+  assert.equal(f.fighters.find(p=>p.name==='@fallen').alive,true);
   assert.equal(f.fighters.filter(p=>p.name==='@new_fan').length,1);
   assert.match(f.nodes.get('#bridge-taps-count').textContent,/Taps LIVE: 15/);
-  assert.match(f.nodes.get('#bridge-taps-count').textContent,/inscripciones: 1/);
-  assert.match(f.nodes.get('#bridge-taps-note').textContent,/Sin personaje activo: 2 taps/);
+  assert.match(f.nodes.get('#bridge-taps-count').textContent,/entradas\/reingresos: 2/);
   send('@new_fan',8);f.flush();
-  assert.equal(f.joins.length,1);
+  assert.equal(f.joins.length,2);
   f.combat();
   send('@late_fan',10);f.flush();
-  assert.equal(f.joins.length,1);
-  assert.match(f.nodes.get('#bridge-taps-note').textContent,/Sin personaje activo: 12 taps/);
+  assert.deepEqual(f.joins,['@new_fan','@fallen','@late_fan']);
+  assert.equal(f.fighters.filter(p=>p.name==='@late_fan').length,1);
+  f.fighters.find(p=>p.name==='@fallen').alive=false;
+  send('@fallen',1);f.flush();
+  assert.equal(f.joins.length,4);
+  assert.equal(f.fighters.filter(p=>p.name==='@fallen').length,1);
+  assert.equal(f.fighters.find(p=>p.name==='@fallen').alive,true);
+  assert.match(f.nodes.get('#bridge-taps-count').textContent,/entradas\/reingresos: 4/);
   send('@viewer_one',10,'test');f.flush();
   assert.match(f.nodes.get('#bridge-taps-count').textContent,/pruebas: 10/);
-  assert.match(f.nodes.get('#bridge-taps-count').textContent,/Taps LIVE: 33/);
+  assert.match(f.nodes.get('#bridge-taps-count').textContent,/Taps LIVE: 34/);
 });
 
 test('inactive controller never receives or applies another window\'s taps',()=>{
