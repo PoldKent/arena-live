@@ -1,6 +1,6 @@
 // A generation owns its events. A stale connection can never revive a closed session.
 export class LiveSession {
-  constructor({createConnection,onChat=()=>{},onStatus=()=>{},setTimer=setTimeout,clearTimer=clearTimeout,autoReconnect=true}){
+  constructor({createConnection,onChat=()=>{},onLike=()=>{},onStatus=()=>{},setTimer=setTimeout,clearTimer=clearTimeout,autoReconnect=true}){
     Object.assign(this,{createConnection,onChat,onStatus,setTimer,clearTimer,autoReconnect});
     this.generation=0;this.current=null;this.wanted=false;this.timer=null;this.attempt=0;this.closing=new Set();
     this.status={phase:'disconnected',lastError:'',connectedSince:null};
@@ -30,6 +30,7 @@ export class LiveSession {
       const connection=await this.createConnection();entry={connection,generation,closed:false};const cancelled=new Promise(resolve=>{entry.cancel=resolve;});
       if(!this.wanted||generation!==this.generation){await this.close(entry);return;}
       entry.listeners={chat:event=>{if(this.active(entry))this.onChat(event);},
+        like:event=>{if(this.active(entry))this.onLike(event);},
         error:error=>{if(this.active(entry))this.emit(this.status.phase,error?.message||error,this.status.connectedSince);},
         disconnected:()=>{if(!this.active(entry))return;this.current=null;if(this.opening===entry.generation)this.opening=null;this.generation++;void this.close(entry);this.retry('Se interrumpió la conexión con TikTok.');}};
       this.current=entry;for(const[event,listener]of Object.entries(entry.listeners))connection.on(event,listener);
