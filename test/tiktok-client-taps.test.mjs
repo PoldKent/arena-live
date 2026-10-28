@@ -31,6 +31,8 @@ function fixture(source) {
   const timers = new Map();
   let timerId = 0;
   const effects = [];
+  const joins = [];
+  let gamePhase = 'LOBBY';
   const fighters = [
     { id:'f1',name:'@viewer_one',platform:'tiktok',alive:true },
     { id:'f2',name:'@fallen',platform:'tiktok',alive:false },
@@ -47,6 +49,14 @@ function fixture(source) {
     addEventListener() {}, dispatchEvent() {},
     ArenaLive:{
       getFighters: () => fighters,
+      joinOnTap: ({ username, platformKey }) => {
+        if (gamePhase !== 'LOBBY' || platformKey !== 'tiktok'
+          || fighters.some(f => f.platform === platformKey && f.name.toLowerCase() === username.toLowerCase())
+          || fighters.length >= 128) return false;
+        fighters.push({id:'f'+(fighters.length+1),name:username,platform:platformKey,alive:true});
+        joins.push(username);
+        return true;
+      },
       support: args => { effects.push(args); return true; }
     }
   };
@@ -77,32 +87,39 @@ function fixture(source) {
       if(task.ms === 800) { timers.delete(id); task.callback(); }
     }
   }
-  return {send,flush,effects,nodes};
+  return {send,flush,effects,joins,nodes,combat:()=>{gamePhase='COMBAT';},fighters};
 }
 
 const source = await readFile(new URL('../bridge/bridge-client.js', import.meta.url),'utf8');
 
-test('LIVE tap deltas are batched and applied only to the matching active TikTok viewer',()=>{
+test('first LIVE tap joins the spectator to the lobby exactly once, without duplicating fighters',()=>{
   const f=fixture(source);
   const send=(username,count,source)=>
     f.send({type:'social',platformKey:'tiktok',eventType:'taps',username,count,source});
   send('@viewer_one',4);
   send('@VIEWER_ONE',6);
-  send('@unregistered',3);
-  send('@fallen',2);
+  send('@new_fan',3);
+  send('@fallen',2); // A fallen registered fighter is NOT automatically rejoined.
   f.flush();
-  assert.equal(f.effects.length,1);
+  assert.deepEqual(f.joins,['@new_fan']);
+  assert.equal(f.effects.length,2);
   assert.deepEqual(JSON.parse(JSON.stringify(f.effects[0])),{
     eventType:'taps',targetId:'f1',tapCount:10
   });
+  assert.equal(f.effects[1].tapCount,3);
+  assert.equal(f.fighters.filter(p=>p.name==='@new_fan').length,1);
   assert.match(f.nodes.get('#bridge-taps-count').textContent,/Taps LIVE: 15/);
-  assert.match(f.nodes.get('#bridge-taps-count').textContent,/mejoras: 1/);
-  assert.match(f.nodes.get('#bridge-taps-note').textContent,/Sin personaje activo: 5 taps/);
-  send('@viewer_one',10,'test');
-  f.flush();
-  assert.equal(f.effects.length,2);
+  assert.match(f.nodes.get('#bridge-taps-count').textContent,/inscripciones: 1/);
+  assert.match(f.nodes.get('#bridge-taps-note').textContent,/Sin personaje activo: 2 taps/);
+  send('@new_fan',8);f.flush();
+  assert.equal(f.joins.length,1);
+  f.combat();
+  send('@late_fan',10);f.flush();
+  assert.equal(f.joins.length,1);
+  assert.match(f.nodes.get('#bridge-taps-note').textContent,/Sin personaje activo: 12 taps/);
+  send('@viewer_one',10,'test');f.flush();
   assert.match(f.nodes.get('#bridge-taps-count').textContent,/pruebas: 10/);
-  assert.match(f.nodes.get('#bridge-taps-count').textContent,/Taps LIVE: 15/);
+  assert.match(f.nodes.get('#bridge-taps-count').textContent,/Taps LIVE: 33/);
 });
 
 test('inactive controller never receives or applies another window\'s taps',()=>{
@@ -111,4 +128,12 @@ test('inactive controller never receives or applies another window\'s taps',()=>
   f.send({type:'social',platformKey:'tiktok',eventType:'taps',username:'@viewer_one',count:10});
   f.flush();
   assert.equal(f.effects.length,0);
+});
+\ntest('spectators cannot bypass the full 128-player cap with taps',()=>{
+  const f=fixture(source);
+  while(f.fighters.length<128)f.fighters.push({id:'extra'+f.fighters.length,name:'@occupant'+f.fighters.length,platform:'tiktok',alive:true});
+  f.send({type:'social',platformKey:'tiktok',eventType:'taps',username:'@over_limit',count:20});
+  f.flush();
+  assert.equal(f.joins.length,0);
+  assert.equal(f.fighters.length,128);
 });
