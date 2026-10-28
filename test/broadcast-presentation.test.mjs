@@ -21,6 +21,18 @@ test('GO has exactly one centered unboxed element in each capture',()=>{
   assert.match(html,/banner\?\.classList\.add\('hidden'\)/);
 });
 
+test('KO has GO-sized text centered without a box in both captures',()=>{
+  for(const suffix of ['16','9']){
+    const element=html.match(new RegExp('<div id="koSlowMoOverlay'+suffix+'" class="arena-ko-overlay hidden"[^>]*><span id="koSlowMoTitle'+suffix+'">KO!</span></div>','g'))||[];
+    assert.equal(element.length,1);
+    assert.doesNotMatch(element[0],/bg-black|rounded-2xl|border-2/);
+  }
+  assert.match(html,/\.arena-ko-overlay\{[^}]*position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center/);
+  assert.match(html,/koTitle.textContent = reason === 'timed' \? 'FIN!' : 'KO!'/);
+  assert.doesNotMatch(html,/id="koSlowMoSub(?:16|9)"/);
+  assert.doesNotMatch(html,/Double Jump Wing Pips Indicator/);
+});
+
 test('victory has newly designed, legible cards in both capture formats',()=>{
   for(const suffix of ['16','9']){
     const markup=html.match(new RegExp('<section id="victoryOverlay'+suffix+'"[^>]*>[\\s\\S]*?<\\/section>'))?.[0];

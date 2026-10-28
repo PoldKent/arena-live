@@ -97,6 +97,16 @@ test('a falling AI can attempt one rescue even just beyond any side of the ellip
     assert.equal(e.tryIsometricSpectatorRecovery(f),false);
   }
 });
+test('AI can spend its aerial charge while a launched body is rising far beyond the ellipse',()=>{
+  const e=engine(),g=e.geometry,f=fighter(g,0,1.12);
+  f.z=28;f.vz=5;f.knockbackTimer=18;
+  assert.equal(e.tryIsometricSpectatorRecovery(f),true);
+  assert.equal(f.recoveryJumpUsed,true);
+  assert.equal(f.jumpsLeft,0);
+  assert.ok(f.vx<0&&f.vz>0);
+  assert.equal(e.tryIsometricSpectatorRecovery(f),false);
+});
+
 test('normal jump and one aerial jump cannot become infinite mid-air jumps',()=>{
   const e=engine(),g=e.geometry,f=fighter(g);
   assert.equal(e.performIsometricJump(f),true);assert.equal(f.jumpsLeft,1);

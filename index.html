@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.18 — TikTok LIVE</title>
+    <title>Arena Live v0.19 — TikTok LIVE</title>
     <!--
       ARENA LIVE · GAME RUNTIME
       The classic game script stays here; utility CSS is built locally and
@@ -13,7 +13,7 @@
       have been migrated to explicit event listeners.
     -->
     <!-- Styles are built once; no browser compiler runs during a stream. -->
-    <link rel="stylesheet" href="styles/arena-ui.css?v=0.18">
+    <link rel="stylesheet" href="styles/arena-ui.css?v=0.19">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Fonts: Inter & Orbitron for Arcade/Esports HUD -->
@@ -417,6 +417,19 @@
 #viewport9x16 .arena-go-overlay span{font-size:clamp(66px,22cqw,135px);}
 @keyframes arenaGoReveal{0%{transform:scale(.5);opacity:0}18%{transform:scale(1.08);opacity:1}
  72%{transform:scale(1);opacity:1}100%{transform:scale(1.2);opacity:0}}
+/* KO shares GO's centered, borderless presentation across both captures. */
+#viewport16x9 .arena-ko-overlay,#viewport9x16 .arena-ko-overlay{
+ position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;
+ pointer-events:none;background:none;border:0;box-shadow:none;}
+#koSlowMoOverlay16.hidden,#koSlowMoOverlay9.hidden{display:none!important;}
+.arena-ko-overlay span{
+ display:block;max-width:94%;color:#fff;
+ font:950 clamp(70px,14cqw,200px)/1 Orbitron,Inter,system-ui,sans-serif;
+ text-shadow:0 5px 0 #250916,0 0 30px #fb7185,0 0 84px #e11d4899;
+ letter-spacing:.035em;white-space:nowrap;animation:arenaKoReveal 2.55s ease-out both;}
+#viewport9x16 .arena-ko-overlay span{font-size:clamp(70px,23cqw,148px);}
+@keyframes arenaKoReveal{0%{transform:scale(.5);opacity:0}12%{transform:scale(1.08);opacity:1}
+ 76%{transform:scale(1);opacity:1}100%{transform:scale(1.16);opacity:0}}
 /* New winner screen, no dependence on outdated Tailwind type scales. */
 #viewport16x9 .arena-victory-overlay,#viewport9x16 .arena-victory-overlay{
  position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);z-index:31;
@@ -1221,15 +1234,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 </div></div></section>
 
                                                 <div id="arenaStartSplash16" class="arena-go-overlay hidden" aria-hidden="true"><span>GO!</span></div>
-<!-- 16:9 FINAL K.O. SLOW-MO OVERLAY -->
-                        <div id="koSlowMoOverlay16" class="hidden relative z-30 my-auto mx-auto pointer-events-none text-center">
-                            <div class="px-6 py-3 rounded-2xl bg-black/85 border-2 border-rose-500 glow-pink animate-pulse-fast">
-                                <div id="koSlowMoTitle16" class="font-display font-black text-2xl sm:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-rose-500 to-cyan-300 tracking-widest uppercase">
-                                    💥 ¡K.O. DECISIVO! 💥
-                                </div>
-                                <div id="koSlowMoSub16" class="text-[11px] font-bold text-white mt-0.5 uppercase"></div>
-                            </div>
-                        </div>
+<!-- 16:9 FINAL KO -->
+                        <div id="koSlowMoOverlay16" class="arena-ko-overlay hidden" aria-hidden="true"><span id="koSlowMoTitle16">KO!</span></div>
 
                         <!-- 16:9 WINNER REBUILD: broadcast readable, independent of the lobby -->
                         <section id="victoryOverlay16" class="arena-victory-overlay arena-victory-wide hidden" aria-label="Resultado de la partida">
@@ -1376,13 +1382,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 </div></div></section>
 
                                                 <div id="arenaStartSplash9" class="arena-go-overlay hidden" aria-hidden="true"><span>GO!</span></div>
-<!-- 9:16 FINAL K.O. SLOW-MO OVERLAY -->
-                        <div id="koSlowMoOverlay9" class="hidden relative z-30 my-auto mx-auto w-[90%] pointer-events-none text-center">
-                            <div class="px-3 py-2.5 rounded-2xl bg-black/85 border-2 border-rose-500 glow-pink animate-pulse-fast">
-                                <div id="koSlowMoTitle9" class="font-display font-black text-lg text-amber-300 uppercase">💥 ¡K.O. FINAL! 💥</div>
-                                <div id="koSlowMoSub9" class="text-[9px] font-bold text-white mt-0.5"></div>
-                            </div>
-                        </div>
+<!-- 9:16 FINAL KO -->
+                        <div id="koSlowMoOverlay9" class="arena-ko-overlay hidden" aria-hidden="true"><span id="koSlowMoTitle9">KO!</span></div>
+
 
                         <!-- 9:16 WINNER REBUILD: broadcast readable, independent of the lobby -->
                         <section id="victoryOverlay9" class="arena-victory-overlay arena-victory-portrait hidden" aria-label="Resultado de la partida">
@@ -1833,17 +1835,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.18 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.19 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
 
     <!-- ==================== COMPLETE GAME ENGINE, LOBBY & VICTORY SCRIPT ==================== -->
-    <script src="engine/arena-core.js?v=0.18"></script>
-    <script src="engine/arena-render.js?v=0.18"></script>
-    <script src="engine/arena-audio.js?v=0.18"></script>
-    <script src="engine/arena-settings.js?v=0.18"></script>
-    <script src="engine/arena-balance-evidence.js?v=0.18"></script>
+    <script src="engine/arena-core.js?v=0.19"></script>
+    <script src="engine/arena-render.js?v=0.19"></script>
+    <script src="engine/arena-audio.js?v=0.19"></script>
+    <script src="engine/arena-settings.js?v=0.19"></script>
+    <script src="engine/arena-balance-evidence.js?v=0.19"></script>
     <script>
         /*************************************************************************
          * ARENA LIVE · MONOLITHIC ENGINE INDEX
@@ -3746,11 +3748,11 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         // ==================== COMBAT / EDGE RECOVERY ====================
-        // Platform rescues are measured from the actual platform rim, not when a
-        // fighter first approaches it. 1.25 normal-jump horizontal ranges.
+        // Recover near the real rim instead of waiting until the fighter is
+        // too far over the abyss to make an aerial double jump meaningful.
         const SPECTATOR_RECOVERY = Object.freeze({
             normalJumpHorizontalRange: 1.95 * (2 * 9.4 / 0.36),
-            rescueDistanceMultiplier: 1.25,
+            rescueDistanceMultiplier: 0.72,
             minimumOutwardSpeed: 0.5,
             recoveryKnockbackFrames: 3,
             maximumLateHeight: 125
@@ -3759,9 +3761,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             * SPECTATOR_RECOVERY.rescueDistanceMultiplier;
 
         function isSpectatorLaunchRecoverable(fighter) {
-            // Launches and accidental falls share the same 1.25-jump threshold.
+            // Only an unspent aerial charge can rescue an AI fighter.
             return !!(fighter && !fighter.isStreamer && !fighter.eliminated
-                && !fighter.recoveryJumpUsed && (fighter.jumpsLeft > 0 || !fighter.extraRecoveryUsed));
+                && !fighter.recoveryJumpUsed && fighter.jumpsLeft > 0);
         }
 
         function getIsometricArenaPosition(fighter) {
@@ -3806,9 +3808,10 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         function tryIsometricSpectatorRecovery(fighter) {
             if (!isSpectatorLaunchRecoverable(fighter)) return false;
             const position = getIsometricArenaPosition(fighter);
-            if (!position.outside || fighter.vz > 0) return false;
-            // Attempt one rescue while descending; a strong launch can still travel too far.
-            if (fighter.z >= 0 && (position.outsideDistance < 8 || fighter.knockbackTimer > 6)) return false;
+            if (!position.outside) return false;
+            // If an upward launch is already far outside, rescue before the fall.
+            if (fighter.vz > 0 && position.outsideDistance < 32) return false;
+            if (fighter.z >= 0 && position.outsideDistance < 8 && fighter.knockbackTimer > 6) return false;
             return performIsometricJump(fighter, true);
         }
 
@@ -3849,21 +3852,19 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const exceededDistance = Math.max(distanceBeyondLeft, distanceBeyondRight) > SPECTATOR_RECOVERY_DISTANCE;
             if (!exceededDistance) return false;
             if (fighter.y > floorY + SPECTATOR_RECOVERY.maximumLateHeight) return false;
+            // Wait for the apex unless already well outside the stage.
+            if (fighter.vy < -1 && fighter.y + fighter.radius < floorY - 20
+                && Math.max(distanceBeyondLeft, distanceBeyondRight) < SPECTATOR_RECOVERY_DISTANCE * 1.5) return false;
             const escapingLeft = distanceBeyondLeft > 0;
             const escapingRight = distanceBeyondRight > 0;
             const outward = (escapingLeft && fighter.vx <= -SPECTATOR_RECOVERY.minimumOutwardSpeed)
                 || (escapingRight && fighter.vx >= SPECTATOR_RECOVERY.minimumOutwardSpeed);
             if (!outward && fighter.knockbackTimer <= 0 && fighter.vy < 0) return false;
 
-            // The launch has already used the grounded jump. Only the aerial
-            // double jump remains available; this cannot become a triple jump.
-            if (fighter.jumpsLeft <= 0) {
-                if (fighter.extraRecoveryUsed) return false;
-                fighter.jumpsLeft = 1;
-                fighter.extraRecoveryUsed = true;
-            } else {
-                fighter.jumpsLeft = Math.min(1, fighter.jumpsLeft);
-            }
+            // Falling off spends the ground jump, not the air charge.
+            // No extra jump is granted if the fighter already spent both.
+            if (fighter.jumpsLeft <= 0) return false;
+            fighter.jumpsLeft = Math.min(1, fighter.jumpsLeft);
             const recovered = performFighterJump(fighter, true, true);
             if (!recovered) return false;
             fighter.recoveryJumpUsed = true;
@@ -3885,7 +3886,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 // If recovering from off-stage abyss, steer strongly toward the center of the arena
                 if (targetCenterOverride || f.x < STAGE_LEFT + 15 || f.x > STAGE_RIGHT - 15) {
                     const dirToCenter = f.x < WORLD_W * 0.5 ? 1 : -1;
-                    f.vx = dirToCenter * 7.8;
+                    f.vx = dirToCenter * 9.7;
                     f.facing = dirToCenter;
                 } else {
                     f.vx = f.facing * 4.5;
@@ -5226,9 +5227,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             ['16', '9'].forEach(sfx => {
                 const koOverlay = document.getElementById(`koSlowMoOverlay${sfx}`);
                 const koTitle = document.getElementById(`koSlowMoTitle${sfx}`);
-                const koSub = document.getElementById(`koSlowMoSub${sfx}`);
-                if (koTitle) koTitle.textContent = titleText;
-                if (koSub) koSub.textContent = subtitleText;
+                if (koTitle) {
+                    koTitle.textContent = reason === 'timed' ? 'FIN!' : 'KO!';
+                    koTitle.style.animation = 'none';
+                    void koTitle.offsetWidth;
+                    koTitle.style.animation = '';
+                }
                 koOverlay.classList.remove('hidden');
             });
 
@@ -5439,7 +5443,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                         // Off-stage jumps use radial recovery rather than platform physics.
                     }
 
-                    const launchDrag = f.knockbackTimer > 0 ? 0.94 : 0.84;
+                    // More lateral momentum over the abyss, without extra physics loops.
+                    const launchDrag = f.knockbackTimer > 0 ? 0.955 : (f.fallDrop > 0 ? 0.91 : 0.84);
                     f.vx *= Math.pow(launchDrag, dt);
                     f.vy *= Math.pow(launchDrag, dt);
                     f.x += f.vx * dt;
@@ -5532,7 +5537,10 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                         f.y = f.radius + 2;
                         if (f.vy < 0) f.vy = 0;
                     }
-                    const launchDrag = f.knockbackTimer > 0 ? 0.96 : 0.91;
+                    // Airborne knockback drifts farther out; the double jump steers inward.
+                    const launchDrag = f.knockbackTimer > 0
+                        ? (isOffStage ? 0.975 : 0.96)
+                        : (isOffStage ? 0.945 : 0.91);
                     f.vx *= Math.pow(launchDrag, dt);
                     f.onGround = false;
 
@@ -6230,17 +6238,6 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 targetCtx.fillStyle = '#38bdf8';
                 targetCtx.fillRect(drawX - barW / 2, plateY + 19, barW * enPct, 2);
 
-                // Double Jump Wing Pips Indicator in Smash & 1v1 Modes
-                if (activeMode !== 'iso') {
-                    for (let j = 0; j < f.maxJumps; j++) {
-                        const pipX = drawX - 5 + j * 10;
-                        const pipY = plateY + 25;
-                        targetCtx.fillStyle = j < f.jumpsLeft ? '#00f3ff' : 'rgba(100, 116, 139, 0.35)';
-                        targetCtx.beginPath();
-                        targetCtx.arc(pipX, pipY, 2.4, 0, Math.PI * 2);
-                        targetCtx.fill();
-                    }
-                }
             }
 
             targetCtx.restore();
@@ -8040,7 +8037,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.18';
+        const ARENA_RELEASE_VERSION = '0.19';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:0, footer:76, format:'21'});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
@@ -8841,7 +8838,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.18.0',
+            version: '0.19.0',
             edition: 'tiktok',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,
             getBalanceRules() {

@@ -1,5 +1,13 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-27 — Arena Live v0.19 · KO y doble salto con recuperación lateral
+
+- KO! centrado y sin marco, como GO!, en horizontal y vertical. Los resultados por tiempo muestran FIN!; el podio conserva su pantalla.
+- IA de Smash/Duelo recupera antes del abismo y la isométrica rescata expulsiones lejanas incluso durante el ascenso.
+- Más inercia lateral en caídas y mejor impulso de retorno al usar doble salto. Sin salto aéreo gratuito tras gastar los dos.
+- Se eliminan los dos puntos celestes; pruebas de recuperación y KO, versión 0.19.0 sincronizada.
+
+
 ## 2026-10-27 — Arena Live v0.18 · Un solo panel de jugador
 
 - Retira Jugador objetivo y su acceso del navegador de herramientas. Jugador, poderes y comandos conserva el único selector, identidad, estado, clase y comandos, con la selección compartida por chat y apoyos.
