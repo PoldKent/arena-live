@@ -285,18 +285,17 @@ function arenaMobileResetButtons(){
 }
 function arenaMobileInstallLayoutSettings(){
     const sections=[...document.querySelectorAll('#settingsGeneralPanel>.arena-settings-section')];
-    const section=sections.at(-1);
+    const section=sections.find(section=>section.dataset.settingsCategory==='controls');
     const target=section?.querySelector('.arena-settings-content')||document.getElementById('settingsPanelsScroll');
     if(!target)return;
     const control=document.createElement('section');control.id='arenaMobileControlSettings';control.setAttribute('aria-label','Acomodar botones');
     control.innerHTML='<h3>📱 Controles táctiles</h3><p>Mueve los botones a posiciones cómodas. Guarda cada cambio para próximas partidas.</p><button type="button" id="arenaMobileArrange">✥ Acomodar botones</button><label for="arenaMobileSize">Tamaño de botones <output id="arenaMobileSizeValue">70 px</output></label><input id="arenaMobileSize" type="range" min="56" max="94" step="2" value="70"><button type="button" id="arenaMobileReset">↺ Restablecer posiciones</button><small>Salto: 1 toque. Doble salto: 2 toques rápidos en ↑. Tocar la arena nunca salta.</small>';
     target.appendChild(control);
-    // Rehome the existing opacity control rather than duplicating a second setting.
-    const originalOpacity=document.getElementById('hudOpacityRange')?.closest('label');
-    if(originalOpacity){
-        originalOpacity.querySelector('span')?.replaceChildren(document.createTextNode('Transparencia de menús y botones'));
-        control.appendChild(originalOpacity);
-    }
+    // HUD transparency has one canonical control in Pantalla y HUD, shared
+    // with desktop. Do not create or move a second opacity slider here.
+    const note=document.createElement('small');
+    note.textContent='La transparencia de menús y HUD está en Pantalla y HUD.';
+    control.appendChild(note);
     control.querySelector('#arenaMobileArrange').onclick=()=>arenaMobileEditButtons(true);
     control.querySelector('#arenaMobileSize').oninput=e=>arenaMobileSetButtonSize(e.target.value);
     control.querySelector('#arenaMobileReset').onclick=arenaMobileResetButtons;
