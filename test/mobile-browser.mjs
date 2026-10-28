@@ -341,6 +341,41 @@ try{
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),false);
         await page.evaluate(()=>ArenaPortable.setMode('player'));
     });
+    await check('native fullscreen keeps Streamer tests, menu and controls visible and the 9:16 centered',async()=>{
+        await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(false);});
+        if(!await page.evaluate(()=>document.fullscreenEnabled)){
+            console.log('SKIP native fullscreen: browser does not support fullscreen for file://');
+            return;
+        }
+        await page.locator('#arenaPortableFullscreen').tap();
+        await page.waitForFunction(()=>document.fullscreenElement?.id==='card-9x16');
+        assert.equal(await page.locator('#arenaMobileFloating').isVisible(),true);
+        assert.equal(await page.locator('#arenaStreamerSkillsDock').isVisible(),true);
+        await page.locator('#arenaMobileTestsShortcut').tap();
+        const state=await page.evaluate(()=>{
+            const card=document.fullscreenElement;
+            const drawer=document.getElementById('arenaPortableTestDrawer');
+            const rect=drawer.getBoundingClientRect(),video=document.getElementById('viewport9x16').getBoundingClientRect();
+            return {inFullscreen:drawer.parentElement===card,
+                options:!!drawer.querySelector('#arenaPanelPowers')&&!!drawer.querySelector('#arenaPortableTestSelect'),
+                onScreen:rect.width>100&&rect.height>80&&rect.top>=0&&rect.bottom<=innerHeight+1,
+                videoCentered:Math.abs(video.left-(innerWidth-video.width)/2)<6,
+                videoClear:video.bottom<=rect.top+1,videoRatio:video.width/video.height};
+        });
+        assert.equal(state.inFullscreen,true);assert.equal(state.options,true);
+        assert.equal(state.onScreen,true,JSON.stringify(state));
+        assert.equal(state.videoCentered,true,JSON.stringify(state));
+        assert.equal(state.videoClear,true,JSON.stringify(state));
+        assert.ok(Math.abs(state.videoRatio-9/16)<.02,JSON.stringify(state));
+        if(output)await page.screenshot({path:join(output,'mobile-fullscreen-tests.png')});
+        await page.locator('#arenaPortableTestClose').tap();
+        await page.locator('#arenaMobileMoreBtn').tap();
+        assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),true);
+        await page.locator('#arenaMobileMoreBtn').tap();
+        await page.locator('#arenaPortableFullscreen').tap();
+        await page.waitForFunction(()=>!document.fullscreenElement);
+        assert.equal(await page.locator('#arenaPortableTestDrawer').evaluate(n=>n.parentElement===document.body),true);
+    });
     await check('phone rotation keeps floating buttons and tests within the active capture',async()=>{
         await page.setViewportSize({width:844,height:390});
         await page.evaluate(()=>{setMonitorFocus('16:9');ArenaPortable.start({count:9,join:true});renderBothScreensSimultaneously();});

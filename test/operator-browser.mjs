@@ -1319,5 +1319,37 @@ await check('Real TikTok follower gift subscriber support routes to the real sen
  assert.equal(r.untouched,true);assert.match(r.count,/Seguir: 1/);assert.match(r.count,/Regalos: 1/);
  assert.match(r.count,/Suscripciones: 1/);assert.match(r.count,/boosts: 3/);
 });
+await check('single-monitor fullscreen keeps original PC panels accessible and restores them afterward',async()=>{
+  if(!await page.evaluate(()=>document.fullscreenEnabled)){
+    console.log('SKIP native fullscreen: Chromium disallowed fullscreen in headless test');
+    return;
+  }
+  await page.evaluate(()=>{if(document.fullscreenElement)document.exitFullscreen();applyArenaWorkspaceLayout('preparation');});
+  await page.locator('#arenaFullscreenMenuBtn').click();
+  await page.locator('#btnFullscreen9').click();
+  await page.waitForFunction(()=>document.fullscreenElement?.id==='card-9x16');
+  assert.equal(await page.locator('#arenaSingleFullscreenTools').isVisible(),true);
+  await page.locator('#arenaSingleFullscreenTools [data-single-action="tests"]').click();
+  assert.equal(await page.locator('#arenaSingleFullscreenDrawer').isVisible(),true);
+  assert.equal(await page.locator('#arenaSingleFullscreenDrawer #arenaPanelPowers').count(),1);
+  assert.equal(await page.locator('#targetFighterSelect').count(),1);
+  await page.locator('#arenaSingleFullscreenDrawer select').selectOption('arenaPanelPlayers');
+  assert.equal(await page.locator('#arenaSingleFullscreenDrawer #arenaPanelPlayers').count(),1);
+  assert.equal(await page.locator('#arenaPanelPowers').count(),1);
+  await page.locator('#arenaSingleFullscreenTools [data-single-action="chat"]').click();
+  assert.equal(await page.locator('#arenaSingleFullscreenDrawer #arenaPanelChat').count(),1);
+  await page.locator('#arenaSingleFullscreenDrawer .arena-single-fs-head button').click();
+  assert.equal(await page.locator('#arenaSingleFullscreenDrawer').isVisible(),false);
+  await page.locator('#arenaSingleFullscreenTools [data-single-action="settings"]').click();
+  assert.equal(await page.locator('#settingsPauseModal').isVisible(),true);
+  assert.equal(await page.locator('#settingsPauseModal').evaluate(n=>n.parentElement===document.fullscreenElement),true);
+  await page.evaluate(()=>toggleSettingsModal(false));
+  await page.locator('#arenaSingleFullscreenTools [data-single-action="exit"]').click();
+  await page.waitForFunction(()=>!document.fullscreenElement);
+  assert.equal(await page.locator('#arenaSingleFullscreenTools').count(),0);
+  assert.equal(await page.locator('#arenaSingleFullscreenDrawer').count(),0);
+  assert.equal(await page.locator('#arenaPanelPowers').count(),1);
+  assert.equal(await page.locator('#arenaPanelChat').count(),1);
+});
 assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:release}));
 } finally {await browser?.close();server.kill('SIGKILL');}

@@ -54,6 +54,16 @@ npm.cmd run verify:release
 
 Esto ejecuta pruebas Node, reconstruye el móvil con la fuente oficial, comprueba navegador escritorio/móvil y prueba rendimiento. El HTML oficial se genera como `dist/Arena-Live-v0.40.0-movil.html`; también se incluye una copia versionada en `mobile-builds/Arena-Live-v0.40.0-movil.html`.
 
+
+## Corrección posterior: fullscreen y disposición clásica v0.36–v0.37
+
+- El 9:16 de la edición móvil vuelve a centrarse verticalmente, siguiendo la distribución de v0.36–v0.37. La cápsula superior permanece fuera del vídeo, y se reserva espacio inferior para Joystick/habilidades y el panel compacto de Pruebas.
+- En pantalla completa móvil, Pruebas, Menú y Ajustes se alojan dentro del elemento fullscreen porque el navegador oculta los elementos hermanos. El vídeo nunca se estira a una proporción diferente de 9:16.
+- En pantalla completa **del juego completo de PC**, el modo de una cámara ofrece accesos a 🧪 Pruebas, 💬 Chat, ⚙ Ajustes y ⤡ Salir. El panel elegido usa el **mismo elemento de DOM original** y sus eventos; al salir vuelve a su posición anterior. No se duplica el motor, el chat, los comandos ni la selección de jugador.
+- En pantallas estrechas, el cajón de PC se desplaza a la parte inferior y reduce el espacio visible del vídeo, en lugar de ocultarse tras la vista fullscreen.
+- Se añadieron pruebas Playwright para verificar visibilidad real del cajón tanto en móvil como en escritorio, y retorno de nodos al cerrar.
+- Esta es una corrección de interfaz de v0.40, no una modificación de las reglas ni de las capturas OBS.
+
 ## Qué está comprobado y qué falta
 
 Se comprobó que el HTML oficial es autocontenido, que sus scripts integrados no presentan errores de sintaxis y que su manifest apunta a los archivos fuente integrados. **Esto no confirma la interacción en Windows, Android o TikTok LIVE**. Las ejecuciones previas de GitHub Actions terminaron con fallo antes de ejecutar los pasos de prueba; son necesarias pruebas reales de Playwright y una sesión LIVE antes de considerar todas las funciones verificadas.

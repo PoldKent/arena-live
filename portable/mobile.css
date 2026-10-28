@@ -955,10 +955,18 @@ html.arena-mobile-offline #arenaOperatorPopover{
 html.arena-mobile-offline body>main#arenaWorkspace{
   padding:2px 4px max(6px,env(safe-area-inset-bottom))!important;gap:2px!important;
 }
+/* Restore the v0.36/v0.37 centered 9:16 presentation.
+   Top icons and bottom controls remain outside the broadcast capture. */
 html.arena-mobile-offline #card-9x16{
   display:flex!important;flex-direction:column!important;align-items:center!important;
-  justify-content:flex-start!important;width:100%!important;min-width:0!important;gap:5px!important;
-  overflow:visible!important;
+  justify-content:center!important;width:100%!important;min-width:0!important;gap:5px!important;
+  margin-block:auto!important;overflow:visible!important;
+}
+html.arena-mobile-offline #card-9x16:not(:fullscreen){
+  box-sizing:border-box!important;min-height:max(0px,calc(100dvh - 76px))!important;
+}
+html.arena-mobile-offline #card-9x16.arena-tests-visible:not(:fullscreen){
+  padding-bottom:min(42dvh,270px)!important;
 }
 html.arena-mobile-offline #card-9x16 #viewport9x16{
   flex:0 0 auto!important;position:relative!important;box-sizing:border-box!important;
@@ -1154,7 +1162,7 @@ html.arena-mobile-offline #arenaMobileControlShelf #arenaPortableTestDrawer.is-c
 html.arena-mobile-offline #card-9x16:fullscreen,
 html.arena-mobile-offline #card-16x9:fullscreen{
   display:flex!important;flex-direction:column!important;align-items:center!important;
-  justify-content:flex-start!important;gap:5px!important;
+  justify-content:center!important;gap:5px!important;
   width:100vw!important;height:100dvh!important;box-sizing:border-box!important;
   overflow:hidden!important;
   /* Fullscreen has no site header: reserve a top band for the v0.37 icon capsule. */
@@ -1164,6 +1172,9 @@ html.arena-mobile-offline #card-16x9:fullscreen{
 }
 html.arena-mobile-offline #card-9x16:fullscreen >div:first-child,
 html.arena-mobile-offline #card-16x9:fullscreen >div:first-child{display:none!important}
+html.arena-mobile-offline #card-9x16:fullscreen.arena-tests-visible{
+  padding-bottom:calc(min(42dvh,270px) + env(safe-area-inset-bottom))!important;
+}
 html.arena-mobile-offline #card-9x16:fullscreen #arenaMobileFloating,
 html.arena-mobile-offline #card-16x9:fullscreen #arenaMobileFloating{
   position:absolute!important;top:calc(8px + env(safe-area-inset-top))!important;
