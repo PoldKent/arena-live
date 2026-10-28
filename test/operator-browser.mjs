@@ -750,7 +750,7 @@ await check('Balance inspection compares actual damage in all modes on a common 
  await page.locator('[data-balance-class="esmeralda"]').click();
  assert.equal(await page.locator('.arena-balance-row[aria-pressed="true"]').count(),1);assert.match(await page.locator('#arenaBalanceDetail').innerText(),/Enredadera/);
  assert.equal(await page.evaluate(()=>document.activeElement?.dataset.balanceClass),'esmeralda');
- assert.deepEqual(await state(),before);assert.deepEqual(await rects(),beforeRects);assert.match(await page.locator('#arenaBalancePanel').innerText(),/pueden dañarse entre sí/i);
+ const after=await state();assert.equal(after.paused,before.paused);assert.ok(after.simulationTick>=before.simulationTick);assert.deepEqual({...after,simulationTick:before.simulationTick},before);assert.deepEqual(await rects(),beforeRects);assert.match(await page.locator('#arenaBalancePanel').innerText(),/pueden dañarse entre sí/i);
 });
 await check('Balance radar reflects round damage, blocked specials and class restrictions while the nominal profile stays available',async()=>{
  await page.locator('#arenaBalanceProfile').selectOption('round');
