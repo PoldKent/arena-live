@@ -4803,6 +4803,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             // Clear special-charge burst with class-colored particles. Both canvases render it.
             const specialColors = { kame:'#00e5ff', ninja:'#a855f7', trueno:'#facc15', titan:'#fb7185', esmeralda:'#4ade80' };
             const burstColor = specialColors[fighter.archetypeKey] || fighter.color;
+            reserveParticleSlots(22);
             for (let i = 0; i < 22; i++) {
                 const angle = Math.PI * 2 * i / 22;
                 spawnParticle(fighter.x + Math.cos(angle) * 12, fighter.y + Math.sin(angle) * 12,
@@ -4897,11 +4898,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 });
                 let previous=fighter;
                 for(const target of targets){
+                    reserveParticleSlots(12);
                     for(let step=1;step<=12;step++){const t=step/12;spawnParticle(previous.x+(target.x-previous.x)*t,previous.y+(target.y-previous.y)*t,'#4ade80',3.2+arenaVisualRandom()*1.4,22,.05);}
                     addActiveEffect({type:'thornVine',x:target.x,y:target.y,color:'#4ade80',timer:28,maxTimer:28});
                     applyDamage(target,getFighterSpecialRule(fighter).damage,fighter,true,'special');previous=target;
                 }
-                if(!targets.length)for(let step=1;step<=8;step++)spawnParticle(fighter.x+dir*step*22,fighter.y-6,'#4ade80',2.8,18,.05);
+                if(!targets.length){reserveParticleSlots(8);for(let step=1;step<=8;step++)spawnParticle(fighter.x+dir*step*22,fighter.y-6,'#4ade80',2.8,18,.05);}
                 spawnFloatingText(fighter.x, fighter.y - 44, `🌿 ${arenaPowerName('!enred')}`, '#4ade80', 20, 'power');
 
             } else if (cmd === '!coloso' || cmd === '!golpecolosal') {
@@ -4917,6 +4919,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                         applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 'special');
                     }
                 });
+                reserveParticleSlots(22);
                 for (let i = 0; i < 22; i++) spawnParticle(fighter.x + (arenaVisualRandom() - 0.5) * 150, fighter.y + fighter.radius, '#fb7185', 4.5, 24, 0.15);
                 spawnFloatingText(fighter.x, fighter.y - 45, `💥 ${arenaPowerName('!coloso')}`, '#fb7185', 21, 'power');
 
@@ -6226,6 +6229,13 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             });
         }
 
+        function reserveParticleSlots(count) {
+            // Reserving a whole special burst before its synchronous loop
+            // gives the exact same last MAX_PARTICLES and draw order as
+            // shifting the oldest entry once per particle, with one splice.
+            const excess = particles.length + count - MAX_PARTICLES;
+            if (excess > 0) particles.splice(0, excess);
+        }
         function spawnParticle(x, y, color, speed = 4, life = 25, gravity = 0.1) {
             const angle = arenaVisualRandom() * Math.PI * 2;
             const spd = arenaVisualRandom() * speed + 1;
