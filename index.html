@@ -1830,16 +1830,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     <select id="languageSelect" onchange="setLanguage(this.value)" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-xs font-semibold text-slate-200" title="Idioma" data-no-translate>
                         <option value="es">🇪🇸 Español</option><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="de">🇩🇪 Deutsch</option><option value="zh">🇨🇳 中文</option><option value="ja">🇯🇵 日本語</option><option value="pt">🇧🇷 Português</option><option value="it">🇮🇹 Italiano</option>
                     </select>
-                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80">
+                    <div class="flex flex-col gap-2 pt-2 border-t border-slate-800/80">
                         <button id="btnAudioToggle" onclick="toggleSound()" class="px-3 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 flex items-center justify-center gap-2 text-xs font-bold text-cyan-300 transition-all">
                             <i id="audioIcon" class="fa-solid fa-volume-high"></i>
                             <span id="audioStatusLabel">Sonido: ON</span>
                         </button>
 
-                        <button onclick="toggleChatSidebar()" class="px-3 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 flex items-center justify-center gap-2 text-xs font-bold text-slate-200 transition-all">
-                            <i class="fa-solid fa-comments text-cyan-400"></i>
-                            <span>💬 Chat</span>
-                        </button>
                     </div>
                 </div>
 
@@ -9060,6 +9056,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             }
             const help=document.getElementById('arenaSpecialPolicyHelp');
             if(combatBody&&help)combatBody.appendChild(help);
+            const audienceBody=sections[4]?.querySelector('.arena-settings-content');
+            const pauseOption=document.getElementById('arenaRuntime_pausePolicy');
+            if(audienceBody&&pauseOption)audienceBody.appendChild(pauseOption.closest('label'));
+            const audioBody=sections[3]?.querySelector('.arena-settings-content');
+            const volume=document.getElementById('arenaRuntime_masterVolume');
+            if(audioBody&&volume)audioBody.appendChild(volume.closest('label'));
             let stored='match';try{stored=localStorage.getItem(ARENA_SETTINGS_NAV_KEY)||'match';}catch(_){}
             const tabs=document.querySelectorAll('[data-settings-tab]');
             tabs.forEach((button,index)=>{
