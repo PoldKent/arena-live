@@ -1,6 +1,11 @@
 // Touch-first controls and a movable test panel for the standalone phone edition.
 // Desktop/OBS retains its own controls; this adapter never changes combat rules.
-const ARENA_MOBILE_TAP_GAP=310;
+const ARENA_MOBILE_TAP_GAP=325;
+const ARENA_MOBILE_LAYOUT_KEY='arenaLiveMobileButtonsV1';
+const arenaMobileLayoutDefaults=Object.freeze({arenaMobileJump:[73,82],arenaMobileAttack:[88,73],arenaMobilePower:[56,77],arenaMobileMoreBtn:[91,93]});
+let arenaMobileLayout={size:70,points:Object.fromEntries(Object.entries(arenaMobileLayoutDefaults).map(([k,v])=>[k,[...v]]))};
+let arenaMobileEditing=false;
+try{const saved=JSON.parse(localStorage.getItem(ARENA_MOBILE_LAYOUT_KEY)||'null');if(saved&&Number.isFinite(saved.size))arenaMobileLayout.size=Math.max(56,Math.min(94,saved.size));for(const [id,p]of Object.entries(saved?.points||{})){if(Object.hasOwn(arenaMobileLayoutDefaults,id)&&Array.isArray(p)&&p.length===2&&p.every(Number.isFinite))arenaMobileLayout.points[id]=[Math.max(7,Math.min(93,p[0])),Math.max(8,Math.min(95,p[1]))];}}catch(_){}
 const ARENA_MOBILE_HOLD_MS=460;
 const ARENA_MOBILE_SWIPE_PX=34;
 const arenaMobileTouchState={pointerId:null,startX:0,startY:0,x:0,y:0,startedAt:0,moved:false,special:false,hold:null,tapCount:0,lastTapAt:0,lastTapX:0,lastTapY:0,jumpRetry:null};
@@ -66,13 +71,13 @@ function arenaMobileSecondJump(){
     };
     attempt();
 }
-function arenaMobileTap(x,y){
+function arenaMobileJumpTap(x=0,y=0){
     const st=arenaMobileTouchState,now=performance.now();
     if(now-st.lastTapAt<=ARENA_MOBILE_TAP_GAP&&Math.hypot(x-st.lastTapX,y-st.lastTapY)<65)st.tapCount++;
     else st.tapCount=1;
     st.lastTapAt=now;st.lastTapX=x;st.lastTapY=y;
-    if(st.tapCount===2){triggerManualJump();if(navigator.vibrate)navigator.vibrate(8);}
-    if(st.tapCount>=3){st.tapCount=0;arenaMobileSecondJump();if(navigator.vibrate)navigator.vibrate([12,35,12]);}
+    if(st.tapCount===1){triggerManualJump();if(navigator.vibrate)navigator.vibrate(8);}
+    else {st.tapCount=0;arenaMobileSecondJump();if(navigator.vibrate)navigator.vibrate([12,35,12]);}
 }
 function arenaMobileTouchPoint(view,x,y){
     const dot=view.querySelector('.arena-mobile-contact');
@@ -122,8 +127,9 @@ function arenaMobileTouchEnd(event){
         if(fighter){if(Math.abs(dx)>6)fighter.facing=dx>0?1:-1;performMeleeAttack(fighter);}
         st.tapCount=0;return;
     }
-    if(Math.hypot(dx,dy)<18&&duration<ARENA_MOBILE_HOLD_MS)arenaMobileTap(st.x,st.y);
-    else st.tapCount=0;
+    // A short tap on the ARENA never jumps: it only moves while the finger is down.
+    // Jump is exclusively a tap on the large, movable jump button.
+    st.tapCount=0;
 }
 function arenaMobileTouchCancel(event){
     if(arenaMobileTouchState.pointerId!==event.pointerId)return;
@@ -224,6 +230,98 @@ function arenaMobileInstallTestDrawer(){
     const previousFocus=setMonitorFocus;
     setMonitorFocus=function(focus){previousFocus(focus);arenaMobileMountTestDrawer();};
 }
+function arenaMobileSaveLayout(){try{localStorage.setItem(ARENA_MOBILE_LAYOUT_KEY,JSON.stringify(arenaMobileLayout));}catch(_){}}
+function arenaMobileApplyLayout(){
+    const view=document.getElementById(document.fullscreenElement?.id==='card-16x9'||(!document.fullscreenElement&&monitorFocus==='16:9')?'viewport16x9':'viewport9x16');
+    const bar=document.getElementById('arenaHeaderActions');if(!view||!bar)return;
+    if(bar.parentElement!==view)view.appendChild(bar);
+    const size=Math.max(56,Math.min(94,arenaMobileLayout.size));
+    document.documentElement.style.setProperty('--arena-mobile-button-size',size+'px');
+    for(const [id,position]of Object.entries(arenaMobileLayout.points)){
+        const btn=document.getElementById(id);if(!btn)continue;
+        btn.style.setProperty('--mobile-x',position[0]+'%');btn.style.setProperty('--mobile-y',position[1]+'%');
+        btn.setAttribute('data-mobile-positioned','true');
+        btn.setAttribute('aria-description',arenaMobileEditing?'Desliza para colocar el botón':'Posición ajustable desde Ajustes');
+    }
+    document.documentElement.classList.toggle('arena-mobile-edit-controls',arenaMobileEditing);
+    const edit=document.getElementById('arenaMobileEditDone');if(edit)edit.hidden=!arenaMobileEditing;
+    const slider=document.getElementById('arenaMobileSize');if(slider)slider.value=String(size);
+    const text=document.getElementById('arenaMobileSizeValue');if(text)text.textContent=size+' px';
+}
+function arenaMobileEditButtons(on=true){
+    arenaMobileEditing=!!on;
+    if(arenaMobileEditing){
+        if(isSettingsOpen)toggleSettingsModal(false);
+        closeArenaOperatorPopover(false);
+        arenaMobileShowTestDrawer(false);
+        document.dispatchEvent(new Event('arena-touch-disable'));
+    }else arenaMobileSaveLayout();
+    arenaMobileApplyLayout();
+}
+function arenaMobileSetButtonSize(size){
+    arenaMobileLayout.size=Math.max(56,Math.min(94,Number(size)||70));
+    arenaMobileApplyLayout();arenaMobileSaveLayout();
+}
+function arenaMobileResetButtons(){
+    arenaMobileLayout={size:70,points:Object.fromEntries(Object.entries(arenaMobileLayoutDefaults).map(([k,v])=>[k,[...v]]))};
+    arenaMobileSaveLayout();arenaMobileApplyLayout();
+}
+function arenaMobileInstallLayoutSettings(){
+    const sections=[...document.querySelectorAll('#settingsGeneralPanel>.arena-settings-section')];
+    const section=sections.at(-1);
+    const target=section?.querySelector('.arena-settings-content')||document.getElementById('settingsPanelsScroll');
+    if(!target)return;
+    const control=document.createElement('section');control.id='arenaMobileControlSettings';control.setAttribute('aria-label','Acomodar botones');
+    control.innerHTML='<h3>📱 Controles táctiles</h3><p>Mueve los botones a posiciones cómodas. Guarda cada cambio para próximas partidas.</p><button type="button" id="arenaMobileArrange">✥ Acomodar botones</button><label for="arenaMobileSize">Tamaño de botones <output id="arenaMobileSizeValue">70 px</output></label><input id="arenaMobileSize" type="range" min="56" max="94" step="2" value="70"><button type="button" id="arenaMobileReset">↺ Restablecer posiciones</button><small>Salto: 1 toque. Doble salto: 2 toques rápidos en ↑. Tocar la arena nunca salta.</small>';
+    target.appendChild(control);
+    control.querySelector('#arenaMobileArrange').onclick=()=>arenaMobileEditButtons(true);
+    control.querySelector('#arenaMobileSize').oninput=e=>arenaMobileSetButtonSize(e.target.value);
+    control.querySelector('#arenaMobileReset').onclick=arenaMobileResetButtons;
+}
+function arenaMobileInstallControlDragging(){
+    for(const id of Object.keys(arenaMobileLayoutDefaults)){
+        const btn=document.getElementById(id);if(!btn)continue;
+        let drag=null;
+        btn.addEventListener('pointerdown',event=>{
+            if(!arenaMobileEditing)return;
+            event.preventDefault();event.stopImmediatePropagation();
+            drag=event.pointerId;
+            try{btn.setPointerCapture(event.pointerId);}catch(_){}
+        },true);
+        btn.addEventListener('pointermove',event=>{
+            if(!arenaMobileEditing||drag!==event.pointerId)return;
+            event.preventDefault();event.stopImmediatePropagation();
+            const view=btn.closest('#viewport9x16,#viewport16x9');
+            if(!view)return;
+            const rect=view.getBoundingClientRect();
+            const radius=arenaMobileLayout.size/2+3;
+            const x=Math.max(radius,Math.min(rect.width-radius,event.clientX-rect.left));
+            const y=Math.max(radius,Math.min(rect.height-radius,event.clientY-rect.top));
+            arenaMobileLayout.points[id]=[Math.round(x/rect.width*1000)/10,Math.round(y/rect.height*1000)/10];
+            arenaMobileApplyLayout();
+        },true);
+        const release=event=>{if(drag!==event.pointerId)return;event.preventDefault();event.stopImmediatePropagation();drag=null;arenaMobileSaveLayout();};
+        btn.addEventListener('pointerup',release,true);btn.addEventListener('pointercancel',release,true);
+        btn.addEventListener('click',event=>{if(arenaMobileEditing){event.preventDefault();event.stopImmediatePropagation();}},true);
+    }
+    const jump=document.getElementById('arenaMobileJump');
+    if(jump){
+        jump.onclick=null;
+        jump.addEventListener('click',event=>{
+            if(arenaMobileEditing||!arenaMobileCanControl())return;
+            arenaMobileJumpTap();
+        });
+    }
+    const done=document.createElement('button');done.id='arenaMobileEditDone';done.type='button';
+    done.textContent='✓ Guardar posiciones';done.hidden=true;
+    done.onclick=()=>arenaMobileEditButtons(false);
+    document.getElementById('arenaMobileFloating')?.appendChild(done);
+    arenaMobileInstallLayoutSettings();
+    window.addEventListener('resize',()=>requestAnimationFrame(arenaMobileApplyLayout));
+    document.addEventListener('fullscreenchange',()=>requestAnimationFrame(arenaMobileApplyLayout));
+    arenaMobileApplyLayout();
+}
+
 function installArenaMobileTouch(){
     for(const id of ['viewport16x9','viewport9x16']){
         const view=document.getElementById(id);
@@ -246,6 +344,7 @@ function installArenaMobileTouch(){
         node.setAttribute('aria-label',node.title);
     }
     arenaMobileInstallTestDrawer();
+    arenaMobileInstallControlDragging();
     const stop=()=>{arenaMobileResetTouch();arenaMobileClearRetry();};
     document.addEventListener('arena-touch-disable',stop);
     document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
@@ -253,6 +352,7 @@ function installArenaMobileTouch(){
 }
 window.addEventListener('load',installArenaMobileTouch,{once:true});
 window.ArenaMobileTouch=Object.freeze({
-    openTests:arenaMobileShowTestDrawer,selectTest:arenaMobileSelectTestPanel,
+    openTests:arenaMobileShowTestDrawer,selectTest:arenaMobileSelectTestPanel,editButtons:arenaMobileEditButtons,setButtonSize:arenaMobileSetButtonSize,resetButtons:arenaMobileResetButtons,
+    getLayout(){return JSON.parse(JSON.stringify(arenaMobileLayout));},
     getState(){return {gestureActive:arenaMobileTouchState.pointerId!==null,tapCount:arenaMobileTouchState.tapCount,testOpen:arenaMobileTestState.open,testPanel:arenaMobileTestState.active};}
 });
