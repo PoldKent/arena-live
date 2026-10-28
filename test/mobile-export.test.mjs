@@ -28,6 +28,16 @@ test('portable export is self-contained, deterministic and includes the exact cu
         assert.match(html,/id="arenaPortableGuideMenu"/);
         assert.match(html,/arena-mobile-show-guide/);
         assert.match(html,/ARENA_MOBILE_MODES/);
+        const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));
+        const embedded=html.match(/<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object\.freeze\((\{[^;]+\})\);<\/script>/)?.[1];
+        assert.ok(embedded,'mobile build manifest exists');
+        const manifest=JSON.parse(embedded);
+        assert.equal(manifest.version,pkg.version);
+        assert.ok(manifest.sourceBlobs?.['index.html']);
+        assert.ok(manifest.sourceBlobs?.['portable/mobile-touch.js']);
+        assert.match(html,/dock\.id='arenaStreamerSkillsDock'/);
+        assert.match(html,/Opciones del Modo Streamer/);
+
         assert.match(html,/Modo Streamer/);
         assert.doesNotMatch(html,/Modo Director \(Streamer\)/);
         assert.match(html,/Modo jugador/);

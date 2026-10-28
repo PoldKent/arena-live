@@ -19,7 +19,12 @@ export async function buildMobile(output) {
     const {version}=JSON.parse(await readFile(resolve(root,'package.json'),'utf8'));
     // Content fingerprints identify the exact input without requiring a git executable.
     const inputs=Object.fromEntries([...files].map(([path,source])=>[path,createHash('sha256').update(source).digest('hex')]));
-    const build={version,edition:'mobile-offline',inputs};
+    // Match Git blob IDs used by published offline releases. This keeps the
+    // embedded asset manifest reproducible from source, with no git executable.
+    const sourceBlobs=Object.fromEntries([...files].map(([path,source])=>[
+        path,createHash('sha1').update('blob '+Buffer.byteLength(source)+'\0').update(source).digest('hex')
+    ]));
+    const build={version,edition:'mobile-offline',sourceBlobs};
     let html=files.get('index.html');
     html=replaceOnce(html,'width=device-width, initial-scale=1.0','width=device-width, initial-scale=1.0, viewport-fit=cover');
     html=replaceOnce(html,/<title>[^<]+<\/title>/.exec(html)[0],`<title>Arena Live v${version} · Móvil</title>`);

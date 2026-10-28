@@ -187,8 +187,8 @@ function arenaMobileShowTestDrawer(open=true){
 function arenaMobileInstallTestDrawer(){
     const drawer=document.createElement('aside');
     drawer.id='arenaPortableTestDrawer';drawer.hidden=true;
-    drawer.setAttribute('aria-label','Panel del streamer');
-    drawer.innerHTML='<div id="arenaPortableTestHead"><span>🧪 Panel del streamer</span><button type="button" id="arenaPortableTestCollapse" aria-label="Minimizar panel">−</button><button type="button" id="arenaPortableTestClose" aria-label="Cerrar pruebas">×</button></div><label class="arena-portable-test-picker">Panel<select id="arenaPortableTestSelect"><option value="arenaPanelPowers">Jugador y comandos</option><option value="arenaPanelPlayers">Participantes y K.O.</option><option value="arenaPanelScenarios">Escenarios</option><option value="arenaPanelSocial">Interacciones</option><option value="arenaPanelSimulation">Simulación</option></select></label><div id="arenaPortableTestBody"></div>';
+    drawer.setAttribute('aria-label','Opciones del Modo Streamer');
+    drawer.innerHTML='<div id="arenaPortableTestHead"><span>🎛 Modo Streamer</span><button type="button" id="arenaPortableTestCollapse" aria-label="Minimizar panel">−</button><button type="button" id="arenaPortableTestClose" aria-label="Cerrar pruebas">×</button></div><label class="arena-portable-test-picker">Herramienta<select id="arenaPortableTestSelect"><option value="arenaPanelPowers">Jugador y comandos</option><option value="arenaPanelPlayers">Participantes y K.O.</option><option value="arenaPanelScenarios">Escenarios</option><option value="arenaPanelSocial">Interacciones</option><option value="arenaPanelSimulation">Simulación</option></select></label><div id="arenaPortableTestBody"></div>';
     document.body.appendChild(drawer);
     drawer.querySelector('#arenaPortableTestSelect').addEventListener('change',event=>arenaMobileSelectTestPanel(event.target.value));
     drawer.querySelector('#arenaPortableTestClose').onclick=()=>arenaMobileShowTestDrawer(false);
@@ -220,13 +220,13 @@ function arenaMobileInstallTestDrawer(){
     head.addEventListener('pointerup',end);head.addEventListener('pointercancel',end);
     arenaMobileMountTestDrawer();
     const fab=document.createElement('button');fab.id='arenaMobileTestFab';fab.type='button';
-    fab.textContent='⚙ Panel del streamer';fab.title='Panel del streamer';fab.setAttribute('aria-label','Abrir panel del streamer');fab.setAttribute('aria-expanded','false');fab.hidden=true;
+    fab.textContent='🎛 Modo Streamer';fab.title='Opciones del Modo Streamer';fab.setAttribute('aria-label','Abrir opciones del Modo Streamer');fab.setAttribute('aria-expanded','false');fab.hidden=true;
     fab.onclick=()=>arenaMobileShowTestDrawer(!arenaMobileTestState.open);
     // Keep the existing control ID for compatibility; access is through the main Menu.
     document.getElementById('arenaOperatorPopover')?.appendChild(fab);
     const menu=document.querySelector('#arenaOperatorPopover [data-operator-panel="mobile"] [data-forward-control="arenaDualTestsToggle"]');
     if(menu){
-        menu.textContent='⚙ Panel del streamer';
+        menu.textContent='🎛 Opciones del Modo Streamer';
         menu.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();arenaMobileShowTestDrawer(true);},true);
     }
     document.addEventListener('fullscreenchange',arenaMobileMountTestDrawer);

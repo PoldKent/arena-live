@@ -666,7 +666,7 @@ html.arena-mobile-offline #arenaPortableSetup select{
  background-color:rgba(19,50,72,var(--arena-hud-opacity,.85))!important;
 }
 
-/* v0.38: Director controls stay within one compact scrollable panel. */
+/* v0.39: Director controls stay within one compact scrollable panel. */
 html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
  position:absolute!important;top:clamp(78px,10%,110px);right:9px;left:auto;
  width:min(92%,390px)!important;height:auto!important;max-height:min(59%,550px)!important;
@@ -745,7 +745,7 @@ html.arena-mobile-offline #arenaFighterDisplayOptions .arena-hud-display-item:ha
  }
 }
 
-/* v0.38 · Mobile-first navigation, bounded settings and unobstructed Streamer view. */
+/* v0.39 · Mobile-first navigation, bounded settings and unobstructed Streamer view. */
 html.arena-mobile-offline #settingsPauseModal{
   box-sizing:border-box!important;overflow:hidden!important;
   padding:max(6px,env(safe-area-inset-top)) 6px max(6px,env(safe-area-inset-bottom))!important;

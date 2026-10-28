@@ -66,9 +66,12 @@ try{
         assert.equal(layout.phoneFit,false);
         assert.ok(Math.abs(layout.videoRatio-9/16)<.02,JSON.stringify(layout));
         assert.equal(layout.guideVisible,false);
-        await page.locator('#arenaPortableToggleGuide').tap();
+        // Help moved to the Menu in the Streamer mobile layout.
+        await page.locator('#arenaMobileMoreBtn').tap();
+        await page.locator('#arenaPortableGuideMenu').tap();
         assert.equal(await page.locator('#arenaAudienceGuide9').isVisible(),true);
-        await page.locator('#arenaPortableToggleGuide').tap();
+        await page.locator('#arenaMobileMoreBtn').tap();
+        await page.locator('#arenaPortableGuideMenu').tap();
         assert.equal(await page.locator('#arenaAudienceGuide9').isVisible(),false);
         assert.match(layout.commands,/DALE TAP TAP PARA UNIRTE/i);
         for(const command of ['!guerrero','!kame','!shinobi','!rasen','!titan','!coloso','!rayo','!trueno','!espiritu','!enred'])assert.ok(layout.commands.includes(command),command);
@@ -284,6 +287,7 @@ try{
         await page.locator('#arenaMobileMoreBtn').tap();
         await page.locator('#arenaOperatorPopover [data-forward-control="arenaDualTestsToggle"]').tap();
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
+        assert.match(await page.locator('#arenaPortableTestHead').innerText(),/Modo Streamer/);
         assert.equal(await page.locator('#arenaPortableTestBody #arenaPanelPowers').count(),1);
         assert.equal(await page.locator('#arenaPortableTestBody #targetFighterSelect').count(),1);
         assert.equal(await page.locator('#arenaStreamerSkillsDock .arena-skill-buttons button').count(),5);

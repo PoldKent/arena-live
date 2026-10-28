@@ -1,5 +1,13 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-28 — Arena Live v0.39 · Sincronización y regresiones móviles
+
+- Sincronizadas las referencias de estilo y de los cinco módulos del motor con la versión 0.39 para evitar fallos al generar el HTML móvil desde los archivos fuente (quedaban referencias a v0.36).
+- El generador móvil ahora registra las huellas Git de los archivos incluidos sin requerir Git instalado, como los HTML descargables publicados.
+- Nombre visible consistente «Modo Streamer» en el panel avanzado y en su entrada de menú, manteniendo intacto el identificador interno de compatibilidad.
+- Actualizadas las pruebas de ayuda desde Menú, disposición de los botones y consistencia de las versiones. Se conservan las cinco habilidades inferiores, el panel avanzado bajo demanda y el HUD 1v1. La verificación visual en Android sigue pendiente.
+
+
 ## 2026-10-28 — Arena Live v0.38 · Modo Streamer y ergonomía móvil
 
 - Nombres visibles estandarizados: «Modo jugador» y «Modo Streamer»; antiguo identificador interno `director` conservado para compatibilidad del guardado. «Herramientas de dirección» se sustituye por «Panel del streamer», «Jugadores y K.O.» por «Participantes y K.O.», y «Jugador, poderes y comandos» por «Jugador y comandos» en móvil.

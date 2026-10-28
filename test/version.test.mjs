@@ -13,6 +13,12 @@ test('the published package, title, Settings footer and API share one release', 
   assert.match(html, new RegExp('id="arenaVersionInfo"[^>]*>Arena Live v' + escapedVisibleVersion));
   assert.match(html, new RegExp("version: '" + escapedVersion + "'"));
   assert.match(html, new RegExp("const ARENA_RELEASE_VERSION = '" + escapedVisibleVersion + "'"));
+  // Cache-busting URLs and the portable bundler must match the published tag.
+  for(const asset of ['styles/arena-ui.css',...['core','render','audio','settings','balance-evidence'].map(n=>'engine/arena-'+n+'.js')]){
+    assert.ok(html.includes(asset+'?v='+visibleVersion),'stale asset version: '+asset);
+  }
+  assert.ok(!html.includes('?v=0.36'),'legacy cache key must not remain');
+
   assert.match(html, /function updateArenaObsGeometrySummary\(\)/);
 });
 test('lobby overlays have no redundant streaming format tags', () => {
