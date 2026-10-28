@@ -129,7 +129,8 @@ test('inactive controller never receives or applies another window\'s taps',()=>
   f.flush();
   assert.equal(f.effects.length,0);
 });
-\ntest('spectators cannot bypass the full 128-player cap with taps',()=>{
+
+test('spectators cannot bypass the full 128-player cap with taps',()=>{
   const f=fixture(source);
   while(f.fighters.length<128)f.fighters.push({id:'extra'+f.fighters.length,name:'@occupant'+f.fighters.length,platform:'tiktok',alive:true});
   f.send({type:'social',platformKey:'tiktok',eventType:'taps',username:'@over_limit',count:20});
