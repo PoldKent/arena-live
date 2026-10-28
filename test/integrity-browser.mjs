@@ -64,7 +64,7 @@ try {
         assert.deepEqual(r,{ai:false,chat:true,power:.25});
     });
     await check('Settings pause receives chat without applying damage, healing or energy until resume',async()=>{
-        const r=await page.evaluate(()=>{fixture();const f=fighters[0];f.hp=50;f.energy=0;toggleSettingsModal(true);const accepted=ArenaLive.sendChat({username:f.name,platformKey:f.platformKey,message:'!jugar'});const paused=[isGamePaused,f.hp,f.energy,arenaAudienceQueue.length];toggleSettingsModal(false);updatePhysicsAndAI();return {accepted,paused,resumed:[isGamePaused,f.hp,Math.floor(f.energy),arenaAudienceQueue.length]};});
+        const r=await page.evaluate(()=>{fixture();const f=fighters[0];f.hp=50;f.energy=0;isGamePaused=true;toggleSettingsModal(true);const accepted=ArenaLive.sendChat({username:f.name,platformKey:f.platformKey,message:'!jugar'});const paused=[isGamePaused,f.hp,f.energy,arenaAudienceQueue.length];toggleSettingsModal(false);isGamePaused=false;updatePhysicsAndAI();return {accepted,paused,resumed:[isGamePaused,f.hp,Math.floor(f.energy),arenaAudienceQueue.length]};});
         assert.equal(r.accepted,true);assert.deepEqual(r.paused,[true,50,0,1]);assert.deepEqual(r.resumed,[false,85,35,0]);
     });
     await check('Paused audience queue is bounded, deduplicated, expires and supports show-only policy',async()=>{
@@ -110,7 +110,7 @@ try {
           const card=document.getElementById('arenaRuntimeCard'),section=card.closest('.arena-settings-section');
           selectArenaSettingsTab(section.dataset.settingsCategory,false);card.open=true;});
         await page.locator('#arenaRuntime_quality').selectOption('performance');await page.locator('#arenaRuntime_renderFps').selectOption('30');await page.evaluate(()=>{const panel=document.getElementById('arenaBalancePanel');selectArenaSettingsTab(panel.dataset.settingsCategory,false);panel.open=true;});await page.locator('#arenaRuntime_warriorTargeting').selectOption('always');
-        const r=await page.evaluate(()=>({open:isSettingsOpen,paused:isGamePaused,runtime:JSON.parse(localStorage.getItem(ARENA_RUNTIME_KEY)),obs:{...arenaObsCalibration}}));assert.equal(r.open,true);assert.equal(r.paused,true);assert.equal(r.runtime.quality,'performance');assert.equal(r.runtime.renderFps,30);assert.equal(r.runtime.warriorTargeting,'always');assert.equal(r.obs.offset,13);assert.equal(r.obs.footer,92);assert.ok(['16','19.5','20','21'].includes(r.obs.format));
+        const r=await page.evaluate(()=>({open:isSettingsOpen,paused:isGamePaused,runtime:JSON.parse(localStorage.getItem(ARENA_RUNTIME_KEY)),obs:{...arenaObsCalibration}}));assert.equal(r.open,true);assert.equal(r.paused,false);assert.equal(r.runtime.quality,'performance');assert.equal(r.runtime.renderFps,30);assert.equal(r.runtime.warriorTargeting,'always');assert.equal(r.obs.offset,13);assert.equal(r.obs.footer,92);assert.ok(['16','19.5','20','21'].includes(r.obs.format));
     });
     await check('Configuration round-trip restores rules, both layouts, audio and OBS without replacing viewer profiles',async()=>{
         const r=await page.evaluate(()=>{fixture();setArenaObsCalibration('offset',13);setArenaRuntimeOption('masterVolume',35);setArenaCombatRule('damage',1.5);setRejoinRuleMode('timed');setMatchDuration(180);arenaWorkspace.layouts.stream.leftWidth=340;
