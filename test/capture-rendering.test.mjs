@@ -2,14 +2,19 @@ import {readEngineSource} from './read-engine-source.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import {readFile} from 'node:fs/promises';
 
 const html=await readEngineSource();
+const renderHelpers=await readFile(new URL('../engine/arena-render.js',import.meta.url),'utf8');
 const source=name=>{
   const match=html.match(new RegExp(`        function ${name}\\([\\s\\S]*?\\n        }\\n`));
   assert.ok(match,name);return match[0];
 };
 const engine=()=>{
   const e=vm.createContext({WORLD_W:960,WORLD_H:540,activeEffects:[],fighters:[]});
+  // Draw helpers now share the production ArenaRender.effectVisible culler.
+  // Load the real renderer in the VM instead of mocking its behavior.
+  vm.runInContext(renderHelpers,e);
   vm.runInContext(['getArenaViewportBounds','drawSpecialEffectsOnCtx'].map(source).join('\n'),e);return e;
 };
 const recorder=()=>{
