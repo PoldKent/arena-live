@@ -3,13 +3,15 @@ export function normalizeTikTokChat(event) {
   if (!event || typeof event !== 'object') return null;
   // Prefer the stable TikTok unique ID: display nicknames need not be unique.
   const user = event.user && typeof event.user === 'object' ? event.user : {};
-  const rawId = user.uniqueId ?? event.uniqueId ?? user.unique_id ?? event.unique_id;
+  // The v2.5 protobuf chat event uses user.displayId; legacy events use uniqueId.
+  const rawId = user.uniqueId || user.displayId || user.unique_id || user.display_id
+    || event.uniqueId || event.displayId || event.unique_id || event.display_id;
   const username = String(rawId ?? '')
     .replace(/^@+/, '')
     .replace(/[\u0000-\u001f\u007f\u200e\u200f\u202a-\u202e]/g, '')
     .trim()
     .slice(0, 24);
-  const text = String(event.comment ?? event.text ?? '')
+  const text = String(event.content ?? event.comment ?? event.text ?? '')
     .replace(/[\u0000-\u001f\u007f]/g, ' ')
     .trim()
     .slice(0, 160);
@@ -19,7 +21,7 @@ export function normalizeTikTokChat(event) {
     platformKey: 'tiktok',
     username: `@${username}`,
     message: text,
-    eventId: String(event.msgId ?? event.messageId ?? event.id ?? '').slice(0, 100),
+    eventId: String(event.common?.msgId ?? event.msgId ?? event.messageId ?? event.id ?? '').slice(0, 100),
   };
 }
 
