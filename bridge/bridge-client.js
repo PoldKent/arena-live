@@ -1,7 +1,7 @@
 /* Arena Live: local TikTok chat bridge. Loaded only by bridge/server.mjs. */
 (() => {
   'use strict';
-  const state = { socket: null, connected: false, controller: false, statusReceived: false, phase: 'disconnected', account: '@polkent.live', received: 0,clientId:null,canClaimControl:false };
+  const state = { socket: null, connected: false, controller: false, statusReceived: false, phase: 'disconnected', account: '@polkent.live', received: 0,tapsReceived:0,testTapsReceived:0,tapBoosts:0,unassignedTaps:0,droppedTaps:0,clientId:null,canClaimControl:false };
   const panel = document.createElement('section');
   panel.id = 'arena-live-bridge-panel';
   panel.setAttribute('aria-label', 'TikTok LIVE — conexión local');
@@ -12,10 +12,13 @@
     <button type="button" id="bridge-connect">Conectar LIVE</button>
     <button type="button" id="bridge-disconnect">Desconectar</button>
     <button type="button" id="bridge-claim" hidden>Usar esta partida</button>
-    <small>LIVE: comentarios · Apoyos sociales: simulación</small>
+    <small>LIVE: comentarios y ❤️ taps · Otros apoyos: simulación</small>
     <input id="bridge-test" maxlength="160" value="!guerrero" aria-label="Mensaje de prueba" style="background:#121d2c;color:white;border:1px solid #64748b;border-radius:5px;padding:5px;min-width:105px" />
     <button type="button" id="bridge-send-test">Probar comando</button>
-    <small id="bridge-count" style="color:#a7b8c9">Mensajes recibidos: 0</small>`;
+    <button type="button" id="bridge-test-like">Probar 10 taps</button>
+    <small id="bridge-count" style="color:#a7b8c9">Mensajes recibidos: 0</small>
+    <small id="bridge-taps-count" style="color:#fda4af">❤️ Taps LIVE: 0 · pruebas: 0 · mejoras: 0</small>
+    <small id="bridge-taps-note" style="color:#94a3b8" aria-live="polite"></small>`;
   const place = document.getElementById('arenaBridgeMount') || document.getElementById('audienceSimulatorPanel') || document.querySelector('main') || document.body;
   document.getElementById('arenaBridgeUnavailable')?.remove();
   place.prepend(panel);
@@ -27,8 +30,80 @@
   const buttonConnect = panel.querySelector('#bridge-connect');
   const buttonDisconnect = panel.querySelector('#bridge-disconnect');
   const buttonTest = panel.querySelector('#bridge-send-test');
+  const buttonTestLike = panel.querySelector('#bridge-test-like');
+  const tapsCount = panel.querySelector('#bridge-taps-count');
+  const tapsNote = panel.querySelector('#bridge-taps-note');
   const inputTest = panel.querySelector('#bridge-test');
   const buttonClaim=panel.querySelector('#bridge-claim');
+
+  // TikTok sends individual LIKE batches (count), not one event per physical tap.
+  // Merge short bursts by viewer, and limit visual/game effects to 12 per flush.
+  // A viewer must already own a living fighter: likes never create combatants.
+  const tapBatches = new Map();
+  const TAP_FLUSH_MS = 800;
+  const MAX_TAP_VIEWERS = 256;
+  const MAX_TAP_EFFECTS_PER_FLUSH = 12;
+  let tapFlushTimer = null;
+  function updateTaps() {
+    tapsCount.textContent = `❤️ Taps LIVE: ${state.tapsReceived.toLocaleString()} · pruebas: ${state.testTapsReceived.toLocaleString()} · mejoras: ${state.tapBoosts.toLocaleString()}`;
+    const details = [];
+    if (state.unassignedTaps) details.push(`Sin personaje activo: ${state.unassignedTaps.toLocaleString()} taps`);
+    if (state.droppedTaps) details.push(`Exceso de espectadores: ${state.droppedTaps.toLocaleString()} taps no procesados`);
+    if (tapBatches.size) details.push(`Ráfagas pendientes: ${tapBatches.size}`);
+    tapsNote.textContent = details.join(' · ');
+  }
+  function scheduleTapFlush() {
+    if (tapFlushTimer !== null) return;
+    tapFlushTimer = setTimeout(() => { tapFlushTimer = null; flushTapBatches(); }, TAP_FLUSH_MS);
+  }
+  function flushTapBatches() {
+    if (!state.connected || !state.controller) { tapBatches.clear(); updateTaps(); return; }
+    const game = window.ArenaLive;
+    const fighters = typeof game?.getFighters === 'function' ? game.getFighters() : [];
+    let applied = 0;
+    for (const [identity, batch] of tapBatches) {
+      if (applied >= MAX_TAP_EFFECTS_PER_FLUSH) break;
+      tapBatches.delete(identity);
+      const fighter = fighters.find(f => f.alive && f.platform === 'tiktok'
+        && typeof f.name === 'string' && f.name.toLocaleLowerCase() === identity);
+      if (!fighter || typeof game?.support !== 'function') {
+        state.unassignedTaps += batch.received;
+        continue;
+      }
+      try {
+        if (game.support({ eventType: 'taps', targetId: fighter.id, tapCount: batch.count })) state.tapBoosts++;
+      } catch (error) {
+        console.warn('Arena Live no pudo aplicar taps:', error);
+      }
+      applied++;
+    }
+    if (tapBatches.size) scheduleTapFlush();
+    updateTaps();
+  }
+  function recordTaps(data) {
+    const amount = Number(data.count);
+    if (typeof data.username !== 'string' || !Number.isSafeInteger(amount) || amount < 1 || amount > 10000) return;
+    const identity = data.username.toLocaleLowerCase();
+    if (!identity.startsWith('@')) return;
+    if (data.source === 'test') state.testTapsReceived += amount;
+    else state.tapsReceived += amount;
+    const previous = tapBatches.get(identity);
+    if (previous) {
+      previous.count = Math.min(100, previous.count + amount);
+      previous.received += amount;
+    } else if (tapBatches.size < MAX_TAP_VIEWERS) {
+      tapBatches.set(identity, { count: Math.min(100, amount), received: amount });
+    } else {
+      state.droppedTaps += amount;
+    }
+    updateTaps();
+    if (tapBatches.size) scheduleTapFlush();
+  }
+  function clearTapBatches() {
+    clearTimeout(tapFlushTimer);
+    tapFlushTimer = null;
+    tapBatches.clear();
+  }
 
   // Dedicated, read-only TikTok LIVE mirror. Rate limits affect gameplay, not this inbox.
   // A 50,000-message memory guard protects long streams; export is available at any point.
@@ -144,7 +219,8 @@
     buttonConnect.disabled = duplicate || !state.connected || !state.statusReceived || ['connected', 'connecting','reconnecting'].includes(state.phase);
     buttonDisconnect.disabled = duplicate || !state.connected || state.phase === 'disconnected';
     buttonTest.disabled = duplicate || !state.connected || !state.statusReceived;
-    for (const b of [buttonConnect, buttonDisconnect, buttonTest]) b.style.opacity = b.disabled ? '.4' : '1';
+    buttonTestLike.disabled = buttonTest.disabled;
+    for (const b of [buttonConnect, buttonDisconnect, buttonTest, buttonTestLike]) b.style.opacity = b.disabled ? '.4' : '1';
     count.textContent = `Mensajes recibidos: ${state.received}`;
     updateLiveChatStatus();
     window.dispatchEvent(new CustomEvent('arena-bridge-status', {detail: {
@@ -171,9 +247,15 @@
       if (!r.sent) refresh('Abre esta página como la ventana principal del juego.');
     } catch (error) { refresh(String(error.message || error)); }
   });
+  buttonTestLike.addEventListener('click', async () => {
+    try {
+      const r = await post('/api/test-like', { username: 'arena_prueba', count: 10 });
+      if (!r.sent) refresh('Abre esta página como la ventana principal del juego.');
+    } catch (error) { refresh(String(error.message || error)); }
+  });
   buttonClaim.addEventListener('click',async()=>{try{await post('/api/claim-control',{clientId:state.clientId});}catch(error){refresh(error.message);}});
   let reconnectTimer=null,reconnectAttempt=0,stopped=false;
-  window.addEventListener('pagehide',()=>{stopped=true;clearTimeout(reconnectTimer);state.socket?.close();});
+  window.addEventListener('pagehide',()=>{stopped=true;clearTimeout(reconnectTimer);clearTapBatches();state.socket?.close();});
   function openSocket() {
     if(stopped)return;
     const socket = new WebSocket(`ws://${location.host}/ws`);
@@ -188,6 +270,7 @@
         state.statusReceived = true;
         state.account = typeof data.account === 'string' ? data.account : state.account;
         state.controller = Boolean(data.isController);state.clientId=data.clientId;state.canClaimControl=Boolean(data.canClaimControl);
+        if (!state.controller) clearTapBatches();
         refresh(data.lastError ? `${data.phase}: ${data.lastError}` : '');
       } else if (data.type === 'chat' && state.controller && data.platformKey === 'tiktok') {
         if (typeof data.message !== 'string' || typeof data.username !== 'string') return;
@@ -200,11 +283,14 @@
         // Connection state did not change. Rebuilding/distributing toolbar state
         // per comment used to flood the DOM/localization observer during bursts.
         scheduleInboxRefresh();
+      } else if (data.type === 'social' && state.controller && data.platformKey === 'tiktok' && data.eventType === 'taps') {
+        recordTaps(data);
       }
     });
     socket.addEventListener('close', () => {
       if (state.socket !== socket||stopped) return;
       state.connected = false; state.controller = false; state.statusReceived = false;
+      clearTapBatches();
       refresh('Puente local desconectado. Reintentando…');
       reconnectTimer=setTimeout(openSocket,Math.min(30000,1000*2**Math.min(reconnectAttempt++,5)));
     });
