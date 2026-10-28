@@ -1633,9 +1633,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                             </div>
                             <input type="range" id="arenaObsVerticalOffset" min="-120" max="120" step="1" value="0" oninput="setArenaObsCalibration('offset',this.value)" class="w-full accent-pink-400" aria-label="Ajustar el marco vertical hacia la izquierda o derecha" />
                             <div class="flex items-center justify-between gap-2 text-[10px] text-slate-400">
-                                <span>← Izquierda</span>
-                                <label class="flex items-center gap-1" for="arenaObsVerticalOffsetExact">Precisión <input type="number" id="arenaObsVerticalOffsetExact" min="-120" max="120" step="1" value="0" onchange="setArenaObsCalibration('offset',this.value)" class="w-16 rounded border border-slate-600 bg-slate-900 px-1 py-0.5 text-right text-slate-100" aria-label="Desplazamiento horizontal exacto en píxeles"> px</label>
-                                <span>Derecha →</span>
+                                <span id="arenaObsOffsetLeft">← Izquierda</span>
+                                <label class="flex items-center gap-1" for="arenaObsVerticalOffsetExact"><span id="arenaObsOffsetPrecision">Precisión</span> <input type="number" id="arenaObsVerticalOffsetExact" min="-120" max="120" step="1" value="0" onchange="setArenaObsCalibration('offset',this.value)" class="w-16 rounded border border-slate-600 bg-slate-900 px-1 py-0.5 text-right text-slate-100" aria-label="Desplazamiento horizontal exacto en píxeles"> px</label>
+                                <span id="arenaObsOffsetRight">Derecha →</span>
                             </div>
                         </div>
                         <label class="flex flex-col gap-1 text-[11px] text-slate-300" for="arenaObsFooterHeight">
@@ -7908,15 +7908,25 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:0, footer:76, format:'21'});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
         const ARENA_OBS_COPY = Object.freeze({
-          es:['Calibración para OBS','Restablecer','Ajusta antes de emitir; los recortes se configuran después. Abrir los paneles no cambiará el tamaño del juego.','Mover 9:16 a la derecha','Espacio inferior de 16:9','Abre Modo Stream para comprobar tamaños.','Pantallas','Preparación'],
-          en:['OBS calibration','Reset','Adjust before going live, then configure OBS crops. Opening panels will not resize the game.','Move 9:16 to the right','16:9 bottom space','Enter Stream Mode to check dimensions.','Displays','Preparation'],
-          fr:['Calibrage OBS','Réinitialiser','Réglez avant le direct; configurez ensuite les recadrages OBS. Ouvrir les panneaux ne redimensionne pas le jeu.','Déplacer 9:16 vers la droite','Espace inférieur 16:9','Ouvrez le double plein écran pour vérifier.','Écrans','Préparation'],
-          de:['OBS-Kalibrierung','Zurücksetzen','Vor der Übertragung einstellen; danach OBS-Ausschnitt konfigurieren. Die Panels ändern keine Bildgrößen.','9:16 nach rechts verschieben','Unterer Abstand 16:9','Dual-Vollbild für die Maße öffnen.','Ansichten','Vorbereitung'],
-          zh:['OBS 校准','重置','直播前调整，然后配置 OBS 裁剪；打开面板不会改变游戏画面尺寸。','9:16 右移','16:9 底部空间','进入双屏全屏以查看尺寸。','画面','准备'],
-          ja:['OBS キャリブレーション','リセット','配信前に調整し、OBS の切り抜きを設定。パネルを開いても画面サイズは変わりません。','9:16 を右へ移動','16:9 下部スペース','デュアル全画面で寸法を確認。','画面','準備'],
-          pt:['Calibração OBS','Redefinir','Ajuste antes da live e depois configure o recorte OBS. Abrir os painéis não altera o tamanho do jogo.','Mover 9:16 à direita','Espaço inferior de 16:9','Abra o dual em tela cheia para conferir tamanhos.','Telas','Preparação'],
-          it:['Calibrazione OBS','Ripristina','Regola prima della diretta, poi imposta i ritagli OBS. Aprire i pannelli non ridimensiona il gioco.','Sposta 9:16 a destra','Spazio inferiore 16:9','Apri il duale a schermo intero per controllare.','Schermi','Preparazione']
+          es:['Calibración para OBS','Restablecer','Ajusta antes de emitir; los recortes se configuran después. Abrir los paneles no cambiará el tamaño del juego.','Posición horizontal de Vertical','Espacio inferior de 16:9','Abre Modo Stream para comprobar tamaños.','Pantallas','Preparación'],
+          en:['OBS calibration','Reset','Adjust before going live, then configure OBS crops. Opening panels will not resize the game.','Vertical horizontal position','16:9 bottom space','Enter Stream Mode to check dimensions.','Displays','Preparation'],
+          fr:['Calibrage OBS','Réinitialiser','Réglez avant le direct; configurez ensuite les recadrages OBS. Ouvrir les panneaux ne redimensionne pas le jeu.','Position horizontale du vertical','Espace inférieur 16:9','Ouvrez le double plein écran pour vérifier.','Écrans','Préparation'],
+          de:['OBS-Kalibrierung','Zurücksetzen','Vor der Übertragung einstellen; danach OBS-Ausschnitt konfigurieren. Die Panels ändern keine Bildgrößen.','Vertikale Ansicht horizontal','Unterer Abstand 16:9','Dual-Vollbild für die Maße öffnen.','Ansichten','Vorbereitung'],
+          zh:['OBS 校准','重置','直播前调整，然后配置 OBS 裁剪；打开面板不会改变游戏画面尺寸。','竖屏水平位置','16:9 底部空间','进入双屏全屏以查看尺寸。','画面','准备'],
+          ja:['OBS キャリブレーション','リセット','配信前に調整し、OBS の切り抜きを設定。パネルを開いても画面サイズは変わりません。','縦画面の左右位置','16:9 下部スペース','デュアル全画面で寸法を確認。','画面','準備'],
+          pt:['Calibração OBS','Redefinir','Ajuste antes da live e depois configure o recorte OBS. Abrir os painéis não altera o tamanho do jogo.','Posição horizontal do vertical','Espaço inferior de 16:9','Abra o dual em tela cheia para conferir tamanhos.','Telas','Preparação'],
+          it:['Calibrazione OBS','Ripristina','Regola prima della diretta, poi imposta i ritagli OBS. Aprire i pannelli non ridimensiona il gioco.','Posizione orizzontale verticale','Spazio inferiore 16:9','Apri il duale a schermo intero per controllare.','Schermi','Preparazione']
+        });        const ARENA_OBS_CONTROL_COPY = Object.freeze({
+          es:['📱 Vertical','Centrar','Izquierda','Derecha','Precisión'],
+          en:['📱 Vertical','Center','Left','Right','Exact'],
+          fr:['📱 Vertical','Centrer','Gauche','Droite','Précision'],
+          de:['📱 Vertikal','Zentrieren','Links','Rechts','Genau'],
+          zh:['📱 竖屏','居中','左','右','精确'],
+          ja:['📱 縦画面','中央','左','右','精密'],
+          pt:['📱 Vertical','Centralizar','Esquerda','Direita','Precisão'],
+          it:['📱 Verticale','Centra','Sinistra','Destra','Precisione']
         });
+
         function clampArenaObsCalibration(key, value) {
           if(key==='format')return ['21','20','19.5','16'].includes(String(value)) ? String(value) : ARENA_OBS_DEFAULTS.format;
           const parsed = Number(value);
@@ -7996,6 +8006,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
           if(n){n.firstChild.textContent=c[3]+': ';}
           const h=document.getElementById('arenaObsFooterHeightLabel');
           if(h){h.firstChild.textContent=c[4]+': ';}
+          const control=ARENA_OBS_CONTROL_COPY[currentLanguage]||ARENA_OBS_CONTROL_COPY.es;
+          for(const [id,value] of [
+            ['arenaObsVerticalFormatLabel',control[0]],['arenaObsCenterVertical',control[1]],
+            ['arenaObsOffsetLeft','← '+control[2]],['arenaObsOffsetRight',control[3]+' →'],
+            ['arenaObsOffsetPrecision',control[4]]
+          ]){const el=document.getElementById(id);if(el)el.textContent=value;}
           updateArenaObsGeometrySummary();
         }
         function refreshArenaDualOperatorLabels() {
