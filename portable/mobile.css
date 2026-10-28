@@ -720,3 +720,14 @@ html.arena-mobile-offline #arenaMobileControlSettings input{width:100%;accent-co
   grid-template-columns:repeat(2,minmax(0,1fr))!important
  }
 }
+
+html.arena-mobile-offline #arenaMobileControlSettings label[for="hudOpacityRange"]{
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:5px!important;
+ border-top:1px solid rgba(117,187,201,.36);padding-top:10px;
+}
+html.arena-mobile-offline #arenaMobileControlSettings label[for="hudOpacityRange"] input{
+ width:100%!important;min-height:32px!important;accent-color:#79e1e7!important
+}
+html.arena-mobile-offline #arenaMobileControlSettings label[for="hudOpacityRange"] small{
+ color:#b5d4dc;font-size:11px;line-height:1.4
+}
