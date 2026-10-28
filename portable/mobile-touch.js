@@ -8,7 +8,8 @@ let arenaMobileEditing=false;
 try{const saved=JSON.parse(localStorage.getItem(ARENA_MOBILE_LAYOUT_KEY)||'null');if(saved&&Number.isFinite(saved.size))arenaMobileLayout.size=Math.max(56,Math.min(94,saved.size));for(const [id,p]of Object.entries(saved?.points||{})){if(Object.hasOwn(arenaMobileLayoutDefaults,id)&&Array.isArray(p)&&p.length===2&&p.every(Number.isFinite))arenaMobileLayout.points[id]=[Math.max(7,Math.min(93,p[0])),Math.max(8,Math.min(95,p[1]))];}}catch(_){}
 const ARENA_MOBILE_HOLD_MS=460;
 const ARENA_MOBILE_SWIPE_PX=34;
-const arenaMobileTouchState={pointerId:null,startX:0,startY:0,x:0,y:0,startedAt:0,moved:false,special:false,hold:null,tapCount:0,lastTapAt:0,lastTapX:0,lastTapY:0,jumpRetry:null};
+const arenaMobileTouchState={pointerId:null,startX:0,startY:0,x:0,y:0,tapCount:0,lastTapAt:0,lastTapX:0,lastTapY:0,jumpRetry:null};
+const arenaMobileActionState={pointerId:null,startX:0,startY:0,x:0,y:0,startedAt:0,moved:false,special:false,hold:null};
 const arenaMobileTestState={open:false,active:'arenaPanelPowers'};
 function arenaMobileActor(){
     return fighters.find(f=>f.isStreamer&&!f.eliminated)||null;
@@ -41,18 +42,11 @@ function arenaMobileApplyDirection(view,x,y){
     const fighter=arenaMobileActor();
     if(fighter && Math.abs(dx)>dead)fighter.facing=dx>0?1:-1;
 }
-function arenaMobileClearHold(){
-    if(arenaMobileTouchState.hold!==null){clearTimeout(arenaMobileTouchState.hold);arenaMobileTouchState.hold=null;}
-}
-function arenaMobileClearRetry(){
-    if(arenaMobileTouchState.jumpRetry!==null){clearTimeout(arenaMobileTouchState.jumpRetry);arenaMobileTouchState.jumpRetry=null;}
-}
+function arenaMobileClearHold(){const a=arenaMobileActionState;if(a.hold!==null){clearTimeout(a.hold);a.hold=null;}}
+function arenaMobileClearRetry(){if(arenaMobileTouchState.jumpRetry!==null){clearTimeout(arenaMobileTouchState.jumpRetry);arenaMobileTouchState.jumpRetry=null;}}
+function arenaMobileResetAction(){arenaMobileClearHold();const a=arenaMobileActionState;a.pointerId=null;a.moved=false;a.special=false;}
 function arenaMobileResetTouch(){
-    arenaMobileClearHold();
-    arenaMobileTouchState.pointerId=null;
-    arenaMobileTouchState.moved=false;
-    arenaMobileTouchState.special=false;
-    arenaMobileClearDirections();
+    arenaMobileTouchState.pointerId=null;arenaMobileResetAction();arenaMobileClearDirections();
     document.querySelectorAll('.arena-mobile-contact').forEach(n=>n.hidden=true);
 }
 function arenaMobileSecondJump(){
@@ -85,65 +79,79 @@ function arenaMobileTouchPoint(view,x,y){
     const rect=view.getBoundingClientRect();
     dot.hidden=false;dot.style.left=(x-rect.left)+'px';dot.style.top=(y-rect.top)+'px';
 }
+// Táctil total: both thumbs work at the same time, with separate pointer IDs.
+// Left half steers; right half provides instant jump, swipe attack and hold power.
 function arenaMobileTouchStart(event){
-    if(event.pointerType==='mouse'||!arenaMobileCanControl()||arenaMobileTouchState.pointerId!==null)return;
+    if(event.pointerType==='mouse'||!arenaMobileCanControl())return;
     if(event.target instanceof Element&&event.target.closest('button,input,select,textarea,summary,a,dialog,#touchControlDock,#arenaPortableSetup,#arenaMobileFloating,#arenaHeaderActions,#arenaOperatorPopover,#arenaPortableTestDrawer,.arena-onboarding'))return;
-    // Joystick mode only accepts input from the analog and the three action buttons.
-    // Block the older viewport tap-to-jump listener without affecting the joystick.
-    if(arenaPortableProfile.touchMode==='joystick'){event.preventDefault();event.stopImmediatePropagation();return;}
     event.preventDefault();event.stopImmediatePropagation();
-    const st=arenaMobileTouchState;
-    st.pointerId=event.pointerId;st.startX=st.x=event.clientX;st.startY=st.y=event.clientY;st.startedAt=performance.now();
-    st.moved=false;st.special=false;arenaMobileClearRetry();
-    try{event.currentTarget.setPointerCapture(event.pointerId);}catch(_){}
-    arenaMobileApplyDirection(event.currentTarget,event.clientX,event.clientY);
-    arenaMobileTouchPoint(event.currentTarget,event.clientX,event.clientY);
-    st.hold=setTimeout(()=>{
-        st.hold=null;
-        if(st.pointerId===event.pointerId&&!st.moved&&arenaMobileCanControl()){
-            st.special=true;arenaMobileClearDirections();
-            if(triggerProtagonistSpecialAttack()&&navigator.vibrate)navigator.vibrate(16);
-        }
-    },ARENA_MOBILE_HOLD_MS);
+    if(arenaPortableProfile.touchMode!=='touch')return;
+    const view=event.currentTarget,rect=view.getBoundingClientRect();
+    if(event.clientX-rect.left>=rect.width*.53){
+        const a=arenaMobileActionState;if(a.pointerId!==null)return;
+        a.pointerId=event.pointerId;a.startX=a.x=event.clientX;a.startY=a.y=event.clientY;
+        a.startedAt=performance.now();a.moved=false;a.special=false;
+        a.hold=setTimeout(()=>{
+            a.hold=null;
+            if(a.pointerId===event.pointerId&&!a.moved&&arenaMobileCanControl()){
+                a.special=true;
+                if(triggerProtagonistSpecialAttack()&&navigator.vibrate)navigator.vibrate(16);
+            }
+        },ARENA_MOBILE_HOLD_MS);
+    }else{
+        const st=arenaMobileTouchState;if(st.pointerId!==null)return;
+        st.pointerId=event.pointerId;st.startX=st.x=event.clientX;st.startY=st.y=event.clientY;
+        arenaMobileTouchPoint(view,st.x,st.y);
+    }
+    try{view.setPointerCapture(event.pointerId);}catch(_){}
 }
 function arenaMobileTouchMove(event){
+    if(arenaMobileActionState.pointerId===event.pointerId){
+        event.preventDefault();event.stopImmediatePropagation();
+        const a=arenaMobileActionState;a.x=event.clientX;a.y=event.clientY;
+        if(Math.hypot(a.x-a.startX,a.y-a.startY)>16){a.moved=true;arenaMobileClearHold();}
+        return;
+    }
     const st=arenaMobileTouchState;
     if(st.pointerId!==event.pointerId)return;
     event.preventDefault();event.stopImmediatePropagation();
     st.x=event.clientX;st.y=event.clientY;
-    if(Math.hypot(st.x-st.startX,st.y-st.startY)>16){st.moved=true;arenaMobileClearHold();}
+    const dx=st.x-st.startX,dy=st.y-st.startY,dead=13;
+    keys.a=dx< -dead;keys.d=dx>dead;
+    keys.w=activeMode==='iso'&&dy< -dead;keys.s=activeMode==='iso'&&dy>dead;
+    const fighter=arenaMobileActor();
+    if(fighter&&Math.abs(dx)>dead)fighter.facing=dx>0?1:-1;
     arenaMobileTouchPoint(event.currentTarget,st.x,st.y);
-    if(!st.special)arenaMobileApplyDirection(event.currentTarget,st.x,st.y);
 }
 function arenaMobileTouchEnd(event){
-    const st=arenaMobileTouchState;
-    if(st.pointerId!==event.pointerId)return;
-    event.preventDefault();event.stopImmediatePropagation();
-    st.x=event.clientX;st.y=event.clientY;
-    const dx=st.x-st.startX,dy=st.y-st.startY;
-    const duration=performance.now()-st.startedAt,special=st.special;
-    arenaMobileResetTouch();
-    if(!arenaMobileCanControl()||special)return;
-    // Fast directional swipes are basic attacks; slower drags guide movement only.
-    if(Math.hypot(dx,dy)>=ARENA_MOBILE_SWIPE_PX&&duration<=380){
-        const fighter=arenaMobileActor();
-        if(fighter){if(Math.abs(dx)>6)fighter.facing=dx>0?1:-1;performMeleeAttack(fighter);}
-        st.tapCount=0;return;
+    if(arenaMobileActionState.pointerId===event.pointerId){
+        event.preventDefault();event.stopImmediatePropagation();
+        const a=arenaMobileActionState;a.x=event.clientX;a.y=event.clientY;
+        const dx=a.x-a.startX,dy=a.y-a.startY,elapsed=performance.now()-a.startedAt;
+        const special=a.special,moved=a.moved;
+        arenaMobileResetAction();
+        if(!arenaMobileCanControl()||special)return;
+        if(!moved&&elapsed>=ARENA_MOBILE_HOLD_MS){
+            if(triggerProtagonistSpecialAttack()&&navigator.vibrate)navigator.vibrate(16);
+        }else if(Math.hypot(dx,dy)>=ARENA_MOBILE_SWIPE_PX&&elapsed<=500){
+            const fighter=arenaMobileActor();
+            if(fighter){if(Math.abs(dx)>6)fighter.facing=dx>0?1:-1;performMeleeAttack(fighter);}
+            arenaMobileTouchState.tapCount=0;
+        }else if(!moved&&elapsed<ARENA_MOBILE_HOLD_MS){
+            arenaMobileJumpTap(a.x,a.y);
+        }
+        return;
     }
-    // Táctil total: one tap moves; two taps jump; a third triggers the aerial jump.
-    // This does not interfere with long-press powers or swipe attacks.
-    if(Math.hypot(dx,dy)<18&&duration<ARENA_MOBILE_HOLD_MS){
-        const now=performance.now();
-        if(now-st.lastTapAt<=ARENA_MOBILE_TAP_GAP&&Math.hypot(st.x-st.lastTapX,st.y-st.lastTapY)<65)st.tapCount++;
-        else st.tapCount=1;
-        st.lastTapAt=now;st.lastTapX=st.x;st.lastTapY=st.y;
-        if(st.tapCount===2)triggerManualJump();
-        if(st.tapCount>=3){arenaMobileSecondJump();st.tapCount=0;}
-    }else st.tapCount=0;
+    if(arenaMobileTouchState.pointerId!==event.pointerId)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    arenaMobileTouchState.pointerId=null;arenaMobileClearDirections();
+    document.querySelectorAll('.arena-mobile-contact').forEach(n=>n.hidden=true);
 }
 function arenaMobileTouchCancel(event){
+    if(arenaMobileActionState.pointerId===event.pointerId){event.stopImmediatePropagation();arenaMobileResetAction();return;}
     if(arenaMobileTouchState.pointerId!==event.pointerId)return;
-    event.stopImmediatePropagation();arenaMobileResetTouch();
+    event.stopImmediatePropagation();arenaMobileTouchState.pointerId=null;arenaMobileClearDirections();
+    document.querySelectorAll('.arena-mobile-contact').forEach(n=>n.hidden=true);
 }
 function arenaMobileTestPanel(){
     return document.getElementById(arenaMobileTestState.active);
@@ -405,5 +413,5 @@ window.ArenaMobileTouch=Object.freeze({
     openTests:arenaMobileShowTestDrawer,selectTest:arenaMobileSelectTestPanel,editButtons:arenaMobileEditButtons,setButtonSize:arenaMobileSetButtonSize,resetButtons:arenaMobileResetButtons,
     setTouchMode:arenaMobileSetTouchMode,getTouchMode(){return arenaPortableProfile.touchMode;},
     getLayout(){return JSON.parse(JSON.stringify(arenaMobileLayout));},
-    getState(){return {gestureActive:arenaMobileTouchState.pointerId!==null,tapCount:arenaMobileTouchState.tapCount,testOpen:arenaMobileTestState.open,testPanel:arenaMobileTestState.active};}
+    getState(){return {gestureActive:arenaMobileTouchState.pointerId!==null||arenaMobileActionState.pointerId!==null,tapCount:arenaMobileTouchState.tapCount,testOpen:arenaMobileTestState.open,testPanel:arenaMobileTestState.active};}
 });
