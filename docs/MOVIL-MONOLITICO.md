@@ -14,6 +14,12 @@ La pantalla se adapta al girar el teléfono. El joystick cambia a la vista activ
 
 No necesita internet, servidor ni instalación de dependencias en el celular. **TikTok LIVE real requiere el servidor de Arena Live**. Los comandos, mensajes y apoyos del archivo son pruebas locales. La exportación conserva sus controles y señala esta limitación en el inicio y el panel de conexión.
 
+## Previsualización 20:9 y comandos visibles
+
+En teléfonos verticales alargados, el modo 9:16 se muestra centrado en un marco **9:20**, sin estiramiento. Las franjas de ajuste pertenecen a la previsualización del dispositivo, nunca al vídeo original. El dibujo vertical conserva 9:16 (720 × 1280 con la configuración inicial; hasta 1080 × 1920).
+
+La bienvenida de lobby y la guía de comandos de clase aparecen en las dos capturas. La tira inferior sigue visible durante el combate; los botones y joysticks del modo offline son controles locales y no sustituyen la interacción real desde TikTok LIVE.
+
 ## Perfil de rendimiento
 
 | Opción | Inicio | Alternativas |
