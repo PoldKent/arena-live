@@ -20,6 +20,10 @@
         default: return true; // Preserve unknown and future effect types.
         }
     }
+    function reserveParticleSlots(items,capacity,count){
+        const overflow=items.length+count-capacity;
+        if(overflow>0)items.splice(0,overflow);
+    }
     const budgets=Object.freeze({high:1800,balanced:900,performance:350});
     function drawParticles(ctx,particles,bounds,quality='balanced'){
         const stride=Math.max(1,Math.ceil(particles.length/(budgets[quality]||budgets.balanced)));
@@ -36,5 +40,5 @@
                 return {samples:count,fps:intervals.length?1000/(intervals.reduce((s,v)=>s+v,0)/intervals.length):0,
                     frame:{p50Ms:percentile(intervals,.5),p95Ms:percentile(intervals,.95),p99Ms:percentile(intervals,.99)},simulation:stats('simulation'),drawing:stats('drawing')};}});
     }
-    root.ArenaRender=Object.freeze({intersects,effectVisible,drawParticles,createDiagnostics,budgets});
+    root.ArenaRender=Object.freeze({intersects,effectVisible,reserveParticleSlots,drawParticles,createDiagnostics,budgets});
 })(globalThis);
