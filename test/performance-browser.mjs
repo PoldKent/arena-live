@@ -161,6 +161,57 @@ try {
       },gpuMode);
       assert.equal(quality.simulationUnchanged,true);assert.deepEqual(quality.captures,[[1920,1080],[1080,1920]]);qualityMeasurements.push(quality);checks.push('quality budgets preserve simulation and native Full HD at a captured particle peak');console.log('QUALITY',JSON.stringify(quality));
     }
+    if(source==='current'){
+      // Reproduce the problematic real-world worst case: all 128 participants
+      // release a class special in one tick; then exercise both Full HD views.
+      // Timing is diagnostic, not a hardware-independent FPS guarantee.
+      const stress=await page.evaluate(gpuMode=>{
+        gameState='LOBBY';applyPlayerCountPreset(128);startCombatFromLobby();
+        setArenaCombatRule('knockback',0);
+        for(const actor of fighters){
+          actor.hp=actor.maxHp=1000000;
+          actor.energy=100;
+          actor.aiSpecialCooldown=100000;
+        }
+        const start=performance.now();
+        let executed=0;
+        for(const actor of [...fighters]){
+          const cmd=CLASS_COMMANDS[actor.archetypeKey]?.powers?.[0];
+          if(cmd&&executeFighterSkill(actor,cmd))executed++;
+        }
+        const castingMs=performance.now()-start;
+        const draw=[],sim=[];
+        for(let frame=0;frame<90;frame++){
+          const t=performance.now();updatePhysicsAndAI();sim.push(performance.now()-t);
+          if(frame%3===0){
+            const t=performance.now();renderBothScreensSimultaneously();
+            if(!gpuMode){ctx16.getImageData(0,0,1,1);ctx9.getImageData(0,0,1,1);}
+            draw.push(performance.now()-t);
+          }
+        }
+        const summarize=rows=>{
+          rows.sort((a,b)=>a-b);
+          return {median:rows[Math.floor(rows.length*.5)],p95:rows[Math.floor(rows.length*.95)],
+            max:rows.at(-1),mean:rows.reduce((sum,n)=>sum+n,0)/rows.length};
+        };
+        return {fighters:fighters.length,executed,castingMs,
+          simulation:summarize(sim),drawing:summarize(draw),
+          capped:particles.length<=MAX_PARTICLES&&activeEffects.length<=MAX_ACTIVE_EFFECTS,
+          finite:fighters.every(p=>[p.x,p.y,p.hp,p.energy].every(Number.isFinite)),
+          resolution:[[canvas16.width,canvas16.height],[canvas9.width,canvas9.height]]};
+      },gpuMode);
+      assert.equal(stress.fighters,128);assert.equal(stress.executed,128);
+      assert.equal(stress.finite,true);assert.equal(stress.capped,true);
+      assert.deepEqual(stress.resolution,[[1920,1080],[1080,1920]]);
+      checks.push('128 synchronous specials cast and render both unchanged Full HD captures');
+      console.log('CAST_STRESS',JSON.stringify({
+        ...stress,warning:stress.drawing.p95>33.3?'Drawing p95 exceeds 33.3 ms on this environment'
+        :stress.drawing.p95>16.7?'Drawing p95 exceeds 16.7 ms on this environment'
+        :'No threshold warning from this environment'
+      }));
+      // Restore the original combat mode for the remaining browser checks.
+      setArenaCombatRule('knockback',1);
+    }
     await page.evaluate(()=>{gameState='LOBBY';applyPlayerCountPreset(128);startCombatFromLobby();});
     if (source === 'current') {
       await check('Full HD captures are opaque and remain eligible for automatic hardware rasterization', async () => {
