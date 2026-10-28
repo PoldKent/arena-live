@@ -2655,6 +2655,11 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     record.addedNodes.forEach(added => {
                         if (added.nodeType === Node.TEXT_NODE) localizeNode(added);
                         else if (added.nodeType === Node.ELEMENT_NODE) {
+                            // LIVE special bursts can add 128 chat rows in a single
+                            // simulation tick. Their data-no-translate payloads are
+                            // already escaped/localized by the sender, so skip an
+                            // unnecessary deep DOM traversal per event.
+                            if (added.closest('[data-no-translate]')) return;
                             const walker = document.createTreeWalker(added, NodeFilter.SHOW_TEXT);
                             let node;
                             while ((node = walker.nextNode())) localizeNode(node);
