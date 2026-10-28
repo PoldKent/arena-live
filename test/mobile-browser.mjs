@@ -160,6 +160,21 @@ try{
         });
         assert.ok(outcome.first>=0);assert.equal(outcome.queued,true);assert.equal(outcome.tapCount,0);
     });
+    await check('long press invokes the active class special without a separate analog control',async()=>{
+        await page.evaluate(()=>{
+            ArenaPortable.start({count:4,join:true});
+            const actor=fighters.find(f=>f.isStreamer);actor.energy=100;actor.aiSpecialCooldown=0;
+            const view=document.getElementById('viewport9x16'),rect=view.getBoundingClientRect();
+            view.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'touch',pointerId:99,clientX:rect.left+rect.width*.65,clientY:rect.top+rect.height*.55}));
+        });
+        await page.waitForTimeout(530);
+        const queued=await page.evaluate(()=>{
+            const actor=fighters.find(f=>f.isStreamer),view=document.getElementById('viewport9x16'),rect=view.getBoundingClientRect(),active=!!actor.castingSkill;
+            view.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch',pointerId:99,clientX:rect.left+rect.width*.65,clientY:rect.top+rect.height*.55}));
+            return active;
+        });
+        assert.equal(queued,true);
+    });
     await check('live mobile tests float over combat and reuse real target, power and command controls',async()=>{
         await page.locator('#arenaMobileTestFab').tap();
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
