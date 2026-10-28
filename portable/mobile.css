@@ -808,17 +808,18 @@ html.arena-mobile-offline #arenaMobileFloating{
 }
 html.arena-mobile-offline #arenaMobileFloating #arenaMobilePause{
   position:static!important;inset:auto!important;transform:none!important;
-  flex:0 0 44px!important;width:44px!important;height:44px!important;
-  min-width:44px!important;min-height:44px!important;max-width:44px!important;
-  z-index:auto!important;border-radius:11px!important;font-size:21px!important;
+  flex:0 0 40px!important;width:40px!important;height:40px!important;
+  min-width:40px!important;min-height:40px!important;max-width:40px!important;
+  z-index:auto!important;border-radius:50%!important;font-size:19px!important;
   background:rgba(79,52,32,var(--arena-hud-opacity,.9))!important;
 }
 html.arena-mobile-offline #arenaMobileFloating #arenaMobileMoreBtn,
 html.arena-mobile-offline #arenaMobileFloating #arenaPortableFullscreen{
   position:static!important;inset:auto!important;transform:none!important;
-  display:flex!important;flex:0 0 44px!important;width:44px!important;height:44px!important;
-  min-width:44px!important;min-height:44px!important;max-width:44px!important;
-  border-radius:11px!important;font-size:21px!important;
+  display:grid!important;place-items:center!important;flex:0 0 40px!important;
+  width:40px!important;height:40px!important;min-width:40px!important;
+  min-height:40px!important;max-width:40px!important;
+  border-radius:50%!important;font-size:18px!important;
 }
 html.arena-mobile-offline #arenaMobileFloating #arenaPortableToggleGuide,
 html.arena-mobile-offline #arenaMobileTestFab{display:none!important}
@@ -907,24 +908,30 @@ html.arena-mobile-offline #arenaTopBarInner .arena-brand-meta{gap:3px!important;
 html.arena-mobile-offline #arenaTopBarInner #headerStateBadge{
   padding:2px 4px!important;font-size:8px!important;letter-spacing:0!important;white-space:nowrap!important;
 }
+/* Restore the v0.36–v0.37 compact top-right capsule, away from the 9:16 frame.
+   The toolbar is fixed in the existing header band, not a row of square header buttons. */
 html.arena-mobile-offline #arenaMobileFloating{
-  position:relative!important;inset:auto!important;left:auto!important;right:auto!important;
-  top:auto!important;bottom:auto!important;transform:none!important;
+  position:fixed!important;
+  top:calc(8px + env(safe-area-inset-top))!important;
+  right:max(8px,env(safe-area-inset-right))!important;
+  left:auto!important;bottom:auto!important;transform:none!important;
   display:flex!important;flex:0 0 auto!important;flex-flow:row nowrap!important;
-  align-items:center!important;justify-content:flex-end!important;gap:4px!important;
-  width:auto!important;height:auto!important;margin:0!important;padding:0!important;
-  max-width:100%!important;border:0!important;border-radius:0!important;
-  background:none!important;box-shadow:none!important;z-index:220!important;
+  align-items:center!important;justify-content:flex-end!important;gap:3px!important;
+  width:max-content!important;height:auto!important;margin:0!important;padding:3px!important;
+  max-width:calc(100vw - 10px)!important;
+  border:1px solid rgba(98,180,200,.38)!important;border-radius:24px!important;
+  background:rgba(9,24,44,var(--arena-hud-opacity,.85))!important;
+  box-shadow:0 4px 15px rgba(0,0,0,.36)!important;z-index:220!important;
 }
 html.arena-mobile-offline #arenaMobileFloating button:not(#arenaMobileEditDone){
-  display:grid!important;place-items:center!important;flex:0 0 42px!important;
+  display:grid!important;place-items:center!important;flex:0 0 40px!important;
   position:static!important;inset:auto!important;transform:none!important;
-  width:44px!important;height:44px!important;min-width:44px!important;
-  min-height:44px!important;max-width:44px!important;padding:0!important;
-  border:1px solid #3b7388!important;border-radius:11px!important;
-  font:800 19px/1 system-ui,sans-serif!important;color:#dcfaff!important;
-  background:linear-gradient(#153d53,#12283d)!important;box-shadow:none!important;
-  touch-action:manipulation!important;
+  width:40px!important;height:40px!important;min-width:40px!important;
+  min-height:40px!important;max-width:40px!important;padding:0!important;
+  border:1px solid rgba(107,215,231,.5)!important;border-radius:50%!important;
+  font:800 17px/1 system-ui,sans-serif!important;color:#e6ffff!important;
+  background:rgba(21,72,88,var(--arena-hud-opacity,.85))!important;
+  box-shadow:inset 0 1px 2px #b5efff16!important;touch-action:manipulation!important;
 }
 html.arena-mobile-offline #arenaMobileFloating #arenaMobileModeShortcut{color:#70e7e0!important}
 html.arena-mobile-offline #arenaMobileFloating #arenaMobileTestsShortcut{color:#ffe2a4!important}
@@ -1149,32 +1156,37 @@ html.arena-mobile-offline #card-16x9:fullscreen{
   display:flex!important;flex-direction:column!important;align-items:center!important;
   justify-content:flex-start!important;gap:5px!important;
   width:100vw!important;height:100dvh!important;box-sizing:border-box!important;
-  overflow:hidden!important;padding:max(5px,env(safe-area-inset-top))
-  5px max(5px,env(safe-area-inset-bottom))!important;
+  overflow:hidden!important;
+  /* Fullscreen has no site header: reserve a top band for the v0.37 icon capsule. */
+  padding:calc(53px + env(safe-area-inset-top)) 5px
+    max(5px,env(safe-area-inset-bottom))!important;
   background:#080f1c!important;
 }
 html.arena-mobile-offline #card-9x16:fullscreen >div:first-child,
 html.arena-mobile-offline #card-16x9:fullscreen >div:first-child{display:none!important}
 html.arena-mobile-offline #card-9x16:fullscreen #arenaMobileFloating,
 html.arena-mobile-offline #card-16x9:fullscreen #arenaMobileFloating{
-  order:-2!important;flex:0 0 auto!important;max-width:100%!important;
-  align-self:center!important;margin:0 auto 1px!important;
+  position:absolute!important;top:calc(8px + env(safe-area-inset-top))!important;
+  right:max(8px,env(safe-area-inset-right))!important;
+  left:auto!important;bottom:auto!important;
+  max-width:calc(100% - 16px)!important;margin:0!important;
+  order:initial!important;
 }
 html.arena-mobile-offline #card-9x16:fullscreen #viewport9x16{
   flex:0 1 auto!important;order:0!important;
-  width:min(100%,calc((100dvh - 166px) * 9 / 16))!important;
-  max-height:calc(100dvh - 166px)!important;height:auto!important;
+  width:min(100%,calc((100dvh - 215px) * 9 / 16))!important;
+  max-height:calc(100dvh - 215px)!important;height:auto!important;
   aspect-ratio:9/16!important;overflow:hidden!important;
 }
 html.arena-mobile-offline #card-16x9:fullscreen #viewport16x9{
   flex:0 1 auto!important;order:0!important;
-  width:min(100%,calc((100dvh - 166px) * 16 / 9))!important;
-  max-height:calc(100dvh - 166px)!important;height:auto!important;
+  width:min(100%,calc((100dvh - 215px) * 16 / 9))!important;
+  max-height:calc(100dvh - 215px)!important;height:auto!important;
   aspect-ratio:16/9!important;overflow:hidden!important;
 }
 html.arena-mobile-offline #card-9x16:fullscreen:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
-  width:min(100%,calc((100dvh - 320px) * 9 / 16))!important;
-  max-height:calc(100dvh - 320px)!important;
+  width:min(100%,calc((100dvh - 369px) * 9 / 16))!important;
+  max-height:calc(100dvh - 369px)!important;
 }
 html.arena-mobile-offline #card-9x16:fullscreen #arenaMobileGestureGuide,
 html.arena-mobile-offline #card-16x9:fullscreen #arenaMobileGestureGuide{
@@ -1302,6 +1314,6 @@ html.arena-mobile-offline #card-9x16:has(#arenaMobileControlShelf.has-open-tests
 }
 html.arena-mobile-offline #card-9x16:fullscreen.arena-tests-visible #viewport9x16,
 html.arena-mobile-offline #card-9x16:fullscreen:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
-  width:min(100%,calc((100dvh - min(42dvh,270px) - 135px) * 9 / 16))!important;
-  max-height:calc(100dvh - min(42dvh,270px) - 135px)!important;
+  width:min(100%,calc((100dvh - min(42dvh,270px) - 184px) * 9 / 16))!important;
+  max-height:calc(100dvh - min(42dvh,270px) - 184px)!important;
 }
