@@ -6,7 +6,7 @@
 - Centro de pruebas consolidado con seis accesos rápidos y un solo panel de pruebas expandido al navegar, manteniendo el chat independiente y la libertad de acoplar paneles.
 - Barra de arriba reordenada por frecuencia: TikTok, Prota, Pausa, Ajustes, Pruebas y Chat, con menos espacio perdido y acceso a opciones secundarias por desplazamiento.
 - La regla de ingreso se restaura del navegador después de actualizar en lugar de forzarse a Entrada libre.
-- Auditoría y nueva recepción de eventos LIVE (seguir, regalos y suscripciones), con deduplicación y controles de diagnóstico.
+- Auditoría y nueva recepción de eventos LIVE (seguir, regalos y suscripciones), con deduplicación y controles de diagnóstico: los regalos de racha solo aplican el apoyo final; los eventos apuntan al autor real; entradas y audiencia son únicamente métricas. Otros eventos y soportes no TikTok siguen disponibles en el simulador.
 
 
 ## 2026-10-28 — Arena Live v0.25 · Transparencia del resultado final

@@ -1,7 +1,7 @@
 /* Arena Live: local TikTok chat bridge. Loaded only by bridge/server.mjs. */
 (() => {
   'use strict';
-  const state = { socket: null, connected: false, controller: false, statusReceived: false, phase: 'disconnected', account: '@polkent.live', received: 0,sharesReceived:0,shareBoosts:0,tapsReceived:0,testTapsReceived:0,tapBoosts:0,tapJoins:0,unassignedTaps:0,droppedTaps:0,clientId:null,canClaimControl:false };
+  const state = { socket: null, connected: false, controller: false, statusReceived: false, phase: 'disconnected', account: '@polkent.live', received: 0,sharesReceived:0,shareBoosts:0,followsReceived:0,giftsReceived:0,subscriptionsReceived:0,supportBoosts:0,liveAudience:null,membersSeen:0,tapsReceived:0,testTapsReceived:0,tapBoosts:0,tapJoins:0,unassignedTaps:0,droppedTaps:0,clientId:null,canClaimControl:false };
   const panel = document.createElement('section');
   panel.id = 'arena-live-bridge-panel';
   panel.setAttribute('aria-label', 'TikTok LIVE — conexión local');
@@ -12,14 +12,19 @@
     <button type="button" id="bridge-connect">Conectar LIVE</button>
     <button type="button" id="bridge-disconnect">Desconectar</button>
     <button type="button" id="bridge-claim" hidden>Usar esta partida</button>
-    <small>LIVE: comentarios, ❤️ taps y 🔁 compartidos · Otros apoyos: simulación</small>
+    <small>LIVE: 💬 chat · ❤️ taps · 🔄 compartir · ➕ seguir · 💎 regalos · ⭐ suscripciones · 👥 audiencia</small>
     <input id="bridge-test" maxlength="160" value="!guerrero" aria-label="Mensaje de prueba" style="background:#121d2c;color:white;border:1px solid #64748b;border-radius:5px;padding:5px;min-width:105px" />
     <button type="button" id="bridge-send-test">Probar comando</button>
     <button type="button" id="bridge-test-like">Probar 10 taps</button>
     <button type="button" id="bridge-test-share">Probar compartir</button>
+    <button type="button" id="bridge-test-follow">Probar seguir</button>
+    <button type="button" id="bridge-test-gift">Probar regalo</button>
+    <button type="button" id="bridge-test-subscribe">Probar suscripción</button>
     <small id="bridge-count" style="color:#a7b8c9">Mensajes recibidos: 0</small>
     <small id="bridge-taps-count" style="color:#fda4af">❤️ Taps LIVE: 0 · entradas/reingresos: 0 · pruebas: 0 · mejoras: 0</small>
     <small id="bridge-shares-count" style="color:#93c5fd" aria-live="polite">🔁 Compartidos recibidos: 0 · boosts: 0</small>
+    <small id="bridge-support-count" style="color:#a7f3d0" aria-live="polite">➕ Seguir: 0 · 💎 Regalos: 0 · ⭐ Suscripciones: 0 · boosts: 0</small>
+    <small id="bridge-live-audience" style="color:#a6bcd0" aria-live="polite">👥 Espectadores LIVE: — · entradas a sala: 0</small>
     <small id="bridge-taps-note" style="color:#94a3b8" aria-live="polite"></small>`;
   const place = document.getElementById('arenaBridgeMount') || document.getElementById('audienceSimulatorPanel') || document.querySelector('main') || document.body;
   document.getElementById('arenaBridgeUnavailable')?.remove();
@@ -35,6 +40,9 @@
   const buttonTestLike = panel.querySelector('#bridge-test-like');
   const buttonTestShare = panel.querySelector('#bridge-test-share');
   const sharesCount = panel.querySelector('#bridge-shares-count');
+  const supportCount=panel.querySelector('#bridge-support-count');
+  const audienceCount=panel.querySelector('#bridge-live-audience');
+  const socialButtons=['follow','gift','subscribe'].map(name=>[name,panel.querySelector('#bridge-test-'+name)]);
   const tapsCount = panel.querySelector('#bridge-taps-count');
   const tapsNote = panel.querySelector('#bridge-taps-note');
   const inputTest = panel.querySelector('#bridge-test');
@@ -240,7 +248,8 @@
     buttonTest.disabled = duplicate || !state.connected || !state.statusReceived;
     buttonTestLike.disabled = buttonTest.disabled;
     buttonTestShare.disabled = buttonTest.disabled;
-    for (const b of [buttonConnect, buttonDisconnect, buttonTest, buttonTestLike, buttonTestShare]) b.style.opacity = b.disabled ? '.4' : '1';
+    for(const [,button] of socialButtons)button.disabled=buttonTest.disabled;
+    for (const b of [buttonConnect, buttonDisconnect, buttonTest, buttonTestLike, buttonTestShare,...socialButtons.map(([,button])=>button)]) b.style.opacity = b.disabled ? '.4' : '1';
     count.textContent = `Mensajes recibidos: ${state.received}`;
     updateLiveChatStatus();
     window.dispatchEvent(new CustomEvent('arena-bridge-status', {detail: {
@@ -279,6 +288,14 @@
       if(!r.sent)refresh('Abre esta página como la ventana principal del juego.');
     } catch(error){refresh(String(error.message||error));}
   });
+  for(const [eventType,button] of socialButtons){
+    button.addEventListener('click',async()=>{
+      try {
+        const response=await post('/api/test-social',{eventType,username:'arena_prueba'});
+        if(!response.sent)refresh('Abre esta página como la ventana principal del juego.');
+      }catch(error){refresh(String(error.message||error));}
+    });
+  }
   buttonClaim.addEventListener('click',async()=>{try{await post('/api/claim-control',{clientId:state.clientId});}catch(error){refresh(error.message);}});
   let reconnectTimer=null,reconnectAttempt=0,stopped=false;
   window.addEventListener('pagehide',()=>{stopped=true;clearTimeout(reconnectTimer);clearTapBatches();state.socket?.close();});
@@ -318,6 +335,22 @@
         const targetId=game?.joinOnShare?.({username,platformKey:'tiktok'});
         if(targetId!=null && game.support({eventType:'share',targetId}))state.shareBoosts++;
         sharesCount.textContent=`🔁 Compartidos recibidos: ${state.sharesReceived} · boosts: ${state.shareBoosts}`;
+      } else if (data.type==='social' && state.controller && data.platformKey==='tiktok' &&
+        ['follow','gift','subscribe'].includes(data.eventType)) {
+        const kind=data.eventType;
+        if(kind==='follow')state.followsReceived++;
+        if(kind==='gift')state.giftsReceived++;
+        if(kind==='subscribe')state.subscriptionsReceived++;
+        const game=window.ArenaLive;
+        // A real contribution belongs to its sender, not the selected test target.
+        // Re-entry is still constrained by lives/time/capacity and victory.
+        const targetId=game?.joinOnShare?.({username:String(data.username||''),platformKey:'tiktok'});
+        if(targetId!=null&&game.support?.({eventType:kind,targetId}))state.supportBoosts++;
+        supportCount.textContent=`➕ Seguir: ${state.followsReceived} · 💎 Regalos: ${state.giftsReceived} · ⭐ Suscripciones: ${state.subscriptionsReceived} · boosts: ${state.supportBoosts}`;
+      } else if(data.type==='audience'&&state.controller&&data.platformKey==='tiktok') {
+        if(data.eventType==='roomUser'&&Number.isSafeInteger(data.count)&&data.count>=0)state.liveAudience=data.count;
+        if(data.eventType==='member'&&typeof data.username==='string')state.membersSeen++;
+        audienceCount.textContent=`👥 Espectadores LIVE: ${state.liveAudience===null?'—':state.liveAudience.toLocaleString()} · entradas a sala: ${state.membersSeen.toLocaleString()}`;
       } else if (data.type === 'social' && state.controller && data.platformKey === 'tiktok' && data.eventType === 'taps') {
         recordTaps(data);
       }

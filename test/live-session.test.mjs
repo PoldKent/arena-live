@@ -41,3 +41,23 @@ test('LIVE shares belong to the active connection and cannot replay after reconn
  current.emit('share',{user:{displayId:'late'}});
  assert.deepEqual(f.shares.map(e=>e.user.displayId),['first','second']);
 });
+
+test('follow gift subscribe roomUser and member events follow the active connection only',async()=>{
+ const old=new Connection(),active=new Connection();
+ const supports=[],audience=[],members=[];
+ const session=new LiveSession({createConnection:async()=>[old,active].shift(),
+  onSupport:(kind,event)=>supports.push([kind,event.id]),
+  onRoomUser:event=>audience.push(event.viewerCount),
+  onMember:event=>members.push(event.user?.displayId)});
+ await session.connect();
+ old.emit('follow',{id:'a'});old.emit('gift',{id:'b'});old.emit('subscribe',{id:'c'});
+ old.emit('roomUser',{viewerCount:4});old.emit('member',{user:{displayId:'first'}});
+ await session.disconnect();
+ old.emit('gift',{id:'stale'});
+ await session.connect();
+ active.emit('gift',{id:'new'});
+ active.emit('roomUser',{viewerCount:9});
+ await session.disconnect();
+ assert.deepEqual(supports,[['follow','a'],['gift','b'],['subscribe','c'],['gift','new']]);
+ assert.deepEqual(audience,[4,9]);assert.deepEqual(members,['first']);
+});

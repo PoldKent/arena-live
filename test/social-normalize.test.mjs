@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeTikTokLike, normalizeTikTokShare } from '../bridge/social-normalize.mjs';
+import { normalizeTikTokLike, normalizeTikTokShare, normalizeTikTokSupport, normalizeTikTokRoomUser, normalizeTikTokMember } from '../bridge/social-normalize.mjs';
 
 test('v2.5 LIKE event becomes viewer-targeted tap delta', () => {
   assert.deepEqual(normalizeTikTokLike({
@@ -47,4 +47,31 @@ test('a verified share uses its account handle and event id without applying a t
   });
   assert.equal(normalizeTikTokShare({user:{displayId:''}}),null);
   assert.equal(normalizeTikTokShare({user:{displayId:'bad name'}}),null);
+});
+
+test('LIVE follows and subscriptions target verified viewer handles',()=>{
+ assert.deepEqual(normalizeTikTokSupport('follow',{user:{uniqueId:'abc'},msgId:'f1'}),{
+  type:'social',platformKey:'tiktok',eventType:'follow',username:'@abc',eventId:'f1'
+ });
+ assert.equal(normalizeTikTokSupport('subscribe',{user:{displayId:'bad name'}}),null);
+ assert.equal(normalizeTikTokSupport('follow',{uniqueId:'@sub_one'}).username,'@sub_one');
+ assert.equal(normalizeTikTokSupport('social',{uniqueId:'viewer'}),null);
+});
+test('gift streak does not apply a boost until repeatEnd and sends one bounded event',()=>{
+ const base={user:{displayId:'gift_viewer'},common:{msgId:'gift-3'},giftType:1,giftName:'Rose',repeatCount:5000};
+ assert.equal(normalizeTikTokSupport('gift',{...base,repeatEnd:false}),null);
+ assert.deepEqual(normalizeTikTokSupport('gift',{...base,repeatEnd:true}),{
+  type:'social',platformKey:'tiktok',eventType:'gift',username:'@gift_viewer',eventId:'gift-3',
+  giftName:'Rose',repeatCount:1000
+ });
+ assert.equal(normalizeTikTokSupport('gift',{user:{displayId:'a'},giftType:0})?.repeatCount,1);
+});
+test('viewer totals and member entries remain informational, never trigger attacks',()=>{
+ assert.deepEqual(normalizeTikTokRoomUser({viewerCount:199}),{
+  type:'audience',platformKey:'tiktok',eventType:'roomUser',count:199
+ });
+ assert.equal(normalizeTikTokRoomUser({viewerCount:-1}),null);
+ assert.deepEqual(normalizeTikTokMember({user:{displayId:'viewer'}}),{
+  type:'audience',platformKey:'tiktok',eventType:'member',username:'@viewer'
+ });
 });

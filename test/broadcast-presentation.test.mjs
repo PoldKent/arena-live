@@ -112,3 +112,9 @@ test('v0.26 keeps all original settings by ID while navigating five persistent s
  for(const id of ['arenaPanelPowers','arenaPanelPlayers','arenaPanelSocial','arenaPanelScenarios','arenaPanelSimulation','arenaPanelBridge'])
    assert.match(html,new RegExp('data-workspace-reveal="'+id+'"'));
 });
+
+test('real TikTok LIVE follow gift and subscription events have isolated viewer-targeted boosts',()=>{
+ const bridge=html; // client itself is validated in bridge tests
+ assert.match(bridge,/joinOnShare\(\{username='',platformKey='tiktok'\}=\{\}\)/);
+ assert.match(bridge,/ARENA_SOCIAL_EVENT_TYPES = Object\.freeze\(\['taps', 'likes', 'share', 'follow', 'subscribe'/);
+});

@@ -6,7 +6,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WebSocket, WebSocketServer } from 'ws';
 import { normalizeTikTokChat, normalizeCreatorHandle } from './chat-normalize.mjs';
-import { normalizeTikTokLike, normalizeTikTokShare } from './social-normalize.mjs';
+import { normalizeTikTokLike, normalizeTikTokShare, normalizeTikTokSupport, normalizeTikTokRoomUser, normalizeTikTokMember } from './social-normalize.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
@@ -22,11 +22,14 @@ let controller = null;
 const recentEventIds = new Map();
 const recentLikeIds = new Map();
 const recentShareIds = new Map();
+const recentSupportIds = new Map();
+let liveViewerCount=null;
 
 function snapshot() {
   return {
     type: 'status', ...liveSession.status, account: `@${TIKTOK_USERNAME}`,
-    viewers: connectedSockets.size, localWindows: connectedSockets.size, capabilities:{comments:true,socialEvents:true,taps:true}, controllerConnected: controller?.readyState === WebSocket.OPEN,
+    viewers: connectedSockets.size, localWindows: connectedSockets.size, liveViewerCount,
+    capabilities:{comments:true,socialEvents:true,taps:true,shares:true,follows:true,gifts:true,subscriptions:true,audience:true}, controllerConnected: controller?.readyState === WebSocket.OPEN,
     version: VERSION
   };
 }
@@ -71,6 +74,31 @@ function publishShare(event) {
   }
   sendToController(share);
 }
+function publishTikTokSupport(kind,event){
+  const social=normalizeTikTokSupport(kind,event);
+  if(!social)return;
+  // No repeat for the same event. Event IDs are scoped by type; guard memory.
+  const key=social.eventId?kind+':'+social.eventId:'';
+  if(key){
+    if(recentSupportIds.has(key))return;
+    recentSupportIds.set(key,Date.now());
+    if(recentSupportIds.size>2000)for(const [id,time] of recentSupportIds){
+      if(Date.now()-time>120000||recentSupportIds.size>1500)recentSupportIds.delete(id);
+      else break;
+    }
+  }
+  sendToController(social);
+}
+function publishRoomUser(event){
+  const value=normalizeTikTokRoomUser(event);
+  if(!value)return;
+  liveViewerCount=value.count;
+  sendToController(value);
+}
+function publishMember(event){
+  const value=normalizeTikTokMember(event);
+  if(value)sendToController(value); // Informational; joining still requires a tap.
+}
 function publishLike(event) {
   const like = normalizeTikTokLike(event);
   if (!like) return;
@@ -95,7 +123,8 @@ const liveSession=new LiveSession({
     // 2.5.0 requires an options object; skip historical chat during reconnections.
     return new C(TIKTOK_USERNAME,{processInitialData:false});
   },
-  onChat:publishChat,onLike:publishLike,onShare:publishShare,onStatus:updateStatus
+  onChat:publishChat,onLike:publishLike,onShare:publishShare,
+  onSupport:publishTikTokSupport,onRoomUser:publishRoomUser,onMember:publishMember,onStatus:updateStatus
 });
 const connectLive=()=>liveSession.connect();
 const disconnectLive=()=>liveSession.disconnect();
@@ -177,6 +206,18 @@ const server = createServer(async (req, res) => {
       const share=normalizeTikTokShare({user:{displayId:body.username||'arena_prueba'}});
       if(!share)return json(res,400,{error:'Usuario inválido.'});
       return json(res,200,{sent:sendToController({...share,source:'test'})});
+    }
+    if(req.method==='POST'&&pathname==='/api/test-social'){
+      if(process.env.NODE_ENV==='production')return json(res,403,{error:'Prueba desactivada.'});
+      const body=await requestBody(req);
+      const type=String(body.eventType||'');
+      if(!['follow','gift','subscribe'].includes(type))return json(res,400,{error:'Interacción no admitida.'});
+      const social=normalizeTikTokSupport(type,{
+        user:{displayId:body.username||'arena_prueba'},giftName:'Regalo de prueba',
+        repeatCount:1,repeatEnd:true
+      });
+      if(!social)return json(res,400,{error:'Usuario inválido.'});
+      return json(res,200,{sent:sendToController({...social,source:'test'})});
     }
     if (req.method === 'POST' && pathname === '/api/test-like') {
       if (process.env.NODE_ENV === 'production') return json(res, 403, { error: 'Prueba desactivada.' });
