@@ -1,7 +1,7 @@
 // A generation owns its events. A stale connection can never revive a closed session.
 export class LiveSession {
   constructor({createConnection,onChat=()=>{},onLike=()=>{},onShare=()=>{},onStatus=()=>{},setTimer=setTimeout,clearTimer=clearTimeout,autoReconnect=true}){
-    Object.assign(this,{createConnection,onChat,onLike,onStatus,setTimer,clearTimer,autoReconnect});
+    Object.assign(this,{createConnection,onChat,onLike,onShare,onStatus,setTimer,clearTimer,autoReconnect});
     this.generation=0;this.current=null;this.wanted=false;this.timer=null;this.attempt=0;this.closing=new Set();
     this.status={phase:'disconnected',lastError:'',connectedSince:null};
   }
