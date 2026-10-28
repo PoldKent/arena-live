@@ -8666,6 +8666,16 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 }));
             },
             setSeed(seed){return setArenaRandomSeed(seed);},
+            // One real LIVE tap admits a previously unseen viewer in the lobby,
+            // without triggering !jugar's repeat healing or bypassing the 128 cap.
+            joinOnTap({ username = '', platformKey = 'tiktok' } = {}) {
+                if (gameState !== 'LOBBY' || koSequenceActive || platformKey !== 'tiktok') return false;
+                if (typeof username !== 'string' || !/^@[a-zA-Z0-9_.-]{1,24}$/.test(username)) return false;
+                const identity = viewerIdentityKey(username, platformKey);
+                if (fighters.some(f => viewerIdentityKey(f.name, f.platformKey) === identity)) return false;
+                if (fighters.length >= getArenaPlayerLimit()) return false;
+                return !!addOrBoostFighter(username, platformKey, false, null, true);
+            },
             sendChat({ username = '@Espectador', platformKey = 'tiktok', message = '', targetId = null } = {}) {
                 const skillCommand = getMatchedSkillCommand(message);
                 const target = skillCommand && targetId != null
