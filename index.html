@@ -2941,6 +2941,10 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             if(String(next[key])!==String(value))return false;
             arenaRuntime=next;
             if(key==='pausePolicy'&&value==='show')arenaAudienceQueue.length=0;
+            // A live policy change must cancel already charging disallowed specials.
+            if(key==='specialSource')for(const fighter of fighters){
+                if(fighter.castingSkill&&(value==='none'||(value==='commands'&&fighter.castingSkill.origin==='ai')))fighter.castingSkill=null;
+            }
             if(remember)try{localStorage.setItem(ARENA_RUNTIME_KEY,JSON.stringify(arenaRuntime));}catch(_){}
             if(typeof refreshArenaRuntimeControls==='function')refreshArenaRuntimeControls();
             if(Object.values(ArenaCore.targetingKeys).includes(key))refreshArenaBalancePanel(true);
@@ -5026,7 +5030,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             if(!validation.allowed){if(fighter&&origin!=='ai')announceArenaActionRejected(fighter,validation.reason);return false;}
             const rule=getFighterSpecialRule(fighter),spent=Math.min(45,Math.max(0,fighter.energy));
             fighter.energy=Math.max(0,fighter.energy-spent);playSound('charge');
-            fighter.castingSkill={cmd,timer:rule.windup,maxTimer:rule.windup,powerFactor:Math.max(.25,spent/45)};
+            fighter.castingSkill={cmd,origin,timer:rule.windup,maxTimer:rule.windup,powerFactor:Math.max(.25,spent/45)};
             fighter.aiSpecialCooldown=Math.max(fighter.aiSpecialCooldown,AI_SPECIAL_RULES.cooldownFrames);
             spawnFloatingText(fighter.x,fighter.y-48,'⚡ '+arenaActionText('charging')+' '+cmd.toUpperCase(),'#ffbe0b',16);
             return true;
@@ -5034,7 +5038,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 
         // MODULE BLOCK G: COMBAT ACTIONS + DAMAGE + K.O. (future js/combat.js).
         function executeFighterSkill(fighter, cmd) {
-            if (!arenaClassPowersAllowed() || !fighter || fighter.eliminated || fighter.fallDrop > 0) return false;
+            if (arenaRuntime.specialSource==='none' || !arenaClassPowersAllowed() || !fighter || fighter.eliminated || fighter.fallDrop > 0) return false;
             cmd = getMatchedSkillCommand(cmd);
             const requiredClass=SKILL_REQUIRED_CLASS[cmd];
             if(!requiredClass||fighter.archetypeKey!==requiredClass)return false;
