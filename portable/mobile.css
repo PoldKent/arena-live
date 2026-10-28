@@ -1031,3 +1031,15 @@ html.arena-mobile-offline #card-16x9:fullscreen #arenaOperatorPopover{
     font-size:11px!important;min-width:35px!important;height:36px!important;padding:0 5px!important;
   }
 }
+
+/* Minimum 44 px touch targets even on narrow screens. */
+html.arena-mobile-offline #arenaMobileFloating button:not(#arenaMobileEditDone){
+  height:44px!important;min-height:44px!important;min-width:44px!important;
+}
+html.arena-mobile-offline #arenaMobileFloating #arenaMobilePause,
+html.arena-mobile-offline #arenaMobileFloating #arenaPortableFullscreen,
+html.arena-mobile-offline #arenaMobileFloating #arenaMobileMoreBtn{
+  width:44px!important;height:44px!important;min-width:44px!important;max-width:44px!important;
+}
+html.arena-mobile-offline #arenaMobileFloating #arenaMobileTestsShortcut{white-space:nowrap!important}
+html.arena-mobile-offline #arenaMobileFloating #arenaMobileModeShortcut{white-space:nowrap!important}
