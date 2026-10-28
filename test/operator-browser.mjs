@@ -1161,5 +1161,28 @@ await check('New settings navigation groups controls without replacing input nod
  assert.deepEqual(r,{labels:['match','combat','broadcast','audience','workspace'],
    livesVisible:true,damageHidden:true,damageVisible:true,obsVisible:true,searchFound:true,stable:true,stored:'match'});
 });
+await check('Real TikTok follower gift subscriber support routes to the real sender rather than the selected actor',async()=>{
+ const r=await page.evaluate(()=>{
+  gameState='LOBBY';isGamePaused=false;koSequenceActive=false;
+  applyPlayerCountPreset(2);startCombatFromLobby();
+  setArenaCombatRule('powerMode','full');socialBoostMultiplier=1;
+  const outsider=fighters[0];outsider.energy=0;outsider.shieldHP=0;outsider.berserkTimer=0;
+  const ownerId=ArenaLive.joinOnShare({username:'@event_owner',platformKey:'tiktok'});
+  const owner=fighters.find(f=>f.id===ownerId);
+  owner.energy=0;owner.shieldHP=0;owner.berserkTimer=0;
+  document.getElementById('targetFighterSelect').value=String(outsider.id);
+  const socket=window.arenaTestSocket;
+  socket.dispatchEvent(new MessageEvent('message',{data:JSON.stringify({
+    type:'status',phase:'connected',isController:true,platformKey:'tiktok'})}));
+  for(const kind of ['follow','subscribe','gift'])socket.dispatchEvent(new MessageEvent('message',{data:JSON.stringify({
+    type:'social',platformKey:'tiktok',eventType:kind,username:'@event_owner',eventId:kind+'-qa'})}));
+  const count=document.getElementById('bridge-support-count').textContent;
+  return {owner:!!owner,energy:owner.energy,shield:owner.shieldHP,berserk:owner.berserkTimer,
+    untouched:outsider.energy===0&&outsider.shieldHP===0&&outsider.berserkTimer===0,count};
+ });
+ assert.equal(r.owner,true);assert.ok(r.energy>0);assert.ok(r.shield>0);assert.ok(r.berserk>0);
+ assert.equal(r.untouched,true);assert.match(r.count,/Seguir: 1/);assert.match(r.count,/Regalos: 1/);
+ assert.match(r.count,/Suscripciones: 1/);assert.match(r.count,/boosts: 3/);
+});
 assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:release}));
 } finally {await browser?.close();server.kill('SIGKILL');}
