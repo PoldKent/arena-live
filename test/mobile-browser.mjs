@@ -135,7 +135,7 @@ try{
         const result=await page.evaluate(()=>{
             ArenaPortable.start({count:4,join:true});
             const actor=fighters.find(f=>f.isStreamer),view=document.getElementById('viewport9x16'),rect=view.getBoundingClientRect();
-            actor.attackCooldown=0;
+            actor.attackCooldown=0;actor.x=camera9x16.x;actor.y=camera9x16.y;
             const center=arenaMobileTouchTarget(view);
             const x=Math.min(rect.right-15,rect.left+center.x+75),y=Math.max(rect.top+15,Math.min(rect.bottom-15,rect.top+center.y));
             const dispatch=(type,clientX,clientY)=>view.dispatchEvent(new PointerEvent(type,{bubbles:true,pointerType:'touch',pointerId:54,clientX,clientY}));
