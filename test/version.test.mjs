@@ -16,10 +16,19 @@ test('the published package, title, Settings footer and API share one release', 
   assert.match(html, /function updateArenaObsGeometrySummary\(\)/);
 });
 test('lobby overlays have no redundant streaming format tags', () => {
-  const lobby16 = html.match(/<div id="lobbyOverlay16"[\s\S]*?<!-- Lobby Rule Selector Pill -->/);
-  const lobby9 = html.match(/<div id="lobbyOverlay9"[\s\S]*?id="lobbyDetectedMode9"/);
+  const lobby16 = html.match(/<section id="lobbyOverlay16"[\s\S]*?<\/section>/);
+  const lobby9 = html.match(/<section id="lobbyOverlay9"[\s\S]*?<\/section>/);
   assert.ok(lobby16 && !lobby16[0].includes('Lobby 16:9 en Vivo'));
   assert.ok(lobby9 && !lobby9[0].includes('TikTok Live 9:16'));
+  for (const id of ['arenaAudienceGuide16','arenaAudienceGuide9','lobbyDetectedMode16','lobbyDetectedMode9','lobbyCountdownText16','lobbyCountdownText9']) {
+    assert.match(html, new RegExp('id="' + id + '"'));
+  }
+  assert.ok(lobby16[0].includes('!jugar') && lobby9[0].includes('!jugar'));
+  for (const command of ['!guerrero','!kame','!shinobi','!rasen','!titan','!coloso','!rayo','!trueno','!espiritu','!enred']) {
+    const guides = [...html.matchAll(/<aside id="arenaAudienceGuide(?:16|9)"[\s\S]*?<\/aside>/g)];
+    assert.equal(guides.length,2);
+    assert.ok(guides.every(match => match[0].includes(command)),command);
+  }
 });
 test('OBS calibration offers right offset, fixed footer and reset', () => {
   for (const id of ['arenaObsVerticalOffset','arenaObsFooterHeight','arenaObsGeometrySummary','arenaObsResetCalibration']) {
