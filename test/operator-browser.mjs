@@ -93,7 +93,7 @@ await check('The unified player/powers panel has one selector with live name, cl
  assert.equal(await page.locator('#arenaPanelSocial').evaluate(n=>n.open),true);
 });
 await check('Class selection and direct Prota entry reuse the original player flow',async()=>{
- await page.locator('#btnProtaClassMenu').click();await page.locator('#protagonistClassSelect').selectOption('ninja');assert.equal(await page.locator('#arenaOperatorPopover').isHidden(),true);
+ await page.locator('#protagonistClassSelect').selectOption('ninja');assert.equal(await page.locator('#protagonistClassSelect').inputValue(),'ninja');assert.equal(await page.locator('#arenaOperatorPopover').isHidden(),true);
  await page.locator('#btnStreamerJoin').click();assert.equal(await page.evaluate(()=>ArenaLive.getFighters().find(f=>f.isStreamer)?.classKey),'ninja');
 });
 await check('TikTok button delegates connect/disconnect to the bridge, with no real LIVE connection',async()=>{
