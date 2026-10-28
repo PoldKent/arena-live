@@ -137,7 +137,8 @@ try{
   if(process.env.ARENA_TRAINING_REPORT_DIR)await page.screenshot({path:join(process.env.ARENA_TRAINING_REPORT_DIR,'training-mobile.png')});
  });
  await check('all five preference controls fit a phone and keep settings open while applying changes',async()=>{
-  await page.evaluate(()=>{toggleSettingsModal(true);document.getElementById('arenaBalancePanel').open=true;});
+  await page.evaluate(()=>{toggleSettingsModal(true);const panel=document.getElementById('arenaBalancePanel');
+    selectArenaSettingsTab(panel.dataset.settingsCategory,false);panel.open=true;});
   await page.locator('#arenaClassPreferences').scrollIntoViewIfNeeded();await page.locator('#arenaRuntime_spiritTargeting').selectOption('prey');
   const r=await page.evaluate(()=>{const field=document.getElementById('arenaClassPreferences');return {count:field.querySelectorAll('select').length,fits:field.scrollWidth<=field.clientWidth+1,open:isSettingsOpen,preference:arenaRuntime.spiritTargeting};});assert.deepEqual(r,{count:5,fits:true,open:true,preference:'prey'});
   if(process.env.ARENA_TRAINING_REPORT_DIR)await page.screenshot({path:join(process.env.ARENA_TRAINING_REPORT_DIR,'class-preferences-mobile.png')});
