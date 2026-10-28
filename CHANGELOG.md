@@ -6,6 +6,7 @@
 - IA de Smash/Duelo recupera antes del abismo y la isométrica rescata expulsiones lejanas incluso durante el ascenso.
 - Más inercia lateral en caídas y mejor impulso de retorno al usar doble salto. Sin salto aéreo gratuito tras gastar los dos.
 - Se eliminan los dos puntos celestes; pruebas de recuperación y KO, versión 0.19.0 sincronizada.
+- Arregla dos fallos anteriores de CI: entorno de la prueba de rendimiento y utilidad CSS `.ease-out` de la hoja publicada.
 
 
 ## 2026-10-27 — Arena Live v0.18 · Un solo panel de jugador
