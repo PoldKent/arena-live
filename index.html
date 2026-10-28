@@ -7908,7 +7908,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
         const ARENA_RELEASE_VERSION = '0.18';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
-        const ARENA_OBS_DEFAULTS = Object.freeze({offset:10, footer:76});
+        const ARENA_OBS_DEFAULTS = Object.freeze({offset:0, footer:76, format:'21'});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
         const ARENA_OBS_COPY = Object.freeze({
           es:['Calibración para OBS','Restablecer','Ajusta antes de emitir; los recortes se configuran después. Abrir los paneles no cambiará el tamaño del juego.','Mover 9:16 a la derecha','Espacio inferior de 16:9','Abre Modo Stream para comprobar tamaños.','Pantallas','Preparación'],
@@ -7921,8 +7921,9 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
           it:['Calibrazione OBS','Ripristina','Regola prima della diretta, poi imposta i ritagli OBS. Aprire i pannelli non ridimensiona il gioco.','Sposta 9:16 a destra','Spazio inferiore 16:9','Apri il duale a schermo intero per controllare.','Schermi','Preparazione']
         });
         function clampArenaObsCalibration(key, value) {
+          if(key==='format')return ['21','20','19.5','16'].includes(String(value)) ? String(value) : ARENA_OBS_DEFAULTS.format;
           const parsed = Number(value);
-          if (key === 'offset') return Math.max(0,Math.min(16,Number.isFinite(parsed)?Math.round(parsed):10));
+          if (key === 'offset') return Math.max(-120,Math.min(120,Number.isFinite(parsed)?Math.round(parsed):0));
           if (key === 'footer') return Math.max(72,Math.min(148,4*Math.round((Number.isFinite(parsed)?parsed:76)/4)));
           return null;
         }
@@ -7931,10 +7932,15 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const raw = localStorage.getItem(ARENA_OBS_CALIBRATION_KEY);
             const values = JSON.parse(raw || '{}');
             if (values && typeof values === 'object') {
-              if (values.offset === 4 && values.footer === 108) {
+              const legacy = !Object.hasOwn(values,'format');
+              if (legacy && values.offset === 4 && values.footer === 108) {
                 arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
               } else {
-                for(const key of ['offset','footer']) arenaObsCalibration[key] = clampArenaObsCalibration(key,values[key] ?? ARENA_OBS_DEFAULTS[key]);
+                for(const key of ['offset','footer','format']) arenaObsCalibration[key] = clampArenaObsCalibration(key,values[key] ?? ARENA_OBS_DEFAULTS[key]);
+                // Old offsets were positive-only (0…16), and anchored the
+                // preview to the right edge. Center the new frame once
+                // rather than preserving a misleading legacy displacement.
+                if (legacy) arenaObsCalibration.offset = 0;
               }
             }
           } catch(_) { /* default calibration when storage is unavailable */ }
@@ -7949,16 +7955,25 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
           arenaObsCalibration={...ARENA_OBS_DEFAULTS};
           applyArenaObsCalibration(true);
         }
+        function centerArenaObsVertical() {
+          setArenaObsCalibration('offset',0);
+        }
         function applyArenaObsCalibration(remember) {
           const stage=document.getElementById('broadcastStageSection');
           if(stage){
             stage.style.setProperty('--arena-vertical-nudge', `${arenaObsCalibration.offset}px`);
+            stage.style.setProperty('--arena-vertical-frame-height', arenaObsCalibration.format);
             stage.style.setProperty('--arena-operator-footer-height', `${arenaObsCalibration.footer}px`);
           }
           for(const [key,id,output] of [['offset','arenaObsVerticalOffset','arenaObsVerticalOffsetValue'],['footer','arenaObsFooterHeight','arenaObsFooterHeightValue']]) {
             const slider=document.getElementById(id); if(slider)slider.value=arenaObsCalibration[key];
-            const label=document.getElementById(output); if(label)label.textContent=`${arenaObsCalibration[key]} px`;
+            const label=document.getElementById(output);
+            if(label)label.textContent=`${key==='offset'&&arenaObsCalibration[key]>0?'+':''}${arenaObsCalibration[key]} px`;
           }
+          const exact=document.getElementById('arenaObsVerticalOffsetExact');
+          if(exact)exact.value=arenaObsCalibration.offset;
+          const format=document.getElementById('arenaObsVerticalFormat');
+          if(format)format.value=arenaObsCalibration.format;
           if(remember)try{localStorage.setItem(ARENA_OBS_CALIBRATION_KEY,JSON.stringify(arenaObsCalibration));}catch(_){}
           if(document.fullscreenElement===stage){
             // Force grid-track resolution before measuring; explicit calibration may resize OBS captures.
@@ -7974,7 +7989,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
           const stage=document.getElementById('broadcastStageSection');
           if(document.fullscreenElement!==stage){el.textContent=copy[5];return;}
           const dims=id=>{const r=document.getElementById(id)?.getBoundingClientRect();return r?`${Math.round(r.width)}×${Math.round(r.height)}`:'—';};
-          el.textContent=`${copy[6]}: ${dims('viewport16x9')} (16:9) · ${dims('card-9x16')} (marco 9:21) → ${dims('viewport9x16')} (9:16) · +${arenaObsCalibration.offset}px`;
+          el.textContent=`${copy[6]}: ${dims('viewport16x9')} (16:9) · Vertical 9:${arenaObsCalibration.format} ${dims('card-9x16')} → vídeo 9:16 ${dims('viewport9x16')} · ${arenaObsCalibration.offset>0?'+':''}${arenaObsCalibration.offset}px`;
         }
         function refreshArenaObsCalibrationLabels() {
           const c=ARENA_OBS_COPY[currentLanguage]||ARENA_OBS_COPY.es;
@@ -8116,12 +8131,13 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 const height16 = scale16 * 9;
                 const avail9W = Math.max(1, rightRect.width - 20);
                 const avail9H = Math.max(1, rightRect.height - 2);
-                // Fit the entire 9:21 frame in the Stream dock. The 9:16 video
-                // occupies exactly 16/21 of its height, with equal upper/lower margins.
-                const scale9 = Math.max(.5, Math.min(avail9W / 9, avail9H / 21));
+                // The selected 9:16…9:21 carrier is fitted into the right dock.
+                // Keep the 9:16 scene unscaled in aspect, precisely centered.
+                const selectedHeight=Number(arenaObsCalibration.format);
+                const scale9 = Math.max(.5, Math.min(avail9W / 9, avail9H / selectedHeight));
                 const width9 = Math.floor(scale9 * 9);
                 const height9 = Math.floor(scale9 * 16);
-                const frameHeight9 = Math.floor(scale9 * 21);
+                const frameHeight9 = Math.floor(scale9 * selectedHeight);
                 const frame9 = document.getElementById('card-9x16');
                 if (frame9) {
                     frame9.classList.add('arena-stream-921');
