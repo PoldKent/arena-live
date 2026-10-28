@@ -2024,6 +2024,9 @@ html.arena-mobile-offline #arenaTopBarInner .arena-brand-block h1{
 }
 html.arena-mobile-offline #arenaTopBarInner .arena-brand-block>div:first-child,
 html.arena-mobile-offline #arenaTopStats{display:none!important}
+html.arena-mobile-offline #arenaTopBarInner>.hidden.md\\:flex{display:none!important}
+html.arena-mobile-offline #arenaTopBarInner .arena-brand-meta{gap:3px!important;min-width:0!important}
+@media(max-width:430px){html.arena-mobile-offline #arenaTopBarInner #headerStateBadge{display:none!important}}
 html.arena-mobile-offline #arenaTopBarInner #headerStateBadge{
   padding:2px 4px!important;font-size:8px!important;letter-spacing:0!important;white-space:nowrap!important;
 }
@@ -2078,6 +2081,14 @@ html.arena-mobile-offline #card-9x16 #viewport9x16{
   width:min(calc(100% - 6px),calc((100dvh - 185px) * 9 / 16))!important;
   height:auto!important;max-height:calc(100dvh - 185px)!important;
   aspect-ratio:9/16!important;margin:0 auto!important;overflow:hidden!important;
+}
+html.arena-mobile-offline #card-9x16:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
+  width:min(calc(100% - 6px),calc((100dvh - 320px) * 9 / 16))!important;
+  max-height:calc(100dvh - 320px)!important;
+}
+html.arena-mobile-offline[data-mobile-mode="player"][data-mobile-touch-mode="touch"] #card-9x16 #viewport9x16{
+  width:min(calc(100% - 6px),calc((100dvh - 132px) * 9 / 16))!important;
+  max-height:calc(100dvh - 132px)!important;
 }
 html.arena-mobile-offline #card-9x16 .arena-fullscreen-exit-button,
 html.arena-mobile-offline #card-16x9 .arena-fullscreen-exit-button{display:none!important}
@@ -2159,6 +2170,13 @@ html.arena-mobile-offline #arenaMobileControlShelf #touchJoystick{
   border-radius:50%!important;background:#173b55!important;
   box-shadow:0 2px 10px #0008,inset 0 1px 7px #90eaff2c!important;
   box-sizing:border-box!important;pointer-events:auto!important;touch-action:none!important;
+}
+html.arena-mobile-offline #arenaMobileControlShelf #touchJoystick.is-active{
+  border-color:#76fff0!important;background:#135e6e!important;
+  box-shadow:0 0 17px #3cf0ee65,inset 0 0 8px #81fff044!important;
+}
+html.arena-mobile-offline #arenaMobileControlShelf #arenaHeaderActions>button:not(:disabled):active{
+  box-shadow:0 0 15px #5aefef75,inset 0 2px 8px #a1fbff50!important;
 }
 html.arena-mobile-offline #arenaMobileControlShelf #touchJoystick .touch-joystick-ring{
   display:grid!important;place-items:center!important;width:82%!important;height:82%!important;
@@ -11126,7 +11144,7 @@ const ARENA_BALANCE_EVIDENCE=Object.freeze({"version":"0.15.0","sample":{"matche
             }
         });
     </script>
-<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze({"version":"0.39.0","edition":"mobile-offline-preview","sourceBlobs":{"index.html":"74044e80b48a9a125d846c1e2516f8338e8c50ab","styles/arena-ui.css":"c933a9cfb504daa6d27800c6098396b3aa57114f","styles/TAILWIND-LICENSE.txt":"d6a82290738a9f78946cbcb4594535d6984086dd","engine/arena-core.js":"ac22091a1263e294b733a337f8c6ebc4f2e1bc9d","engine/arena-render.js":"6c9603974d2c02d0f0fb52857992211c08cd6725","engine/arena-audio.js":"319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934","engine/arena-settings.js":"f1fbbd2492b4be8cfb725e72cd0ab604894681cf","engine/arena-balance-evidence.js":"0aab05b49f0ef9e80c43810b2bfc929b4f695cdf","portable/mobile.css":"0d8594d0e9a247ccc8c97ffd0596cbbd9a019297","portable/mobile-runtime.js":"a996b4a02b0264c07aa9f18e0263de95c033700f","portable/mobile-touch.js":"33cb9d45cdee5424dda0d4372f115c91430aea40"},"preview":"PR-4-mobile-control-redesign"});</script>
+<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze({"version":"0.39.0","edition":"mobile-offline-preview","sourceBlobs":{"index.html":"74044e80b48a9a125d846c1e2516f8338e8c50ab","styles/arena-ui.css":"c933a9cfb504daa6d27800c6098396b3aa57114f","styles/TAILWIND-LICENSE.txt":"d6a82290738a9f78946cbcb4594535d6984086dd","engine/arena-core.js":"ac22091a1263e294b733a337f8c6ebc4f2e1bc9d","engine/arena-render.js":"6c9603974d2c02d0f0fb52857992211c08cd6725","engine/arena-audio.js":"319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934","engine/arena-settings.js":"f1fbbd2492b4be8cfb725e72cd0ab604894681cf","engine/arena-balance-evidence.js":"0aab05b49f0ef9e80c43810b2bfc929b4f695cdf","portable/mobile.css":"74cf61beff965c11dd08e06365751c57747c23aa","portable/mobile-runtime.js":"3916cebfc4dc2d7f2712d271a067f895d4551811","portable/mobile-touch.js":"33cb9d45cdee5424dda0d4372f115c91430aea40"},"preview":"PR-4-ergonomia-final"});</script>
 <script id="arena-mobile-runtime">
 // Loaded inline after the unchanged classic engine, before its load bootstrap.
 // This adapter changes presentation and test setup, never combat decisions.
@@ -11352,7 +11370,7 @@ function installArenaPortableFloatingUI(){
             document.getElementById('arenaPortableNotice').hidden=false;
         };
         // Offline control menu: omit streaming connections and OBS-specific entries.
-        for(const key of ['arenaViewMenuBtn','arenaFullscreenMenuBtn','arenaDualChatToggleBtn','arenaDualTikTokConnectBtn','btnFullscreenDual']){
+        for(const key of ['arenaViewMenuBtn','arenaFullscreenMenuBtn','arenaDualChatToggleBtn','arenaDualTikTokConnectBtn','arenaDualTestsToggle','btnFullscreenDual']){
             menu.querySelector('[data-forward-control="'+key+'"]')?.remove();
         }
         const round=document.createElement('details');round.className='arena-mobile-match-menu';
