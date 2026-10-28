@@ -34,6 +34,14 @@ Abrir Ajustes pausa y cerrarlo reanuda. Durante la pausa, el chat puede guardar 
 
 **Guardar/Cargar configuración** conserva reglas, sesión, calibración OBS y las distribuciones de ambos espacios. El archivo no es una partida guardada ni contiene los perfiles del chat. La importación aplica opciones al instante. **Restablecer sesión** conserva OBS y los paneles. **Exportar diagnóstico** registra tiempos de CPU y resoluciones, sin inventar uso de GPU.
 
+## Actualización visual y diagnóstico de 128 especiales
+
+El duelo 16:9 utiliza barras superiores más anchas, con vida, energía, nombres y porcentajes grandes. **GO!** aparece centrado, sin recuadro. La pantalla final se reconstruyó de forma independiente en horizontal y vertical; incluye nombre grande, clase, plataforma, K.O., daño, apoyos, finalistas y acciones de lobby/revancha. Los empates muestran un encabezado distinto y los dos temporizadores de victoria se sincronizan.
+
+Para investigar los bajones de FPS con 128 participantes, ejecuta **`npm.cmd run test:performance`** (raster por software) o **`npm.cmd run test:gpu`** (envío con aceleración, sujeto al entorno). Busca la salida **`CAST_STRESS`**: reproduce 128 especiales lanzados en una misma ráfaga y entrega milisegundos de ejecución, simulación y dibujo (mediana y p95). **`BURST`** mide 180 fotogramas simulados con IA. Valores de dibujo p95 mayores a 16,7 ms pueden dificultar 60 FPS; mayores a 33,3 ms, 30 FPS. No son FPS reales de OBS ni equivalen automáticamente a tu GPU.
+
+La búsqueda ordinaria de objetivos en IA evita ahora llamadas repetitivas al validador para cada rival, conservando el orden de la lista, las exclusiones de los eliminados y las reglas de prioridad. Se descartaron cambios que no mejoraron el tiempo en micropruebas. Los ajustes visuales no modifican resolución, daño, energía, duración de ataques ni cupo de 128.
+
 ## Rendimiento con 128 jugadores
 
 En ráfagas simultáneas de 128 especiales, el dibujo ahora comparte el índice de personajes entre ambas cámaras y descarta únicamente efectos completamente fuera de la vista, con márgenes de seguridad para rayos, columnas de K.O. y haces que cruzan la pantalla. Las partículas de especiales reservan sus huecos en bloque: mismo límite, orden y aspecto finales, menos desplazamientos del arreglo. El observador de traducción evita recorrer mensajes de chat que ya están normalizados. No se alteraron daño, física, aleatoriedad, duración de los especiales ni resolución de captura. Estas optimizaciones reducen trabajo innecesario; el FPS real depende de CPU, GPU y OBS y debe medirse en la emisión.
