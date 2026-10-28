@@ -30,12 +30,20 @@ test('lobby overlays have no redundant streaming format tags', () => {
     assert.ok(guides.every(match => match[0].includes(command)),command);
   }
 });
-test('OBS calibration offers right offset, fixed footer and reset', () => {
-  for (const id of ['arenaObsVerticalOffset','arenaObsFooterHeight','arenaObsGeometrySummary','arenaObsResetCalibration']) {
-    assert.ok(html.includes('id="'+id+'"'));
+test('OBS calibration has four selectable portrait ratios, precise signed centering and reset', () => {
+  for (const id of ['arenaObsVerticalFormat','arenaObsVerticalOffset','arenaObsVerticalOffsetExact',
+    'arenaObsCenterVertical','arenaObsFooterHeight','arenaObsGeometrySummary','arenaObsResetCalibration']) {
+    assert.ok(html.includes('id="'+id+'"'),id);
   }
+  for (const ratio of ['21','20','19.5','16']) {
+    assert.ok(html.includes('<option value="'+ratio+'">9:'+ratio),ratio);
+  }
+  assert.match(html, /id="arenaObsVerticalOffset" min="-120" max="120" step="1" value="0"/);
+  assert.match(html, /function centerArenaObsVertical\(\)/);
   assert.match(html, /function resetArenaObsCalibration\(\)/);
   assert.match(html, /--arena-vertical-nudge/);
+  assert.match(html, /--arena-vertical-frame-height/);
   assert.match(html, /--arena-operator-footer-height/);
+  assert.doesNotMatch(html, /9:16 CENTRADO · MARCO 9:21/);
 });
 
