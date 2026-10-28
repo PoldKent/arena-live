@@ -34,3 +34,24 @@ test('mobile Combat settings have bounded widths, independent scrolling and resp
   assert.match(css,/#settingsGeneralPanel \.arena-settings-content select\{[\s\S]*?text-overflow:ellipsis/);
   assert.match(css,/#arenaSettingsTabs\{[\s\S]*?grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 });
+
+test('Player supports saved touch-total or joystick controls, with no unwanted game overlay',()=>{
+  assert.match(runtime,/touchMode:'joystick'/);
+  assert.match(runtime,/dataset\.mobileTouchMode/);
+  assert.match(touch,/function arenaMobileSetTouchMode\(mode\)/);
+  assert.match(touch,/function arenaMobileSyncTouchMode\(\)/);
+  assert.match(touch,/name="arenaMobileTouchMode"/);
+  assert.match(touch,/Táctil total/);
+  assert.match(touch,/Joystick/);
+  assert.doesNotMatch(touch,/touchControlDock'\)\?\.remove\(\)/);
+  assert.match(touch,/touchJoystick:\[19,82\]/);
+  assert.match(runtime,/const header=document\.getElementById\('arenaTopBarInner'\)/);
+  assert.match(runtime,/fullscreen\?card:header/);
+  assert.match(runtime,/id='arenaMobileGestureGuide'/);
+  assert.match(css,/#arenaMobileGestureGuide/);
+  assert.match(css,/data-mobile-touch-mode="touch"/);
+  assert.match(css,/data-mobile-touch-mode="joystick"/);
+  assert.match(css,/#card-9x16:fullscreen #viewport9x16/);
+  assert.match(runtime,/id='arenaMobileModeShortcut'/);
+  assert.match(runtime,/id='arenaMobileTestsShortcut'/);
+});
