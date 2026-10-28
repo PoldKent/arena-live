@@ -222,7 +222,7 @@ function installArenaPortableFloatingUI(){
             document.getElementById('arenaPortableNotice').hidden=false;
         };
         // Offline control menu: omit streaming connections and OBS-specific entries.
-        for(const key of ['arenaViewMenuBtn','arenaFullscreenMenuBtn','arenaDualChatToggleBtn','arenaDualTikTokConnectBtn','btnFullscreenDual']){
+        for(const key of ['arenaViewMenuBtn','arenaFullscreenMenuBtn','arenaDualChatToggleBtn','arenaDualTikTokConnectBtn','arenaDualTestsToggle','btnFullscreenDual']){
             menu.querySelector('[data-forward-control="'+key+'"]')?.remove();
         }
         const round=document.createElement('details');round.className='arena-mobile-match-menu';
