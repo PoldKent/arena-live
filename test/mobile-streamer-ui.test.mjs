@@ -75,3 +75,21 @@ test('Pruebas is never clipped by the control shelf and stays visible in fullscr
   assert.match(runtime,/arenaMobileMountTestDrawer\(\)/);
   assert.doesNotMatch(runtime,/\['arenaHeaderActions','touchControlDock','arenaStreamerSkillsDock','arenaPortableTestDrawer'\]/);
 });
+
+test('v0.36–v0.37 top-right floating capsule is restored without overlapping 9:16',()=>{
+  const restored=css.split('/* Restore the v0.36–v0.37 compact top-right capsule')[1];
+  assert.ok(restored,'The version 0.37 restoration is present');
+  assert.match(restored,/position:fixed!important/);
+  assert.match(restored,/right:max\(8px,env\(safe-area-inset-right\)\)!important/);
+  assert.match(restored,/border-radius:24px!important/);
+  assert.match(restored,/border-radius:50%!important/);
+  assert.match(restored,/width:40px!important;height:40px!important/);
+  assert.match(css,/min-height:60px!important;z-index:230!important/);
+  assert.match(css,/#card-9x16:fullscreen #arenaMobileFloating,[\s\S]*?position:absolute!important/);
+  assert.match(css,/padding:calc\(53px \+ env\(safe-area-inset-top\)\)/);
+  assert.match(runtime,/hud\.prepend\(pause\)/);
+  assert.match(runtime,/id='arenaMobileModeShortcut'/);
+  assert.match(runtime,/id='arenaMobileTestsShortcut'/);
+  assert.match(runtime,/hud\.insertBefore\(topMenu,fullscreenControl\)/);
+  assert.match(touch,/function arenaMobileMountTestDrawer\(\)/);
+});
