@@ -860,7 +860,7 @@ await check('Prota uses a direct five-class toolbar dropdown instead of a nested
  const menu=page.locator('#btnProtaClassMenu'),select=page.locator('#arenaHeaderActions #protagonistClassSelect');
  assert.equal(await menu.count(),0);
  assert.equal(await select.locator('option').count(),5);
- await page.evaluate(async()=>{if(document.fullscreenElement)await document.exitFullscreen();toggleSettingsModal(false);openLobby(true);});
+ await page.evaluate(async()=>{if(document.fullscreenElement)await document.exitFullscreen();toggleSettingsModal(false);arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};openLobby(true);});
  await page.waitForFunction(()=>!document.fullscreenElement);
  await select.selectOption('ninja');
  await page.evaluate(()=>joinAsStreamer());
