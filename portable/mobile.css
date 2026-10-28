@@ -666,7 +666,6 @@ html.arena-mobile-offline #arenaPortableSetup select{
  background-color:rgba(19,50,72,var(--arena-hud-opacity,.85))!important;
 }
 
-
 /* v0.37: Director controls stay within one compact scrollable panel. */
 html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
  position:absolute!important;top:clamp(78px,10%,110px);right:9px;left:auto;
