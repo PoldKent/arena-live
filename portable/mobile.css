@@ -901,6 +901,9 @@ html.arena-mobile-offline #arenaTopBarInner .arena-brand-block h1{
 }
 html.arena-mobile-offline #arenaTopBarInner .arena-brand-block>div:first-child,
 html.arena-mobile-offline #arenaTopStats{display:none!important}
+html.arena-mobile-offline #arenaTopBarInner>.hidden.md\\:flex{display:none!important}
+html.arena-mobile-offline #arenaTopBarInner .arena-brand-meta{gap:3px!important;min-width:0!important}
+@media(max-width:430px){html.arena-mobile-offline #arenaTopBarInner #headerStateBadge{display:none!important}}
 html.arena-mobile-offline #arenaTopBarInner #headerStateBadge{
   padding:2px 4px!important;font-size:8px!important;letter-spacing:0!important;white-space:nowrap!important;
 }
