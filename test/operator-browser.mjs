@@ -153,7 +153,7 @@ await check('OBS calibration keeps the established key and applies exact saved v
  await page.locator('#arenaDualSettingsBtn').click();await settingsSection(2);
  await page.locator('#arenaObsVerticalOffset').evaluate(n=>{n.value='8';n.dispatchEvent(new Event('input',{bubbles:true}));n.dispatchEvent(new Event('change',{bubbles:true}));});
  assert.equal((await state()).settingsOpen,true);assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('arenaLiveObsCalibrationV01')).offset),8);
- await page.locator('#btnViewDual').click();assert.equal(await page.evaluate(()=>monitorFocus),'dual');assert.equal((await state()).paused,false);await page.locator('#btnFullscreenDual').click();await page.waitForFunction(()=>document.fullscreenElement?.id==='broadcastStageSection');
+ await page.locator('#btnViewDual').click();assert.equal(await page.evaluate(()=>monitorFocus),'dual');assert.equal((await state()).paused,false);await page.keyboard.press('Escape');assert.equal((await state()).settingsOpen,false);await page.locator('#btnFullscreenDual').click();await page.waitForFunction(()=>document.fullscreenElement?.id==='broadcastStageSection');
 });
 await check('Stream uses its own reserved left column and contains both correctly proportioned canvases',async()=>{
  await page.waitForTimeout(150);assert.equal(await page.locator('#arenaStreamToolbarMount #arenaHeaderActions').count(),1);assert.equal(await page.locator('#arenaStreamPanelHost').isHidden(),true);
