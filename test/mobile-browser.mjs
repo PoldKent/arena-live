@@ -56,7 +56,8 @@ try{
         assert.ok(Math.abs(layout.videoRatio-9/16)<.02,JSON.stringify(layout));
         assert.equal(layout.guideVisible,true);
         assert.ok(layout.guideTop>=layout.viewportTop-2,JSON.stringify(layout));
-        for(const command of ['!jugar','!guerrero','!kame','!shinobi','!rasen','!titan','!coloso','!rayo','!trueno','!espiritu','!enred'])assert.ok(layout.commands.includes(command),command);
+        assert.match(layout.commands,/DALE TAP TAP PARA UNIRTE/i);
+        for(const command of ['!guerrero','!kame','!shinobi','!rasen','!titan','!coloso','!rayo','!trueno','!espiritu','!enred'])assert.ok(layout.commands.includes(command),command);
     });
     await check('only the visible portrait capture allocates pixels; 720p uses 56% fewer pixels than full HD',async()=>{
         const dimensions=await page.evaluate(()=>{renderBothScreensSimultaneously();return [canvas16.width,canvas16.height,canvas9.width,canvas9.height];});
