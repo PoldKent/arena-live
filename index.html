@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.32 — TikTok LIVE</title>
+    <title>Arena Live v0.33 — TikTok LIVE</title>
     <!--
       ARENA LIVE · GAME RUNTIME
       The classic game script stays here; utility CSS is built locally and
@@ -13,7 +13,7 @@
       have been migrated to explicit event listeners.
     -->
     <!-- Styles are built once; no browser compiler runs during a stream. -->
-    <link rel="stylesheet" href="styles/arena-ui.css?v=0.32">
+    <link rel="stylesheet" href="styles/arena-ui.css?v=0.33">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Fonts: Inter & Orbitron for Arcade/Esports HUD -->
@@ -219,7 +219,7 @@
 #viewport16x9 .arena-victory-card, #viewport9x16 .arena-victory-card,
 #viewport16x9 .arena-audience-guide, #viewport9x16 .arena-audience-guide { opacity: var(--arena-hud-opacity); }
 #verticalEventHistory { display: none !important; }
-/* v0.32 · Operator-first layout. No game canvas, OBS crop or rule logic is modified. */
+/* v0.33 · Operator-first layout. No game canvas, OBS crop or rule logic is modified. */
 #arenaSettingsNav {position:sticky;top:-10px;z-index:4;display:grid;gap:7px;padding:9px 1px 11px;background:#0b101e;border-bottom:1px solid #34495b;margin-bottom:11px}
 #arenaSettingsTabs {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
 #arenaSettingsTabs button {padding:9px 4px;min-height:37px;border:1px solid #30465b;border-radius:7px;background:#152131;color:#d2e0eb;font:650 11px Inter,system-ui;white-space:normal}
@@ -1913,17 +1913,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.32 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.33 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
 
     <!-- ==================== COMPLETE GAME ENGINE, LOBBY & VICTORY SCRIPT ==================== -->
-    <script src="engine/arena-core.js?v=0.32"></script>
-    <script src="engine/arena-render.js?v=0.32"></script>
-    <script src="engine/arena-audio.js?v=0.32"></script>
-    <script src="engine/arena-settings.js?v=0.32"></script>
-    <script src="engine/arena-balance-evidence.js?v=0.32"></script>
+    <script src="engine/arena-core.js?v=0.33"></script>
+    <script src="engine/arena-render.js?v=0.33"></script>
+    <script src="engine/arena-audio.js?v=0.33"></script>
+    <script src="engine/arena-settings.js?v=0.33"></script>
+    <script src="engine/arena-balance-evidence.js?v=0.33"></script>
     <script>
         /*************************************************************************
          * ARENA LIVE · MONOLITHIC ENGINE INDEX
@@ -8296,7 +8296,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.32';
+        const ARENA_RELEASE_VERSION = '0.33';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:0, footer:76, format:'21'});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
@@ -9000,7 +9000,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             refreshArenaTrainingControls();
         }
 
-        // v0.32: Reorganize existing Settings sections, never cloning inputs or
+        // v0.33: Reorganize existing Settings sections, never cloning inputs or
         // changing their inline handlers, IDs, saved values or rule semantics.
         const ARENA_SETTINGS_NAV_KEY = 'arenaLiveSettingsNavV1';
         const ARENA_SETTINGS_GROUPS = Object.freeze(['match','controls','broadcast','audio','audience','system','combat','classes','system']);
@@ -9250,7 +9250,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.32.0',
+            version: '0.33.0',
             edition: 'tiktok',
             renderSpriteMode: arenaGpuSpritesEnabled ? 'hardware-candidate' : 'software-safe-vectors',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,
