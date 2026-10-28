@@ -19,7 +19,7 @@ test('one explicit controller receives comments and server shutdown closes activ
         response=await post('/api/test-chat',{message:'!titan'});assert.equal((await response.json()).sent,false);
         response=await post('/api/claim-control',{clientId:second.clientId});assert.equal(response.status,200);await b.until(v=>v.isController===true);
         response=await post('/api/test-chat',{username:'hello',message:'!titan'});assert.equal((await response.json()).sent,true);await b.until(v=>v.type==='chat');assert.equal(b.messages.filter(v=>v.type==='chat').length,1);
-        const status=await(await fetch(base+'/api/status')).json();assert.equal(status.localWindows,1);assert.deepEqual(status.capabilities,{comments:true,socialEvents:false});
+        const status=await(await fetch(base+'/api/status')).json();assert.equal(status.localWindows,1);assert.deepEqual(status.capabilities,{comments:true,socialEvents:true,taps:true});
         const exited=once(server,'exit');if(process.platform==='win32')server.send('arena-test-shutdown');else server.kill('SIGINT');
         const [code]=await Promise.race([exited,new Promise((_,reject)=>{const t=setTimeout(()=>reject(Error('Shutdown did not finish with an active WebSocket')),3000);t.unref();})]);assert.equal(code,0);
     }finally{for(const ws of clients)ws.terminate();if(server.exitCode===null)server.kill('SIGKILL');}
