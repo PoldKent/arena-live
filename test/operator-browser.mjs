@@ -53,7 +53,7 @@ await check('Both broadcast views include permanent five-class instructions and 
 });
 
 async function unfold(id){const panel=page.locator('#'+id);if(!await panel.evaluate(n=>n.open))await panel.locator('> summary').click({noWaitAfter:true});}
-async function settingsSection(index){const section=page.locator('.arena-settings-section').nth(index);if(!await section.evaluate(n=>n.open))await section.locator('> summary').click({noWaitAfter:true});}
+async function settingsSection(index){const section=page.locator('.arena-settings-section').nth(index);await page.evaluate(index=>{const s=document.querySelectorAll('.arena-settings-section')[index];selectArenaSettingsTab(s.dataset.settingsCategory,false);},index);if(!await section.evaluate(n=>n.open))await section.locator('> summary').click({noWaitAfter:true});}
 async function streamClick(id){await page.mouse.move(600,20);await page.locator('#'+id).click({noWaitAfter:true});}
 await check('UI styles are served locally without a browser Tailwind compiler',async()=>{
  const response=await page.request.get(`http://127.0.0.1:${port}/styles/arena-ui.css?v=0.14`);
