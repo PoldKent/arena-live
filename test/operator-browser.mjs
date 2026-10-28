@@ -261,7 +261,7 @@ const openRuleSettings=async()=>{
 };
 const ruleRange=async(key,value)=>page.locator(`[data-combat-rule="${key}"]`).evaluate((n,value)=>{n.value=String(value);n.dispatchEvent(new Event('input',{bubbles:true}));n.dispatchEvent(new Event('change',{bubbles:true}));},value);
 const capacityUI=async value=>{await page.locator('#arenaMaxPlayers').fill(String(value));await page.locator('#arenaMaxPlayers').press('Tab');};
-await check('Configurable capacity blocks chat, raw admission and Prota while preserving existing re-entry slots',async()=>{
+await check('Capacity blocks real new viewers, reserves a bot slot for Prota and preserves legal re-entry',async()=>{
  await openRuleSettings();await capacityUI(4);
  await page.evaluate(()=>{setRejoinRuleMode('free');applyPlayerCountPreset(4);});
  const before=await page.evaluate(()=>ArenaLive.getFighters().map(f=>f.id));
@@ -270,9 +270,9 @@ await check('Configurable capacity blocks chat, raw admission and Prota while pr
   addOrBoostFighter('raw_capacity','twitch');joinAsStreamer();
   const f=fighters[0];f.eliminated=true;const joins=f.joinsUsed;
   addOrBoostFighter(f.name,f.platformKey,false);
-  return {ids:fighters.map(f=>f.id),rejoined:!f.eliminated&&f.joinsUsed===joins+1,state:ArenaLive.getState()};
+  return {ids:fighters.map(f=>f.id),prota:fighters.some(f=>f.isStreamer),rejoined:!f.eliminated&&f.joinsUsed===joins+1,state:ArenaLive.getState()};
  });
- assert.deepEqual(result.ids,before);assert.equal(result.rejoined,true);assert.equal(result.state.maxFighters,4);assert.equal(result.state.hardMaxFighters,128);assert.equal(await page.locator('#btnStreamerJoin').isDisabled(),true);
+ assert.equal(result.ids.length,4);assert.equal(result.prota,true);assert.equal(result.rejoined,true);assert.equal(result.state.maxFighters,4);assert.equal(result.state.hardMaxFighters,128);assert.equal(await page.locator('#btnStreamerJoin').isDisabled(),true);
  assert.equal((await state()).settingsOpen,true);
 });
 await check('Scenario loading and delayed batch joins obey the selected capacity',async()=>{
@@ -938,6 +938,88 @@ await check('First TikTok tap admits one viewer in lobby, never duplicates or by
  assert.equal(admission.found,1);assert.equal(admission.rosterAfter,admission.before+1);
  assert.equal(admission.blocked,false);assert.equal(admission.late,false);
  assert.equal(admission.fullCount,128);
+});
+await check('Lobby opacity changes both welcome cards and both audience guides',async()=>{
+ const values=await page.evaluate(()=>{
+  openLobby(true);setArenaHudOpacity(50);
+  const output=['16x9','9x16'].map(v=>{
+   const host=document.getElementById('viewport'+v);
+   return [getComputedStyle(host.querySelector('.arena-onboarding-card')).opacity,
+     getComputedStyle(host.querySelector('.arena-audience-guide')).opacity];
+  });setArenaHudOpacity(85);return output;
+ });
+ assert.deepEqual(values,[['0.5','0.5'],['0.5','0.5']]);
+});
+await check('A rapid !jugar rejoin in final duel remains available with remaining lives',async()=>{
+ const r=await page.evaluate(()=>{
+  gameState='LOBBY';setRejoinRuleMode('free');applyPlayerCountPreset(2);startCombatFromLobby();
+  const actor=fighters[0];chatRateLimits.clear();
+  const first=processChatCommand(actor.name,actor.platformKey,'!jugar');
+  actor.eliminated=true;actor.hp=0;
+  const second=processChatCommand(actor.name,actor.platformKey,'!jugar');
+  const recovered=!actor.eliminated&&actor.hp===actor.maxHp;
+  setRejoinRuleMode('3_lives');MAX_OPPORTUNITIES=1;
+  actor.eliminated=true;actor.permanentlyOut=true;
+  const refused=addOrBoostFighter(actor.name,actor.platformKey,false,null,true)===null;
+  return {first,second,recovered,refused,players:fighters.length};
+ });
+ assert.deepEqual(r,{first:true,second:true,recovered:true,refused:true,players:2});
+});
+await check('Normal TikTok messages show one character speech bubble on both canvases',async()=>{
+ const r=await page.evaluate(()=>{
+  gameState='LOBBY';applyPlayerCountPreset(2);startCombatFromLobby();
+  document.querySelectorAll('.fighter-speech-bubble').forEach(n=>n.remove());
+  document.getElementById('showSpeechBubbleToggle').checked=true;
+  const owner=fighters[0],accepted=processChatCommand(owner.name,owner.platformKey,'hola TikTok',null,true);
+  const bubbles=['viewport16x9','viewport9x16'].map(id=>[...document.getElementById(id).querySelectorAll('.fighter-speech-bubble')].filter(n=>n.textContent==='hola TikTok'&&n.dataset.bubbleOwner===String(owner.id)).length);
+  document.querySelectorAll('.fighter-speech-bubble').forEach(n=>n.remove());
+  document.getElementById('showSpeechBubbleToggle').checked=false;
+  processChatCommand(owner.name,owner.platformKey,'sin burbuja',null,true);
+  const disabled=document.querySelectorAll('.fighter-speech-bubble').length;
+  document.getElementById('showSpeechBubbleToggle').checked=true;
+  return {accepted,bubbles,disabled};
+ });
+ assert.deepEqual(r,{accepted:true,bubbles:[1,1],disabled:0});
+});
+await check('Sharing heals and gives 10s protection to the sharing viewer only',async()=>{
+ const r=await page.evaluate(()=>{
+  gameState='LOBBY';applyPlayerCountPreset(2);startCombatFromLobby();
+  setArenaCombatRule('powerMode','full');socialBoostMultiplier=1;
+  const unaffected=fighters[0];unaffected.hp=44;
+  const id=ArenaLive.joinOnShare({username:'@share_viewer',platformKey:'tiktok'});
+  const owner=fighters.find(f=>f.id===id);if(owner)owner.hp=50;
+  const applied=id!=null?ArenaLive.support({eventType:'share',targetId:id}):false;
+  return {applied,heal:owner?owner.hp-50:-1,expected:owner?Math.round(owner.maxHp*.3):0,
+    timer:owner?.immunityTimer,unaffected:unaffected.hp};
+ });
+ assert.equal(r.applied,true);assert.equal(r.heal,r.expected);assert.equal(r.timer,600);assert.equal(r.unaffected,44);
+});
+await check('At full capacity Prota reclaims a bot but cannot alter a locked victory',async()=>{
+ const r=await page.evaluate(()=>{
+  gameState='LOBBY';setRejoinRuleMode('free');applyPlayerCountPreset(128);startCombatFromLobby();
+  joinAsStreamer();
+  const count=fighters.length,prota=fighters.find(f=>f.isStreamer&&!f.eliminated);
+  triggerVictoryScreen(prota);
+  const refused=addOrBoostFighter('@second_prota','twitch',true,'ninja',true)===null;
+  return {count,prota:!!prota,refused,unchanged:fighters.length===count};
+ });
+ assert.deepEqual(r,{count:128,prota:true,refused:true,unchanged:true});
+});
+await check('The champion remains in both new lobby formats after clearing the old roster',async()=>{
+ const r=await page.evaluate(()=>{
+  gameState='LOBBY';applyPlayerCountPreset(2);startCombatFromLobby();
+  const winner=fighters[0];applyFighterArchetype(winner,'ninja');
+  const name=winner.name,key=winner.archetypeKey;
+  triggerVictoryScreen(winner);openLobby(true);
+  const banners=['16','9'].map(sfx=>{
+   const node=document.getElementById('lobbyChampion'+sfx);
+   return !node.classList.contains('hidden')&&node.textContent.includes(name);
+  });
+  const kept=fighters[0].name===name&&fighters[0].archetypeKey===key;
+  openLobby(false);
+  return {kept,banners,keptAgain:fighters[0].name===name&&fighters[0].archetypeKey===key};
+ });
+ assert.deepEqual(r,{kept:true,banners:[true,true],keptAgain:true});
 });
 assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:release}));
 } finally {await browser?.close();server.kill('SIGKILL');}

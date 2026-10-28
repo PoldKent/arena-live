@@ -3921,6 +3921,11 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         function addOrBoostFighter(username, platformKey = 'tiktok', isStreamer = false, preferredClassKey = null, silentBanner = false) {
             if (!isStreamer) username = normalizeChatUsername(username);
             platformKey = Object.prototype.hasOwnProperty.call(PLATFORMS, platformKey) ? platformKey : 'tiktok';
+            // A finished result cannot lose a bot or eliminated player to admission.
+            if (gameState === 'VICTORY' || koSequenceActive) {
+                if (isStreamer) updateStreamerJoinButton();
+                return null;
+            }
             const alreadyRegistered = fighters.some(f => f.platformKey === platformKey
                 && f.name.toLocaleLowerCase() === String(username).toLocaleLowerCase());
             // The configured capacity includes Prota and eliminated registered slots.
@@ -3953,13 +3958,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 profile = rememberViewerProfile(username, platformKey, preferredClassKey, !!preferredClassKey);
                 if (!preferredClassKey && profile?.archetypeKey) preferredClassKey = profile.archetypeKey;
             }
-            // The streamer can join any gameplay/re-entry rule, but not after the winner is decided.
-            if (isStreamer && (gameState === 'VICTORY' || koSequenceActive)) {
-                updateStreamerJoinButton();
-                return null;
-            }
-
-            if(gameState==='VICTORY'||koSequenceActive)return null;
+            // Every gameplay and re-entry rule still admits Prota until the result locks.
             // The final duel can be interrupted by a legal !jugar admission.
             // Only an actual final K.O. or victory locks the roster.
             // Identity is platform-scoped: the same handle on two platforms is a different profile.
@@ -7404,16 +7403,22 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             state.lastSeen = now;
             const command = message.startsWith('!');
             const normalizedMessage = message.toLocaleLowerCase();
-            if (state.messageCount >= CHAT_MAX_MESSAGES_PER_WINDOW) {
+            const fallen = normalizedMessage === '!jugar' && gameState === 'COMBAT'
+                && fighters.find(f => f.eliminated && f.platformKey===platformKey
+                    && f.name.toLocaleLowerCase()===username.toLocaleLowerCase());
+            const legalReentry = !!fallen && !koSequenceActive
+                && (rejoinRuleMode !== '3_lives'
+                    || (!fallen.permanentlyOut && fallen.joinsUsed < MAX_OPPORTUNITIES));
+            if (state.messageCount >= CHAT_MAX_MESSAGES_PER_WINDOW && !legalReentry) {
                 chatRateLimits.set(key, state);
                 return false;
             }
             if (command) {
-                if (normalizedMessage === state.lastCommand && now - state.lastCommandAt < CHAT_DUPLICATE_COMMAND_MS) {
+                if (!legalReentry && normalizedMessage === state.lastCommand && now - state.lastCommandAt < CHAT_DUPLICATE_COMMAND_MS) {
                     chatRateLimits.set(key, state);
                     return false;
                 }
-                if (state.commandCount >= CHAT_MAX_COMMANDS_PER_WINDOW) {
+                if (state.commandCount >= CHAT_MAX_COMMANDS_PER_WINDOW && !legalReentry) {
                     chatRateLimits.set(key, state);
                     return false;
                 }

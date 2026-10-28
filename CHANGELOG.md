@@ -9,6 +9,7 @@
 - Prota puede entrar durante el combate y liberar una plaza de un eliminado o de un bot al alcanzar capacidad, sin expulsar a espectadores reales activos.
 - El campeón anterior queda incluido, con su clase y nombre, en el nuevo lobby incluso al limpiar la lista; indicador visible en ambas capturas.
 - Sin cambios en física, daño de clases, resoluciones Full HD ni reglas de 3 vidas.
+- Bloqueo preventivo de las admisiones después de una victoria y excepción de anti-spam para reingresos legales muy rápidos; seis escenarios de navegador que ejercitan las correcciones.
 
 
 ## 2026-10-27 — Arena Live v0.22 · Selección segura GPU / software
