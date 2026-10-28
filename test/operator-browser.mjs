@@ -256,6 +256,7 @@ await check('Eight languages remain selectable and new workspace labels follow t
 });
 const openRuleSettings=async()=>{
  if(!(await state()).settingsOpen)await page.locator('#arenaDualSettingsBtn').click();
+ await page.evaluate(()=>selectArenaSettingsTab('combat',false));
  const section=page.locator('.arena-settings-section').filter({has:page.locator('#arenaMaxPlayers')});
  if(!await section.evaluate(n=>n.open))await section.locator('> summary').click();
 };
@@ -709,6 +710,7 @@ await check('Display settings reveal real attack names and damage numbers immedi
 });
 const openBalance=async()=>{
  if(!(await state()).settingsOpen)await page.evaluate(()=>toggleSettingsModal(true));
+ await page.evaluate(()=>selectArenaSettingsTab('combat',false));
  const section=page.locator('#arenaBalancePanel');if(!await section.evaluate(n=>n.open))await section.locator('> summary').click();
 };
 const assertBalanceRadar=async()=>{
