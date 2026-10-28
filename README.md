@@ -1,4 +1,4 @@
-# Arena Live · v0.31
+# Arena Live · v0.32
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
@@ -30,9 +30,11 @@ Las capturas **Full HD 16:9 y 9:16** seleccionan automáticamente la ruta de dib
 
 **v0.31 — Interfaz táctil:** 1 toque en ↑ salta, 2 toques hacen el doble salto; tocar la arena mueve y nunca salta accidentalmente. Cuatro botones independientes que puedes arrastrar y redimensionar desde Ajustes, Pausa fija en la esquina, Partida plegable y poderes distribuidos directamente sobre la arena en Modo Director. La transparencia de botones y menús sigue el control del HUD. [Cambios y límites](docs/MOBILE-CONTROLES-V031.md).
 
+**v0.32 — Ajustes táctiles refinados:** los botones redondos se mantienen dentro de la pantalla aunque cambies su tamaño o gires el celular; el selector de jugador de las pruebas se muestra sin tarjeta opaca y puede desplazarse para dejar libre la arena. Los poderes se distribuyen como botones independientes. La opacidad de los controles sigue el ajuste del HUD. Se conserva una pausa visible en la esquina y la agrupación de Lobby, Nueva partida y Revancha.
+
 ## Probar en un celular con un solo archivo
 
-Descarga directamente la [edición móvil v0.31: controles reubicables y pruebas libres](mobile-builds/Arena-Live-v0.31.0-movil.html) (en GitHub usa **Download raw file**) o ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.31.0-movil.html`. Copia ese HTML al teléfono y ábrelo desde Chrome o un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
+Descarga directamente la [edición móvil v0.32: controles adaptables y pruebas libres](mobile-builds/Arena-Live-v0.32.0-movil.html) (en GitHub usa **Download raw file**) o ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.32.0-movil.html`. Copia ese HTML al teléfono y ábrelo desde Chrome o un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
 
 La exportación usa el combate de `main`; comienza en 720p, dibujo a 30 FPS y calidad Rendimiento. Permite cambiar a 540p/1080p y 30/60 FPS. TikTok LIVE real sigue necesitando el servidor: este archivo ofrece pruebas locales. [Uso, optimizaciones y límites de la exportación móvil](docs/MOVIL-MONOLITICO.md).
 
