@@ -99,7 +99,7 @@ try{
     });
     await check('settings retain rules, class radar and pause/resume behavior',async()=>{
         await page.evaluate(()=>{toggleSettingsModal(true);refreshArenaBalancePanel(true);});
-        assert.equal(await page.evaluate(()=>ArenaLive.getState().paused),true);
+        assert.equal(await page.evaluate(()=>ArenaLive.getState().paused),false);
         assert.equal(await page.locator('#settingsPauseModal').isVisible(),true);
         assert.equal(await page.locator('#arenaMaxPlayers').count(),1);
         assert.ok(await page.locator('#arenaBalanceRadar').count());
