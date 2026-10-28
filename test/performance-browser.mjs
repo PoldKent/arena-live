@@ -173,6 +173,9 @@ try {
           actor.energy=100;
           actor.aiSpecialCooldown=100000;
         }
+        const feed=document.getElementById('chatFeed');
+        const chatObserver=new MutationObserver(()=>{});
+        chatObserver.observe(feed,{childList:true});
         const start=performance.now();
         let executed=0;
         // Model a genuine same-tick AI release: chat is flushed once at the
@@ -184,6 +187,10 @@ try {
         }
         flushArenaTickChatBatch();
         const castingMs=performance.now()-start;
+        const mutations=chatObserver.takeRecords();chatObserver.disconnect();
+        const appended=mutations.flatMap(record=>[...record.addedNodes])
+          .filter(node=>node.dataset?.chatEvent==='special').length;
+        const batchMutations=mutations.filter(record=>record.addedNodes.length>0).length;
         const draw=[],sim=[];
         for(let frame=0;frame<90;frame++){
           const t=performance.now();updatePhysicsAndAI();sim.push(performance.now()-t);
@@ -198,13 +205,14 @@ try {
           return {median:rows[Math.floor(rows.length*.5)],p95:rows[Math.floor(rows.length*.95)],
             max:rows.at(-1),mean:rows.reduce((sum,n)=>sum+n,0)/rows.length};
         };
-        return {fighters:fighters.length,executed,castingMs,
+        return {fighters:fighters.length,executed,castingMs,appended,batchMutations,
           simulation:summarize(sim),drawing:summarize(draw),
           capped:particles.length<=MAX_PARTICLES&&activeEffects.length<=MAX_ACTIVE_EFFECTS,
           finite:fighters.every(p=>[p.x,p.y,p.hp,p.energy].every(Number.isFinite)),
           resolution:[[canvas16.width,canvas16.height],[canvas9.width,canvas9.height]]};
       },gpuMode);
       assert.equal(stress.fighters,128);assert.equal(stress.executed,128);
+      assert.equal(stress.appended,128);assert.equal(stress.batchMutations,1);
       assert.equal(stress.finite,true);assert.equal(stress.capped,true);
       assert.deepEqual(stress.resolution,[[1920,1080],[1080,1920]]);
       checks.push('128 synchronous specials cast and render both unchanged Full HD captures');
