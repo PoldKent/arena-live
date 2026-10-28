@@ -35,6 +35,8 @@ try{
         assert.equal(await page.locator('#arenaPortableNotice').isVisible(),true);
         assert.match(await page.locator('#arenaPortableNotice').innerText(),/streaming.*chat.*comandos/s);
         assert.equal(await page.locator('#arenaPortableDontShow').isChecked(),false);
+        assert.equal(await page.locator('input[name="arenaPortableMode"]').count(),2);
+        assert.equal(await page.locator('input[name="arenaPortableMode"][value="player"]').isChecked(),true);
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
         if(output)await page.screenshot({path:join(output,'mobile-start.png')});
     });
@@ -47,6 +49,10 @@ try{
         assert.equal(state.fighters.filter(f=>f.isStreamer).length,1);assert.equal(state.fighters.find(f=>f.isStreamer).classKey,'ninja');
         const size=await page.locator('#arenaMobilePower').boundingBox();assert.ok(size.height>=44&&size.width>=44);
         assert.equal(await page.locator('#arenaMobilePower').isEnabled(),true);
+        assert.equal(await page.evaluate(()=>ArenaPortable.getProfile().mode),'player');
+        assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),false);
+        assert.equal(await page.locator('#arenaMobileTestFab').isVisible(),false);
+        assert.equal(await page.locator('#arenaMobilePause').isVisible(),true);
     });
     await check('Mobile preview hides viewer instructions by default and can reveal them on demand',async()=>{
         const layout=await page.evaluate(()=>{
@@ -76,7 +82,11 @@ try{
         assert.deepEqual(result.visible,['arenaMobileJump','arenaMobileAttack','arenaMobilePower','arenaMobileMoreBtn']);
         assert.ok(result.rects.every(([left,right,width,height])=>left>=0&&right<=result.screen&&width>=44&&height>=44),JSON.stringify(result));
         await page.locator('#arenaMobileMoreBtn').tap();
-        assert.equal(await page.locator('#arenaPortableFullscreenMenu').isVisible(),true);
+        assert.equal(await page.locator('#arenaPortableModePlayer').isVisible(),true);
+        assert.equal(await page.locator('#arenaPortableModeDirector').isVisible(),true);
+        assert.equal(await page.locator('.arena-mobile-match-menu #arenaPortableQuick').count(),1);
+        assert.equal(await page.locator('#arenaOperatorPopover [data-forward-control="arenaDualChatToggleBtn"]').count(),0);
+        assert.equal(await page.locator('#arenaOperatorPopover [data-forward-control="arenaViewMenuBtn"]').count(),0);
         assert.equal(await page.locator('#arenaPortableGuideMenu').isVisible(),true);
         assert.equal(await page.locator('#protagonistClassSelect').count(),1);
         await page.locator('#arenaMobileMoreBtn').tap();
@@ -175,7 +185,20 @@ try{
         });
         assert.equal(queued,true);
     });
+    await check('two roles switch in a running match, with Player HUD clean and Director tools visible',async()=>{
+        assert.equal(await page.evaluate(()=>ArenaPortable.getProfile().mode),'player');
+        await page.evaluate(()=>ArenaPortable.setMode('director'));
+        assert.equal(await page.evaluate(()=>ArenaPortable.getProfile().mode),'director');
+        assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
+        assert.equal(await page.locator('#arenaMobileJump').isVisible(),false);
+        assert.equal(await page.locator('#arenaMobilePause').isVisible(),true);
+        await page.evaluate(()=>ArenaPortable.setMode('player'));
+        assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),false);
+        assert.equal(await page.locator('#arenaMobilePower').isVisible(),true);
+        assert.equal(await page.evaluate(()=>streamerManualControl),true);
+    });
     await check('live mobile tests float over combat and reuse real target, power and command controls',async()=>{
+        await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(false);});
         await page.locator('#arenaMobileTestFab').tap();
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
         assert.equal(await page.locator('#arenaPortableTestBody #arenaPanelPowers').count(),1);
@@ -189,6 +212,7 @@ try{
         await page.locator('#arenaPortableTestCollapse').tap();
         await page.locator('#arenaPortableTestClose').tap();
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),false);
+        await page.evaluate(()=>ArenaPortable.setMode('player'));
     });
     await check('phone rotation keeps floating buttons and tests within the active capture',async()=>{
         await page.setViewportSize({width:844,height:390});
@@ -210,6 +234,7 @@ try{
         await page.evaluate(()=>{ArenaPortable.setResolution(540);setArenaRuntimeOption('renderFps',60);});await page.reload({waitUntil:'load'});
         assert.equal(await page.locator('#arenaPortableResolution').inputValue(),'540');assert.equal(await page.locator('#arenaPortableFps').inputValue(),'60');
         assert.equal(await page.locator('#arenaPortableNotice').isVisible(),false);
+        assert.equal(await page.locator('input[name="arenaPortableMode"][value="player"]').isChecked(),true);
     });
     await check('returning from another app resets the wall clock without changing a manual pause',async()=>{
         const clock=await page.evaluate(()=>{
