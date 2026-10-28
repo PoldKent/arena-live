@@ -46,11 +46,13 @@ Las capturas **Full HD 16:9 y 9:16** seleccionan automáticamente la ruta de dib
 
 **v0.39 — corrección de publicación móvil y nombres:** se sincronizan las versiones de los seis archivos JS/CSS que carga la edición Stream con el paquete y el HTML móvil, para que `npm.cmd run build:mobile` pueda empaquetarlos de nuevo. El generador incluye referencias SHA-1 Git reproducibles de los archivos fuente. Las opciones avanzadas se denominan ahora **Opciones del Modo Streamer**; la ayuda se abre desde Menú, no desde un botón oculto. Conserva las barras 1v1, las seis opciones de HUD y las cinco habilidades inferiores.
 
+**v0.40.1 — poderes permanentes en Streamer móvil:** el marco 9:16 no cambia al abrir Pruebas. Las cinco habilidades permanecen visibles en una franja separada; el panel de pruebas flota por encima, incluso en pantalla completa. La distribución centrada se conserva.
+
 **v0.40 — proyecto principal y móvil sincronizados:** la cápsula superior circular de v0.36–v0.37 vuelve a la esquina superior derecha; Modo Jugador ofrece Táctil total (dos pulgares) o Joystick original con acciones configurables fuera de la arena. En Modo Streamer, 🧪 abre las herramientas avanzadas fuera del marco 9:16, también en pantalla completa. La numeración del paquete, el título, la API, el pie de Ajustes y los recursos del servidor vuelven a coincidir. **No hay un segundo motor:** el HTML portátil se compila directamente desde el mismo `index.html` y los mismos módulos `engine/` utilizados por el servidor TikTok. Desde el servidor de PC se prueban ambas interfaces en `/` y `/mobile`. [Cambios y verificación de v0.40](docs/RELEASE-0.40.md).
 
 ## Probar en un celular con un solo archivo
 
-Descarga la [exportación móvil oficial v0.40 del juego completo](mobile-builds/Arena-Live-v0.40.0-movil.html) (en GitHub usa **Download raw file**) o ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.40.0-movil.html`. Copia ese HTML al teléfono y ábrelo desde Chrome o un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
+Descarga la [exportación móvil oficial v0.40 del juego completo](mobile-builds/Arena-Live-v0.40.1-movil.html) (en GitHub usa **Download raw file**) o ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.40.1-movil.html`. Copia ese HTML al teléfono y ábrelo desde Chrome o un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
 
 La exportación usa el combate de `main`; comienza en 720p, dibujo a 30 FPS y calidad Rendimiento. Permite cambiar a 540p/1080p y 30/60 FPS. TikTok LIVE real sigue necesitando el servidor: este archivo ofrece pruebas locales. [Uso, optimizaciones y límites de la exportación móvil](docs/MOVIL-MONOLITICO.md).
 
@@ -109,7 +111,7 @@ npm.cmd ci
 npm.cmd start
 ```
 
-**`npm.cmd start` regenera automáticamente `dist/Arena-Live-v0.40.0-movil.html` desde el motor principal antes de iniciar el servidor**. No necesitas mantener otro juego ni compilarlo manualmente. Abre **http://127.0.0.1:4173/** para la aplicación principal con TikTok LIVE, OBS y el motor completo. Abre **http://127.0.0.1:4173/mobile** para ver en tu PC la interfaz móvil generada desde ese mismo motor (el módulo móvil simula interacciones: no conecta al LIVE). En Chrome puedes pulsar **F12 → Ctrl+Shift+M** para emular un celular. Conserva abierta la consola; TikTok comienza desconectado y solo se conecta cuando pulsas **📡 TikTok**.
+**`npm.cmd start` regenera automáticamente `dist/Arena-Live-v0.40.1-movil.html` desde el motor principal antes de iniciar el servidor**. No necesitas mantener otro juego ni compilarlo manualmente. Abre **http://127.0.0.1:4173/** para la aplicación principal con TikTok LIVE, OBS y el motor completo. Abre **http://127.0.0.1:4173/mobile** para ver en tu PC la interfaz móvil generada desde ese mismo motor (el módulo móvil simula interacciones: no conecta al LIVE). En Chrome puedes pulsar **F12 → Ctrl+Shift+M** para emular un celular. Conserva abierta la consola; TikTok comienza desconectado y solo se conecta cuando pulsas **📡 TikTok**.
 
 Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd ci` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.40 en el pie de Ajustes**.
 
