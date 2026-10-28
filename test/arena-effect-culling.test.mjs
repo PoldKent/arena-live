@@ -27,3 +27,20 @@ test('lightning and KO pillars may reach the screen from above or below',()=>{
  assert.equal(visible({type:'ringOutPillar',x:300,y:-300},camera),false);
  assert.equal(visible({type:'futureEffect',x:-9000,y:-9000},camera),true);
 });
+
+test('batch reservation retains exactly the same particles and draw order as per-particle overflow',()=>{
+ const max=1800;
+ for(const existing of [0,1775,1799,1800]){
+  for(const burstCount of [1,8,12,22]){
+   const original=Array.from({length:existing},(_,i)=>i);
+   const optimized=original.slice();
+   root.ArenaRender.reserveParticleSlots(optimized,max,burstCount);
+   for(let i=0;i<burstCount;i++){
+    if(original.length>=max)original.splice(0,original.length-max+1);
+    original.push(2000+i);
+    optimized.push(2000+i);
+   }
+   assert.deepEqual(optimized,original,`existing=${existing} burst=${burstCount}`);
+  }
+ }
+});
