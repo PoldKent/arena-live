@@ -9014,6 +9014,26 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             pt:["🎮 Partida","⚔️ Combate","⚖️ Classes","📡 Público","🖥 Tela e HUD","🔊 Áudio e idioma","🎮 Controles","⚙ Sistema","Buscar: nomes, dano, OBS…","Ajustes sem pausa."],
             it:["🎮 Partita","⚔️ Combattimento","⚖️ Classi","📡 Pubblico","🖥 Schermo e HUD","🔊 Audio e lingua","🎮 Controlli","⚙ Sistema","Cerca: nomi, danni, OBS…","Modifiche senza pausa."]
         });
+        const ARENA_HUD_SETTINGS_COPY=Object.freeze({
+            es:['👁 Información de combate','Solo cambia la presentación; no afecta al daño ni a las reglas.','Mostrar nombres y clases de jugadores','Mostrar números de daño y curación','Mostrar texto de los poderes'],
+            en:['👁 Combat information','Changes the display only; does not affect damage or rules.','Show player names and classes','Show damage and healing numbers','Show power names'],
+            fr:['👁 Informations de combat','Modifie seulement l’affichage, jamais les dégâts ou les règles.','Afficher les noms et classes','Afficher les chiffres de dégâts et de soins','Afficher le texte des pouvoirs'],
+            de:['👁 Kampfinformationen','Nur die Anzeige ändert sich, nicht Schaden oder Regeln.','Namen und Klassen anzeigen','Schadens- und Heilungszahlen anzeigen','Fähigkeitstext anzeigen'],
+            zh:['👁 战斗信息','仅改变显示效果，不改变伤害或规则。','显示玩家名称和职业','显示伤害和治疗数值','显示技能文字'],
+            ja:['👁 戦闘情報','表示のみ変更し、ダメージやルールには影響しません。','プレイヤー名とクラスを表示','ダメージと回復数値を表示','必殺技名を表示'],
+            pt:['👁 Informações de combate','Altera apenas a exibição, não o dano nem as regras.','Mostrar nomes e classes','Mostrar números de dano e cura','Mostrar nomes dos poderes'],
+            it:['👁 Informazioni di combattimento','Modifica solo la visualizzazione, non i danni o le regole.','Mostra nomi e classi','Mostra numeri di danni e cure','Mostra testo dei poteri']
+        });
+        function refreshArenaHudSettingsLabels(){
+            const labels=ARENA_HUD_SETTINGS_COPY[currentLanguage]||ARENA_HUD_SETTINGS_COPY.es;
+            const ids=['arenaHudInfoTitle','arenaHudInfoHelp','arenaHudNamesLabel'];
+            ids.forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=labels[i];});
+            for(const [id,index] of [['showCombatNumbersToggle',3],['showPowerTextToggle',4]]){
+                const label=document.getElementById(id)?.closest('label');
+                const last=label?.lastChild;
+                if(last?.nodeType===Node.TEXT_NODE)last.textContent=' '+labels[index];
+            }
+        }
         let arenaSettingsActiveTab = 'match';
         function refreshArenaSettingsNavigation() {
             const labels=ARENA_SETTINGS_LABELS[currentLanguage]||ARENA_SETTINGS_LABELS.es;
@@ -9024,6 +9044,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             if(search)search.placeholder='🔎 '+labels[8];
             const note=document.getElementById('arenaSettingsNote');
             if(note&&note.textContent!==labels[9])note.textContent=labels[9];
+            refreshArenaHudSettingsLabels();
         }
         function selectArenaSettingsTab(key, remember=true) {
             if(!ARENA_SETTINGS_GROUPS.includes(key))return;
@@ -9089,15 +9110,15 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 hud.id='arenaHudInformationSettings';
                 hud.className='rounded-xl border border-cyan-800/50 bg-slate-950/70 p-3 flex flex-col gap-3';
                 hud.setAttribute('aria-label','Información de combate');
-                hud.innerHTML='<h4 class="font-semibold text-cyan-200 text-xs">👁 Información de combate</h4>'
-                    +'<p class="text-[11px] text-slate-400">Solo cambia lo que se muestra en la pantalla; no modifica el daño, los golpes ni las reglas.</p>'
+                hud.innerHTML='<h4 id="arenaHudInfoTitle" class="font-semibold text-cyan-200 text-xs">👁 Información de combate</h4>'
+                    +'<p id="arenaHudInfoHelp" class="text-[11px] text-slate-400">Solo cambia lo que se muestra en la pantalla; no modifica el daño, los golpes ni las reglas.</p>'
                     +'<div id="arenaHudDisplayToggles" class="flex flex-col gap-2 text-xs text-slate-200"></div>';
                 displayBody.appendChild(hud);
                 const toggles=hud.querySelector('#arenaHudDisplayToggles');
                 const oldContainer=document.getElementById('showCombatNumbersToggle')?.parentElement?.parentElement;
                 const names=document.createElement('label');
                 names.className='flex items-center gap-2';
-                names.innerHTML='<input id="showFighterNamesToggle" type="checkbox" class="accent-cyan-400" onchange="setCombatDisplayOption(\'names\',this.checked)"> Mostrar nombres y clases de jugadores';
+                names.innerHTML='<input id="showFighterNamesToggle" type="checkbox" class="accent-cyan-400" onchange="setCombatDisplayOption(\'names\',this.checked)"> <span id="arenaHudNamesLabel">Mostrar nombres y clases de jugadores</span>';
                 toggles.appendChild(names);
                 move('showCombatNumbersToggle',toggles);
                 move('showPowerTextToggle',toggles);
