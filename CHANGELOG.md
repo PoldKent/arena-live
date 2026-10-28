@@ -1,5 +1,12 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-27 — Arena Live v0.22 · Selección segura GPU / software
+
+- Comparación de v0.21 con v0.20: el dibujo de sprites resultó más lento en el Chromium Linux que utiliza **SwiftShader**, por lo que la ruta acelerada ahora se usa **solo** si se detecta GPU física mediante WebGL; si no, vuelve al dibujo vectorial probado.
+- Ambas rutas conservan exactamente los dos lienzos Full HD, el estado de combate, las etiquetas/bonus y las barras de vida. Los sprites se mantienen para GPU compatible; en software los cachés de métricas siguen evitando trabajo redundante.
+- Para diagnosticar, `ArenaLive.renderSpriteMode` indica `hardware-candidate` o `software-safe-vectors`; parámetros locales `arenaSprites=off|force` permiten comparar, sin implicar una garantía de FPS.
+- Ajustes de la prueba de regresión para verificar tanto la ruta vectorial como la ruta de imágenes. Versión visible/API/paquete 0.22.0.
+
 ## 2026-10-27 — Arena Live v0.21 · Composición acelerable por GPU
 
 - Sprites Canvas 2D transparentes reutilizables de las placas de nombre/clase: un dibujo al crear o cambiar el texto, luego composición con `drawImage` para 32, 64 y 128 guerreros en 16:9 y 9:16.

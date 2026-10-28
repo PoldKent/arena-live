@@ -289,10 +289,12 @@ try {
             if(text===classTitle||String(text).includes(fighter.name.slice(0,7)))baselines.push(this.textBaseline);
             return fill.call(this,text,...args);
           };
-          try {drawFighterOnCtx(ctx16,fighter);return baselines;}
+          try {drawFighterOnCtx(ctx16,fighter);return {baselines, accelerated:arenaGpuSpritesEnabled,
+            sprite:Boolean(arenaFighterLabelCache.get(fighter)?.[0]?.sprite)};}
           finally {fighter.likeBoostTimer=boost;CanvasRenderingContext2D.prototype.fillText=fill;}
         });
-        assert.ok(result.length>=2); assert.ok(result.every(value=>value==='alphabetic'));
+        if(result.accelerated)assert.equal(result.sprite,true);
+        else {assert.ok(result.baselines.length>=2); assert.ok(result.baselines.every(value=>value==='alphabetic'));}
       });
       await page.evaluate(()=>setArenaCombatRule('knockback',1));
       await check('128-player scenario also loads during combat; mode transitions and capacity remain correct', async () => {
@@ -350,7 +352,7 @@ try {
           };
           try {
             renderBothScreensSimultaneously();
-            return { calls, players:fighters.length,
+            return { calls, players:fighters.length,accelerated:arenaGpuSpritesEnabled,
               bodyAtlas:arenaFighterBodySprites.size,
               cached16:fighters.filter(f=>Boolean(arenaFighterLabelCache.get(f)?.[0]?.sprite)).length,
               cached9:fighters.filter(f=>Boolean(arenaFighterLabelCache.get(f)?.[1]?.sprite)).length,
@@ -360,10 +362,16 @@ try {
           }
         });
         assert.equal(result.players,128);
-        assert.equal(result.cached16,128);
-        assert.ok(result.cached9>0&&result.cached9<=128);
-        assert.ok(result.bodyAtlas>0&&result.bodyAtlas<=72);
-        assert.ok(result.calls<30,'steady frames avoid repeated text rasterization');
+        if(result.accelerated){
+          assert.equal(result.cached16,128);
+          assert.ok(result.cached9>0&&result.cached9<=128);
+          assert.ok(result.bodyAtlas>0&&result.bodyAtlas<=72);
+          assert.ok(result.calls<30,'GPU path avoids repeated glyph rasterization');
+        } else {
+          assert.equal(result.bodyAtlas,0);
+          assert.equal(result.cached16,0);
+          assert.ok(result.calls>=128,'software path retains the direct vector text drawing');
+        }
         assert.deepEqual(result.dimensions,[[1920,1080],[1080,1920]]);
       });
       await check('unchanged duel HUD values do not recreate text or trigger localization each frame', async () => {

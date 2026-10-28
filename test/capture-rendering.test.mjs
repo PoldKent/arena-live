@@ -71,3 +71,13 @@ test('reusable high-DPI label and body sprites preserve full-HD dual-capture arc
   assert.match(html,/if \(f\.shieldTimer > 0\)/);
   assert.match(html,/if \(f\.immunityTimer > 0\)/);
 });
+
+test('hardware detection preserves the original vector route when acceleration is absent',()=>{
+  assert.match(html,/function detectArenaHardwareSpriteSupport\(\)/);
+  assert.match(html,/failIfMajorPerformanceCaveat:true/);
+  assert.match(html,/swiftshader\|llvmpipe\|softpipe\|lavapipe\|software/);
+  assert.match(html,/if \(!arenaGpuSpritesEnabled\) return drawFighterLabelVectors\(/);
+  assert.match(html,/if \(arenaGpuSpritesEnabled\) \{\s*const bodySprite/);
+  assert.match(html,/function drawFighterLabelVectors\(/);
+  assert.match(html,/renderSpriteMode: arenaGpuSpritesEnabled \? 'hardware-candidate' : 'software-safe-vectors'/);
+});
