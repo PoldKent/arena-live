@@ -1292,3 +1292,16 @@ html.arena-mobile-offline #card-16x9:fullscreen #arenaPortableTestDrawer:not([hi
     right:6px!important;
   }
 }
+
+/* Reserve the actual drawer height, the skill bar and the upper controls.
+   The 9:16 arena shrinks only while tests are open and never covers them. */
+html.arena-mobile-offline #card-9x16.arena-tests-visible #viewport9x16,
+html.arena-mobile-offline #card-9x16:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
+  width:min(calc(100% - 6px),calc((100dvh - min(42dvh,270px) - 135px) * 9 / 16))!important;
+  max-height:calc(100dvh - min(42dvh,270px) - 135px)!important;
+}
+html.arena-mobile-offline #card-9x16:fullscreen.arena-tests-visible #viewport9x16,
+html.arena-mobile-offline #card-9x16:fullscreen:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
+  width:min(100%,calc((100dvh - min(42dvh,270px) - 135px) * 9 / 16))!important;
+  max-height:calc(100dvh - min(42dvh,270px) - 135px)!important;
+}
