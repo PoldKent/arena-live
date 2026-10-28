@@ -6842,7 +6842,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             if (classSelect) {
                 classSelect.disabled = arenaCombatRules.classRule!=='any' || gameState==='VICTORY' || koSequenceActive;
                 if(arenaCombatRules.classRule!=='any')classSelect.value=arenaCombatRules.classRule;
-                classSelect.classList.toggle('opacity-50', alive);
+                classSelect.classList.toggle('opacity-50', classSelect.disabled);
                 if (alive && protagonist?.archetypeKey) classSelect.value = protagonist.archetypeKey;
             }
             refreshArenaOperatorToolbar();
