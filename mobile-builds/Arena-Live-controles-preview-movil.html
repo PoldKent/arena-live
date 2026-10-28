@@ -2337,6 +2337,98 @@ html.arena-mobile-offline #arenaMobileArrangeSettings{
   }
 }
 
+
+/* v0.40.1 · Visible, compact Streamer tests outside the video.
+   The old panel lived inside a max-height skill shelf and could be clipped.
+   Keep a single real panel and make its own viewport independently scrollable. */
+html.arena-mobile-offline #arenaPortableTestDrawer[hidden]{display:none!important}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
+  position:fixed!important;
+  inset:auto max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) auto!important;
+  top:auto!important;left:auto!important;
+  display:flex!important;flex-direction:column!important;
+  box-sizing:border-box!important;
+  width:min(94vw,390px)!important;min-width:0!important;max-width:94vw!important;
+  height:min(42dvh,270px)!important;
+  min-height:min(42dvh,160px)!important;
+  max-height:min(42dvh,270px)!important;
+  padding:0!important;margin:0!important;
+  overflow:hidden!important;
+  background:#102a3b!important;color:#f0fcff!important;
+  border:1px solid #64a5b2!important;border-radius:13px!important;
+  box-shadow:0 8px 24px #000a!important;
+  z-index:250!important;visibility:visible!important;opacity:1!important;
+  pointer-events:auto!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]) #arenaPortableTestHead{
+  position:relative!important;inset:auto!important;
+  display:flex!important;flex:0 0 36px!important;
+  height:36px!important;min-height:36px!important;
+  padding:2px 8px!important;font-size:11px!important;
+  border-bottom:1px solid #477489!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]) #arenaPortableTestHead button{
+  width:30px!important;height:30px!important;min-width:30px!important;
+  min-height:30px!important;font-size:16px!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]) .arena-portable-test-picker{
+  display:flex!important;flex:0 0 auto!important;
+  flex-flow:row nowrap!important;align-items:center!important;
+  gap:6px!important;padding:3px 7px!important;
+  font-size:10px!important;max-width:100%!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]) #arenaPortableTestSelect{
+  width:100%!important;min-width:0!important;flex:1 1 auto!important;
+  height:36px!important;min-height:36px!important;
+  font-size:12px!important;padding:2px 6px!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]) #arenaPortableTestBody{
+  flex:1 1 auto!important;display:block!important;
+  min-height:0!important;max-height:none!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  padding:4px 8px 10px!important;
+  overscroll-behavior:contain!important;touch-action:pan-y!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]) #arenaPortableTestBody button{
+  min-height:38px!important;font-size:11px!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed:not([hidden]){
+  height:38px!important;min-height:38px!important;max-height:38px!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed .arena-portable-test-picker,
+html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed #arenaPortableTestBody{
+  display:none!important;
+}
+/* Native fullscreen requires the tests to live inside the fullscreen element.
+   Never place them in the game viewport or the bounded skill shelf. */
+html.arena-mobile-offline #card-9x16:fullscreen #arenaPortableTestDrawer:not([hidden]),
+html.arena-mobile-offline #card-16x9:fullscreen #arenaPortableTestDrawer:not([hidden]){
+  position:absolute!important;top:auto!important;left:auto!important;
+  right:max(8px,env(safe-area-inset-right))!important;
+  bottom:max(8px,env(safe-area-inset-bottom))!important;
+  z-index:280!important;
+  max-height:min(40%,270px)!important;
+}
+@media(max-width:370px){
+  html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
+    width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;
+    right:6px!important;
+  }
+}
+
+/* Reserve the actual drawer height, the skill bar and the upper controls.
+   The 9:16 arena shrinks only while tests are open and never covers them. */
+html.arena-mobile-offline #card-9x16.arena-tests-visible #viewport9x16,
+html.arena-mobile-offline #card-9x16:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
+  width:min(calc(100% - 6px),calc((100dvh - min(42dvh,270px) - 135px) * 9 / 16))!important;
+  max-height:calc(100dvh - min(42dvh,270px) - 135px)!important;
+}
+html.arena-mobile-offline #card-9x16:fullscreen.arena-tests-visible #viewport9x16,
+html.arena-mobile-offline #card-9x16:fullscreen:has(#arenaMobileControlShelf.has-open-tests) #viewport9x16{
+  width:min(100%,calc((100dvh - min(42dvh,270px) - 135px) * 9 / 16))!important;
+  max-height:calc(100dvh - min(42dvh,270px) - 135px)!important;
+}
+
 </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#06080f] text-slate-100">
@@ -11144,7 +11236,7 @@ const ARENA_BALANCE_EVIDENCE=Object.freeze({"version":"0.15.0","sample":{"matche
             }
         });
     </script>
-<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze({"version":"0.39.0","edition":"mobile-offline-preview","sourceBlobs":{"index.html":"74044e80b48a9a125d846c1e2516f8338e8c50ab","styles/arena-ui.css":"c933a9cfb504daa6d27800c6098396b3aa57114f","styles/TAILWIND-LICENSE.txt":"d6a82290738a9f78946cbcb4594535d6984086dd","engine/arena-core.js":"ac22091a1263e294b733a337f8c6ebc4f2e1bc9d","engine/arena-render.js":"6c9603974d2c02d0f0fb52857992211c08cd6725","engine/arena-audio.js":"319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934","engine/arena-settings.js":"f1fbbd2492b4be8cfb725e72cd0ab604894681cf","engine/arena-balance-evidence.js":"0aab05b49f0ef9e80c43810b2bfc929b4f695cdf","portable/mobile.css":"6a10242efe097a98fc3350fbd1fae103feaa9aad","portable/mobile-runtime.js":"3916cebfc4dc2d7f2712d271a067f895d4551811","portable/mobile-touch.js":"33cb9d45cdee5424dda0d4372f115c91430aea40"},"preview":"PR-4-ergonomia-final"});</script>
+<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze({"version":"0.39.0","edition":"mobile-offline-preview","sourceBlobs":{"index.html":"74044e80b48a9a125d846c1e2516f8338e8c50ab","styles/arena-ui.css":"c933a9cfb504daa6d27800c6098396b3aa57114f","styles/TAILWIND-LICENSE.txt":"d6a82290738a9f78946cbcb4594535d6984086dd","engine/arena-core.js":"ac22091a1263e294b733a337f8c6ebc4f2e1bc9d","engine/arena-render.js":"6c9603974d2c02d0f0fb52857992211c08cd6725","engine/arena-audio.js":"319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934","engine/arena-settings.js":"f1fbbd2492b4be8cfb725e72cd0ab604894681cf","engine/arena-balance-evidence.js":"0aab05b49f0ef9e80c43810b2bfc929b4f695cdf","portable/mobile.css":"c7f9fe49aab178868cc056d28ca65b1d78fdf447","portable/mobile-runtime.js":"29f30d79aedf48d51eda169c27b36230be13a2a6","portable/mobile-touch.js":"bf2f5c254744c291d8db1810217d09ca2f9106ec"},"preview":"PR-mobile-tests-visible"});</script>
 <script id="arena-mobile-runtime">
 // Loaded inline after the unchanged classic engine, before its load bootstrap.
 // This adapter changes presentation and test setup, never combat decisions.
@@ -11455,7 +11547,10 @@ function arenaPortableReady() {
         if(menu)(fullscreen?card:document.body)?.appendChild(menu);
         if(guide)card?.appendChild(guide);
         if(playerShelf&&card&&playerShelf.parentElement!==card)card.appendChild(playerShelf);
-        for(const id of ['arenaHeaderActions','touchControlDock','arenaStreamerSkillsDock','arenaPortableTestDrawer']){const node=document.getElementById(id);if(node)playerShelf?.appendChild(node);}
+        // The compact tests panel is independent of the skill shelf. Mount it
+        // on body in normal mode and inside the fullscreen card when necessary.
+        for(const id of ['arenaHeaderActions','touchControlDock','arenaStreamerSkillsDock']){const node=document.getElementById(id);if(node)playerShelf?.appendChild(node);}
+        if(typeof arenaMobileMountTestDrawer==='function')arenaMobileMountTestDrawer();
         if(typeof arenaMobileApplyLayout==='function')requestAnimationFrame(arenaMobileApplyLayout);
         const setup=document.getElementById('arenaPortableSetup');
         if(setup)(fullscreen?view:document.body).appendChild(setup);
@@ -11646,14 +11741,20 @@ function arenaMobileTestPanel(){
     return document.getElementById(arenaMobileTestState.active);
 }
 function arenaMobileMountTestDrawer(){
-    const shelf=document.getElementById('arenaMobileControlShelf');
     const drawer=document.getElementById('arenaPortableTestDrawer');
-    if(shelf&&drawer){
-        shelf.appendChild(drawer);
-        const skills=document.getElementById('arenaStreamerSkillsDock');
-        if(skills)shelf.appendChild(skills);
-        drawer.style.top='';drawer.style.left='';drawer.style.right='';
-    }
+    if(!drawer)return;
+    // The 9:16 viewport and the compact skill shelf must never clip advanced tests.
+    // Native fullscreen hides normal document siblings; move the SAME drawer into
+    // the fullscreen card (not into the 9:16 video) and restore it afterward.
+    const fullscreen=document.fullscreenElement;
+    const card=fullscreen?.matches?.('#card-9x16,#card-16x9')
+        ?fullscreen:fullscreen?.querySelector?.('#card-9x16,#card-16x9');
+    const host=card||document.body;
+    if(drawer.parentElement!==host)host.appendChild(drawer);
+    drawer.style.removeProperty('top');
+    drawer.style.removeProperty('left');
+    drawer.style.removeProperty('right');
+    drawer.style.removeProperty('bottom');
 }
 function arenaMobileSelectTestPanel(id){
     const allowed=['arenaPanelPowers','arenaPanelPlayers','arenaPanelScenarios','arenaPanelSocial','arenaPanelSimulation'];
@@ -11686,13 +11787,19 @@ function arenaMobileShowTestDrawer(open=true){
         if(panel)document.getElementById('arenaMobilePanelHost')?.appendChild(panel);
     }
     drawer.hidden=!open;
+    drawer.classList.remove('is-collapsed'); // Always reopen with actual options visible.
     document.getElementById('arenaMobileControlShelf')?.classList.toggle('has-open-tests',!!open);
+    for(const id of ['card-9x16','card-16x9'])document.getElementById(id)?.classList.toggle('arena-tests-visible',!!open);
+    const shortcut=document.getElementById('arenaMobileTestsShortcut');
+    if(shortcut){shortcut.setAttribute('aria-expanded',String(!!open));shortcut.setAttribute('aria-controls','arenaPortableTestDrawer');}
     const fab=document.getElementById('arenaMobileTestFab');
     if(fab)fab.setAttribute('aria-expanded',String(!!open));
+    // A fixed drawer is already visible: scrolling the document would move the game.
 }
 function arenaMobileInstallTestDrawer(){
     const drawer=document.createElement('aside');
     drawer.id='arenaPortableTestDrawer';drawer.hidden=true;
+    drawer.setAttribute('role','region');drawer.setAttribute('aria-live','off');
     drawer.setAttribute('aria-label','Opciones del Modo Streamer');
     drawer.innerHTML='<div id="arenaPortableTestHead"><span>🎛 Modo Streamer</span><button type="button" id="arenaPortableTestCollapse" aria-label="Minimizar panel">−</button><button type="button" id="arenaPortableTestClose" aria-label="Cerrar pruebas">×</button></div><label class="arena-portable-test-picker">Herramienta<select id="arenaPortableTestSelect"><option value="arenaPanelPowers">Jugador y comandos</option><option value="arenaPanelPlayers">Participantes y K.O.</option><option value="arenaPanelScenarios">Escenarios</option><option value="arenaPanelSocial">Interacciones</option><option value="arenaPanelSimulation">Simulación</option></select></label><div id="arenaPortableTestBody"></div>';
     document.body.appendChild(drawer);
@@ -11715,7 +11822,7 @@ function arenaMobileInstallTestDrawer(){
         menu.textContent='🎛 Opciones del Modo Streamer';
         menu.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();arenaMobileShowTestDrawer(true);},true);
     }
-    document.addEventListener('fullscreenchange',arenaMobileMountTestDrawer);
+    document.addEventListener('fullscreenchange',()=>requestAnimationFrame(arenaMobileMountTestDrawer));
     window.addEventListener('resize',()=>{
         requestAnimationFrame(()=>{
             arenaMobileMountTestDrawer();
