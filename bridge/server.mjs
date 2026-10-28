@@ -57,7 +57,13 @@ function publishChat(event) {
 }
 
 const liveSession=new LiveSession({
-  async createConnection(){const imported=await import('tiktok-live-connector');const C=imported.TikTokLiveConnection||imported.default?.TikTokLiveConnection;if(!C)throw new Error('TikTokLiveConnection no disponible.');return new C(TIKTOK_USERNAME);},
+  async createConnection(){
+    const imported=await import('tiktok-live-connector');
+    const C=imported.TikTokLiveConnection||imported.default?.TikTokLiveConnection;
+    if(!C)throw new Error('TikTokLiveConnection no disponible.');
+    // 2.5.0 requires an options object; skip historical chat during reconnections.
+    return new C(TIKTOK_USERNAME,{processInitialData:false});
+  },
   onChat:publishChat,onStatus:updateStatus
 });
 const connectLive=()=>liveSession.connect();
