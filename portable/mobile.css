@@ -246,3 +246,10 @@ html.arena-mobile-offline body>main#arenaWorkspace{padding-bottom:calc(83px + en
  html.arena-mobile-offline #arenaPortableNotice p{font-size:11px}
  html.arena-mobile-offline .arena-portable-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px}
 }
+
+html.arena-mobile-offline #arenaPortableToast:not([hidden]){
+ position:absolute;right:0;top:calc(100% + 9px);display:block;min-width:225px;max-width:min(74vw,340px);
+ border:1px solid #bb8d44;border-radius:11px;padding:10px 12px;background:#221c25;
+ color:#ffdf9d;box-shadow:0 12px 25px #000b;font:600 12px/1.4 system-ui,sans-serif;
+ cursor:pointer;white-space:normal;z-index:250;
+}
