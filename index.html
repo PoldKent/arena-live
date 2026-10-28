@@ -6230,11 +6230,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         }
 
         function reserveParticleSlots(count) {
-            // Reserving a whole special burst before its synchronous loop
-            // gives the exact same last MAX_PARTICLES and draw order as
-            // shifting the oldest entry once per particle, with one splice.
-            const excess = particles.length + count - MAX_PARTICLES;
-            if (excess > 0) particles.splice(0, excess);
+            ArenaRender.reserveParticleSlots(particles, MAX_PARTICLES, count);
         }
         function spawnParticle(x, y, color, speed = 4, life = 25, gravity = 0.1) {
             const angle = arenaVisualRandom() * Math.PI * 2;
