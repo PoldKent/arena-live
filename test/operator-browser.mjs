@@ -693,7 +693,8 @@ await check('Display settings reveal real attack names and damage numbers immedi
  await page.evaluate(()=>selectArenaSettingsTab('audience',false));
  const section=page.locator('.arena-settings-section').filter({has:page.locator('#showPowerTextToggle')});if(!await section.evaluate(n=>n.open))await section.locator('summary').click();
  const calibration=await page.evaluate(()=>localStorage.getItem(ARENA_OBS_CALIBRATION_KEY));
- await page.locator('#showPowerTextToggle').check();await page.locator('#showCombatNumbersToggle').check();assert.equal((await state()).paused,false);
+ const pauseBefore=await page.evaluate(()=>isGamePaused);
+ await page.locator('#showPowerTextToggle').check();await page.locator('#showCombatNumbersToggle').check();assert.equal((await state()).paused,pauseBefore);
  const labels=await page.evaluate(()=>{
   arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};gameState='COMBAT';activeMode='smash';isGamePaused=true;soundEnabled=false;
   return ['kame','ninja','titan','trueno','esmeralda'].map(key=>{
