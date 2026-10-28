@@ -212,9 +212,6 @@ function installArenaPortableFloatingUI(){
         menu.insertBefore(round,menu.querySelector('[data-forward-control="arenaDualTestsToggle"]')||null);
         const prota=document.getElementById('arenaProtaClassToolbar');
         if(prota)menu.appendChild(prota); // Move the original select, keep its listeners and value.
-        const join=document.createElement('button');join.type='button';join.id='arenaPortableJoinMenu';join.textContent='👑 Controlar protagonista';
-        join.onclick=()=>{arenaPortableSetMode(ARENA_MOBILE_MODES.PLAYER);closeArenaOperatorPopover(false);};
-        menu.appendChild(join);
     }
     const label=document.getElementById('arenaProtaClassLabel');if(label)label.textContent='🎭 Protagonista';
     const bottom=document.getElementById('arenaMobileMoreBtn');
@@ -232,8 +229,13 @@ function arenaPortableReady() {
     document.getElementById('arenaPortableDontShow').onchange=event=>{
         try{localStorage.setItem(ARENA_PORTABLE_NOTICE_KEY,event.target.checked?'1':'0');}catch(_){}
     };
+    // The initial setup is a draft: choosing a radio does not change an active match
+    // until the user explicitly presses "Iniciar partida".
     document.querySelectorAll('input[name="arenaPortableMode"]').forEach(input=>input.addEventListener('change',event=>{
-        if(event.target.checked)arenaPortableSetMode(event.target.value,{updateGame:false});
+        if(event.target.checked){
+            const cls=document.getElementById('arenaPortableClass');
+            if(cls)cls.disabled=event.target.value!==ARENA_MOBILE_MODES.PLAYER||arenaCombatRules.classRule!=='any';
+        }
     }));
     document.getElementById('arenaPortableResolution').onchange=event=>arenaPortableResolution(event.target.value);
     document.getElementById('arenaPortableFps').onchange=event=>setArenaRuntimeOption('renderFps',event.target.value);
