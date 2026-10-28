@@ -19,7 +19,10 @@ test('responsive preparation and manual switching', () => {
 });
 test('fullscreen retains portrait on the right and fixed operator bands', () => {
   assert.match(html, /grid-template-rows:34px minmax\(0,1fr\) var\(--arena-operator-footer-height,76px\)!important/);
-  assert.match(html, /translateX\(var\(--arena-vertical-nudge,10px\)\)/);
+  // The vertical frame now centers at 0 px and can be shifted both ways.
+  assert.match(html, /translateX\(var\(--arena-vertical-nudge,0px\)\)/);
+  assert.match(html, /justify-content:center;min-width:0;min-height:0;overflow:visible;transform:translateX/);
+  assert.match(html, /id="arenaObsVerticalOffset" min="-120" max="120" step="1" value="0"/);
   assert.match(html, /function fitArenaDualOperatorMonitors\(\)/);
   assert.match(html, /moveArenaDualMonitorNode\('card-9x16', 'arenaDualUltrawideVerticalStage'\)/);
   assert.match(html, /id="arenaStreamMenuRail"/);
