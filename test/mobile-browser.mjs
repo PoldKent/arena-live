@@ -157,18 +157,42 @@ try{
         });
         assert.equal(result.moving,true);assert.equal(result.released,true);assert.equal(result.attack,true);
     });
-    await check('double and triple taps select first jump and second jump without a joystick',async()=>{
-        const outcome=await page.evaluate(()=>{
-            ArenaPortable.start({count:4,join:true});const actor=fighters.find(f=>f.isStreamer);
-            const view=document.getElementById('viewport9x16'),rect=view.getBoundingClientRect();
-            const x=rect.left+rect.width/2+65,y=rect.top+rect.height/2;
-            const tap=()=>{view.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'touch',pointerId:58,clientX:x,clientY:y}));view.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch',pointerId:58,clientX:x,clientY:y}));};
-            tap();tap();const first=actor.jumpsLeft;
-            for(let i=0;i<12;i++)updatePhysicsAndAI();
-            tap();const queued=arenaMobileTouchState.jumpRetry!==null||actor.jumpsLeft<first;
-            return {first,queued,tapCount:ArenaMobileTouch.getState().tapCount};
+    await check('arena taps move only; dedicated jump button gives one jump and double tap gives second jump',async()=>{
+        const result=await page.evaluate(()=>{
+            ArenaPortable.start({count:4,join:true});
+            const actor=fighters.find(f=>f.isStreamer),view=document.getElementById('viewport9x16'),rect=view.getBoundingClientRect();
+            const x=rect.left+rect.width*.47,y=rect.top+rect.height*.46;
+            const tapArena=()=>{
+                view.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'touch',pointerId:58,clientX:x,clientY:y}));
+                view.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch',pointerId:58,clientX:x,clientY:y}));
+            };
+            const initial=actor.jumpsLeft;
+            tapArena();tapArena();
+            const noAccidentalJump=actor.jumpsLeft===initial;
+            document.getElementById('arenaMobileJump').click();
+            const afterOne=actor.jumpsLeft;
+            document.getElementById('arenaMobileJump').click();
+            const doubleRequested=actor.jumpsLeft<afterOne||arenaMobileTouchState.jumpRetry!==null;
+            return {initial,noAccidentalJump,afterOne,doubleRequested};
         });
-        assert.ok(outcome.first>=0);assert.equal(outcome.queued,true);assert.equal(outcome.tapCount,0);
+        assert.equal(result.noAccidentalJump,true);assert.ok(result.afterOne<result.initial);assert.equal(result.doubleRequested,true);
+    });
+    await check('button placement and size can be saved, modified and restored from Ajustes',async()=>{
+        const result=await page.evaluate(()=>{
+            const original=ArenaMobileTouch.getLayout();
+            ArenaMobileTouch.setButtonSize(88);
+            ArenaMobileTouch.editButtons(true);
+            const editing=document.documentElement.classList.contains('arena-mobile-edit-controls');
+            const node=document.getElementById('arenaMobileAttack'),rect=document.getElementById('viewport9x16').getBoundingClientRect();
+            node.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'touch',pointerId:90,clientX:rect.left+rect.width*.8,clientY:rect.top+rect.height*.73}));
+            node.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerType:'touch',pointerId:90,clientX:rect.left+rect.width*.64,clientY:rect.top+rect.height*.70}));
+            node.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch',pointerId:90,clientX:rect.left+rect.width*.64,clientY:rect.top+rect.height*.70}));
+            const next=ArenaMobileTouch.getLayout();
+            ArenaMobileTouch.editButtons(false);
+            ArenaMobileTouch.resetButtons();
+            return {editing,changed:next.points.arenaMobileAttack[0]!==original.points.arenaMobileAttack[0],size:next.size,restored:ArenaMobileTouch.getLayout().size,settings:!!document.getElementById('arenaMobileControlSettings')};
+        });
+        assert.equal(result.editing,true);assert.equal(result.changed,true);assert.equal(result.size,88);assert.equal(result.restored,70);assert.equal(result.settings,true);
     });
     await check('long press invokes the active class special without a separate analog control',async()=>{
         await page.evaluate(()=>{
@@ -203,6 +227,7 @@ try{
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
         assert.equal(await page.locator('#arenaPortableTestBody #arenaPanelPowers').count(),1);
         assert.equal(await page.locator('#arenaPortableTestBody #targetFighterSelect').count(),1);
+        assert.equal(await page.locator('#arenaPortableTestDrawer').evaluate(n=>getComputedStyle(n).borderTopWidth),'0px');
         assert.equal(await page.locator('#targetFighterSelect').count(),1);
         await page.locator('#arenaPortableTestSelect').selectOption('arenaPanelPlayers');
         assert.equal(await page.locator('#arenaPortableTestBody #arenaPanelPlayers').count(),1);
@@ -226,7 +251,7 @@ try{
         assert.equal(await page.locator('#arenaPortableTestDrawer').evaluate(n=>n.parentElement.id),'viewport16x9');
         await page.evaluate(()=>ArenaMobileTouch.openTests(false));
         if(output)await page.screenshot({path:join(output,'mobile-landscape.png')});
-        await page.locator('#arenaMobileMoreBtn').tap();await page.locator('#arenaPortableQuick').tap();
+        await page.locator('#arenaMobileMoreBtn').tap();await page.locator('.arena-mobile-match-menu summary').tap();await page.locator('#arenaPortableQuick').tap();
         assert.equal(await page.locator('#arenaPortableSetup').isVisible(),true);
         await page.locator('#arenaPortableClose').tap();assert.equal(await page.evaluate(()=>isGamePaused),false);
     });
