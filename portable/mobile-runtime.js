@@ -187,13 +187,12 @@ function arenaPortableReady() {
     selectArenaChatTab('local',false);
     const footer=document.querySelector('#settingsPauseModal>div>div:last-child');
     if(footer){const note=document.createElement('span');note.textContent=' · Archivo móvil sin conexión';note.setAttribute('data-no-translate','');footer.appendChild(note);}
-    const dock=document.getElementById('touchControlDock');
     function dockForView(){
         const fullscreen=document.fullscreenElement?.id;
         const horizontal=fullscreen==='card-16x9'||(fullscreen!=='card-9x16'&&monitorFocus==='16:9');
         const view=document.getElementById(horizontal?'viewport16x9':'viewport9x16');
         if(!view)return;
-        view.append(dock,document.getElementById('arenaMobileFloating'),document.getElementById('arenaHeaderActions'),document.getElementById('arenaOperatorPopover'));
+        for(const id of ['arenaMobileFloating','arenaHeaderActions','arenaOperatorPopover','arenaPortableTestDrawer']){const node=document.getElementById(id);if(node)view.appendChild(node);}
         const setup=document.getElementById('arenaPortableSetup');
         if(setup)(fullscreen?view:document.body).appendChild(setup);
         refreshArenaPortableFloatingUI();
