@@ -856,5 +856,36 @@ await check('Radar axes and power names stay readable across eight languages, mo
  const before=await rects();await page.locator('[data-balance-class="esmeralda"]').click();assert.deepEqual(await rects(),before);assert.equal((await state()).settingsOpen,true);await shot('radar-stream-narrow');
  await page.evaluate(()=>document.getElementById('broadcastStageSection').style.removeProperty('--arena-stream-width'));
 });
+await check('Prota uses a direct five-class toolbar dropdown instead of a nested class menu',async()=>{
+ const menu=page.locator('#btnProtaClassMenu'),select=page.locator('#arenaHeaderActions #protagonistClassSelect');
+ assert.equal(await menu.count(),0);
+ assert.equal(await select.locator('option').count(),5);
+ await page.evaluate(async()=>{if(document.fullscreenElement)await document.exitFullscreen();toggleSettingsModal(false);openLobby(true);});
+ await page.waitForFunction(()=>!document.fullscreenElement);
+ await select.selectOption('ninja');
+ await page.evaluate(()=>joinAsStreamer());
+ const chosen=await page.evaluate(()=>fighters.find(f=>f.isStreamer)?.archetypeKey);
+ assert.equal(chosen,'ninja');
+});
+await check('First TikTok tap admits one viewer in lobby, never duplicates or bypasses the 128-player cap',async()=>{
+ const admission=await page.evaluate(()=>{
+  openLobby(true);arenaCombatRules.maxPlayers=128;
+  const before=fighters.length;
+  const first=ArenaLive.joinOnTap({username:'@live_fan',platformKey:'tiktok'});
+  const again=ArenaLive.joinOnTap({username:'@live_fan',platformKey:'tiktok'});
+  const found=fighters.filter(f=>f.name.toLowerCase()==='@live_fan'&&f.platformKey==='tiktok').length;
+  const rosterAfter=fighters.length;
+  const full=new Array(129).fill(null); // no effect on active roster
+  applyPlayerCountPreset(128);
+  const blocked=ArenaLive.joinOnTap({username:'@overflow_fan',platformKey:'tiktok'});
+  gameState='COMBAT';
+  const late=ArenaLive.joinOnTap({username:'@combat_fan',platformKey:'tiktok'});
+  return {first,again,found,rosterAfter,before,blocked,late,fullCount:fighters.length};
+ });
+ assert.equal(admission.first,true);assert.equal(admission.again,false);
+ assert.equal(admission.found,1);assert.equal(admission.rosterAfter,admission.before+1);
+ assert.equal(admission.blocked,false);assert.equal(admission.late,false);
+ assert.equal(admission.fullCount,128);
+});
 assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:checks.length,errors:errors.length,version:release}));
 } finally {await browser?.close();server.kill('SIGKILL');}
