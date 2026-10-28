@@ -43,9 +43,9 @@ test('LIVE shares belong to the active connection and cannot replay after reconn
 });
 
 test('follow gift subscribe roomUser and member events follow the active connection only',async()=>{
- const old=new Connection(),active=new Connection();
+ const old=new Connection(),active=new Connection(),queue=[old,active];
  const supports=[],audience=[],members=[];
- const session=new LiveSession({createConnection:async()=>[old,active].shift(),
+ const session=new LiveSession({createConnection:async()=>queue.shift(),
   onSupport:(kind,event)=>supports.push([kind,event.id]),
   onRoomUser:event=>audience.push(event.viewerCount),
   onMember:event=>members.push(event.user?.displayId)});
