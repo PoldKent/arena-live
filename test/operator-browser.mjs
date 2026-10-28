@@ -953,6 +953,7 @@ await check('Lobby opacity changes both welcome cards and both audience guides',
 await check('A rapid !jugar rejoin in final duel remains available with remaining lives',async()=>{
  const r=await page.evaluate(()=>{
   gameState='LOBBY';setRejoinRuleMode('free');applyPlayerCountPreset(2);startCombatFromLobby();
+  isGamePaused=false; // real LIVE input is queued while paused, by design.
   const actor=fighters[0];chatRateLimits.clear();
   const first=processChatCommand(actor.name,actor.platformKey,'!jugar');
   actor.eliminated=true;actor.hp=0;
