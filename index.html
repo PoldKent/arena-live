@@ -6840,7 +6840,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             if(!hasSlot&&!alive)button.title=`${arenaCombatRuleText('fullCapacity')} (${getArenaPlayerLimit()})`;
             const classSelect = document.getElementById('protagonistClassSelect');
             if (classSelect) {
-                classSelect.disabled = alive||arenaCombatRules.classRule!=='any';
+                classSelect.disabled = arenaCombatRules.classRule!=='any' || gameState==='VICTORY' || koSequenceActive;
                 if(arenaCombatRules.classRule!=='any')classSelect.value=arenaCombatRules.classRule;
                 classSelect.classList.toggle('opacity-50', alive);
                 if (alive && protagonist?.archetypeKey) classSelect.value = protagonist.archetypeKey;
@@ -6848,6 +6848,23 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             refreshArenaOperatorToolbar();
             updateTouchControlsVisibility();
         }
+
+        function changeProtaClassFromToolbar(event) {
+            const select = event.currentTarget;
+            const selectedKey = select.value;
+            if (!Object.hasOwn(CLASS_COMMANDS, selectedKey)) return;
+            const prota = fighters.find(f => f.isStreamer && !f.eliminated);
+            if (!prota) {
+                arenaUnrestrictedProtaClass = selectedKey;
+                return; // Choice will apply when Prota joins or re-enters.
+            }
+            if (prota.archetypeKey === selectedKey) return;
+            // Same class-selection/cooldown path used by ordinary spectators.
+            // Invalid switches revert the selector instead of lying about the class.
+            const changed = selectFighterClass(prota.name, prota.platformKey, selectedKey, prota);
+            if (!changed || prota.archetypeKey !== selectedKey) select.value = prota.archetypeKey;
+        }
+        document.getElementById('protagonistClassSelect')?.addEventListener('change',changeProtaClassFromToolbar);
 
         function joinAsStreamer() {
             if (gameState === 'VICTORY' || koSequenceActive) {
