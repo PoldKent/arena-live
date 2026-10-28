@@ -82,11 +82,11 @@ try{
             const rects=ids.map(id=>{const r=document.getElementById(id).getBoundingClientRect();return [r.left,r.right,r.width,r.height];});
             const top=[...document.querySelectorAll('#arenaMobileFloating>button')].filter(n=>getComputedStyle(n).display!=='none').map(n=>n.id);
             const bottom=[...document.querySelectorAll('#arenaHeaderActions>button')].filter(n=>getComputedStyle(n).display!=='none').map(n=>n.id);
-            return {rects,screen:innerWidth,top,bottom,menuInTop:document.getElementById('arenaMobileMoreBtn').parentElement.id==='arenaMobileFloating'};
+            return {rects,screen:innerWidth,top,bottom,menuInTop:document.getElementById('arenaMobileMoreBtn').parentElement.id==='arenaMobileFloating',topOutside:document.getElementById('arenaMobileFloating').parentElement.id==='arenaTopBarInner'};
         });
-        assert.deepEqual(result.top,['arenaMobilePause','arenaMobileMoreBtn','arenaPortableFullscreen']);
+        assert.deepEqual(result.top,['arenaMobilePause','arenaMobileModeShortcut','arenaMobileMoreBtn','arenaPortableFullscreen']);
         assert.deepEqual(result.bottom,['arenaMobileJump','arenaMobileAttack','arenaMobilePower']);
-        assert.equal(result.menuInTop,true);
+        assert.equal(result.menuInTop,true);assert.equal(result.topOutside,true);
         assert.ok(result.rects.every(([left,right,width,height])=>left>=0&&right<=result.screen&&width>=44&&height>=44),JSON.stringify(result));
         await page.locator('#arenaMobileMoreBtn').tap();
         assert.equal(await page.locator('#arenaPortableModePlayer').isVisible(),true);
@@ -181,8 +181,12 @@ try{
         await page.evaluate(()=>ArenaPortable.start({count:128,join:false}));assert.equal(await page.evaluate(()=>fighters.length),64);
         await page.evaluate(()=>setArenaCombatRule('maxPlayers',128));
     });
-    await check('direct touch replaces the analog, directions move Prota and a fast swipe performs melee',async()=>{
-        assert.equal(await page.locator('#touchJoystick').count(),0);
+    await check('Táctil total hides the analog and action buttons while preserving swipe combat',async()=>{
+        await page.evaluate(()=>ArenaMobileTouch.setTouchMode('touch'));
+        assert.equal(await page.locator('#touchJoystick').count(),1);
+        assert.equal(await page.locator('#touchJoystick').isVisible(),false);
+        assert.equal(await page.locator('#arenaMobilePower').isVisible(),false);
+        assert.equal(await page.locator('#arenaMobileGestureGuide').isVisible(),true);
         const result=await page.evaluate(()=>{
             ArenaPortable.start({count:4,join:true});
             const actor=fighters.find(f=>f.isStreamer),view=document.getElementById('viewport9x16'),rect=view.getBoundingClientRect();
@@ -198,7 +202,7 @@ try{
         });
         assert.equal(result.moving,true);assert.equal(result.released,true);assert.equal(result.attack,true);
     });
-    await check('arena taps move only; dedicated jump button gives one jump and double tap gives second jump',async()=>{
+    await check('Táctil total jumps with two taps and double-jumps with three',async()=>{
         const result=await page.evaluate(()=>{
             ArenaPortable.start({count:4,join:true});
             const actor=fighters.find(f=>f.isStreamer),view=document.getElementById('viewport9x16'),rect=view.getBoundingClientRect();
@@ -208,18 +212,19 @@ try{
                 view.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch',pointerId:58,clientX:x,clientY:y}));
             };
             const initial=actor.jumpsLeft;
-            tapArena();tapArena();
+            tapArena();
             const noAccidentalJump=actor.jumpsLeft===initial;
-            document.getElementById('arenaMobileJump').click();
+            tapArena();
             const afterOne=actor.jumpsLeft;
-            document.getElementById('arenaMobileJump').click();
+            tapArena();
             const doubleRequested=actor.jumpsLeft<afterOne||arenaMobileTouchState.jumpRetry!==null;
             return {initial,noAccidentalJump,afterOne,doubleRequested};
         });
         assert.equal(result.noAccidentalJump,true);assert.ok(result.afterOne<result.initial);assert.equal(result.doubleRequested,true);
     });
-    await check('button placement and size can be saved, modified and restored from Ajustes',async()=>{
+    await check('joystick plus action button positions can be saved, modified and restored',async()=>{
         const result=await page.evaluate(()=>{
+            ArenaMobileTouch.setTouchMode('joystick');
             const original=ArenaMobileTouch.getLayout();
             ArenaMobileTouch.setButtonSize(88);
             ArenaMobileTouch.editButtons(true);
@@ -239,7 +244,7 @@ try{
         const bounds=await page.evaluate(()=>{
             ArenaMobileTouch.setButtonSize(94);
             const parent=document.getElementById('viewport9x16').getBoundingClientRect();
-            const buttons=['arenaMobileJump','arenaMobileAttack','arenaMobilePower','arenaMobileMoreBtn'];
+            const buttons=['touchJoystick','arenaMobileJump','arenaMobileAttack','arenaMobilePower'];
             const values=buttons.map(id=>{
                 const r=document.getElementById(id).getBoundingClientRect();
                 return {id,left:r.left,right:r.right,top:r.top,bottom:r.bottom,
@@ -250,9 +255,9 @@ try{
         });
         assert.ok(bounds.every(item=>item.inside),JSON.stringify(bounds));
     });
-    await check('long press invokes the active class special without a separate analog control',async()=>{
+    await check('Táctil total long press invokes the active special',async()=>{
         await page.evaluate(()=>{
-            ArenaPortable.start({count:4,join:true});
+            ArenaMobileTouch.setTouchMode('touch');ArenaPortable.start({count:4,join:true});
             const actor=fighters.find(f=>f.isStreamer);actor.energy=100;actor.aiSpecialCooldown=0;
             const view=document.getElementById('viewport9x16'),rect=view.getBoundingClientRect();
             view.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'touch',pointerId:99,clientX:rect.left+rect.width*.65,clientY:rect.top+rect.height*.55}));
@@ -265,7 +270,8 @@ try{
         });
         assert.equal(queued,true);
     });
-    await check('two roles switch in a running match, with Player HUD clean and Director tools visible',async()=>{
+    await check('two roles switch in a running match, with Player HUD clean and Streamer tools visible',async()=>{
+        await page.evaluate(()=>ArenaMobileTouch.setTouchMode('joystick'));
         assert.equal(await page.evaluate(()=>ArenaPortable.getProfile().mode),'player');
         await page.evaluate(()=>ArenaPortable.setMode('director'));
         assert.equal(await page.evaluate(()=>ArenaPortable.getProfile().mode),'director');
@@ -318,7 +324,7 @@ try{
         await page.evaluate(()=>{setMonitorFocus('16:9');ArenaPortable.start({count:9,join:true});renderBothScreensSimultaneously();});
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
         assert.deepEqual(await page.evaluate(()=>[canvas16.width,canvas16.height,canvas9.width,canvas9.height]),[1280,720,1,1]);
-        assert.equal(await page.locator('#touchJoystick').count(),0);
+        assert.equal(await page.locator('#touchJoystick').count(),1);
         assert.equal(await page.locator('#arenaMobileMoreBtn').isVisible(),true);
         const bar=await page.locator('#arenaHeaderActions').boundingBox();assert.ok(bar.y+bar.height<=391);
         await page.evaluate(()=>ArenaMobileTouch.openTests(true));
