@@ -97,7 +97,7 @@ test('v0.36–v0.37 top-right floating capsule is restored without overlapping 9
 test('Streamer Pruebas is a compact overlay, never reduces the arena or covers five skills',()=>{
   assert.match(touch,/function arenaMobilePositionTestDrawer\(\)/);
   assert.match(touch,/getElementById\('arenaStreamerSkillsDock'\)/);
-  assert.match(touch,/skills\.getBoundingClientRect\(\)\.top/);
+  assert.match(touch,/const rail=skills\?\.getBoundingClientRect\(\)/);
   assert.match(touch,/drawer\.style\.setProperty\('--arena-tests-bottom'/);
   assert.match(css,/bottom:var\(--arena-tests-bottom,80px\)!important/);
   assert.match(css,/#arenaMobileControlShelf #arenaStreamerSkillsDock\{/);
