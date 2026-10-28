@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.31 — TikTok LIVE</title>
+    <title>Arena Live v0.32 — TikTok LIVE</title>
     <!--
       ARENA LIVE · GAME RUNTIME
       The classic game script stays here; utility CSS is built locally and
@@ -13,7 +13,7 @@
       have been migrated to explicit event listeners.
     -->
     <!-- Styles are built once; no browser compiler runs during a stream. -->
-    <link rel="stylesheet" href="styles/arena-ui.css?v=0.31">
+    <link rel="stylesheet" href="styles/arena-ui.css?v=0.32">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Fonts: Inter & Orbitron for Arcade/Esports HUD -->
@@ -219,7 +219,7 @@
 #viewport16x9 .arena-victory-card, #viewport9x16 .arena-victory-card,
 #viewport16x9 .arena-audience-guide, #viewport9x16 .arena-audience-guide { opacity: var(--arena-hud-opacity); }
 #verticalEventHistory { display: none !important; }
-/* v0.31 · Operator-first layout. No game canvas, OBS crop or rule logic is modified. */
+/* v0.32 · Operator-first layout. No game canvas, OBS crop or rule logic is modified. */
 #arenaSettingsNav {position:sticky;top:-10px;z-index:4;display:grid;gap:7px;padding:9px 1px 11px;background:#0b101e;border-bottom:1px solid #34495b;margin-bottom:11px}
 #arenaSettingsTabs {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
 #arenaSettingsTabs button {padding:9px 4px;min-height:37px;border:1px solid #30465b;border-radius:7px;background:#152131;color:#d2e0eb;font:650 11px Inter,system-ui;white-space:normal}
@@ -1912,17 +1912,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.31 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.32 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
 
     <!-- ==================== COMPLETE GAME ENGINE, LOBBY & VICTORY SCRIPT ==================== -->
-    <script src="engine/arena-core.js?v=0.31"></script>
-    <script src="engine/arena-render.js?v=0.31"></script>
-    <script src="engine/arena-audio.js?v=0.31"></script>
-    <script src="engine/arena-settings.js?v=0.31"></script>
-    <script src="engine/arena-balance-evidence.js?v=0.31"></script>
+    <script src="engine/arena-core.js?v=0.32"></script>
+    <script src="engine/arena-render.js?v=0.32"></script>
+    <script src="engine/arena-audio.js?v=0.32"></script>
+    <script src="engine/arena-settings.js?v=0.32"></script>
+    <script src="engine/arena-balance-evidence.js?v=0.32"></script>
     <script>
         /*************************************************************************
          * ARENA LIVE · MONOLITHIC ENGINE INDEX
@@ -3272,7 +3272,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         const smashPlatforms = [
             { xPct: 0.16, yPct: 0.63, wPct: 0.24 },
             { xPct: 0.60, yPct: 0.63, wPct: 0.24 },
-            { xPct: 0.35, yPct: 0.44, wPct: 0.31 }
+            { xPct: 0.35, yPct: 0.44, wPct: 0.32 }
         ];
 
         // Fighter classes: short, single-word names. Class commands select in the lobby.
@@ -4274,7 +4274,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             matchTimeSeconds = Math.max(2, matchTimeSeconds - secondsToSkip);
             updateCombatTimerDisplay();
             playSound('powerup');
-            spawnFloatingText(WORLD_W * 0.5, WORLD_H * 0.31, `⏩ RELOJ ADELANTADO (${matchTimeSeconds}s restantes)`, '#38bdf8', 15);
+            spawnFloatingText(WORLD_W * 0.5, WORLD_H * 0.32, `⏩ RELOJ ADELANTADO (${matchTimeSeconds}s restantes)`, '#38bdf8', 15);
         }
 
         /*************************************************************************
@@ -6536,7 +6536,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     targetCtx.lineWidth = 3;
                     for (let s = 0; s < 3; s++) {
                         targetCtx.beginPath();
-                        targetCtx.arc(rx, ry, rad * (0.4 + s * 0.31), animationTime * 0.02 + s, animationTime * 0.02 + s + 4);
+                        targetCtx.arc(rx, ry, rad * (0.4 + s * 0.32), animationTime * 0.02 + s, animationTime * 0.02 + s + 4);
                         targetCtx.stroke();
                     }
 
@@ -6928,7 +6928,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             // modes, vertical stick travel does NOT jump; jumping is a separate tap.
             let joystickPointerId = null;
             const setJoystickKeys = (nx, ny) => {
-                const deadzone = 0.31;
+                const deadzone = 0.32;
                 keys.a = nx < -deadzone;
                 keys.d = nx > deadzone;
                 keys.s = ny > deadzone;
@@ -6937,7 +6937,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const moveJoystick = event => {
                 if (joystickPointerId !== event.pointerId) return;
                 const rect = joystick.getBoundingClientRect();
-                const maxMove = Math.max(16, rect.width * 0.31);
+                const maxMove = Math.max(16, rect.width * 0.32);
                 let dx = event.clientX - (rect.left + rect.width / 2);
                 let dy = event.clientY - (rect.top + rect.height / 2);
                 const length = Math.hypot(dx, dy);
@@ -7327,7 +7327,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 symbol = '❤️'; color = '#ec4899';
                 f.likesReceived += 1;
             } else if (eventType === 'share') {
-                const healed = Math.max(0, Math.min(f.maxHp - f.hp, Math.round(f.maxHp * 0.31 * scale)));
+                const healed = Math.max(0, Math.min(f.maxHp - f.hp, Math.round(f.maxHp * 0.32 * scale)));
                 f.hp += healed;
                 f.immunityTimer = Math.max(f.immunityTimer, frames);
                 value = `+${healed} HP · 10 s`;
@@ -8290,7 +8290,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.31';
+        const ARENA_RELEASE_VERSION = '0.32';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:0, footer:76, format:'21'});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
@@ -8994,7 +8994,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             refreshArenaTrainingControls();
         }
 
-        // v0.31: Reorganize existing Settings sections, never cloning inputs or
+        // v0.32: Reorganize existing Settings sections, never cloning inputs or
         // changing their inline handlers, IDs, saved values or rule semantics.
         const ARENA_SETTINGS_NAV_KEY = 'arenaLiveSettingsNavV1';
         const ARENA_SETTINGS_GROUPS = Object.freeze(['match','combat','broadcast','audio','audience','system','combat','classes','system']);
@@ -9181,7 +9181,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.31.0',
+            version: '0.32.0',
             edition: 'tiktok',
             renderSpriteMode: arenaGpuSpritesEnabled ? 'hardware-candidate' : 'software-safe-vectors',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,
