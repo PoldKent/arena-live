@@ -307,16 +307,18 @@ try{
         assert.equal(await page.locator('#arenaPortableTestBody #targetFighterSelect').count(),1);
         assert.equal(await page.locator('#arenaStreamerSkillsDock .arena-skill-buttons button').count(),5);
         const sheet=await page.locator('#arenaPortableTestDrawer').evaluate(n=>{
-            const box=n.getBoundingClientRect(),body=n.querySelector('#arenaPortableTestBody');
-            const panel=body.querySelector('.arena-panel-body');
-            const viewport=n.parentElement.getBoundingClientRect();
+            const box=n.getBoundingClientRect(),video=document.getElementById('viewport9x16').getBoundingClientRect();
+            const body=n.querySelector('#arenaPortableTestBody'),panel=body.querySelector('.arena-panel-body');
             return {border:parseFloat(getComputedStyle(n).borderTopWidth)>0,
                 scroll:getComputedStyle(body).overflowY==='auto',
-                contained:box.width<=viewport.width&&box.height<=viewport.height,
-                normalPanel:getComputedStyle(panel).position==='static',
-                noScreenOverlay:box.height<viewport.height&&box.height<170};
+                inBody:n.parentElement===document.body,
+                onScreen:box.width>150&&box.height>=120&&box.top>=0&&box.bottom<=innerHeight+2,
+                clearOfVideo:box.top>=video.bottom-1,
+                actualOptions:!!n.querySelector('#arenaPortableTestSelect')&&!!n.querySelector('#arenaPanelPowers'),
+                normalPanel:getComputedStyle(panel).position==='static'};
         });
-        assert.deepEqual(sheet,{border:true,scroll:true,contained:true,normalPanel:true,noScreenOverlay:true});
+        assert.deepEqual(sheet,{border:true,scroll:true,inBody:true,onScreen:true,clearOfVideo:true,actualOptions:true,normalPanel:true},JSON.stringify(sheet));
+        if(output)await page.screenshot({path:join(output,'mobile-streamer-tests-open.png')});
         assert.equal(await page.locator('#targetFighterSelect').count(),1);
         await page.locator('#arenaPortableTestSelect').selectOption('arenaPanelPlayers');
         assert.equal(await page.locator('#arenaPortableTestBody #arenaPanelPlayers').count(),1);
@@ -337,7 +339,7 @@ try{
         assert.equal(await page.locator('#arenaMobileMoreBtn').isVisible(),true);
         const bar=await page.locator('#arenaMobileFloating').boundingBox();assert.ok(bar.y+bar.height<=391);
         await page.evaluate(()=>ArenaMobileTouch.openTests(true));
-        assert.equal(await page.locator('#arenaPortableTestDrawer').evaluate(n=>n.parentElement.id),'arenaMobileControlShelf');
+        assert.equal(await page.locator('#arenaPortableTestDrawer').evaluate(n=>n.parentElement===document.body),true);
         await page.evaluate(()=>ArenaMobileTouch.openTests(false));
         if(output)await page.screenshot({path:join(output,'mobile-landscape.png')});
         await page.locator('#arenaMobileMoreBtn').tap();await page.locator('.arena-mobile-match-menu summary').tap();await page.locator('#arenaPortableQuick').tap();
