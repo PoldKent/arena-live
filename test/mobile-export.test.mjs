@@ -22,6 +22,12 @@ test('portable export is self-contained, deterministic and includes the exact cu
         for(const [,source]of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))new Script(source);
         assert.match(html,/Archivo autónomo sin conexión a redes/);
         assert.match(html,/arena-mobile-offline/);
+        assert.match(html,/id="arenaPortableNotice"/);
+        assert.match(html,/No mostrar de nuevo/);
+        assert.match(html,/id="arenaPortableFullscreen"/);
+        assert.match(html,/id="arenaPortableGuideMenu"/);
+        assert.match(html,/arena-mobile-show-guide/);
+        assert.doesNotMatch(html,/Listo para tu celular/);
         const index=await readFile(new URL('../index.html',import.meta.url),'utf8');
         assert.match(index,/id="canvas16x9" width="1920" height="1080"/);
         assert.match(index,/id="canvas9x16" width="1080" height="1920"/);
