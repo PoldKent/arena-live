@@ -49,10 +49,18 @@ function arenaPortableSetMode(mode,{remember=true,updateGame=true}={}){
     if(updateGame&&!arenaPortableSetupOpen){
         if(mode===ARENA_MOBILE_MODES.PLAYER){
             if(!streamerManualControl)toggleStreamerManualControl();
-            if(gameState==='COMBAT'&&!fighters.some(f=>f.isStreamer&&!f.eliminated)){
+            if((gameState==='COMBAT'||gameState==='LOBBY')&&!fighters.some(f=>f.isStreamer&&!f.eliminated)){
                 joinAsStreamer();
-                if(!fighters.some(f=>f.isStreamer&&!f.eliminated))
-                    arenaPortableReport('No hay un espacio disponible para el protagonista; puedes seguir como Director.');
+                if(!fighters.some(f=>f.isStreamer&&!f.eliminated)){
+                    // Do not display Player controls without an actual controllable protagonist.
+                    arenaPortableProfile={...arenaPortableProfile,mode:ARENA_MOBILE_MODES.DIRECTOR,join:false};
+                    if(streamerManualControl)toggleStreamerManualControl();
+                    if(remember)arenaPortableRemember();
+                    if(typeof arenaMobileShowTestDrawer==='function'&&gameState==='COMBAT')arenaMobileShowTestDrawer(true);
+                    arenaPortableReport('No se pudo incorporar al protagonista. Sigues en Modo Director.');
+                    arenaPortableSyncModeControls();refreshArenaPortableFloatingUI();
+                    return false;
+                }
             }
             if(typeof arenaMobileShowTestDrawer==='function')arenaMobileShowTestDrawer(false);
         }else{
