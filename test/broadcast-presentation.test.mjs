@@ -118,3 +118,25 @@ test('real TikTok LIVE follow gift and subscription events have isolated viewer-
  assert.match(bridge,/joinOnShare\(\{username='',platformKey='tiktok'\}=\{\}\)/);
  assert.match(bridge,/ARENA_SOCIAL_EVENT_TYPES = Object\.freeze\(\['taps', 'likes', 'share', 'follow', 'subscribe'/);
 });
+
+test('simulated fighters keep fighting but hide overhead HP/energy and duel panels when the LIVE filter is enabled',()=>{
+ const info=html.match(/function shouldShowFighterInformation\(fighter\) \{[\s\S]*?\n        \}/)?.[0];
+ assert.ok(info,'common fighter information filter is present');
+ const ctx=vm.createContext({});
+ vm.runInContext('let showTikTokParticipantNamesOnly=true; '+info,ctx);
+ const bot={isStreamer:false,joinedByTikTok:false};
+ const real={isStreamer:false,joinedByTikTok:true};
+ const prota={isStreamer:true,joinedByTikTok:false};
+ assert.equal(vm.runInContext('shouldShowFighterInformation',ctx)(bot),false);
+ assert.equal(vm.runInContext('shouldShowFighterInformation',ctx)(real),true);
+ assert.equal(vm.runInContext('shouldShowFighterInformation',ctx)(prota),true);
+ vm.runInContext('showTikTokParticipantNamesOnly=false',ctx);
+ assert.equal(vm.runInContext('shouldShowFighterInformation',ctx)(bot),true);
+ assert.match(html,/if \(gameState !== 'LOBBY' && shouldShowFighterInformation\(f\)\) \{/);
+ assert.match(html,/syncArenaDuelFighterInformation\(sfx, p1, p2\)/);
+ assert.match(html,/card\.classList\.toggle\('hidden', !showFirst && !showSecond\)/);
+ assert.match(html,/classList\.toggle\('hidden', !showFirst\)/);
+ assert.match(html,/classList\.toggle\('hidden', !showSecond\)/);
+ assert.match(html,/arena-duel-single/);
+ assert.match(html,/Los simulados siguen peleando sin etiquetas ni barras/);
+});

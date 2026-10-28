@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.34 — TikTok LIVE</title>
+    <title>Arena Live v0.35 — TikTok LIVE</title>
     <!--
       ARENA LIVE · GAME RUNTIME
       The classic game script stays here; utility CSS is built locally and
@@ -13,7 +13,7 @@
       have been migrated to explicit event listeners.
     -->
     <!-- Styles are built once; no browser compiler runs during a stream. -->
-    <link rel="stylesheet" href="styles/arena-ui.css?v=0.34">
+    <link rel="stylesheet" href="styles/arena-ui.css?v=0.35">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Fonts: Inter & Orbitron for Arcade/Esports HUD -->
@@ -219,7 +219,7 @@
 #viewport16x9 .arena-victory-card, #viewport9x16 .arena-victory-card,
 #viewport16x9 .arena-audience-guide, #viewport9x16 .arena-audience-guide { opacity: var(--arena-hud-opacity); }
 #verticalEventHistory { display: none !important; }
-/* v0.34 · Operator-first layout. No game canvas, OBS crop or rule logic is modified. */
+/* v0.35 · Operator-first layout. No game canvas, OBS crop or rule logic is modified. */
 #arenaSettingsNav {position:sticky;top:-10px;z-index:4;display:grid;gap:7px;padding:9px 1px 11px;background:#0b101e;border-bottom:1px solid #34495b;margin-bottom:11px}
 #arenaSettingsTabs {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
 #arenaSettingsTabs button {padding:9px 4px;min-height:37px;border:1px solid #30465b;border-radius:7px;background:#152131;color:#d2e0eb;font:650 11px Inter,system-ui;white-space:normal}
@@ -443,6 +443,8 @@
 }
 
 /* Broadcast HUD: real 16:9 life bars, readable from a streaming preview. */
+#hud1v1Bars16.arena-duel-single>.grid,#hud1v1Bars9.arena-duel-single>.grid{grid-template-columns:minmax(0,1fr)!important}
+#hud1v1Bars16.arena-duel-single .col-span-5,#hud1v1Bars9.arena-duel-single .col-span-5{grid-column:1/-1!important}
 #viewport16x9 #hud1v1Bars16{width:86%!important;max-width:1480px!important;padding:12px 20px!important;
  margin-inline:auto!important;border:1px solid rgba(251,191,36,.46)!important;border-radius:14px!important;
  background:rgba(6,17,32,.90)!important;box-shadow:0 5px 22px #0005;}
@@ -1913,17 +1915,17 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.34 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.35 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
 
     <!-- ==================== COMPLETE GAME ENGINE, LOBBY & VICTORY SCRIPT ==================== -->
-    <script src="engine/arena-core.js?v=0.34"></script>
-    <script src="engine/arena-render.js?v=0.34"></script>
-    <script src="engine/arena-audio.js?v=0.34"></script>
-    <script src="engine/arena-settings.js?v=0.34"></script>
-    <script src="engine/arena-balance-evidence.js?v=0.34"></script>
+    <script src="engine/arena-core.js?v=0.35"></script>
+    <script src="engine/arena-render.js?v=0.35"></script>
+    <script src="engine/arena-audio.js?v=0.35"></script>
+    <script src="engine/arena-settings.js?v=0.35"></script>
+    <script src="engine/arena-balance-evidence.js?v=0.35"></script>
     <script>
         /*************************************************************************
          * ARENA LIVE · MONOLITHIC ENGINE INDEX
@@ -3222,8 +3224,24 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         let showPowerText = false;
         let showFighterNames = true;
         let showTikTokParticipantNamesOnly = false;
+        // The same LIVE-participant filter governs overhead labels, health and energy bars,
+        // and the two duel HUDs. It never changes a fighter's combat state or hit points.
+        function shouldShowFighterInformation(fighter) {
+            return !showTikTokParticipantNamesOnly || fighter?.isStreamer === true || fighter?.joinedByTikTok === true;
+        }
         function shouldShowFighterLabel(fighter) {
-            return showFighterNames && (!showTikTokParticipantNamesOnly || fighter.isStreamer || fighter.joinedByTikTok === true);
+            return showFighterNames && shouldShowFighterInformation(fighter);
+        }
+        function syncArenaDuelFighterInformation(sfx, p1, p2) {
+            const showFirst = shouldShowFighterInformation(p1);
+            const showSecond = shouldShowFighterInformation(p2);
+            const card = document.getElementById(`hud1v1Bars${sfx}`);
+            if (!card) return;
+            card.classList.toggle('hidden', !showFirst && !showSecond);
+            card.classList.toggle('arena-duel-single', showFirst !== showSecond);
+            card.querySelector('.col-span-1')?.classList.toggle('hidden', !(showFirst && showSecond));
+            document.getElementById(`p1Name1v1_${sfx}`)?.closest('.col-span-5')?.classList.toggle('hidden', !showFirst);
+            document.getElementById(`p2Name1v1_${sfx}`)?.closest('.col-span-5')?.classList.toggle('hidden', !showSecond);
         }
         const ARENA_COMBAT_DISPLAY_KEY = 'arenaLiveCombatDisplayV1';
 
@@ -3244,7 +3262,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const names=document.getElementById('showFighterNamesToggle');
             if(names)names.checked=showFighterNames;
             const onlyParticipants=document.getElementById('showTikTokParticipantNamesOnlyToggle');
-            if(onlyParticipants){onlyParticipants.checked=showTikTokParticipantNamesOnly;onlyParticipants.disabled=!showFighterNames;}
+            if(onlyParticipants)onlyParticipants.checked=showTikTokParticipantNamesOnly;
             if (remember) try { localStorage.setItem(ARENA_COMBAT_DISPLAY_KEY, JSON.stringify({numbers:showCombatNumbers, powerText:showPowerText, names:showFighterNames, tiktokNamesOnly:showTikTokParticipantNamesOnly})); } catch (_) {}
         }
         function loadCombatDisplayOptions() {
@@ -5895,6 +5913,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     const p2Energy = Math.max(0, Math.min(100, Math.round(p2.energy)));
 
                     ['16', '9'].forEach(sfx => {
+                        syncArenaDuelFighterInformation(sfx, p1, p2);
                         const p1Name = document.getElementById(`p1Name1v1_${sfx}`);
                         const p2Name = document.getElementById(`p2Name1v1_${sfx}`);
                         writeArenaHudText(p1Name, `${p1.platform.icon} ${getFighterDisplayName(p1)}`);
@@ -6485,7 +6504,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             const plateY = drawY - r - (portraitLabel ? 24 : 22);
             if(shouldShowFighterLabel(f))drawFighterLabel(targetCtx, f, drawX, plateY, nameFont, classFont, packedFighterCount);
 
-            if (gameState !== 'LOBBY') {
+            if (gameState !== 'LOBBY' && shouldShowFighterInformation(f)) {
                 const barW = 44;
                 const hpPct = Math.max(0, f.hp / f.maxHp);
                 targetCtx.fillStyle = 'rgba(15, 23, 42, 0.92)';
@@ -9014,7 +9033,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             refreshArenaTrainingControls();
         }
 
-        // v0.34: Reorganize existing Settings sections, never cloning inputs or
+        // v0.35: Reorganize existing Settings sections, never cloning inputs or
         // changing their inline handlers, IDs, saved values or rule semantics.
         const ARENA_SETTINGS_NAV_KEY = 'arenaLiveSettingsNavV1';
         const ARENA_SETTINGS_GROUPS = Object.freeze(['match','controls','broadcast','audio','audience','system','combat','classes','system']);
@@ -9136,7 +9155,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 toggles.appendChild(names);
                 const audienceOnly=document.createElement('label');
                 audienceOnly.className='flex items-start gap-2 pl-4 text-cyan-100';
-                audienceOnly.innerHTML='<input id="showTikTokParticipantNamesOnlyToggle" type="checkbox" class="mt-0.5 accent-cyan-400" onchange="setCombatDisplayOption(\'tiktokNamesOnly\',this.checked)"> <span id="arenaHudParticipantsLabel">Solo participantes que entraron con taps o !jugar de TikTok (y Protagonista). Los bots siguen peleando sin etiqueta.</span>';
+                audienceOnly.innerHTML='<input id="showTikTokParticipantNamesOnlyToggle" type="checkbox" class="mt-0.5 accent-cyan-400" onchange="setCombatDisplayOption(\'tiktokNamesOnly\',this.checked)"> <span id="arenaHudParticipantsLabel">Mostrar nombres, vida y energía solo de participantes que entraron con taps o !jugar de TikTok (y Protagonista). Los simulados siguen peleando sin etiquetas ni barras.</span>';
                 toggles.appendChild(audienceOnly);
                 move('showCombatNumbersToggle',toggles);
                 move('showPowerTextToggle',toggles);
@@ -9148,7 +9167,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                 const namesToggle=document.getElementById('showFighterNamesToggle');
                 if(namesToggle)namesToggle.checked=showFighterNames;
                 const tiktokNamesToggle=document.getElementById('showTikTokParticipantNamesOnlyToggle');
-                if(tiktokNamesToggle){tiktokNamesToggle.checked=showTikTokParticipantNamesOnly;tiktokNamesToggle.disabled=!showFighterNames;}
+                if(tiktokNamesToggle)tiktokNamesToggle.checked=showTikTokParticipantNamesOnly;
             }
 
             let stored='match';try{stored=localStorage.getItem(ARENA_SETTINGS_NAV_KEY)||'match';}catch(_){}
@@ -9270,7 +9289,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.34.0',
+            version: '0.35.0',
             edition: 'tiktok',
             renderSpriteMode: arenaGpuSpritesEnabled ? 'hardware-candidate' : 'software-safe-vectors',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,

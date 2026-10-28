@@ -1,12 +1,12 @@
 {
   "name": "arena-live",
-  "version": "0.34.0",
+  "version": "0.35.0",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
       "name": "arena-live",
-      "version": "0.34.0",
+      "version": "0.35.0",
       "dependencies": {
         "tiktok-live-connector": "2.5.0",
         "ws": "8.22.0"

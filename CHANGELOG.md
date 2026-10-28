@@ -1,5 +1,13 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-28 — Arena Live v0.35 · Ocultar vida y energía de luchadores simulados
+
+- El filtro de participantes LIVE de Pantalla y HUD ahora oculta nombres, barras de vida y energía a los bots que no hayan entrado con taps o `!jugar`, en ambas capturas. Mantiene visibles los indicadores de participantes confirmados y Protagonista.
+- Aplica también al panel 1v1 superior: ambos bots lo ocultan; cuando solo hay un participante confirmado, se oculta el bloque del bot y el superviviente visible usa el ancho del panel. No se alteran el combate, el daño ni las estadísticas del luchador.
+- El filtro de participación es independiente del interruptor general de nombres; conserva la clave de preferencias existente para migración sin sobrescritura.
+- HTML autónomo Mobile v0.35 sincronizado. La conexión TikTok LIVE real y las pruebas gráficas en Android requieren verificación fuera de la simulación local.
+
+
 ## 2026-10-28 — Arena Live v0.34 · Etiquetas de espectadores LIVE y entradas en combate
 
 - Nuevo filtro opcional en Pantalla y HUD: mantener visibles solo nombres y clases de personas que hicieron tap o enviaron `!jugar` en TikTok, además del Protagonista. Los bots y participantes sin esas señales siguen peleando sin etiqueta. No modifica estadísticas, cupo, clasificación ni barras de vida.
