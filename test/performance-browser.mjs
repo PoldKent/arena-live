@@ -175,10 +175,14 @@ try {
         }
         const start=performance.now();
         let executed=0;
+        // Model a genuine same-tick AI release: chat is flushed once at the
+        // end of the simulated tick instead of measuring 128 separate layouts.
+        arenaChatTickBatchActive=true;
         for(const actor of [...fighters]){
           const cmd=CLASS_COMMANDS[actor.archetypeKey]?.powers?.[0];
           if(cmd&&executeFighterSkill(actor,cmd)!==false)executed++;
         }
+        flushArenaTickChatBatch();
         const castingMs=performance.now()-start;
         const draw=[],sim=[];
         for(let frame=0;frame<90;frame++){
