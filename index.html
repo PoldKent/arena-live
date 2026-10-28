@@ -4834,7 +4834,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             for (const other of fighters) {
                 // Filter in place: at 128 fighters this avoids ~16,000 helper
                 // calls per physics tick while retaining live roster order.
-                if (other.id === attacker.id || other.eliminated || other.fallDrop > 0) continue;
+                if (!other || other.id === attacker.id || other.eliminated || other.fallDrop > 0) continue;
                 if (inRange && !inRange(other)) continue;
                 const sameClass = other.archetypeKey === attacker.archetypeKey;
                 const dx = other.x - attacker.x, dy = other.y - attacker.y;
