@@ -1176,9 +1176,12 @@ await check('Real TikTok follower gift subscriber support routes to the real sen
   gameState='LOBBY';isGamePaused=false;koSequenceActive=false;
   applyPlayerCountPreset(2);startCombatFromLobby();
   setArenaCombatRule('powerMode','full');socialBoostMultiplier=1;
-  const outsider=fighters[0];outsider.energy=0;outsider.shieldHP=0;outsider.berserkTimer=0;
+  const outsider=fighters[0];
   const ownerId=ArenaLive.joinOnShare({username:'@event_owner',platformKey:'tiktok'});
   const owner=fighters.find(f=>f.id===ownerId);
+  // Joining may change the combat mode and reinitialize existing actors.
+  // Snapshot both actors only after the admission has completed.
+  outsider.energy=0;outsider.shieldHP=0;outsider.berserkTimer=0;
   owner.energy=0;owner.shieldHP=0;owner.berserkTimer=0;
   document.getElementById('targetFighterSelect').value=String(outsider.id);
   const socket=window.arenaTestSocket;
