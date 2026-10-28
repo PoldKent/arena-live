@@ -43,6 +43,23 @@ try{
         const size=await page.locator('#arenaMobilePower').boundingBox();assert.ok(size.height>=44&&size.width>=44);
         assert.equal(await page.locator('#arenaMobilePower').isEnabled(),true);
     });
+    await check('20:9 phone carrier letterboxes the 9:16 game and keeps viewer commands visible',async()=>{
+        const layout=await page.evaluate(()=>{
+            const card=document.getElementById('card-9x16'),video=document.getElementById('viewport9x16'),guide=document.getElementById('arenaAudienceGuide9');
+            const frame=card.getBoundingClientRect(),inner=video.getBoundingClientRect();
+            return {phoneFit:card.classList.contains('arena-phone-fit'),
+                frameRatio:frame.width/frame.height,videoRatio:inner.width/inner.height,
+                contained:inner.top>=frame.top-1&&inner.bottom<=frame.bottom+1,
+                guideVisible:getComputedStyle(guide).display!=='none',
+                commands:guide.textContent,phase:ArenaLive.getState().phase};
+        });
+        assert.equal(layout.phoneFit,true);
+        assert.ok(Math.abs(layout.frameRatio-9/20)<.02,JSON.stringify(layout));
+        assert.ok(Math.abs(layout.videoRatio-9/16)<.02,JSON.stringify(layout));
+        assert.equal(layout.contained,true);
+        assert.equal(layout.guideVisible,true);
+        for(const command of ['!jugar','!guerrero','!kame','!shinobi','!rasen','!titan','!coloso','!rayo','!trueno','!espiritu','!enred'])assert.ok(layout.commands.includes(command),command);
+    });
     await check('only the visible portrait capture allocates pixels; 720p uses 56% fewer pixels than full HD',async()=>{
         const dimensions=await page.evaluate(()=>{renderBothScreensSimultaneously();return [canvas16.width,canvas16.height,canvas9.width,canvas9.height];});
         assert.deepEqual(dimensions,[1,1,720,1280]);assert.ok(720*1280/(1080*1920)<.45);
