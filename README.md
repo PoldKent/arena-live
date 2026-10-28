@@ -40,7 +40,7 @@ El duelo 16:9 utiliza barras superiores más anchas, con vida, energía, nombres
 
 Para investigar los bajones de FPS con 128 participantes, ejecuta **`npm.cmd run test:performance`** (raster por software) o **`npm.cmd run test:gpu`** (envío con aceleración, sujeto al entorno). Busca la salida **`CAST_STRESS`**: reproduce 128 especiales lanzados en una misma ráfaga y entrega milisegundos de ejecución, simulación y dibujo (mediana y p95). **`BURST`** mide 180 fotogramas simulados con IA. Valores de dibujo p95 mayores a 16,7 ms pueden dificultar 60 FPS; mayores a 33,3 ms, 30 FPS. No son FPS reales de OBS ni equivalen automáticamente a tu GPU.
 
-La búsqueda ordinaria de objetivos en IA evita ahora llamadas repetitivas al validador para cada rival, conservando el orden de la lista, las exclusiones de los eliminados y las reglas de prioridad. Se descartaron cambios que no mejoraron el tiempo en micropruebas. Los ajustes visuales no modifican resolución, daño, energía, duración de ataques ni cupo de 128.
+La búsqueda ordinaria de objetivos en IA evita ahora llamadas repetitivas al validador para cada rival, conservando el orden de la lista, las exclusiones de los eliminados y las reglas de prioridad. Los mensajes generados durante un mismo paso de simulación se incorporan al chat en **un único lote DOM**, sin descartar registros ni modificar el orden. Se descartaron cambios que no mejoraron el tiempo en micropruebas. Los ajustes visuales no modifican resolución, daño, energía, duración de ataques ni cupo de 128.
 
 ## Rendimiento con 128 jugadores
 
