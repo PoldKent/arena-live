@@ -324,7 +324,7 @@ try{
         assert.equal(await page.locator('#arenaPortableTestBody #arenaPanelPowers').count(),1);
         assert.equal(await page.locator('#arenaPortableTestBody #targetFighterSelect').count(),1);
         assert.equal(await page.locator('#arenaStreamerSkillsDock .arena-skill-buttons button').count(),5);
-        const sheet=await page.locator('#arenaPortableTestDrawer').evaluate(n=>{
+        const sheet=await page.locator('#arenaPortableTestDrawer').evaluate((n,before)=>{
             const box=n.getBoundingClientRect(),video=document.getElementById('viewport9x16').getBoundingClientRect();
             const skills=document.getElementById('arenaStreamerSkillsDock').getBoundingClientRect();
             const body=n.querySelector('#arenaPortableTestBody'),panel=body.querySelector('.arena-panel-body');
