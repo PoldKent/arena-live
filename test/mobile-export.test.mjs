@@ -20,7 +20,8 @@ test('portable export is self-contained, deterministic and includes the exact cu
             assert.ok(html.includes(source.replace(/<\/script/gi,'<\\/script')),path+' is copied without gameplay edits');
         }
         for(const [,source]of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))new Script(source);
-        assert.match(html,/TikTok LIVE real requiere el servidor/);
+        assert.match(html,/Archivo autónomo sin conexión a redes/);
+        assert.match(html,/arena-mobile-offline/);
         const index=await readFile(new URL('../index.html',import.meta.url),'utf8');
         assert.match(index,/id="canvas16x9" width="1920" height="1080"/);
         assert.match(index,/id="canvas9x16" width="1080" height="1920"/);
