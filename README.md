@@ -1,10 +1,10 @@
-# Arena Live · v0.39
+# Arena Live · v0.40
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
 ## Versión principal
 
-`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API y el paquete identifican la versión 0.39. [Panel único de v0.18](docs/RELEASE-0.18-PANEL-UNICO.md). [Las seis correcciones y su validación](docs/RELEASE-0.15-CORRECCIONES.md).
+`main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API y el paquete identifican la versión 0.40. [Panel único de v0.18](docs/RELEASE-0.18-PANEL-UNICO.md). [Las seis correcciones y su validación](docs/RELEASE-0.15-CORRECCIONES.md).
 
 En **duelo 1v1**, los marcadores de vida de ambas capturas muestran **HP actuales** (por ejemplo, `180 HP` o `75 HP`) en lugar de porcentajes; las barras siguen reflejando proporcionalmente la vida restante y la energía mantiene su porcentaje.
 
@@ -46,9 +46,11 @@ Las capturas **Full HD 16:9 y 9:16** seleccionan automáticamente la ruta de dib
 
 **v0.39 — corrección de publicación móvil y nombres:** se sincronizan las versiones de los seis archivos JS/CSS que carga la edición Stream con el paquete y el HTML móvil, para que `npm.cmd run build:mobile` pueda empaquetarlos de nuevo. El generador incluye referencias SHA-1 Git reproducibles de los archivos fuente. Las opciones avanzadas se denominan ahora **Opciones del Modo Streamer**; la ayuda se abre desde Menú, no desde un botón oculto. Conserva las barras 1v1, las seis opciones de HUD y las cinco habilidades inferiores.
 
+**v0.40 — proyecto principal y móvil sincronizados:** la cápsula superior circular de v0.36–v0.37 vuelve a la esquina superior derecha; Modo Jugador ofrece Táctil total (dos pulgares) o Joystick original con acciones configurables fuera de la arena. En Modo Streamer, 🧪 abre las herramientas avanzadas fuera del marco 9:16, también en pantalla completa. La numeración del paquete, el título, la API, el pie de Ajustes y los recursos del servidor vuelven a coincidir. **No hay un segundo motor:** el HTML portátil se compila directamente desde el mismo `index.html` y los mismos módulos `engine/` utilizados por el servidor TikTok. Desde el servidor de PC se prueban ambas interfaces en `/` y `/mobile`. [Cambios y verificación de v0.40](docs/RELEASE-0.40.md).
+
 ## Probar en un celular con un solo archivo
 
-Descarga directamente la [edición móvil v0.39: Modo Streamer optimizado](mobile-builds/Arena-Live-v0.39.0-movil.html) (en GitHub usa **Download raw file**) o ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.39.0-movil.html`. Copia ese HTML al teléfono y ábrelo desde Chrome o un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
+Descarga la [exportación móvil oficial v0.40 del juego completo](mobile-builds/Arena-Live-v0.40.0-movil.html) (en GitHub usa **Download raw file**) o ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.40.0-movil.html`. Copia ese HTML al teléfono y ábrelo desde Chrome o un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
 
 La exportación usa el combate de `main`; comienza en 720p, dibujo a 30 FPS y calidad Rendimiento. Permite cambiar a 540p/1080p y 30/60 FPS. TikTok LIVE real sigue necesitando el servidor: este archivo ofrece pruebas locales. [Uso, optimizaciones y límites de la exportación móvil](docs/MOVIL-MONOLITICO.md).
 
@@ -96,20 +98,21 @@ Se mantienen el cupo de 128, los poderes, los límites de efectos, la simulació
 
 Los lienzos opacos usan Canvas 2D con `willReadFrequently:false`; el navegador puede rasterizarlos con GPU cuando tiene aceleración gráfica disponible. El juego no lee píxeles durante la emisión. `npm.cmd run test:gpu` deja habilitada la configuración gráfica predeterminada del navegador de pruebas e informa de `2d_canvas`, composición y renderer reales. No fuerza una GPU ni confirma la configuración de tu navegador habitual. El control `test:performance` desactiva la GPU para conservar una medición por software comparable; sus tiempos incluyen lectura de píxeles, y los de `test:gpu` miden envío de comandos, sin esperar a que la GPU termine.
 
-## Instalar y arrancar en Windows
+## Instalar y arrancar en Windows (PC y vista móvil desde el mismo repositorio)
 
-Requiere Git y Node.js 20 o superior; CI verifica Node.js 24 en Windows y Linux. `npm-shrinkwrap.json` fija las dependencias para `npm.cmd ci` y tiene prioridad sobre un `package-lock.json` local, que no se elimina:
+Requiere Git y Node.js 20 o superior; el flujo CI está configurado con Node.js 24 en Windows y Linux. `npm-shrinkwrap.json` fija las dependencias para `npm.cmd ci` y tiene prioridad sobre un `package-lock.json` local, que no se elimina:
 
 ```powershell
-git clone --branch main https://github.com/PoldKent/arena-live.git Arena_Live_GitHub
-cd Arena_Live_GitHub
+git clone --branch main https://github.com/PoldKent/arena-live.git arena-live
+cd arena-live
 npm.cmd ci
+npm.cmd run build:mobile
 npm.cmd start
 ```
 
-Abre **http://127.0.0.1:4173/** y conserva abierta la consola. TikTok comienza desconectado; **📡 TikTok** conecta o desconecta según el estado real del puente.
+Abre **http://127.0.0.1:4173/** para la aplicación principal con TikTok LIVE, OBS y el motor completo. Abre **http://127.0.0.1:4173/mobile** para ver en tu PC la interfaz móvil generada desde ese mismo motor (el módulo móvil simula interacciones: no conecta al LIVE). En Chrome puedes pulsar **F12 → Ctrl+Shift+M** para emular un celular. Conserva abierta la consola; TikTok comienza desconectado y solo se conecta cuando pulsas **📡 TikTok**.
 
-Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd ci` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.19 en el pie de Ajustes**.
+Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd ci` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.40 en el pie de Ajustes**.
 
 Para volver a `main` desde una rama anterior:
 
@@ -243,9 +246,13 @@ El juego permanece en `index.html`. El puente usa `ws` y `tiktok-live-connector`
 npm.cmd test
 npx.cmd playwright install chromium
 npm.cmd run test:browser
+npm.cmd run test:mobile
 npm.cmd run test:performance
 npm.cmd run test:gpu
+npm.cmd run verify:release
 ```
+
+Para validar todo lo relacionado con esta versión, `npm.cmd run verify:release` ejecuta pruebas unitarias, construye el HTML móvil desde el motor principal, verifica pantallas de escritorio y móvil y mide rendimiento. Si faltan navegadores de pruebas, instala Chromium con `npx.cmd playwright install chromium`. 
 
 Para modificar clases de la interfaz, ejecuta `npm.cmd run build:styles` y guarda también `styles/arena-ui.css`. El CSS ya está incluido para jugar; `npm.cmd start` no ejecuta un compilador. `npm.cmd test` verifica que coincida con las clases actuales.
 
