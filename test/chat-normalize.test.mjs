@@ -35,3 +35,29 @@ test('bounds identifiers and message length to game input limits', () => {
   assert.equal(event.username.length, 25);
   assert.equal(event.message.length, 160);
 });
+
+test('routes v2.5 protobuf chat to the game with a stable handle and native message ID', () => {
+  assert.deepEqual(normalizeTikTokChat({
+    common: { msgId: '777001' },
+    user: { displayId: 'viewer_actual', nickname: 'Nombre visible' },
+    content: '!jugar'
+  }), {
+    type: 'chat', platformKey: 'tiktok', username: '@viewer_actual', message: '!jugar', eventId: '777001'
+  });
+});
+
+test('prefers the stable uniqueId when both v2.5 and legacy IDs are present', () => {
+  assert.deepEqual(normalizeTikTokChat({
+    common: { msgId: '778' },
+    user: { uniqueId: 'viewer_legacy', displayId: 'viewer_display' },
+    content: '!rayo'
+  }), {
+    type: 'chat', platformKey: 'tiktok', username: '@viewer_legacy', message: '!rayo', eventId: '778'
+  });
+});
+
+test('falls back to the modern displayId when legacy uniqueId is empty', () => {
+  const event = normalizeTikTokChat({ user: { uniqueId: '', displayId: '@viewer2' }, content: 'hola' });
+  assert.equal(event.username, '@viewer2');
+  assert.equal(event.message, 'hola');
+});
