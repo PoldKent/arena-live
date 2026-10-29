@@ -4,7 +4,7 @@
 
 La versión principal del juego se encuentra en `main` y se ejecuta con el puente local TikTok LIVE en `http://127.0.0.1:4173/`. El paquete móvil no es otro juego ni una rama independiente: `tools/build-mobile.mjs` toma **el mismo `index.html`, `styles/arena-ui.css` y los cinco módulos `engine/` de la aplicación principal**, y solo añade los adaptadores `portable/` de interfaz, rendimiento y controles sin conexión. El motor no se copia a mano para mantener otra versión. El archivo oficial histórico v0.39 se conserva para poder retroceder.
 
-Esta edición sincroniza `package.json`, `npm-shrinkwrap.json`, título, ajustes, API y recursos versionados en **v0.40.1**. Corrige la antigua constante `ARENA_RELEASE_VERSION` que todavía era v0.34.
+Esta edición sincroniza `package.json`, `npm-shrinkwrap.json`, título, ajustes, API y recursos versionados en **v0.40.2**. Corrige la antigua constante `ARENA_RELEASE_VERSION` que todavía era v0.34.
 
 ## Cambios integrados
 
@@ -52,7 +52,7 @@ npx.cmd playwright install chromium
 npm.cmd run verify:release
 ```
 
-Esto ejecuta pruebas Node, reconstruye el móvil con la fuente oficial, comprueba navegador escritorio/móvil y prueba rendimiento. El HTML oficial se genera como `dist/Arena-Live-v0.40.1-movil.html`; también se incluye una copia versionada en `mobile-builds/Arena-Live-v0.40.1-movil.html`.
+Esto ejecuta pruebas Node, reconstruye el móvil con la fuente oficial, comprueba navegador escritorio/móvil y prueba rendimiento. El HTML oficial se genera como `dist/Arena-Live-v0.40.2-movil.html`; también se incluye una copia versionada en `mobile-builds/Arena-Live-v0.40.2-movil.html`.
 
 
 ## Corrección posterior: fullscreen y disposición clásica v0.36–v0.37
@@ -81,4 +81,8 @@ La meta de futuras mejoras es modificar `main` como **fuente única** y actualiz
 
 ## Corrección 0.40.1 · panel flotante y habilidades permanentes
 
-Abrir 🧪 Pruebas nunca modifica las dimensiones del 9:16; en Modo Streamer los cinco poderes originales siguen visibles y accionables incluso con pruebas abiertas y en pantalla completa. El panel flotante se posiciona en relación con la fila real de poderes y no dentro del layout del video. El paquete móvil oficial es `mobile-builds/Arena-Live-v0.40.1-movil.html`.
+Abrir 🧪 Pruebas nunca modifica las dimensiones del 9:16; en Modo Streamer los cinco poderes originales siguen visibles y accionables incluso con pruebas abiertas y en pantalla completa. El panel flotante se posiciona en relación con la fila real de poderes y no dentro del layout del video. El paquete móvil oficial es `mobile-builds/Arena-Live-v0.40.2-movil.html`.
+
+## Corrección 0.40.2 · Android local, fullscreen y botones
+
+La captura mobile usa un solo motor. Cuando un visualizador Android `content://` rechaza `requestFullscreen`, el botón activa una vista ampliada dentro del área útil del navegador; las barras nativas de Chrome no se pueden ocultar con CSS. El video 9:16 reserva espacio visible para las cinco habilidades y los controles del Streamer, incluso en modo de edición. La barra superior se conserva y el botón de guardar posiciones es compacto. El panel de Pruebas mantiene arrastre y transparencia. El HTML de distribución se publica con nombre nuevo para evitar confundirlo con una descarga anterior.
