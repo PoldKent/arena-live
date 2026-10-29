@@ -35,7 +35,7 @@ test('official engine is identical when virtually reconstructed for regression t
     assert.ok(reconstructed.includes('<script>'+game+'</script>'));
     assert.match(reconstructed,/function syncArenaSingleFullscreenPanels\(\)/);
     assert.match(reconstructed,/function updateArenaObsGeometrySummary\(\)/);
-    assert.match(reconstructed,/window\.ArenaLive=Object\.freeze/);
+    assert.match(reconstructed,/window\.ArenaLive\s*=\s*Object\.freeze/);
 });
 test('offline mobile remains complete, self-contained, under 500 KB and sourced from official files',async()=>{
     assert.ok(Buffer.byteLength(compressed,'utf8')<=500000,'compressed official mobile export exceeds 500 KB');
