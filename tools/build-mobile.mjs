@@ -85,6 +85,7 @@ export function wrapMobileHtml(unpacked,version){
 const root=fileURLToPath(new URL('../',import.meta.url));
 const assets=['index.html','styles/arena-ui.css','styles/TAILWIND-LICENSE.txt',
     ...['core','render','audio','settings','balance-evidence'].map(name=>`engine/arena-${name}.js`),
+    'engine/arena-game.js',
     'portable/mobile.css','portable/mobile-runtime.js','portable/mobile-touch.js'];
 const replaceOnce=(source,from,to)=>{
     if(source.split(from).length!==2)throw Error('Mobile export marker changed: '+from.slice(0,90));
@@ -114,6 +115,11 @@ export async function buildMobile(output) {
         html=replaceOnce(html,`<script src="${path}?v=${version.split('.').slice(0,2).join('.')}"></script>`,
             `<script data-bundled-source="${path}">\n${inline(files.get(path))}\n</script>`);
     }
+    // Recreate the original classic-script order inside the self-contained
+    // mobile HTML. The official PC page loads this source as a separate file.
+    // Content remains identical; the portable-only adaptations are below.
+    html=replaceOnce(html,`<script src="engine/arena-game.js?v=${version.split('.').slice(0,2).join('.')}"></script>`,
+        `<script data-bundled-source="engine/arena-game.js">\n${inline(files.get('engine/arena-game.js'))}\n</script>`);
     // The mobile profile is packaging and rendering only; world coordinates,
     // physics, damage, class rules and commands are copied byte for byte.
     html=html.replaceAll('(max-width:767px)','(max-width:1023px)');
