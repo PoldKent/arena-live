@@ -1534,3 +1534,17 @@ html.arena-mobile-offline #arenaPortableSetup .arena-portable-card{
   height:min(34dvh,190px)!important;max-height:min(34dvh,190px)!important;
  }
 }
+
+/* The close control shares the heading row, not an extra grid row. */
+html.arena-mobile-offline #arenaOperatorPopover .arena-portable-menu-heading{
+ position:sticky!important;top:0!important;z-index:6!important;
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+ gap:6px!important;background:#10263a!important;
+ padding:1px 4px 6px!important;
+}
+html.arena-mobile-offline #arenaOperatorPopover .arena-portable-menu-heading #arenaMobileMenuClose{
+ display:grid!important;position:relative!important;inset:auto!important;float:none!important;
+ flex:0 0 36px!important;width:36px!important;height:36px!important;
+ min-width:36px!important;min-height:36px!important;
+ margin:0!important;padding:0!important;z-index:auto!important;
+}
