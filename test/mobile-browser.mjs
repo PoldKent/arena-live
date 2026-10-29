@@ -352,6 +352,39 @@ try{
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),false);
         await page.evaluate(()=>ArenaPortable.setMode('player'));
     });
+    await check('Android content URL fallback preserves five Streamer powers and upper toolbar without cropping',async()=>{
+        await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(false);});
+        await page.evaluate(()=>Object.defineProperty(document,'fullscreenEnabled',{value:false,configurable:true}));
+        await page.locator('#arenaPortableFullscreen').tap();
+        await page.waitForFunction(()=>document.documentElement.classList.contains('arena-mobile-theater'));
+        await page.waitForTimeout(100);
+        const bounds=await page.evaluate(()=>{
+            const box=id=>document.getElementById(id).getBoundingClientRect();
+            const video=box('viewport9x16'),rail=box('arenaStreamerSkillsDock'),toolbar=box('arenaMobileFloating');
+            return {video:{top:video.top,bottom:video.bottom,width:video.width,height:video.height},
+                rail:{top:rail.top,bottom:rail.bottom,height:rail.height},
+                toolbar:{top:toolbar.top,bottom:toolbar.bottom},
+                buttons:[...document.querySelectorAll('#arenaStreamerSkillsDock .arena-skill-buttons>button')].map(b=>b.getBoundingClientRect().width),
+                toolbarVisible:getComputedStyle(document.getElementById('arenaMobileFloating')).display!=='none',
+                railVisible:getComputedStyle(document.getElementById('arenaStreamerSkillsDock')).display!=='none',
+                headerVisible:getComputedStyle(document.getElementById('arenaMobileFullscreenBar')).display!=='none',
+                screen:innerHeight};
+        });
+        assert.ok(bounds.headerVisible&&bounds.toolbarVisible&&bounds.railVisible,JSON.stringify(bounds));
+        assert.equal(bounds.buttons.length,5);
+        assert.ok(bounds.buttons.every(w=>w>=25),JSON.stringify(bounds));
+        assert.ok(bounds.rail.bottom<=bounds.screen+1,JSON.stringify(bounds));
+        assert.ok(bounds.video.bottom<=bounds.rail.top+2,JSON.stringify(bounds));
+        assert.ok(bounds.toolbar.bottom<=bounds.video.top+2,JSON.stringify(bounds));
+        assert.ok(Math.abs(bounds.video.width/bounds.video.height-9/16)<.02,JSON.stringify(bounds));
+        await page.locator('#arenaMobileTestsShortcut').tap();
+        assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
+        assert.equal(await page.locator('#arenaStreamerSkillsDock').isVisible(),true);
+        await page.locator('#arenaPortableTestClose').tap();
+        await page.locator('#arenaPortableFullscreen').tap();
+        assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('arena-mobile-theater')),false);
+        await page.evaluate(()=>delete document.fullscreenEnabled);
+    });
     await check('native fullscreen keeps Streamer tests, menu and controls visible and the 9:16 centered',async()=>{
         await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(false);});
         if(!await page.evaluate(()=>document.fullscreenEnabled)){
