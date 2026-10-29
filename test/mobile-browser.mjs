@@ -352,6 +352,42 @@ try{
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),false);
         await page.evaluate(()=>ArenaPortable.setMode('player'));
     });
+    await check('restored v0.37 UI is the actual stylesheet and has single focus + fixed powers rail',async()=>{
+        const result=await page.evaluate(()=>{
+            const css=document.getElementById('arena-mobile-profile').textContent;
+            return {baseline:css.includes('v0.37: Director controls stay within one compact scrollable panel'),
+              restored:css.includes('RESTORE MOBILE v0.37 UI · RC1'),
+              oldPatchStack:css.includes('v0.40.3 · Single mobile theater'),
+              fixFullscreenCSS:document.getElementById('arena-fullscreen-capture').textContent.includes('html:not(.arena-mobile-offline) #card-9x16:fullscreen'),
+              mode:document.documentElement.dataset.mobileMode};
+        });
+        assert.equal(result.baseline,true,JSON.stringify(result));
+        assert.equal(result.restored,true,JSON.stringify(result));
+        assert.equal(result.oldPatchStack,false,JSON.stringify(result));
+        assert.equal(result.fixFullscreenCSS,true,JSON.stringify(result));
+        await page.evaluate(()=>{ArenaPortable.setMode('director');setMonitorFocus('9:16');ArenaMobileTouch.openTests(false);});
+        await page.waitForTimeout(120);
+        const layout=await page.evaluate(()=>{
+            const r=id=>document.getElementById(id).getBoundingClientRect();
+            const video=r('viewport9x16'),rail=r('arenaStreamerSkillsDock');
+            return {videoBottom:video.bottom,videoRatio:video.width/video.height,
+              railTop:rail.top,railBottom:rail.bottom,
+              railDisplay:getComputedStyle(document.getElementById('arenaStreamerSkillsDock')).display,
+              powers:[...document.querySelectorAll('#arenaStreamerSkillsDock .arena-skill-buttons>button')].map(n=>{
+                const b=n.getBoundingClientRect();return {width:b.width,height:b.height,top:b.top,bottom:b.bottom};
+              }),
+              viewportHeight:innerHeight};
+        });
+        assert.equal(layout.powers.length,5,JSON.stringify(layout));
+        assert.ok(layout.powers.every(b=>b.width>20&&b.top>=0&&b.bottom<=layout.viewportHeight+1),JSON.stringify(layout));
+        assert.ok(layout.videoBottom<=layout.railTop+2,JSON.stringify(layout));
+        assert.ok(layout.railBottom<=layout.viewportHeight+1,JSON.stringify(layout));
+        assert.ok(Math.abs(layout.videoRatio-9/16)<.02,JSON.stringify(layout));
+        await page.locator('#arenaMobileTestsShortcut').tap();
+        const after=await page.locator('#viewport9x16').boundingBox();
+        assert.ok(Math.abs(after.y+after.height-layout.videoBottom)<2,JSON.stringify({layout,after}));
+        await page.locator('#arenaPortableTestClose').tap();
+    });
     await check('Android content URL fallback preserves five Streamer powers and upper toolbar without cropping',async()=>{
         await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(false);});
         await page.evaluate(()=>Object.defineProperty(document,'fullscreenEnabled',{value:false,configurable:true}));
