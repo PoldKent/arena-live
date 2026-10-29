@@ -10,7 +10,97 @@ const ARENA_MOBILE_HOLD_MS=460;
 const ARENA_MOBILE_SWIPE_PX=34;
 const arenaMobileTouchState={pointerId:null,startX:0,startY:0,x:0,y:0,tapCount:0,lastTapAt:0,lastTapX:0,lastTapY:0,jumpRetry:null};
 const arenaMobileActionState={pointerId:null,startX:0,startY:0,x:0,y:0,startedAt:0,moved:false,special:false,hold:null};
-const arenaMobileTestState={open:false,active:'arenaPanelPowers'};
+const ARENA_MOBILE_TEST_PREFS_KEY='arenaLiveMobileTestPanelV2';
+const arenaMobileTestState={open:false,active:'arenaPanelPowers',position:null,transparency:0,drag:null};
+try {
+    const saved=JSON.parse(localStorage.getItem(ARENA_MOBILE_TEST_PREFS_KEY)||'null');
+    if(saved&&Number.isFinite(saved.transparency))
+        arenaMobileTestState.transparency=Math.min(75,Math.max(0,saved.transparency));
+    if(saved?.position&&Number.isFinite(saved.position.x)&&Number.isFinite(saved.position.y))
+        arenaMobileTestState.position={x:Math.min(1,Math.max(0,saved.position.x)),y:Math.min(1,Math.max(0,saved.position.y))};
+} catch (_) {}
+function arenaMobileSaveTestPrefs(){
+    try {localStorage.setItem(ARENA_MOBILE_TEST_PREFS_KEY,JSON.stringify({
+        transparency:arenaMobileTestState.transparency,position:arenaMobileTestState.position
+    }));} catch (_) {}
+}
+function arenaMobileApplyTestOpacity(){
+    const drawer=document.getElementById('arenaPortableTestDrawer');
+    if(!drawer)return;
+    drawer.style.setProperty('--arena-tests-opacity',String(1-arenaMobileTestState.transparency/100));
+    const input=document.getElementById('arenaPortableTestTransparency');
+    if(input){input.value=String(arenaMobileTestState.transparency);input.setAttribute('aria-valuetext',arenaMobileTestState.transparency+'% de transparencia');}
+    const label=document.getElementById('arenaPortableTransparencyValue');
+    if(label)label.textContent=arenaMobileTestState.transparency+'%';
+}
+function arenaMobileTestSurface(){
+    const fullscreen=document.fullscreenElement;
+    if(fullscreen?.matches?.('#card-9x16,#card-16x9'))return fullscreen.getBoundingClientRect();
+    return {left:0,top:0,width:window.innerWidth,height:window.innerHeight};
+}
+function arenaMobileTestLimits(drawer){
+    const rect=drawer.getBoundingClientRect(),surface=arenaMobileTestSurface();
+    const maxX=Math.max(0,surface.width-rect.width-6);
+    let maxY=Math.max(0,surface.height-rect.height-6);
+    const rail=document.getElementById('arenaStreamerSkillsDock');
+    if(rail&&getComputedStyle(rail).display!=='none'){
+        const box=rail.getBoundingClientRect();
+        if(box.height>=30&&box.top>=surface.top&&box.top<surface.top+surface.height)
+            maxY=Math.min(maxY,Math.max(0,box.top-surface.top-rect.height-7));
+    }
+    return {surface,maxX,maxY};
+}
+function arenaMobilePlaceTestPanel(){
+    const drawer=document.getElementById('arenaPortableTestDrawer'),position=arenaMobileTestState.position;
+    if(!drawer||!position||drawer.hidden||arenaMobileTestState.drag)return;
+    const rect=drawer.getBoundingClientRect();
+    if(rect.width<40||rect.height<20)return;
+    const {maxX,maxY}=arenaMobileTestLimits(drawer);
+    const x=Math.round(6+Math.max(0,maxX-6)*position.x);
+    const y=Math.round(6+Math.max(0,maxY-6)*position.y);
+    drawer.classList.add('is-positioned');
+    drawer.style.setProperty('--arena-tests-x',x+'px');
+    drawer.style.setProperty('--arena-tests-y',y+'px');
+}
+function arenaMobileInstallTestDragging(drawer){
+    const head=drawer.querySelector('#arenaPortableTestHead');
+    head.addEventListener('pointerdown',event=>{
+        if(event.button!==0||event.target.closest('button,input,label,select'))return;
+        const surface=arenaMobileTestSurface(),rect=drawer.getBoundingClientRect();
+        arenaMobileTestState.drag={id:event.pointerId,startX:event.clientX,startY:event.clientY,
+            x:rect.left-surface.left,y:rect.top-surface.top};
+        event.preventDefault();
+        try{head.setPointerCapture(event.pointerId);}catch(_){}
+        head.classList.add('is-dragging');
+    });
+    head.addEventListener('pointermove',event=>{
+        const drag=arenaMobileTestState.drag;
+        if(!drag||drag.id!==event.pointerId)return;
+        const {maxX,maxY}=arenaMobileTestLimits(drawer);
+        const x=Math.min(maxX,Math.max(6,drag.x+event.clientX-drag.startX));
+        const y=Math.min(maxY,Math.max(6,drag.y+event.clientY-drag.startY));
+        drawer.classList.add('is-positioned');
+        drawer.style.setProperty('--arena-tests-x',Math.round(x)+'px');
+        drawer.style.setProperty('--arena-tests-y',Math.round(y)+'px');
+        arenaMobileTestState.position={x:maxX>6?(x-6)/(maxX-6):0,y:maxY>6?(y-6)/(maxY-6):0};
+        event.preventDefault();
+    });
+    const finish=event=>{
+        if(!arenaMobileTestState.drag||arenaMobileTestState.drag.id!==event.pointerId)return;
+        arenaMobileTestState.drag=null;
+        head.classList.remove('is-dragging');
+        arenaMobileSaveTestPrefs();
+    };
+    head.addEventListener('pointerup',finish);
+    head.addEventListener('pointercancel',finish);
+    head.addEventListener('lostpointercapture',finish);
+    drawer.querySelector('#arenaPortableTestTransparency').addEventListener('input',event=>{
+        arenaMobileTestState.transparency=Math.min(75,Math.max(0,Number(event.target.value)||0));
+        arenaMobileApplyTestOpacity();
+        arenaMobileSaveTestPrefs();
+    });
+    arenaMobileApplyTestOpacity();
+}
 function arenaMobileActor(){
     return fighters.find(f=>f.isStreamer&&!f.eliminated)||null;
 }
@@ -178,6 +268,8 @@ function arenaMobilePositionTestDrawer(){
     const clearance=usable?Math.ceil(bottom-rail.top+8):86;
     // A hidden or unmounted rail must never push the tests offscreen.
     drawer.style.setProperty('--arena-tests-bottom',Math.max(72,Math.min(bottom*.5,clearance))+'px');
+    arenaMobileApplyTestOpacity();
+    arenaMobilePlaceTestPanel();
 }
 function arenaMobileMountTestDrawer(){
     const drawer=document.getElementById('arenaPortableTestDrawer');
@@ -190,10 +282,7 @@ function arenaMobileMountTestDrawer(){
         ?fullscreen:fullscreen?.querySelector?.('#card-9x16,#card-16x9');
     const host=card||document.body;
     if(drawer.parentElement!==host)host.appendChild(drawer);
-    drawer.style.removeProperty('top');
-    drawer.style.removeProperty('left');
-    drawer.style.removeProperty('right');
-    drawer.style.removeProperty('bottom');
+    // Position and opacity persist across opening, rotation and fullscreen.
     requestAnimationFrame(arenaMobilePositionTestDrawer);
 }
 function arenaMobileSelectTestPanel(id){
@@ -245,14 +334,16 @@ function arenaMobileInstallTestDrawer(){
     drawer.id='arenaPortableTestDrawer';drawer.hidden=true;
     drawer.setAttribute('role','region');drawer.setAttribute('aria-live','off');
     drawer.setAttribute('aria-label','Opciones del Modo Streamer');
-    drawer.innerHTML='<div id="arenaPortableTestHead"><span>🎛 Modo Streamer</span><button type="button" id="arenaPortableTestCollapse" aria-label="Minimizar panel">−</button><button type="button" id="arenaPortableTestClose" aria-label="Cerrar pruebas">×</button></div><label class="arena-portable-test-picker">Herramienta<select id="arenaPortableTestSelect"><option value="arenaPanelPowers">Jugador y comandos</option><option value="arenaPanelPlayers">Participantes y K.O.</option><option value="arenaPanelScenarios">Escenarios</option><option value="arenaPanelSocial">Interacciones</option><option value="arenaPanelSimulation">Simulación</option></select></label><div id="arenaPortableTestBody"></div>';
+    drawer.innerHTML='<div id="arenaPortableTestHead" title="Arrastra para mover el panel"><span>🎛 Modo Streamer</span><label class="arena-tests-transparency" title="Transparencia del panel"><span>◐</span><input type="range" id="arenaPortableTestTransparency" min="0" max="75" step="5" value="0" aria-label="Transparencia del panel de pruebas"><output id="arenaPortableTransparencyValue">0%</output></label><button type="button" id="arenaPortableTestCollapse" aria-label="Minimizar panel">−</button><button type="button" id="arenaPortableTestClose" aria-label="Cerrar pruebas">×</button></div><label class="arena-portable-test-picker">Herramienta<select id="arenaPortableTestSelect"><option value="arenaPanelPowers">Jugador y comandos</option><option value="arenaPanelPlayers">Participantes y K.O.</option><option value="arenaPanelScenarios">Escenarios</option><option value="arenaPanelSocial">Interacciones</option><option value="arenaPanelSimulation">Simulación</option></select></label><div id="arenaPortableTestBody"></div>';
     document.body.appendChild(drawer);
+    arenaMobileInstallTestDragging(drawer);
     drawer.querySelector('#arenaPortableTestSelect').addEventListener('change',event=>arenaMobileSelectTestPanel(event.target.value));
     drawer.querySelector('#arenaPortableTestClose').onclick=()=>arenaMobileShowTestDrawer(false);
     drawer.querySelector('#arenaPortableTestCollapse').onclick=()=>{
         drawer.classList.toggle('is-collapsed');
         drawer.querySelector('#arenaPortableTestCollapse').textContent=drawer.classList.contains('is-collapsed')?'+':'−';
         drawer.querySelector('#arenaPortableTestCollapse').setAttribute('aria-label',drawer.classList.contains('is-collapsed')?'Expandir panel':'Minimizar panel');
+        requestAnimationFrame(arenaMobilePositionTestDrawer);
     };
     // Compact tests are docked below the video, not draggable across the fight.
     arenaMobileMountTestDrawer();
