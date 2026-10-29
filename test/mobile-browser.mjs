@@ -273,6 +273,53 @@ try{
         assert.ok(r.rail.top>=r.game.top+r.game.height*.60,JSON.stringify(r));
         assert.equal(r.hint,'none',JSON.stringify(r));
     });
+    await check('five concurrent joystick contacts coexist and release cleanly',async()=>{
+        const state=await page.evaluate(()=>{
+            ArenaPortable.setMode('player');ArenaMobileTouch.setTouchMode('joystick');
+            ArenaPortable.start({count:4,join:true});
+            const actor=fighters.find(f=>f.isStreamer);actor.energy=100;actor.aiSpecialCooldown=0;
+            const send=(id,type,pointerId,x=.5,y=.5)=>{
+                const node=document.getElementById(id),r=node.getBoundingClientRect();
+                node.dispatchEvent(new PointerEvent(type,{bubbles:true,pointerType:'touch',pointerId,
+                    clientX:r.left+r.width*x,clientY:r.top+r.height*y}));
+            };
+            send('touchJoystick','pointerdown',711,.5,.1);
+            const up=window.ArenaMobileJoystickAim;
+            send('arenaMobileJump','pointerdown',712);
+            send('arenaMobileAttack','pointerdown',713);
+            send('arenaMobilePower','pointerdown',714);
+            send('viewport9x16','pointerdown',715,.75,.45);
+            const during=ArenaMobileTouch.getState().contacts,castAim=actor.castingSkill?.aim;
+            send('viewport9x16','pointerup',715,.75,.45);
+            send('arenaMobilePower','pointerup',714);
+            send('arenaMobileAttack','pointerup',713);
+            send('arenaMobileJump','pointerup',712);
+            send('touchJoystick','pointerup',711);
+            return {up,during,after:ArenaMobileTouch.getState().contacts,castAim};
+        });
+        assert.equal(state.up,'up');assert.equal(state.during,5);
+        assert.equal(state.after,0);assert.equal(state.castAim,'up');
+    });
+    await check('melee up/down deals directional damage and charged special keeps aim',async()=>{
+        const result=await page.evaluate(()=>{
+            ArenaPortable.start({count:2,join:true});setArenaCombatRule('knockback',1);
+            const actor=fighters.find(f=>f.isStreamer),target=fighters.find(f=>f!==actor);
+            actor.attackCooldown=0;actor.castingSkill=null;actor.x=460;actor.y=300;actor.facing=1;
+            target.x=470;target.y=247;target.hp=target.maxHp;target.immunityTimer=0;
+            target.shieldTimer=0;target.shieldHP=0;
+            const hpUp=target.hp;performMeleeAttack(actor,'up');
+            const up={damage:hpUp-target.hp,vy:target.vy,aim:actor.lastAttackAim};
+            actor.attackCooldown=0;target.x=470;target.y=353;target.hp=target.maxHp;
+            const hpDown=target.hp;performMeleeAttack(actor,'down');
+            const down={damage:hpDown-target.hp,vy:target.vy,aim:actor.lastAttackAim};
+            actor.energy=100;actor.aiSpecialCooldown=0;actor.castingSkill=null;
+            const cast=triggerProtagonistSpecialAttack('down');
+            return {up,down,cast,castAim:actor.castingSkill?.aim};
+        });
+        assert.ok(result.up.damage>0&&result.up.vy<0,JSON.stringify(result));
+        assert.ok(result.down.damage>0&&result.down.vy>0,JSON.stringify(result));
+        assert.equal(result.cast,true);assert.equal(result.castAim,'down');
+    });
     await check('joystick plus action button positions can be saved, modified and restored',async()=>{
         const result=await page.evaluate(()=>{
             ArenaMobileTouch.setTouchMode('joystick');
@@ -383,7 +430,7 @@ try{
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),false);
         await page.evaluate(()=>ArenaPortable.setMode('player'));
     });
-    await check('v0.40.5 canonical UI removes the historical patch stack and retains five powers',async()=>{
+    await check('v0.40.6 canonical UI removes the historical patch stack and retains five powers',async()=>{
         const result=await page.evaluate(()=>{
             const css=document.getElementById('arena-mobile-profile').textContent;
             return {canonical:css.includes('CANONICAL MOBILE LAYOUT'),
@@ -454,7 +501,7 @@ try{
         await page.evaluate(()=>delete document.fullscreenEnabled);
     });
 
-    await check('v0.40.5 menu closes by button, X, Escape and Android Back without leaving theater',async()=>{
+    await check('v0.40.6 menu closes by button, X, Escape and Android Back without leaving theater',async()=>{
         await page.evaluate(()=>{
             ArenaPortable.setMode('player');
             Object.defineProperty(document,'fullscreenEnabled',{value:false,configurable:true});
@@ -489,7 +536,7 @@ try{
         assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('arena-mobile-theater')),false);
         await page.evaluate(()=>delete document.fullscreenEnabled);
     });
-    await check('v0.40.5 mobile format selector changes guide without resizing 9:16 game',async()=>{
+    await check('v0.40.6 mobile format selector changes guide without resizing 9:16 game',async()=>{
         await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(false);});
         await page.evaluate(()=>Object.defineProperty(document,'fullscreenEnabled',{value:false,configurable:true}));
         await page.locator('#arenaPortableFullscreen').tap();
@@ -509,7 +556,7 @@ try{
         await page.locator('#arenaPortableFullscreen').tap();
         await page.evaluate(()=>delete document.fullscreenEnabled);
     });
-    await check('v0.40.5 menu X centered, controls hidden, stage unchanged',async()=>{
+    await check('v0.40.6 menu X centered, controls hidden, stage unchanged',async()=>{
         await page.evaluate(()=>ArenaPortable.setMode('player'));
         const baseline=await page.locator('#viewport9x16').boundingBox();
         await page.locator('#arenaMobileMoreBtn').tap();
@@ -525,7 +572,7 @@ try{
         assert.ok(Math.abs(after.width-baseline.width)<1&&Math.abs(after.height-baseline.height)<1);
     });
 
-    await check('v0.40.5 strips the phantom toolbar and positions controls below the horizon',async()=>{
+    await check('v0.40.6 strips the phantom toolbar and positions controls below the horizon',async()=>{
         await page.evaluate(()=>{ArenaPortable.setMode('player');ArenaMobileTouch.setTouchMode('joystick');});
         const state=await page.evaluate(()=>{
             const legacy=document.getElementById('arenaHeaderActions');
@@ -544,7 +591,7 @@ try{
         assert.equal(state.outline,'0px');
         assert.ok(state.shelfTop>=state.game.top+state.game.height*.60,JSON.stringify(state));
     });
-    await check('v0.40.5 Streamer 75–100% transparency changes all nested backgrounds',async()=>{
+    await check('v0.40.6 Streamer 75–100% transparency changes all nested backgrounds',async()=>{
         await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(true);});
         const slider=page.locator('#arenaPortableTestTransparency');
         await slider.evaluate(n=>{n.value='75';n.dispatchEvent(new Event('input',{bubbles:true}))});
