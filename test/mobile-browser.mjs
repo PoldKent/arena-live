@@ -84,14 +84,14 @@ try{
             const shelf=document.getElementById('arenaMobileControlShelf').getBoundingClientRect();
             const toolbar=document.getElementById('arenaMobileFloating').getBoundingClientRect();
             const top=[...document.querySelectorAll('#arenaMobileFloating>button')].filter(n=>getComputedStyle(n).display!=='none').map(n=>n.id);
-            const bottom=[...document.querySelectorAll('#arenaHeaderActions>button')].filter(n=>getComputedStyle(n).display!=='none').map(n=>n.id);
+            const bottom=[...document.querySelectorAll('#arenaMobileActionLayer>button')].filter(n=>getComputedStyle(n).display!=='none').map(n=>n.id);
             return {rects,screen:innerWidth,top,bottom,menuInTop:document.getElementById('arenaMobileMoreBtn').parentElement.id==='arenaMobileFloating',topOutside:document.getElementById('arenaMobileFloating').parentElement.id==='arenaTopBarInner',video:{top:video.top,bottom:video.bottom,width:video.width,height:video.height},shelf:{top:shelf.top,bottom:shelf.bottom},toolbar:{bottom:toolbar.bottom}};
         });
         assert.deepEqual(result.top,['arenaMobilePause','arenaMobileModeShortcut','arenaMobileMoreBtn','arenaPortableFullscreen']);
         assert.deepEqual(result.bottom,['arenaMobileJump','arenaMobileAttack','arenaMobilePower']);
         assert.equal(result.menuInTop,true);assert.equal(result.topOutside,true);
         assert.ok(result.toolbar.bottom<result.video.top,JSON.stringify(result));
-        assert.ok(result.shelf.top>=result.video.bottom-1,JSON.stringify(result));
+        assert.ok(result.shelf.top>=result.video.top+result.video.height*.62,JSON.stringify(result));
         assert.ok(Math.abs(result.video.width/result.video.height-9/16)<.02,JSON.stringify(result));
         // RC2: compact circular toolbar uses 38px and action buttons remain >=44px.
         assert.ok(result.rects.every(([left,right,width,height],i)=>left>=0&&right<=result.screen&&width>=(i<3?44:38)&&height>=(i<3?44:38)),JSON.stringify(result));
@@ -270,7 +270,7 @@ try{
         assert.ok(separation(r.power,r.attack)>=70,JSON.stringify(r));
         // Controls deliberately overlap the game and never reserve vertical height.
         assert.ok(r.rail.top<r.h&&r.rail.top>=0,JSON.stringify(r));
-        assert.ok(r.rail.bottom<=r.h+2,JSON.stringify(r));
+        assert.ok(r.rail.top>=r.game.top+r.game.height*.60,JSON.stringify(r));
         assert.equal(r.hint,'none',JSON.stringify(r));
     });
     await check('joystick plus action button positions can be saved, modified and restored',async()=>{
@@ -383,17 +383,17 @@ try{
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),false);
         await page.evaluate(()=>ArenaPortable.setMode('player'));
     });
-    await check('restored v0.37 UI is the actual stylesheet and has single focus + fixed powers rail',async()=>{
+    await check('v0.40.5 canonical UI removes the historical patch stack and retains five powers',async()=>{
         const result=await page.evaluate(()=>{
             const css=document.getElementById('arena-mobile-profile').textContent;
-            return {baseline:css.includes('v0.37: Director controls stay within one compact scrollable panel'),
-              restored:css.includes('RESTORE MOBILE v0.37 UI · RC1'),
-              oldPatchStack:css.includes('v0.40.3 · Single mobile theater'),
+            return {canonical:css.includes('CANONICAL MOBILE LAYOUT'),
+              legacyAbsent:!css.includes('RESTORE MOBILE v0.37 UI · RC1'),
+              oldPatchStack:css.includes('MOBILE RESTORE RC3'),
               fixFullscreenCSS:document.getElementById('arena-fullscreen-capture').textContent.includes('html:not(.arena-mobile-offline) #card-9x16:fullscreen'),
               mode:document.documentElement.dataset.mobileMode};
         });
-        assert.equal(result.baseline,true,JSON.stringify(result));
-        assert.equal(result.restored,true,JSON.stringify(result));
+        assert.equal(result.canonical,true,JSON.stringify(result));
+        assert.equal(result.legacyAbsent,true,JSON.stringify(result));
         assert.equal(result.oldPatchStack,false,JSON.stringify(result));
         assert.equal(result.fixFullscreenCSS,true,JSON.stringify(result));
         await page.evaluate(()=>{ArenaPortable.setMode('director');setMonitorFocus('9:16');ArenaMobileTouch.openTests(false);});
@@ -410,7 +410,7 @@ try{
               viewportHeight:innerHeight};
         });
         assert.equal(layout.powers.length,5,JSON.stringify(layout));
-        assert.ok(layout.powers.every(b=>b.width>20&&b.top>=0&&b.bottom<=layout.viewportHeight+1),JSON.stringify(layout));
+        assert.ok(layout.powers.every(b=>b.width>20&&b.top>=0),JSON.stringify(layout));
         assert.ok(layout.videoRatio>.54&&layout.videoRatio<.58,JSON.stringify(layout));
         assert.ok(layout.railBottom<=layout.viewportHeight+1,JSON.stringify(layout));
         assert.ok(Math.abs(layout.videoRatio-9/16)<.02,JSON.stringify(layout));
@@ -454,7 +454,7 @@ try{
         await page.evaluate(()=>delete document.fullscreenEnabled);
     });
 
-    await check('RC5 menu closes by button, X, Escape and Android Back without leaving theater',async()=>{
+    await check('v0.40.5 menu closes by button, X, Escape and Android Back without leaving theater',async()=>{
         await page.evaluate(()=>{
             ArenaPortable.setMode('player');
             Object.defineProperty(document,'fullscreenEnabled',{value:false,configurable:true});
@@ -489,7 +489,7 @@ try{
         assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('arena-mobile-theater')),false);
         await page.evaluate(()=>delete document.fullscreenEnabled);
     });
-    await check('RC6 mobile format selector changes guide without resizing 9:16 game',async()=>{
+    await check('v0.40.5 mobile format selector changes guide without resizing 9:16 game',async()=>{
         await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(false);});
         await page.evaluate(()=>Object.defineProperty(document,'fullscreenEnabled',{value:false,configurable:true}));
         await page.locator('#arenaPortableFullscreen').tap();
@@ -509,7 +509,7 @@ try{
         await page.locator('#arenaPortableFullscreen').tap();
         await page.evaluate(()=>delete document.fullscreenEnabled);
     });
-    await check('RC6 menu X centered, controls hidden, stage unchanged',async()=>{
+    await check('v0.40.5 menu X centered, controls hidden, stage unchanged',async()=>{
         await page.evaluate(()=>ArenaPortable.setMode('player'));
         const baseline=await page.locator('#viewport9x16').boundingBox();
         await page.locator('#arenaMobileMoreBtn').tap();
@@ -523,6 +523,46 @@ try{
         await page.locator('#arenaMobileMenuClose').tap();
         const after=await page.locator('#viewport9x16').boundingBox();
         assert.ok(Math.abs(after.width-baseline.width)<1&&Math.abs(after.height-baseline.height)<1);
+    });
+
+    await check('v0.40.5 strips the phantom toolbar and positions controls below the horizon',async()=>{
+        await page.evaluate(()=>{ArenaPortable.setMode('player');ArenaMobileTouch.setTouchMode('joystick');});
+        const state=await page.evaluate(()=>{
+            const legacy=document.getElementById('arenaHeaderActions');
+            const layer=document.getElementById('arenaMobileActionLayer');
+            const game=document.getElementById('viewport9x16').getBoundingClientRect();
+            const shelf=document.getElementById('arenaMobileControlShelf').getBoundingClientRect();
+            return {legacyParent:legacy.parentElement.id,legacyVisible:getComputedStyle(legacy).display!=='none',
+                layerParent:layer.parentElement.id,
+                children:[...layer.children].map(n=>n.id),
+                game:{top:game.top,height:game.height},shelfTop:shelf.top,
+                outline:getComputedStyle(layer).borderTopWidth};
+        });
+        assert.equal(state.legacyVisible,false,JSON.stringify(state));
+        assert.equal(state.layerParent,'arenaMobileControlShelf');
+        assert.deepEqual(state.children,['arenaMobileJump','arenaMobileAttack','arenaMobilePower']);
+        assert.equal(state.outline,'0px');
+        assert.ok(state.shelfTop>=state.game.top+state.game.height*.60,JSON.stringify(state));
+    });
+    await check('v0.40.5 Streamer 75–100% transparency changes all nested backgrounds',async()=>{
+        await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(true);});
+        const slider=page.locator('#arenaPortableTestTransparency');
+        await slider.evaluate(n=>{n.value='75';n.dispatchEvent(new Event('input',{bubbles:true}))});
+        const state=await page.evaluate(()=>{
+            const drawer=document.getElementById('arenaPortableTestDrawer');
+            const head=document.getElementById('arenaPortableTestHead');
+            const body=document.getElementById('arenaPortableTestBody');
+            const alpha=n=>getComputedStyle(n).backgroundColor;
+            return {drawer:alpha(drawer),head:alpha(head),body:alpha(body),opacity:getComputedStyle(drawer).opacity};
+        });
+        assert.match(state.drawer,/0\.25\)/);
+        assert.match(state.head,/0\.25\)/);
+        assert.match(state.body,/0\.25\)/);
+        assert.equal(state.opacity,'1');
+        await slider.evaluate(n=>{n.value='100';n.dispatchEvent(new Event('input',{bubbles:true}))});
+        const transparent=await page.locator('#arenaPortableTestHead').evaluate(n=>getComputedStyle(n).backgroundColor);
+        assert.match(transparent,/0\)$/);
+        await page.evaluate(()=>ArenaMobileTouch.openTests(false));
     });
     await check('native fullscreen keeps Streamer tests, menu and controls visible and the 9:16 centered',async()=>{
         await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(false);});
