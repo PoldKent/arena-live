@@ -34,3 +34,10 @@ test('mobile language changes update text and accessibility labels',()=>{
   assert.match(runtime,/\['title','aria-label','aria-description','placeholder'\]/);
   assert.match(touch,/queueMicrotask\(/);
 });
+
+test('changing language refreshes combat rule headings and parameter labels',()=>{
+  const setter=engine.match(/function setLanguage\(language\) \{([\s\S]*?)\n        \}\n\n        function refreshLocalizedWinnerLabels/);
+  assert.ok(setter,'Language-change handler not found');
+  assert.match(setter[1],/refreshArenaCombatRuleControls\(\)/);
+  assert.match(engine,/\[data-combat-rule-copy\]/);
+});
