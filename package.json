@@ -1,7 +1,7 @@
 {
   "name": "arena-live",
   "private": true,
-  "version": "0.40.1",
+  "version": "0.40.2",
   "description": "Local TikTok LIVE chat bridge for the Arena Live prototype",
   "type": "module",
   "engines": {
