@@ -1857,3 +1857,32 @@ html.arena-mobile-offline #arenaMobileDisplaySettings small{
   padding:1px!important;
  }
 }
+
+
+/* Normal mode tracks the physical viewport; native fullscreen is positioned
+   against its own card instead. Scroll never displaces gameplay hit targets. */
+html.arena-mobile-offline:not(.arena-mobile-theater) body > #arenaMobileControlShelf{
+ position:fixed!important;
+}
+html.arena-mobile-offline #card-9x16:fullscreen > #arenaMobileControlShelf,
+html.arena-mobile-offline #card-16x9:fullscreen > #arenaMobileControlShelf,
+html.arena-mobile-offline.arena-mobile-theater #arenaMobileControlShelf{
+ position:absolute!important;
+}
+/* Preserve the five original distinct class colors; only clear ghost layers. */
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaStreamerSkillsDock .arena-skill-buttons>button{
+ background-color:revert-layer!important;
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaStreamerSkillsDock .arena-skill-buttons>button:disabled{
+ opacity:.48!important;
+}
+/* Show actionable target/command controls first; keep full detail scrollable. */
+html.arena-mobile-offline #arenaPortableTestBody #arenaTrainingTargetCard{
+ padding:5px!important;margin:0!important;
+}
+html.arena-mobile-offline #arenaPortableTestBody #arenaPowerTargetStatus{
+ margin:2px 0!important;line-height:1.2!important;
+}
+html.arena-mobile-offline #arenaPortableTestBody .arena-target-command-row{
+ gap:4px!important;
+}
