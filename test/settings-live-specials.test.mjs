@@ -2,8 +2,9 @@ import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import {readEngineSource} from './read-engine-source.mjs';
 const root=new URL('../',import.meta.url);
-const html=await readFile(new URL('index.html',root),'utf8');
+const html=await readEngineSource();
 const core=await readFile(new URL('engine/arena-core.js',root),'utf8');
 test('special source is independent of energy policy and preserves legacy configs',()=>{
  const c=vm.createContext({});vm.runInContext(core,c);
