@@ -1886,3 +1886,14 @@ html.arena-mobile-offline #arenaPortableTestBody #arenaPowerTargetStatus{
 html.arena-mobile-offline #arenaPortableTestBody .arena-target-command-row{
  gap:4px!important;
 }
+
+/* Keep the Prota cue inside the actual video boundary, even when a 9:16
+   frame is narrower than the physical display. No video scale changes. */
+html.arena-mobile-offline #arenaMobileProtaStatus:not([hidden]){
+ position:fixed!important;
+ top:var(--arena-prota-top,72px)!important;
+ right:var(--arena-prota-right,8px)!important;
+ bottom:auto!important;left:auto!important;
+ max-width:min(205px,calc(100vw - 28px))!important;
+ z-index:970!important;
+}
