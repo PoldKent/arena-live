@@ -168,19 +168,33 @@ function arenaPortableReport(message){
 }
 function arenaPortableFitMobileStage(){
     const ratio=arenaPortableActiveRatio();
-    const card=document.getElementById(ratio==='16:9'?'card-16x9':'card-9x16');
-    const fullscreen=!!document.fullscreenElement||arenaPortableTheater;
+    const video=document.getElementById(ratio==='16:9'?'viewport16x9':'viewport9x16');
     const stage=document.getElementById('broadcastStageSection');
-    const height=fullscreen?window.innerHeight:(stage?.getBoundingClientRect().height||window.innerHeight-60);
+    const fullscreen=!!document.fullscreenElement||arenaPortableTheater;
     const director=arenaPortableProfile.mode===ARENA_MOBILE_MODES.DIRECTOR;
-    const shelf=director||arenaPortableProfile.touchMode!=='touch';
-    const bottom=shelf?(window.innerHeight<=600?76:92):0;
-    const head=fullscreen?65:0;
-    const usable=Math.max(80,Math.floor(height-bottom-head-18));
-    document.documentElement.style.setProperty('--arena-mobile-video-height',usable+'px');
+    const controlsVisible=director||arenaPortableProfile.touchMode==='joystick';
+    const viewHeight=Math.max(1,Math.min(window.innerHeight,window.visualViewport?.height||window.innerHeight));
+    const top=fullscreen?63:Math.max(58,stage?.getBoundingClientRect().top||58);
+    const band=controlsVisible?(director?78:124):0;
+    // Calculate from the real visual viewport, not document/scroll height.
+    // This leaves a real control band below the 9:16 video on Android.
+    const usable=Math.max(80,Math.floor(viewHeight-top-band-14));
+    const root=document.documentElement;
+    const next=usable+'px';
+    if(root.style.getPropertyValue('--arena-mobile-video-height')!==next)
+        root.style.setProperty('--arena-mobile-video-height',next);
     if(typeof arenaMobileKeepStreamerSkillsVisible==='function')arenaMobileKeepStreamerSkillsVisible();
-    if(typeof arenaMobilePositionTestDrawer==='function')arenaMobilePositionTestDrawer();
     if(typeof arenaMobileApplyLayout==='function')arenaMobileApplyLayout();
+    if(video){
+        const rect=video.getBoundingClientRect();
+        const desired=rect.bottom+6;
+        const maxTop=Math.max(54,viewHeight-band-6);
+        const controlTop=Math.round(Math.max(54,Math.min(desired,maxTop)));
+        const nextTop=controlTop+'px';
+        if(root.style.getPropertyValue('--arena-mobile-controls-top')!==nextTop)
+            root.style.setProperty('--arena-mobile-controls-top',nextTop);
+    }
+    if(typeof arenaMobilePositionTestDrawer==='function')arenaMobilePositionTestDrawer();
 }
 function arenaPortableSetTheater(enabled){
     arenaPortableTheater=!!enabled;
