@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
-import {unpackMobile} from '../tools/build-mobile.mjs';
+import {buildMobile,unpackMobile} from '../tools/build-mobile.mjs';
 import {readEngineSource} from './read-engine-source.mjs';
 
 const root=new URL('../',import.meta.url);
@@ -12,6 +13,8 @@ const index=await read('index.html');
 const game=await read('engine/arena-game.js');
 const server=await read('bridge/server.mjs');
 const officialPath='mobile-builds/Arena-Live-v'+pkg.version+'-movil.html';
+// Validate a fresh export from the canonical files rather than a stale historical build.
+await buildMobile(fileURLToPath(new URL(officialPath,root)));
 const compressed=await read(officialPath);
 const encoded=compressed.match(/"([A-Za-z0-9+/=]{10000,})"/)?.[1];
 if(!encoded)throw Error('Official mobile compressed payload missing');
