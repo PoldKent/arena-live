@@ -1,63 +1,46 @@
-/** Normalize a single per-update TikTok LIKE event. Never use cumulative room totals. */
-export function normalizeTikTokLike(event) {
-  if (!event || typeof event !== 'object') return null;
-  const user = event.user && typeof event.user === 'object' ? event.user : {};
-  // v2.5 protobuf payloads use displayId; older connectors used uniqueId.
-  const rawId = user.uniqueId || user.displayId || user.unique_id || user.display_id
-    || event.uniqueId || event.displayId || event.unique_id || event.display_id;
-  const username = String(rawId ?? '')
-    .replace(/^@+/, '')
-    .replace(/[\u0000-\u001f\u007f\u200e\u200f\u202a-\u202e]/g, '')
-    .trim()
-    .slice(0, 24);
-  // "count" is the delta for this event, "total" is cumulative: don't replay totals.
-  const count = Number(event.count);
-  if (!username || !Number.isSafeInteger(count) || count <= 0) return null;
-  return {
-    type: 'social',
-    platformKey: 'tiktok',
-    eventType: 'taps',
-    username: '@' + username,
-    count: Math.min(count, 10000),
-    eventId: String(event.common?.msgId ?? event.msgId ?? event.messageId ?? event.id ?? '').slice(0, 100)
-  };
-}
-
-/** A genuine SHARE event targets its own viewer, never a random spectator. */
-export function normalizeTikTokShare(event) {
+// Normalize viewer-specific TikTok LIVE events once, never from room totals.
+// Account handles are intentionally stricter than arbitrary chat display names.
+const handlePattern=/^[a-zA-Z0-9_.-]{1,24}$/;
+const invisible=/[\u0000-\u001f\u007f\u200e\u200f\u202a-\u202e]/g;
+function viewerHandle(event){
   if(!event||typeof event!=='object')return null;
   const user=event.user&&typeof event.user==='object'?event.user:{};
   const raw=user.uniqueId||user.displayId||user.unique_id||user.display_id
     ||event.uniqueId||event.displayId||event.unique_id||event.display_id;
-  const username=String(raw??'').replace(/^@+/,'')
-    .replace(/[\u0000-\u001f\u007f\u200e\u200f\u202a-\u202e]/g,'').trim().slice(0,24);
-  if(!username||!/^[a-zA-Z0-9_.-]+$/.test(username))return null;
-  return {type:'social',platformKey:'tiktok',eventType:'share',username:'@'+username,
-    eventId:String(event.common?.msgId??event.msgId??event.messageId??event.id??'').slice(0,100)};
+  const handle=String(raw??'').replace(/^@+/,'').replace(invisible,'').trim().slice(0,24);
+  return handlePattern.test(handle)?'@'+handle:null;
+}
+function eventId(event){
+  return String(event.common?.msgId??event.msgId??event.messageId??event.id??'').slice(0,100);
 }
 
-/**
- * Verified, viewer-targeted LIVE support. Unlike room totals, each item
- * represents an actual viewer event. Never infer paid events from chat.
- */
-export function normalizeTikTokSupport(eventType,event) {
-  if(!['follow','gift','subscribe'].includes(eventType)||!event||typeof event!=='object')return null;
-  const user=event.user&&typeof event.user==='object'?event.user:{};
-  const raw=user.uniqueId||user.displayId||user.unique_id||user.display_id
-    ||event.uniqueId||event.displayId||event.unique_id||event.display_id;
-  const username=String(raw??'').replace(/^@+/,'')
-    .replace(/[\u0000-\u001f\u007f\u200e\u200f\u202a-\u202e]/g,'').trim().slice(0,24);
-  if(!/^[a-zA-Z0-9_.-]{1,24}$/.test(username))return null;
-  // Streak gifts are updated throughout a streak; only the final repeatEnd
-  // (or a single gift) may trigger one game benefit.
+/** Normalize a single per-update TikTok LIKE event, never cumulative totals. */
+export function normalizeTikTokLike(event){
+  const username=viewerHandle(event);
+  if(!username)return null;
+  const count=Number(event.count);
+  if(!Number.isSafeInteger(count)||count<=0)return null;
+  return {type:'social',platformKey:'tiktok',eventType:'taps',username,
+    count:Math.min(count,10000),eventId:eventId(event)};
+}
+
+/** A genuine SHARE targets its own viewer, not a random spectator. */
+export function normalizeTikTokShare(event){
+  const username=viewerHandle(event);
+  if(!username)return null;
+  return {type:'social',platformKey:'tiktok',eventType:'share',username,eventId:eventId(event)};
+}
+
+/** Viewer-targeted follows/gifts/subscriptions; streak rewards only at the end. */
+export function normalizeTikTokSupport(eventType,event){
+  if(!['follow','gift','subscribe'].includes(eventType))return null;
+  const username=viewerHandle(event);
+  if(!username)return null;
   if(eventType==='gift'){
     const streak=Number(event.giftType??event.gift?.giftType??0)===1;
-    if(streak && event.repeatEnd!==true && event.repeatEnd!==1)return null;
+    if(streak&&event.repeatEnd!==true&&event.repeatEnd!==1)return null;
   }
-  const value={
-    type:'social',platformKey:'tiktok',eventType,username:'@'+username,
-    eventId:String(event.common?.msgId??event.msgId??event.messageId??event.id??'').slice(0,100)
-  };
+  const value={type:'social',platformKey:'tiktok',eventType,username,eventId:eventId(event)};
   if(eventType==='gift'){
     value.giftName=String(event.gift?.name??event.giftName??'Regalo').slice(0,56);
     const repeat=Number(event.repeatCount??1);
@@ -65,15 +48,15 @@ export function normalizeTikTokSupport(eventType,event) {
   }
   return value;
 }
-export function normalizeTikTokRoomUser(event) {
+
+/** Room population is informational: it never adds a fighter. */
+export function normalizeTikTokRoomUser(event){
   const count=Number(event?.viewerCount??event?.userCount??event?.roomUserCount);
   if(!Number.isSafeInteger(count)||count<0||count>10_000_000)return null;
   return {type:'audience',platformKey:'tiktok',eventType:'roomUser',count};
 }
-export function normalizeTikTokMember(event) {
-  const user=event?.user&&typeof event.user==='object'?event.user:{};
-  const raw=user.uniqueId||user.displayId||event?.uniqueId||event?.displayId;
-  const name=String(raw??'').replace(/^@+/,'').trim().slice(0,24);
-  if(!/^[a-zA-Z0-9_.-]{1,24}$/.test(name))return null;
-  return {type:'audience',platformKey:'tiktok',eventType:'member',username:'@'+name};
+export function normalizeTikTokMember(event){
+  const username=viewerHandle(event);
+  if(!username)return null;
+  return {type:'audience',platformKey:'tiktok',eventType:'member',username};
 }

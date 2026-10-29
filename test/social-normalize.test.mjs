@@ -75,3 +75,17 @@ test('viewer totals and member entries remain informational, never trigger attac
   type:'audience',platformKey:'tiktok',eventType:'member',username:'@viewer'
  });
 });
+
+test('LIVE social events reject unsafe account handles but preserve sanitized valid ones',()=>{
+  for(const eventType of ['taps','share','follow','member']){
+    const normalize=(event)=>eventType==='taps'?normalizeTikTokLike({...event,count:5})
+      :eventType==='share'?normalizeTikTokShare(event)
+      :eventType==='member'?normalizeTikTokMember(event)
+      :normalizeTikTokSupport('follow',event);
+    for(const displayId of ['bad name','<script>','bad/name','@']){
+      assert.equal(normalize({user:{displayId}}),null,eventType+' '+displayId);
+    }
+    assert.equal(normalize({user:{displayId:'@safe\u0000_user'}})?.username,'@safe_user');
+    assert.equal(normalize({user:{unique_id:'fallback_id'}})?.username,'@fallback_id');
+  }
+});
