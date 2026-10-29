@@ -2477,6 +2477,16 @@ html.arena-mobile-offline #arenaMobileControlShelf #arenaStreamerSkillsDock>.are
  min-width:0!important;max-width:100%!important;
 }
 
+
+/* Native fullscreen's original :fullscreen selector is more specific than the
+   plain fullscreen-bar selector. Neutralize its legacy 10px offset explicitly. */
+html.arena-mobile-offline #card-9x16:fullscreen #arenaMobileFullscreenBar #arenaMobileFloating,
+html.arena-mobile-offline #card-16x9:fullscreen #arenaMobileFullscreenBar #arenaMobileFloating{
+ position:relative!important;inset:auto!important;top:auto!important;
+ right:auto!important;bottom:auto!important;left:auto!important;
+ transform:none!important;align-self:center!important;
+}
+
 </style>
 <meta name="arena-mobile-restore" content="v037-RC3">
 </head>
@@ -11357,7 +11367,7 @@ const ARENA_BALANCE_EVIDENCE=Object.freeze({"version":"0.15.0","sample":{"matche
             }
         });
     </script>
-<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze({"version":"0.40.2","edition":"mobile-offline","sourceBlobs":{"index.html":"6dd4f281655b8584c0f67f31fcc4c710bc072388","styles/arena-ui.css":"c933a9cfb504daa6d27800c6098396b3aa57114f","styles/TAILWIND-LICENSE.txt":"d6a82290738a9f78946cbcb4594535d6984086dd","engine/arena-core.js":"ac22091a1263e294b733a337f8c6ebc4f2e1bc9d","engine/arena-render.js":"6c9603974d2c02d0f0fb52857992211c08cd6725","engine/arena-audio.js":"319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934","engine/arena-settings.js":"f1fbbd2492b4be8cfb725e72cd0ab604894681cf","engine/arena-balance-evidence.js":"0aab05b49f0ef9e80c43810b2bfc929b4f695cdf","portable/mobile.css":"dc569af953e75800ad4a06df45066a8df786e71b","portable/mobile-runtime.js":"9ea77ab9402799a45511a0d4d2c9814daea39cf1","portable/mobile-touch.js":"441a6c15dfed5aebf1ef1eb654e3aac3708139a6"},"uiBaseline":"0.37.0","releaseChannel":"restore-rc2"});</script>
+<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze({"version":"0.40.2","edition":"mobile-offline","sourceBlobs":{"index.html":"6dd4f281655b8584c0f67f31fcc4c710bc072388","styles/arena-ui.css":"c933a9cfb504daa6d27800c6098396b3aa57114f","styles/TAILWIND-LICENSE.txt":"d6a82290738a9f78946cbcb4594535d6984086dd","engine/arena-core.js":"ac22091a1263e294b733a337f8c6ebc4f2e1bc9d","engine/arena-render.js":"6c9603974d2c02d0f0fb52857992211c08cd6725","engine/arena-audio.js":"319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934","engine/arena-settings.js":"f1fbbd2492b4be8cfb725e72cd0ab604894681cf","engine/arena-balance-evidence.js":"0aab05b49f0ef9e80c43810b2bfc929b4f695cdf","portable/mobile.css":"874d060c5189272161b4eac7788d6b01794fde1b","portable/mobile-runtime.js":"9ea77ab9402799a45511a0d4d2c9814daea39cf1","portable/mobile-touch.js":"441a6c15dfed5aebf1ef1eb654e3aac3708139a6"},"uiBaseline":"0.37.0","releaseChannel":"restore-rc2"});</script>
 <script id="arena-mobile-runtime">
 // Loaded inline after the unchanged classic engine, before its load bootstrap.
 // This adapter changes presentation and test setup, never combat decisions.
