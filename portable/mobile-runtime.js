@@ -421,6 +421,21 @@ function arenaPortableReady() {
     arenaMobileInstallBackAndMenuClose();
     const playerShelf=document.createElement('section');playerShelf.id='arenaMobileControlShelf';playerShelf.setAttribute('aria-label','Controles del juego y herramientas');
     document.getElementById('card-9x16')?.appendChild(playerShelf);
+    const playerStatus=document.createElement('output');
+    playerStatus.id='arenaMobileProtaStatus';playerStatus.hidden=true;
+    playerStatus.setAttribute('role','status');playerStatus.setAttribute('aria-live','polite');
+    playerShelf.appendChild(playerStatus);
+    function arenaMobileRefreshProtaStatus(){
+        if(arenaPortableProfile.mode!==ARENA_MOBILE_MODES.PLAYER||arenaPortableSetupOpen||typeof fighters==='undefined'||gameState!=='COMBAT'){
+            playerStatus.hidden=true;return;
+        }
+        const alive=fighters.filter(f=>!f.eliminated);
+        const prota=alive.find(f=>f.isStreamer);
+        if(!prota){playerStatus.textContent='Prota fuera de combate';playerStatus.hidden=false;}
+        else if(alive.length>=24){playerStatus.textContent='🎮 Prota en combate · '+alive.length+' luchadores';playerStatus.hidden=false;}
+        else playerStatus.hidden=true;
+    }
+    setInterval(arenaMobileRefreshProtaStatus,700);
     const gestureGuide=document.createElement('aside');gestureGuide.id='arenaMobileGestureGuide';gestureGuide.setAttribute('aria-label','Cómo controlar el protagonista');
     gestureGuide.textContent='Táctil total: izquierda, desliza para moverte. Derecha, toca para saltar, dos toques para doble salto; desliza para golpear o mantén pulsado para el poder.';
     document.getElementById('card-9x16')?.appendChild(gestureGuide);
