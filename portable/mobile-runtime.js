@@ -469,6 +469,15 @@ function arenaPortableReady() {
             playerStatus.hidden=true;return;
         }
         const alive=fighters.filter(f=>!f.eliminated);
+        const video=document.getElementById(arenaPortableActiveRatio()==='16:9'?'viewport16x9':'viewport9x16');
+        const vr=video?.getBoundingClientRect();
+        if(vr&&vr.width>20&&vr.height>30){
+            const right=Math.max(8,window.innerWidth-vr.right+7);
+            const maxTop=Math.max(58,window.innerHeight-42);
+            const top=Math.min(maxTop,Math.max(58,vr.bottom-46));
+            playerStatus.style.setProperty('--arena-prota-right',Math.round(right)+'px');
+            playerStatus.style.setProperty('--arena-prota-top',Math.round(top)+'px');
+        }
         const prota=alive.find(f=>f.isStreamer);
         if(!prota){playerStatus.textContent='Prota fuera de combate';playerStatus.hidden=false;}
         else if(alive.length>=24){playerStatus.textContent='🎮 Prota en combate · '+alive.length+' luchadores';playerStatus.hidden=false;}
