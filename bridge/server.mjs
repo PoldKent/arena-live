@@ -178,7 +178,7 @@ const server = createServer(async (req, res) => {
       }
       return;
     }
-    if(req.method==='GET'&&['/engine/arena-core.js','/engine/arena-render.js','/engine/arena-audio.js','/engine/arena-settings.js','/engine/arena-balance-evidence.js'].includes(pathname)){res.writeHead(200,{...noCache,'Content-Type':'text/javascript; charset=utf-8'});res.end(await readFile(resolve(ROOT,pathname.slice(1))));return;}
+    if(req.method==='GET'&&['/engine/arena-core.js','/engine/arena-render.js','/engine/arena-audio.js','/engine/arena-settings.js','/engine/arena-balance-evidence.js','/engine/arena-game.js'].includes(pathname)){res.writeHead(200,{...noCache,'Content-Type':'text/javascript; charset=utf-8'});res.end(await readFile(resolve(ROOT,pathname.slice(1))));return;}
     if (req.method === 'GET' && pathname === '/bridge-client.js') {
       const script = await readFile(resolve(__dirname, 'bridge-client.js'), 'utf8');
       res.writeHead(200, { ...noCache, 'Content-Type': 'text/javascript; charset=utf-8' });
