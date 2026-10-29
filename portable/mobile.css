@@ -812,7 +812,7 @@ html.arena-mobile-offline #dualMonitorsGrid[data-focus="9:16"] > #card-9x16{
  width:100%!important;min-height:0!important;max-width:100%!important;
  display:flex!important;flex-direction:column!important;align-items:center!important;
  justify-content:center!important;overflow:visible!important;margin:0!important;
- gap:0!important;padding:var(--mobile-restore-top) 3px var(--mobile-restore-bottom)!important;
+ gap:0!important;padding:3px 3px var(--mobile-restore-bottom)!important;
 }
 html.arena-mobile-offline #dualMonitorsGrid[data-focus="9:16"] > #card-9x16 #viewport9x16{
  box-sizing:border-box!important;flex:0 0 auto!important;
