@@ -123,3 +123,12 @@ test('v0.40.1 keeps all five original Streamer skills visible and the 9:16 fixed
   assert.doesNotMatch(latest,/\.arena-tests-visible/);
   assert.doesNotMatch(latest,/\.has-open-tests #viewport9x16/);
 });
+
+test('RC3 keeps one mobile toolbar row and isolates controls per mode',()=>{
+  assert.match(css,/MOBILE RESTORE RC3/);
+  assert.match(css,/data-mobile-mode="player"\] #arenaMobileControlShelf #arenaStreamerSkillsDock\{[\s\S]*?display:none!important/);
+  assert.match(css,/data-mobile-mode="director"\] #arenaMobileControlShelf #touchControlDock\{[\s\S]*?display:none!important/);
+  assert.match(css,/#arenaMobileFullscreenBar #headerStateBadge\{[\s\S]*?display:none!important/);
+  assert.match(runtime,/const shelfHost=fullscreen\?card:document\.body/);
+  assert.match(runtime,/shelfHost\.appendChild\(playerShelf\)/);
+});
