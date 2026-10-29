@@ -25,8 +25,9 @@
     function result(fighters,winner,{reason='survival',eliminations=[]}={}) {
         const byId=new Map(fighters.map(f=>[f.id,snapshot(f)]));
         if(winner&&!byId.has(winner.id))byId.set(winner.id,snapshot(winner));
-        const selected=winner?byId.get(winner.id):null,order=[];
-        const add=f=>{if(f&&!order.some(item=>item.id===f.id))order.push(f);};
+        const selected=winner?byId.get(winner.id):null,order=[],included=new Set();
+        // Result order is stable while deduplication stays O(1) per fighter.
+        const add=f=>{if(f&&!included.has(f.id)){included.add(f.id);order.push(f);}};
         add(selected);
         if(reason==='survival')for(const f of [...eliminations].reverse())add(byId.get(f.id));
         for(const f of [...byId.values()].sort(compareScore))add(f);

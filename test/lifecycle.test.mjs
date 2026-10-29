@@ -12,3 +12,14 @@ test('timed podium follows score instead of elimination order and supports a dra
 test('independent generators replay combat regardless of visual calls',()=>{const a=c.createRandom(4521),b=c.createRandom(4521),v=c.createRandom(1);assert.equal(a.next(),b.next());for(let i=0;i<100;i++)v.next();assert.equal(a.next(),b.next());const state=a.state();assert.equal(a.state(),state);a.reset(4521);b.reset(4521);assert.equal(a.next(),b.next());});
 test('runtime configuration rejects unknown values without accepting foreign keys',()=>{assert.deepEqual(c.normalizeRuntime({quality:'oops',renderFps:300,specialPolicy:'bad',pausePolicy:'bad',extra:true}),{quality:'balanced',renderFps:60,specialSource:'both',specialPolicy:'fair',pausePolicy:'queue',warriorTargeting:'local',shinobiTargeting:'local',titanTargeting:'nearest',lightningTargeting:'nearest',spiritTargeting:'nearest',testAdaptClass:true,masterVolume:70,hudOpacity:85});assert.equal(c.normalizeRuntime(null).renderFps,60);});
 test('a bounded chat history overwrites oldest entries in order and supports paging/export',()=>{const h=c.createHistory(3);for(let i=0;i<5;i++)h.push(i);assert.equal(h.length,3);assert.equal(h.dropped,2);assert.deepEqual(h.slice(),[2,3,4]);assert.deepEqual(h.slice(1,3),[3,4]);assert.deepEqual(h.map(x=>x*2),[4,6,8]);});
+
+test('128-fighter results preserve podium order without repeating reentered contenders',()=>{
+ const fighters=Array.from({length:128},(_,i)=>fighter(String(i),{kills:i%4,damageDealt:i}));
+ const champion=fighters[127];
+ const eliminations=[...fighters,...fighters.slice(0,60),...fighters.slice(60)];
+ const result=c.result(fighters,champion,{eliminations});
+ assert.equal(result.standings.length,128);
+ assert.equal(new Set(result.standings.map(f=>f.id)).size,128);
+ assert.equal(result.podium[0].id,champion.id);
+ assert.equal(result.podium[1].id,fighters[126].id);
+});
