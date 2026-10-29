@@ -630,6 +630,7 @@ function arenaMobileInstallControlDragging(){
     window.addEventListener('resize',()=>requestAnimationFrame(arenaMobileApplyLayout));
     document.addEventListener('fullscreenchange',()=>requestAnimationFrame(arenaMobileApplyLayout));
     arenaMobileApplyLayout();
+    if(typeof arenaMobileLocalizeAll==='function')arenaMobileLocalizeAll();
 }
 
 function installArenaMobileTouch(){
