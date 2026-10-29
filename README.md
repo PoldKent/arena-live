@@ -16,6 +16,14 @@ El archivo oficial `mobile-builds/Arena-Live-v0.40.5-movil.html` es una exportac
 
 **Regla móvil v0.40.5:** el escenario nunca pierde tamaño por la presencia de joystick, acciones, cinco poderes o paneles. Los controles se superponen al juego; joystick y habilidades pueden sobresalir del marco 9:16. En Ajustes → Controles móviles → Pantalla completa está disponible la referencia automática/9:16/9:19.5/9:20/9:21; el motor y video reales mantienen 9:16 y la calibración OBS es independiente.\n\nEn Windows PowerShell: `npm.cmd ci`, `npm.cmd test`, `npm.cmd run build:mobile` y `npm.cmd start`; el servidor local se abre en `http://127.0.0.1:4173`. El comando de compilación genera también `dist/Arena-Live-v0.40.5-movil.html`.
 
+### Versión oficial para PC · código reorganizado
+
+El archivo principal **`index.html` ocupa aproximadamente 174 KB**, cumpliendo el límite de 500 KB sin comprimir. Contiene el diseño y los elementos originales de la aplicación; el JavaScript clásico del juego se conserva completo en **`engine/arena-game.js`**, cargado al final y después de los cinco módulos de apoyo, sin alterar sus funciones, física, reglas, comandos, interfaces de TikTok LIVE ni capturas 16:9/9:16 para OBS. El servidor de `bridge/server.mjs` permite cargar ese archivo localmente en `http://127.0.0.1:4173`.
+
+**A diferencia de la versión móvil**, el HTML oficial no es un archivo autónomo: para ejecutarlo necesita los demás archivos del repositorio. Por tanto, el límite de 500 KB se aplica a `index.html` y no a la suma de código, motor e integraciones. No copies solamente el `index.html`; mantén la estructura del proyecto. El empaquetador móvil continúa generando el HTML autónomo comprimido menor a 500 KB con el mismo motor.
+
+Desde PowerShell en la carpeta del repositorio: `git pull --ff-only origin main`, `npm.cmd ci`, `npm.cmd test`, `npm.cmd run build:mobile` y `npm.cmd start`. Abre `http://127.0.0.1:4173` para la versión oficial; `http://127.0.0.1:4173/mobile` para la versión móvil de prueba.
+
 ## Versión principal
 
 `main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API y el paquete identifican la versión 0.40. [Panel único de v0.18](docs/RELEASE-0.18-PANEL-UNICO.md). [Las seis correcciones y su validación](docs/RELEASE-0.15-CORRECCIONES.md).
