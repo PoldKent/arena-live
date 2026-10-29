@@ -506,7 +506,10 @@ try{
         await page.locator('#arenaPortableTestTransparency').evaluate(n=>{
             n.value='45';n.dispatchEvent(new Event('input',{bubbles:true}));
         });
-        assert.ok(Math.abs(Number(await page.locator('#arenaPortableTestDrawer').evaluate(n=>getComputedStyle(n).opacity))-.55)<.02);
+        assert.equal(Number(await page.locator('#arenaPortableTestDrawer').evaluate(n=>getComputedStyle(n).opacity)),1);
+        const panelAlpha=await page.locator('#arenaPortableTestDrawer').evaluate(n=>
+            Number(getComputedStyle(n).getPropertyValue('--arena-tests-background-alpha')));
+        assert.ok(Math.abs(panelAlpha-.55)<.02);
         assert.equal(await page.locator('#arenaPortableTransparencyValue').textContent(),'45%');
         assert.equal(await page.locator('#arenaStreamerSkillsDock .arena-skill-buttons>button').count(),5);
         assert.equal(await page.locator('#arenaMobileFullscreenBar').isVisible(),true);
