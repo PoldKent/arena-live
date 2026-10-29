@@ -1456,3 +1456,93 @@ html.arena-mobile-offline #dualMonitorsGrid.arena-dual-preview #card-9x16:not(:f
 html.arena-mobile-offline #dualMonitorsGrid.arena-dual-preview #viewport9x16{
   max-height:none!important;margin:0!important;
 }
+
+/* v0.40.2 fullscreen mobile: preserve the original branded header and five
+   Streamer powers. The base OBS fullscreen rule hides direct siblings of
+   #viewport9x16/#viewport16x9; these are intentional interactive exceptions. */
+html.arena-mobile-offline #arenaMobileFullscreenBar[hidden]{display:none!important}
+html.arena-mobile-offline #card-9x16:fullscreen > #arenaMobileFullscreenBar,
+html.arena-mobile-offline #card-16x9:fullscreen > #arenaMobileFullscreenBar{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  flex-direction:row!important;gap:5px!important;box-sizing:border-box!important;
+  position:absolute!important;top:0!important;left:0!important;right:0!important;
+  width:100%!important;height:calc(58px + env(safe-area-inset-top))!important;
+  padding:env(safe-area-inset-top) max(7px,env(safe-area-inset-right)) 3px max(7px,env(safe-area-inset-left))!important;
+  border-bottom:1px solid #31475c!important;background:#0b1525!important;
+  z-index:650!important;pointer-events:auto!important;overflow:visible!important;
+}
+html.arena-mobile-offline #arenaMobileFullscreenBar .arena-brand-block{
+  display:flex!important;align-items:center!important;flex:0 1 auto!important;
+  width:auto!important;min-width:0!important;margin:0!important;
+}
+html.arena-mobile-offline #arenaMobileFullscreenBar .arena-brand-block h1{
+  font-size:clamp(10px,2.4vw,14px)!important;white-space:nowrap!important;
+}
+html.arena-mobile-offline #arenaMobileFullscreenBar .arena-brand-meta{
+  display:flex!important;align-items:center!important;gap:5px!important;
+  min-width:0!important;
+}
+html.arena-mobile-offline #arenaMobileFullscreenBar #arenaMobileFloating{
+  display:flex!important;position:relative!important;inset:auto!important;
+  top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;
+  margin:0 0 0 auto!important;transform:none!important;
+  z-index:660!important;flex:0 0 auto!important;
+  pointer-events:auto!important;visibility:visible!important;
+}
+@media(max-width:430px){
+  html.arena-mobile-offline #arenaMobileFullscreenBar #headerStateBadge{display:none!important}
+}
+html.arena-mobile-offline #card-9x16:fullscreen > #arenaMobileControlShelf,
+html.arena-mobile-offline #card-16x9:fullscreen > #arenaMobileControlShelf{
+  display:flex!important;visibility:visible!important;
+  pointer-events:auto!important;z-index:350!important;
+}
+html.arena-mobile-offline[data-mobile-mode="player"][data-mobile-touch-mode="touch"] #card-9x16:fullscreen > #arenaMobileControlShelf,
+html.arena-mobile-offline[data-mobile-mode="player"][data-mobile-touch-mode="touch"] #card-16x9:fullscreen > #arenaMobileControlShelf{
+  display:none!important;
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #card-9x16:fullscreen > #arenaMobileControlShelf #arenaStreamerSkillsDock,
+html.arena-mobile-offline[data-mobile-mode="director"] #card-16x9:fullscreen > #arenaMobileControlShelf #arenaStreamerSkillsDock{
+  display:block!important;visibility:visible!important;opacity:1!important;
+  pointer-events:auto!important;min-height:62px!important;z-index:360!important;
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #card-9x16:fullscreen > #arenaMobileControlShelf #arenaStreamerSkillsDock>.arena-skill-buttons,
+html.arena-mobile-offline[data-mobile-mode="director"] #card-16x9:fullscreen > #arenaMobileControlShelf #arenaStreamerSkillsDock>.arena-skill-buttons{
+  display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;
+}
+/* Positionable, translucent tests: never modify the battle viewport geometry.
+   The fullscreen card is the containing block; otherwise use the window. */
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
+  opacity:var(--arena-tests-opacity,1)!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]).is-positioned{
+  left:var(--arena-tests-x,8px)!important;top:var(--arena-tests-y,65px)!important;
+  right:auto!important;bottom:auto!important;
+}
+html.arena-mobile-offline #card-9x16:fullscreen > #arenaPortableTestDrawer:not([hidden]).is-positioned,
+html.arena-mobile-offline #card-16x9:fullscreen > #arenaPortableTestDrawer:not([hidden]).is-positioned{
+  position:absolute!important;
+  left:var(--arena-tests-x,8px)!important;top:var(--arena-tests-y,65px)!important;
+  right:auto!important;bottom:auto!important;
+}
+html.arena-mobile-offline #arenaPortableTestHead{cursor:grab!important;touch-action:none!important}
+html.arena-mobile-offline #arenaPortableTestHead.is-dragging{cursor:grabbing!important}
+html.arena-mobile-offline #arenaPortableTestDrawer .arena-tests-transparency{
+  display:flex!important;align-items:center!important;gap:3px!important;
+  flex:0 0 auto!important;min-width:0!important;color:#b9e4eb!important;
+  font:650 9px/1 system-ui,sans-serif!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer #arenaPortableTestTransparency{
+  display:block!important;flex:0 0 60px!important;width:60px!important;
+  height:22px!important;min-width:0!important;min-height:22px!important;
+  padding:0!important;accent-color:#76dadd!important;touch-action:pan-x!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer #arenaPortableTransparencyValue{
+  font-size:9px!important;min-width:23px!important;
+}
+@media(max-width:370px){
+  html.arena-mobile-offline #arenaPortableTestDrawer #arenaPortableTestTransparency{
+    flex-basis:38px!important;width:38px!important;
+  }
+  html.arena-mobile-offline #arenaPortableTestDrawer #arenaPortableTransparencyValue{display:none!important}
+}
