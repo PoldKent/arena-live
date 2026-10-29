@@ -2,7 +2,7 @@
   "name": "arena-live",
   "private": true,
   "version": "0.40.7",
-  "description": "Local TikTok LIVE chat bridge for the Arena Live prototype",
+  "description": "Shared Arena Live game engine, OBS broadcast views, offline mobile export and local TikTok LIVE bridge",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -20,7 +20,6 @@
     "verify:release": "npm test && npm run build:mobile && npm run test:browser && npm run test:mobile && npm run test:performance",
     "build:styles": "node tools/build-styles.mjs",
     "build:mobile": "node tools/build-mobile.mjs",
-    "clean:branches": "node tools/clean-merged-branches.mjs",
     "analyze:balance": "node test/balance-simulation.mjs"
   },
   "dependencies": {
