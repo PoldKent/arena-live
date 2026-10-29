@@ -1897,3 +1897,11 @@ html.arena-mobile-offline #arenaMobileProtaStatus:not([hidden]){
  max-width:min(205px,calc(100vw - 28px))!important;
  z-index:970!important;
 }
+
+
+/* Original class identity: one color per command. */
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaStreamerSkillsDock .arena-skill-buttons>button:nth-child(1){background-color:rgba(8,65,85,.90)!important;border-color:rgba(6,182,212,.50)!important}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaStreamerSkillsDock .arena-skill-buttons>button:nth-child(2){background-color:rgba(59,29,93,.90)!important;border-color:rgba(168,85,247,.50)!important}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaStreamerSkillsDock .arena-skill-buttons>button:nth-child(3){background-color:rgba(91,51,8,.90)!important;border-color:rgba(245,158,11,.50)!important}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaStreamerSkillsDock .arena-skill-buttons>button:nth-child(4){background-color:rgba(6,74,59,.90)!important;border-color:rgba(16,185,129,.50)!important}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaStreamerSkillsDock .arena-skill-buttons>button:nth-child(5){background-color:rgba(94,24,49,.90)!important;border-color:rgba(244,63,94,.50)!important}
