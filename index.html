@@ -18,7 +18,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Fonts: Inter & Orbitron for Arcade/Esports HUD -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
-    <style>
+    <style id="arena-app-styles">
+/* Canonical Arena Live PC/OBS styles. Order preserved from original head. */
+
+/* base */
+
         /* MODULE BLOCK: BASE UI / layout / responsive controls. Future file: styles/base.css */
         :root {
             --neon-cyan: #00f3ff;
@@ -401,10 +405,10 @@
   }
 }
 
-</style>
 
 
-<style id="arena-prota-selector">
+/* arena-prota-selector */
+
 #arenaHeaderActions .arena-prota-class-control{display:inline-flex;align-items:center;justify-content:center;flex:none;gap:5px;padding:2px 4px;
  border:1px solid #526c87;border-radius:6px;background:#122033;color:#f4e2aa;font:700 11px/1.25 Inter,system-ui,sans-serif;white-space:nowrap;}
 #arenaHeaderActions .arena-prota-class-control select{appearance:auto;min-width:115px;max-width:155px;height:30px;padding:3px 5px;border:1px solid #4b6989;border-radius:5px;
@@ -416,8 +420,10 @@
  #arenaHeaderActions .arena-prota-class-control span{display:none;}
  #arenaHeaderActions .arena-prota-class-control select{min-width:112px;max-width:128px;font-size:11px;}
 }
-</style>
-<style id="arena-audience-onboarding-v020">
+
+
+/* arena-audience-onboarding-v020 */
+
 /* The guide is plain, always-visible text inside the TOP HUD, not an overlay over combat. */
 #viewport16x9,#viewport9x16{isolation:isolate;container-type:inline-size}
 #viewport16x9 .arena-audience-guide,#viewport9x16 .arena-audience-guide{
@@ -618,17 +624,19 @@
 #viewport9x16 .arena-victory-next{font-size:clamp(12px,3.4cqw,18px);}
 #viewport9x16 .arena-victory-buttons{display:grid;grid-template-columns:1fr 1fr;width:100%;gap:6px;}
 #viewport9x16 .arena-victory-buttons button{padding:10px 4px;font-size:clamp(12px,3.3cqw,18px);}
-</style>
 
-<style id="arena-clean-broadcast">
+
+/* arena-clean-broadcast */
+
 /* MODULE BLOCK: BROADCAST CAPTURE OVERRIDES. Future file: styles/broadcast.css */
 /* Clean in-game capture: remove labels surrounding the playfield and redundant roster cards. */
 #broadcastStageSection > .relative.z-10.flex.items-center.justify-between,
 #card-16x9 > .w-full.flex.items-center.justify-between,
 #card-9x16 > .w-full.flex.items-center.justify-between { display:none !important; }
-</style>
 
-<style id="arena-responsive-touch-and-toolbar">
+
+/* arena-responsive-touch-and-toolbar */
+
 /* Responsive corrections: touch controls belong to the 9:16 viewport, never the page. */
 #viewport9x16 { isolation: isolate; }
 #viewport9x16 .touch-control-dock {
@@ -826,10 +834,10 @@ body.touch-controls-active #portraitChatOverlay {
     }
     #chatFeed { min-height: 0; height: 100%; overflow-y: auto; }
 }
-</style>
 
 
-<style id="arena-fullscreen-capture">
+/* arena-fullscreen-capture */
+
 /* MODULE BLOCK: BROADCAST FULLSCREEN — preserve 16:9 and 9:16 without stretching. */
 #arenaFullscreenActions9 button { border-color: rgba(244, 114, 182, .5); color:#fce7f3; }
 .arena-fullscreen-exit-button { display: none; }
@@ -911,9 +919,10 @@ html:not(.arena-mobile-offline) #card-9x16:fullscreen > :not(#viewport9x16):not(
     #card-16x9:fullscreen .arena-fullscreen-exit-button,
     #card-9x16:fullscreen .arena-fullscreen-exit-button { opacity: .65; }
 }
-</style>
 
-<style id="arena-visual-polish-v01">
+
+/* arena-visual-polish-v01 */
+
 /* Arena Live v0.5: duelo vertical legible y controles compactos fuera de la imagen. */
 #viewport9x16 #hud1v1Bars9 {padding:9px 10px!important;border-radius:14px!important;border-color:rgba(251,191,36,.62)!important;box-shadow:0 5px 20px rgba(0,0,0,.28)}
 #viewport9x16 #hud1v1Bars9 .grid-cols-11 {gap:7px!important}
@@ -923,10 +932,10 @@ html:not(.arena-mobile-offline) #card-9x16:fullscreen > :not(#viewport9x16):not(
 #viewport9x16 #p1HpText1v1_9,#viewport9x16 #p2HpText1v1_9 {font-size:12px!important;line-height:17px!important;font-weight:800!important}
 #viewport9x16 #hud1v1Bars9 div:has(> #p1Energy1v1_9),#viewport9x16 #hud1v1Bars9 div:has(> #p2Energy1v1_9) {height:6px!important}
 #viewport9x16 #p1EnergyText1v1_9,#viewport9x16 #p2EnergyText1v1_9 {font-size:9px!important;line-height:12px!important}
-</style>
 
 
-<style id="arena-workspace-v03">
+/* arena-workspace-v03 */
+
 /* MODULE BLOCK: v0.5 operator workspaces. Games keep their original canvases and HUD. */
 :root {--arena-left-width:260px;--arena-right-width:300px;--arena-stream-width:260px;--arena-line:#29313e;--arena-surface:#111720;--arena-muted:#97a3b5}
 html,body {height:100%;min-height:100%;overflow:hidden!important;background:#090d13}
@@ -1161,8 +1170,10 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 }
 @media (prefers-reduced-motion:reduce) {#arenaStreamToolbarMount {transition:none}}
 
-</style>
-<style id="arena-training-panel">
+
+
+/* arena-training-panel */
+
 #arenaTrainingTargetCard {display:flex;flex-direction:column;gap:5px;padding:9px;border:1px solid #364859;border-radius:7px;background:#0b1320}
 #arenaTrainingTargetCard strong {color:#a5f3fc;font-size:12px;overflow-wrap:anywhere}
 #arenaPowerTargetClass {color:#c4b5fd;font-size:11px}
@@ -1185,7 +1196,25 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 #arenaClassPreferences select {max-width:100%}
 #arenaClassPreferencesHelp {font-size:10px;line-height:1.5;color:#94a3b8}
 #arenaClassPreferencesTitle {max-width:100%;white-space:normal;overflow-wrap:anywhere;margin-bottom:8px;color:#a5f3fc}
+
 </style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </head>
 <body class="min-h-screen flex flex-col bg-[#06080f] text-slate-100">
 

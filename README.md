@@ -6,7 +6,7 @@ Juego para transmisiones con una única simulación y dos capturas sincronizadas
 
 - **Aplicación principal (PC y OBS):** `npm.cmd start` → `http://127.0.0.1:4173/`.
 - **Móvil autónomo actual:** [Arena Live v0.40.6](mobile-builds/Arena-Live-v0.40.6-movil.html), completo y sin conexión (menos de 500 KB). `npm.cmd run build:mobile` genera `dist/Arena-Live-v0.40.6-movil.html`.
-- **Regresión inmediata:** [v0.40.5](mobile-builds/Arena-Live-v0.40.5-movil.html). Se conservan [v0.36](mobile-builds/Arena-Live-v0.36.0-movil.html), [v0.37](mobile-builds/Arena-Live-v0.37.0-movil.html) y [v0.37 RC4](mobile-builds/Arena-Live-Mobile-v037-GAMEBOY-RC4.html) como referencias visuales, no como alternativas de desarrollo.
+- **Histórico:** las versiones v0.36, v0.37, v0.37 RC4 y v0.40.5 se conservan en el historial Git, no como descargas redundantes en `main`. La única versión móvil publicada es [v0.40.6](mobile-builds/Arena-Live-v0.40.6-movil.html).
 
 En **v0.40.6**, los golpes normales y los especiales aceptan apuntado frontal, arriba y abajo; el modo joystick admite hasta cinco contactos táctiles. Las indicaciones translúcidas de gestos solo aparecen en modo táctil sin joystick. Las cinco habilidades del Streamer, los controles en pantalla completa y el tamaño 9:16 permanecen integrados en `main`.
 
