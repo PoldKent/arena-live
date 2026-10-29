@@ -545,7 +545,9 @@ function arenaMobileSetTouchMode(mode){
     document.dispatchEvent(new Event('arena-touch-disable'));
     if(arenaMobileEditing)arenaMobileEditButtons(false);
     arenaPortableProfile.touchMode=mode;arenaPortableRemember();
-    arenaMobileSyncTouchMode();return true;
+    arenaMobileSyncTouchMode();
+    if(typeof arenaMobileLocalizeAll==='function')arenaMobileLocalizeAll();
+    return true;
 }
 function arenaMobileSyncTouchMode(){
     const mode=arenaPortableProfile.touchMode;
@@ -658,6 +660,14 @@ function installArenaMobileTouch(){
     arenaMobileInstallTestDrawer();
     arenaMobileInstallStreamerSkills();
     arenaMobileInstallControlDragging();
+    // Controls are recreated or relabeled when switching modes or opening tools.
+    // Translate visible labels and accessible names after the originating click.
+    for(const eventName of ['click','change']){
+        document.addEventListener(eventName,()=>queueMicrotask(()=>{
+            if(typeof arenaMobileLocalizeAll==='function')arenaMobileLocalizeAll();
+        }),true);
+    }
+    if(typeof arenaMobileLocalizeAll==='function')arenaMobileLocalizeAll();
     const stop=()=>{arenaMobileResetTouch();arenaMobileClearRetry();};
     document.addEventListener('arena-touch-disable',stop);
     document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
