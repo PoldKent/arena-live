@@ -1548,3 +1548,19 @@ html.arena-mobile-offline #arenaOperatorPopover .arena-portable-menu-heading #ar
  min-width:36px!important;min-height:36px!important;
  margin:0!important;padding:0!important;z-index:auto!important;
 }
+
+/* Give the protagonist a compact location/state cue in crowded fights. */
+html.arena-mobile-offline #arenaMobileProtaStatus[hidden]{display:none!important}
+html.arena-mobile-offline #arenaMobileProtaStatus:not([hidden]){
+ position:absolute!important;top:-34px!important;right:4px!important;
+ display:block!important;max-width:calc(100% - 10px)!important;
+ font:700 11px/1.25 system-ui,sans-serif!important;
+ color:#e9fbff!important;background:rgba(9,31,47,.93)!important;
+ border:1px solid rgba(100,215,232,.7)!important;
+ border-radius:9px!important;padding:5px 8px!important;
+ text-shadow:0 1px 2px #001!important;
+ box-shadow:0 3px 15px #0008!important;pointer-events:none!important;
+}
+html.arena-mobile-offline.arena-mobile-overlay-open #arenaMobileProtaStatus{
+ display:none!important;
+}
