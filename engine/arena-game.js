@@ -51,7 +51,7 @@
             zh: { join: '加入 Zhujiao', rejoin: 'Zhujiao 重新加入', lobbyJoined: 'Zhujiao 已加入', inArena: 'Zhujiao 在竞技场', available: '大厅可加入', finalizing: '对局结束中', joinTitle: 'Zhujiao 可在大厅或任何战斗模式中加入。', ai: 'AI', manual: '手动', manualTitle: '🎮 Zhujiao 手动控制', timerRemaining: '剩余时间', timerUnlimited: '不限时', joinStatus: 'Zhujiao 可在大厅或战斗中加入，不受规则限制。', specialAttack: '特殊攻击', specialAttackTitle: '特殊攻击 (R)' , "classShort": "职业", "audio": "音频", "playerTarget": "🎯 目标玩家"},
             ja: { join: 'Shujinkou として参加', rejoin: 'Shujinkou 再参加', lobbyJoined: 'Shujinkou 参加中', inArena: 'Shujinkou アリーナ参加中', available: 'ロビーで参加可能', finalizing: '試合終了処理中', joinTitle: 'Shujinkou はロビーまたはどの対戦モードでも参加できます。', ai: 'AI', manual: '手動', manualTitle: '🎮 Shujinkou 手動操作', timerRemaining: '残り時間', timerUnlimited: '時間制限なし', joinStatus: 'Shujinkou はルールに関係なくロビーまたは対戦中に参加できます。', specialAttack: '必殺技', specialAttackTitle: '必殺技 (R)' , "classShort": "クラス", "audio": "音声", "playerTarget": "🎯 対象プレイヤー"},
             pt: { join: 'Entrar como Prota', rejoin: 'Prota voltar', lobbyJoined: 'Prota inscrito', inArena: 'Prota na arena', available: 'Disponível no lobby', finalizing: 'Partida encerrando', joinTitle: 'Prota pode entrar no lobby ou durante qualquer modo de combate.', ai: 'IA', manual: 'MANUAL', manualTitle: '🎮 Controles manuais do Prota', timerRemaining: 'Tempo restante', timerUnlimited: 'Sem limite de tempo', joinStatus: 'Prota pode entrar no lobby ou durante o combate, com qualquer regra.', specialAttack: 'ataque especial', specialAttackTitle: 'Ataque especial (R)' , "classShort": "Classe", "audio": "Áudio", "playerTarget": "🎯 Jogador alvo"},
-            it: { join: 'Entra come Prota', rejoin: 'Fai rientrare Prota', lobbyJoined: 'Prota registrato', inArena: 'Prota nell’arena', available: 'Disponibile nella lobby', finalizing: 'Partita in chiusura', joinTitle: 'Prota può entrare nella lobby o durante qualsiasi modalità di combattimento.', ai: 'IA', manual: 'MANUALE', manualTitle: '🎮 Comandi manuali di Prota', timerRemaining: 'Tempo rimanente', timerUnlimited: 'Nessun limite di tempo', joinStatus: 'Prota può entrare nella lobby o durante il combattimento, con qualsiasi regola.', specialAttack: 'attacco speciale', specialAttackTitle: 'Attacco speciale (R)' }
+            it: { join: 'Entra come Prota', rejoin: 'Fai rientrare Prota', lobbyJoined: 'Prota registrato', inArena: 'Prota nell’arena', available: 'Disponibile nella lobby', finalizing: 'Partita in chiusura', joinTitle: 'Prota può entrare nella lobby o durante qualsiasi modalità di combattimento.', ai: 'IA', manual: 'MANUALE', manualTitle: '🎮 Comandi manuali di Prota', timerRemaining: 'Tempo rimanente', timerUnlimited: 'Nessun limite di tempo', joinStatus: 'Prota può entrare nella lobby o durante il combattimento, con qualsiasi regola.', specialAttack: 'attacco speciale', specialAttackTitle: 'Attacco speciale (R)', classShort: 'Classe', audio: 'Audio', playerTarget: '🎯 Giocatore bersaglio' }
         });
         // Critical runtime notices are translated as complete sentences, not token-by-token.
         const RUNTIME_COPY = Object.freeze({
@@ -82,7 +82,7 @@
             zh: {pauseNow:'立即暂停', editLive:'直播时调整', rules:'1 · 对局规则', pace:'2 · 战斗与操作', screen:'3 · 画面与声音', audience:'4 · 观众与聊天', close:'关闭菜单 (ESC)', title:'暂停与对局设置'},
             ja: {pauseNow:'今すぐ一時停止', editLive:'LIVE中に設定変更', rules:'1 · 試合ルール', pace:'2 · バトルと操作', screen:'3 · 画面と音声', audience:'4 · 視聴者とチャット', close:'メニューを閉じる (ESC)', title:'一時停止と試合設定'},
             pt: {pauseNow:'Pausar agora', editLive:'Editar durante a LIVE', rules:'1 · Regras da partida', pace:'2 · Combate e controles', screen:'3 · Telas e áudio', audience:'4 · Público e chat', close:'Fechar menu (ESC)', title:'Pausa e configurações da partida'},
-            it: {pauseNow:'Metti in pausa', editLive:'Modifica durante la LIVE', rules:'1 · Regole della partita', pace:'2 · Combattimento e comandi', screen:'3 · Schermi e audio', audience:'4 · Pubblico e chat', close:'Chiudi menu (ESC)', title:'Pausa e impostazioni della partita', "classShort": "Classe", "audio": "Audio", "playerTarget": "🎯 Giocatore bersaglio"},
+            it: {pauseNow:'Metti in pausa', editLive:'Modifica durante la LIVE', rules:'1 · Regole della partita', pace:'2 · Combattimento e comandi', screen:'3 · Schermi e audio', audience:'4 · Pubblico e chat', close:'Chiudi menu (ESC)', title:'Pausa e impostazioni della partita'},
         });
         // ==================== UI / CURATED LABELS (8 LOCALES) ====================
         // Prefer concise, full phrases over piecemeal dictionary substitution.
@@ -867,6 +867,7 @@
             updateRuleSpecificSettings();
             updateCombatTimerDisplay();
             refreshLocalizedChatMessages();
+            if(typeof arenaMobileLocalizeAll==='function')arenaMobileLocalizeAll();
             const viewerPlaceholder = document.getElementById('chatUsernameInput');
             if (viewerPlaceholder) {
                 const examples = {es:'@TuUsuario', en:'@YourName', fr:'@VotrePseudo', de:'@DeinName', zh:'@你的昵称', ja:'@あなたの名前', pt:'@SeuNome', it:'@IlTuoNome'};
@@ -934,6 +935,16 @@
         let isGamePaused = false;
         let isSettingsOpen = false;
 
+        const ARENA_SETTINGS_STATE_COPY=Object.freeze({
+            es:['Pausa manual activa: los ajustes conservan esta pausa.','Los ajustes se aplican mientras continúa la pelea.'],
+            en:['Manual pause is active. Changing settings will not resume the match.','Settings take effect while the match continues.'],
+            fr:['Pause manuelle active. Modifier les réglages ne relance pas la partie.','Les réglages s’appliquent pendant le combat.'],
+            de:['Manuelle Pause aktiv. Änderungen setzen das Spiel nicht fort.','Einstellungen gelten, während der Kampf weiterläuft.'],
+            zh:['已手动暂停。修改设置不会恢复比赛。','设置将在战斗继续期间生效。'],
+            ja:['手動で一時停止中です。設定を変えても試合は再開しません。','設定は対戦を続けながら反映されます。'],
+            pt:['Pausa manual ativa. Alterar ajustes não retoma a partida.','Os ajustes são aplicados enquanto a partida continua.'],
+            it:['Pausa manuale attiva. Le modifiche non riprendono la partita.','Le impostazioni si applicano mentre la partita continua.']
+        });
         function syncSettingsModalState() {
             const modal = document.getElementById('settingsPauseModal');
             if (!modal) return;
@@ -942,9 +953,9 @@
             modal.classList.toggle('hidden', !isSettingsOpen);
             document.getElementById('pausedBadgeHeader')?.classList.toggle('hidden', !isGamePaused);
             const badge = document.getElementById('settingsModeBadge');
-            if (badge) badge.textContent = isGamePaused ? `⏸ ${runtimeCopy('paused')}` : (currentLanguage==='es'?'▶ COMBATE ACTIVO':'▶ GAME RUNNING');
+            if (badge) badge.textContent = isGamePaused ? `⏸ ${runtimeCopy('paused')}` : (`▶ ${runtimeCopy('live').replace(/^LIVE · /,'')}`);
             const hint=document.getElementById('settingsModeDescription');
-            if(hint)hint.textContent=isGamePaused?'Pausa manual activa: los ajustes conservan esta pausa.':'Los ajustes se aplican mientras continúa la pelea.';
+            if(hint)hint.textContent=(ARENA_SETTINGS_STATE_COPY[currentLanguage]||ARENA_SETTINGS_STATE_COPY.es)[isGamePaused?0:1];
             refreshPauseMenuLabels();
             refreshArenaOperatorToolbar();
             updateTouchControlsVisibility();
@@ -6664,11 +6675,11 @@
                 if (element) element.textContent = value;
             });
             const extra = {
-                arenaDualSettingsBtn: currentLanguage==='es'?'⚙ Ajustes':'⚙ Settings',
+                arenaDualSettingsBtn: `⚙ ${arenaOperatorText('settings')}`,
                 arenaDualTestsToggle: `🧪 ${c[10]}`,
                 arenaDualChatToggleBtn: `💬 ${c[9]}`,
-                arenaDualTikTokConnectBtn: currentLanguage==='es'?'📡 Conectar TikTok':'📡 Connect TikTok',
-                arenaDualDrawerSummary: currentLanguage==='es'?'☷ Herramientas y chat · abrir panel':'☷ Tools and chat · expand',
+                arenaDualTikTokConnectBtn: `📡 ${arenaOperatorText('connect')}`,
+                arenaDualDrawerSummary: `☷ ${arenaOperatorText('tools')} · ${arenaOperatorText('chat')} · ${presentationText('expand')}`,
                 arenaDualChatSummary: `💬 ${c[9]}`
             };
             Object.entries(extra).forEach(([id,value])=>{const n=document.getElementById(id);if(n)n.textContent=value;});
@@ -6919,7 +6930,7 @@
                 arenaDualTestsToggle:`🧰 ${arenaOperatorText('tools')}`,
                 arenaDualChatToggleBtn:`💬 ${arenaOperatorText('chat')}`,
                 arenaDualSettingsBtn:`⚙ ${arenaOperatorText('settings')}`,
-                resumeGameLabel:currentLanguage==='es'?'✕ Cerrar ajustes':'✕ Close settings',
+                resumeGameLabel:`✕ ${runtimeCopy('finish')}`,
                 arenaExitFullscreenBtn:`⤡ ${(ARENA_FULLSCREEN_COPY[currentLanguage] || ARENA_FULLSCREEN_COPY.es).exit}`
             };
             for (const [id,text] of Object.entries(labels)) {
