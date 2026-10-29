@@ -4,6 +4,84 @@ import {createHash} from 'node:crypto';
 import {dirname,resolve} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 
+
+/* Native JavaScript LZ dictionary codec. It keeps the complete engine, menus,
+ * classes and assets intact while shipping a compact offline HTML. No network,
+ * external scripts, lossy minification, or separate combat implementation. */
+export function packMobile(input){
+    const dict=Object.create(null),created=Object.create(null),chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    let word='',size=3,width=2,grow=2,value=0,position=0;
+    const output=[];
+    const bit=n=>{value=(value<<1)|n;if(position===5){output.push(chars[value]);position=0;value=0;}else position++};
+    const bits=(n,count)=>{for(let i=0;i<count;i++){bit(n&1);n>>>=1;}};
+    const advance=()=>{if(--grow===0){grow=2**width;width++;}};
+    const emit=token=>{
+        if(created[token]){
+            const code=token.charCodeAt(0);
+            if(code<256){bits(0,width);bits(code,8);}else{bits(1,width);bits(code,16);}
+            advance();delete created[token];
+        }else bits(dict[token],width);
+        advance();
+    };
+    for(let i=0;i<input.length;i++){
+        const char=input.charAt(i);
+        if(dict[char]===undefined){dict[char]=size++;created[char]=true;}
+        const combined=word+char;
+        if(dict[combined]!==undefined)word=combined;
+        else{emit(word);dict[combined]=size++;word=char;}
+    }
+    if(word)emit(word);
+    bits(2,width);
+    while(true){value<<=1;if(position===5){output.push(chars[value]);break;}position++;}
+    const data=output.join('');
+    return data+'='.repeat((4-data.length%4)%4);
+}
+export function unpackMobile(input){
+    const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    const dictionary=[0,1,2],result=[];
+    let grow=4,size=4,width=3,word='',data={value:chars.indexOf(input.charAt(0)),position:32,index:1};
+    const read=count=>{
+        let value=0,power=1;
+        for(let i=0;i<count;i++){
+            const active=data.value&data.position;
+            data.position>>=1;
+            if(data.position===0){data.position=32;data.value=chars.indexOf(input.charAt(data.index++));}
+            if(active)value+=power;
+            power*=2;
+        }
+        return value;
+    };
+    const first=read(2);
+    let character;
+    if(first===0)character=String.fromCharCode(read(8));
+    else if(first===1)character=String.fromCharCode(read(16));
+    else return '';
+    dictionary[3]=character;word=character;result.push(character);
+    for(;;){
+        if(data.index>input.length)throw Error('Truncated mobile payload');
+        let code=read(width);
+        if(code===0){dictionary[size++]=String.fromCharCode(read(8));code=size-1;grow--;}
+        else if(code===1){dictionary[size++]=String.fromCharCode(read(16));code=size-1;grow--;}
+        else if(code===2)return result.join('');
+        if(grow===0){grow=2**width;width++;}
+        let entry;
+        if(dictionary[code])entry=dictionary[code];
+        else if(code===size)entry=word+word.charAt(0);
+        else throw Error('Invalid mobile payload');
+        result.push(entry);dictionary[size++]=word+entry.charAt(0);
+        grow--;word=entry;
+        if(grow===0){grow=2**width;width++;}
+    }
+}
+export function wrapMobileHtml(unpacked,version){
+    const packed=packMobile(unpacked);
+    const loading='<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Arena Live v'+version+' · Móvil</title></head><body style="background:#0b1425;color:#c5edf7;font:600 16px system-ui;text-align:center;padding:15vh 12px"><p id="arena-mobile-loading">Iniciando Arena Live v'+version+'…</p><script>';
+    const boot='try{const content=('+unpackMobile.toString()+')('+JSON.stringify(packed)+');if(!content.includes("ARENA_PORTABLE_BUILD"))throw Error("Archivo incompleto");document.open();document.write(content);document.close();}catch(error){document.body.textContent="No se pudo abrir Arena Live: "+error.message;}';
+    const html=loading+boot+'<\/script></body></html>';
+    if(Buffer.byteLength(html,'utf8')>500000)throw Error('Mobile HTML exceeds the 500,000-byte limit');
+    return html;
+}
+
 const root=fileURLToPath(new URL('../',import.meta.url));
 const assets=['index.html','styles/arena-ui.css','styles/TAILWIND-LICENSE.txt',
     ...['core','render','audio','settings','balance-evidence'].map(name=>`engine/arena-${name}.js`),
@@ -62,8 +140,12 @@ export async function buildMobile(output) {
     html=replaceOnce(html,'</body>',`<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze(${JSON.stringify(build)});</script>\n<script id="arena-mobile-runtime">\n${inline(files.get('portable/mobile-runtime.js'))}\n</script>\n<script id="arena-mobile-touch">\n${inline(files.get('portable/mobile-touch.js'))}\n</script>\n</body>`);
     if(/<(?:script|link)\b[^>]+(?:src|href)\s*=/i.test(html))throw Error('Mobile export still has an external runtime asset');
     const target=resolve(output||resolve(root,'dist',`Arena-Live-v${version}-movil.html`));
-    await mkdir(dirname(target),{recursive:true});await writeFile(target,html);
-    return {path:target,version,bytes:Buffer.byteLength(html),sha256:createHash('sha256').update(html).digest('hex'),inputs};
+    // Preserve the full HTML for regression tests and debugging, but publish
+    // only the small, immediately executable, self-unpacking offline file.
+    const compact=wrapMobileHtml(html,version);
+    if(unpackMobile(packMobile(html))!==html)throw Error('Mobile export did not round-trip without loss');
+    await mkdir(dirname(target),{recursive:true});await writeFile(target,compact);
+    return {path:target,version,bytes:Buffer.byteLength(compact),unpackedBytes:Buffer.byteLength(html),sha256:createHash('sha256').update(compact).digest('hex'),inputs};
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href) {
     const flag=process.argv.indexOf('--output');
