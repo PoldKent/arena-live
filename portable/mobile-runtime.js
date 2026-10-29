@@ -187,6 +187,11 @@ function installArenaPortableFloatingUI(){
     hud.setAttribute('aria-label','Accesos flotantes del juego');
     hud.innerHTML='<button type="button" id="arenaPortableToggleGuide" aria-label="Mostrar instrucciones" title="Mostrar instrucciones">?</button><button type="button" id="arenaPortableFullscreen" aria-label="Pantalla completa" title="Pantalla completa">⛶</button><output id="arenaPortableToast" role="status" hidden></output>';
     document.body.appendChild(hud);
+    const fullscreenBar=document.createElement('header');
+    fullscreenBar.id='arenaMobileFullscreenBar';
+    fullscreenBar.setAttribute('aria-label','Barra de Arena Live en pantalla completa');
+    fullscreenBar.hidden=true;
+    document.body.appendChild(fullscreenBar);
     const pause=document.createElement('button');
     pause.id='arenaMobilePause';pause.type='button';pause.textContent='⏸';pause.setAttribute('aria-label','Pausar combate');
     pause.onclick=()=>{document.getElementById('arenaDualPauseBtn')?.click();refreshArenaPortableFloatingUI();};
@@ -303,13 +308,25 @@ function arenaPortableReady() {
         const menu=document.getElementById('arenaOperatorPopover');
         const guide=document.getElementById('arenaMobileGestureGuide');
         const header=document.getElementById('arenaTopBarInner');
-        if(toolbar)(fullscreen?card:header)?.appendChild(toolbar);
+        const fullscreenBar=document.getElementById('arenaMobileFullscreenBar');
+        const brand=document.querySelector('.arena-brand-block');
+        if(fullscreen&&card&&fullscreenBar){
+            fullscreenBar.hidden=false;
+            if(fullscreenBar.parentElement!==card)card.appendChild(fullscreenBar);
+            if(brand)fullscreenBar.prepend(brand);
+            if(toolbar)fullscreenBar.appendChild(toolbar);
+        }else{
+            if(brand&&header)header.prepend(brand);
+            if(toolbar&&header)header.appendChild(toolbar);
+            if(fullscreenBar){fullscreenBar.hidden=true;if(fullscreenBar.parentElement!==document.body)document.body.appendChild(fullscreenBar);}
+        }
         if(menu)(fullscreen?card:document.body)?.appendChild(menu);
         if(guide)card?.appendChild(guide);
         if(playerShelf&&card&&playerShelf.parentElement!==card)card.appendChild(playerShelf);
         // The compact tests panel is independent of the skill shelf. Mount it
         // on body in normal mode and inside the fullscreen card when necessary.
         for(const id of ['arenaHeaderActions','touchControlDock','arenaStreamerSkillsDock']){const node=document.getElementById(id);if(node)playerShelf?.appendChild(node);}
+        if(typeof arenaMobileKeepStreamerSkillsVisible==='function')arenaMobileKeepStreamerSkillsVisible();
         if(typeof arenaMobileMountTestDrawer==='function')arenaMobileMountTestDrawer();
         if(typeof arenaMobileApplyLayout==='function')requestAnimationFrame(arenaMobileApplyLayout);
         const setup=document.getElementById('arenaPortableSetup');
