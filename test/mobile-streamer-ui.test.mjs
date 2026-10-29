@@ -63,13 +63,15 @@ test('default Gameboy layout prevents circle overlap at narrow widths and large 
     }
   }
 });
-test('fullscreen reserves top status and dynamic bottom controls without resizing on tests',()=>{
+test('fullscreen maximizes the video without subtracting controls, menu or test-panel height',()=>{
   assert.match(runtime,/function arenaPortableFitMobileStage\(\)/);
-  assert.match(runtime,/--arena-mobile-reserved-bottom/);
-  assert.match(runtime,/--arena-mobile-player-shelf-height/);
+  assert.match(runtime,/const usable=Math\.max\(100,Math\.floor\(viewportHeight-top-\(fullscreen\?2:0\)\)\)/);
+  assert.doesNotMatch(runtime,/viewportHeight-top-band/);
+  assert.match(runtime,/--arena-mobile-reserved-bottom','0px'/);
   assert.match(runtime,/const shelfHost=fullscreen\?card:document\.body/);
-  assert.match(css,/#card-9x16:fullscreen #viewport9x16/);
-  assert.match(css,/max-height:min\(var\(--arena-mobile-video-height/);
+  assert.match(css,/v0\.40\.4 NON-SHRINK MOBILE CONTRACT/);
+  assert.match(css,/max-height:calc\(100dvh - 56px\)!important/);
+  assert.match(css,/position:fixed!important/);
   assert.doesNotMatch(css,/#card-9x16\.arena-tests-visible #viewport9x16/);
 });
 test('native fullscreen, Android theater and normal mode keep one original HUD',()=>{
@@ -114,4 +116,40 @@ test('protagonist status and role compatibility do not modify combat logic',()=>
   assert.match(touch,/function arenaMobileTouchStart\(event\)/);
   assert.match(touch,/arenaMobileJumpTap\(\)/);
   assert.match(touch,/function arenaMobileInstallControlDragging\(\)/);
+});
+
+test('mobile formats 9:16, 9:19.5, 9:20, 9:21 and automatic are presentation-only',()=>{
+  for(const value of ["'auto'","'16'","'19.5'","'20'","'21'"])assert.ok(runtime.includes(value),value);
+  assert.match(runtime,/ARENA_MOBILE_FRAME_FORMAT_KEY='arenaMobileFrameFormatV01'/);
+  assert.match(runtime,/function arenaMobileSetFullscreenFormat\(format\)/);
+  assert.match(runtime,/window\.ArenaMobileFrame=Object\.freeze/);
+  assert.match(touch,/id="arenaMobileFullscreenFormat"/);
+  assert.match(touch,/Independiente de OBS/);
+  assert.match(css,/#arenaMobileFrameGuide:not\(\[hidden\]\)/);
+});
+test('Gameboy custom saved positions are visibly separated without losing preferences',()=>{
+  assert.match(touch,/const actions=\['arenaMobilePower','arenaMobileJump','arenaMobileAttack'\]/);
+  assert.match(touch,/Math\.hypot\(points\[id\]\[0\]-points\[other\]\[0\]/);
+  assert.match(touch,/root\.dataset\.mobileAutoSeparated='true'/);
+  assert.match(touch,/if\(id==='touchJoystick'\)/);
+  assert.match(css,/#arenaMobileControlShelf #arenaHeaderActions\.arena-operator-toolbar\{/);
+  assert.match(css,/display:contents!important/);
+});
+test('menu has perfectly centered vector X and overlays cannot affect the stage size',()=>{
+  assert.match(runtime,/button\.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24"/);
+  assert.match(css,/#arenaMobileMenuClose svg/);
+  assert.match(css,/display:grid!important;place-items:center!important/);
+  assert.match(css,/arena-mobile-overlay-open #card-9x16:fullscreen > #arenaMobileControlShelf/);
+});
+test('Streamer power rail retains five colors and is independent of video frame',()=>{
+  assert.match(css,/#arenaMobileControlShelf::before/);
+  assert.match(css,/#arenaMobileControlShelf #arenaHeaderActions::before/);
+  assert.match(css,/data-mobile-mode="director"\] #arenaMobileControlShelf #arenaStreamerSkillsDock/);
+  assert.match(css,/data-mobile-mode="director"\] #arenaStreamerSkillsDock \.arena-skill-buttons>button\[data-command-label\]/);
+  assert.match(css,/#arenaPortableTestBody/);
+});
+test('the Prota status is aligned to its video frame rather than physical screen edge',()=>{
+  assert.match(runtime,/window\.innerWidth-vr\.right\+7/);
+  assert.match(css,/--arena-prota-right/);
+  assert.match(css,/position:fixed!important/);
 });
