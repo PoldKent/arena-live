@@ -59,3 +59,15 @@
 - [Motor principal de la aplicación](https://github.com/PoldKent/arena-live/blob/main/index.html)
 - [Historial de decisiones mobile](https://github.com/PoldKent/arena-live/blob/main/README.md)
 - [Pruebas existentes](https://github.com/PoldKent/arena-live/blob/main/test/mobile-browser.mjs)
+
+
+## RC2 · Controles tipo Gameboy, barra superior alineada
+
+- Archivo de prueba único: `mobile-builds/Arena-Live-Mobile-v037-GAMEBOY-RC2.html` (no sustituye RC1).
+- En Mobile normal, el encabezado ARENA LIVE y la cápsula circular comparten un mismo carril superior de 54 px; fullscreen mantiene su encabezado original dentro de la tarjeta fullscreen.
+- Se retira la explicación de gestos superpuesta bajo la escena; la ayuda sigue en el menú de opciones y en Ajustes → Controles.
+- Modo Jugador / Joystick: analógico a la izquierda y tres acciones (Poder, Salto, Golpe) escalonadas a la derecha, disposición tipo Gameboy sin modificar sus funciones ni el motor.
+- La fila inferior se coloca inmediatamente después de la vista de combate utilizando medidas del área visible de Android. En Streamer permanece una fila compacta de cinco poderes.
+- Se usa `arenaLiveMobileButtonsV2` para nuevos valores predeterminados. Al migrar desde V1, las posiciones explícitamente personalizadas se conservan; únicamente se sustituyen las coordenadas por defecto antiguas, preservando el tamaño escogido.
+- Se añadió una aserción de navegador para disposición lateral de joystick/acciones, orden de botones, barra superior y geometría de video. **No validada todavía en un Android físico.**
+- `main`, PC/OBS y los archivos 0.38–0.40.2 permanecen intactos; RC2 es candidata, no una publicación final.
