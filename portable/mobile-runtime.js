@@ -6,6 +6,8 @@ const ARENA_PORTABLE_GUIDE_KEY='arenaLiveMobileShowGuideV1';
 // User-facing modes: Modo jugador (Protagonista) and Modo Streamer.
 const ARENA_MOBILE_MODES=Object.freeze({PLAYER:'player',DIRECTOR:'director'});
 let arenaPortableSuspended=false,arenaPortableSetupOpen=false,arenaPortablePreviousPause=false;
+let arenaPortableTheater=false;
+let arenaPortableDockForView=null;
 let arenaPortableGuideVisible=false;
 try{arenaPortableGuideVisible=localStorage.getItem(ARENA_PORTABLE_GUIDE_KEY)==='1';}catch(_){}
 let arenaPortableProfile={resolution:720,count:32,classKey:'kame',mode:ARENA_MOBILE_MODES.PLAYER,join:true,touchMode:'joystick'};
@@ -75,6 +77,7 @@ function arenaPortableSetMode(mode,{remember=true,updateGame=true}={}){
         updateTouchControlsVisibility();
     }
     arenaPortableSyncModeControls();refreshArenaPortableFloatingUI();
+    requestAnimationFrame(arenaPortableFitMobileStage);
     return true;
 }
 
@@ -145,7 +148,7 @@ function setArenaPortableGuideVisible(enabled,remember=true){
     refreshArenaPortableFloatingUI();
 }
 function refreshArenaPortableFloatingUI(){
-    const fullscreen=!!document.fullscreenElement;
+    const fullscreen=!!document.fullscreenElement||arenaPortableTheater;
     const fs=document.getElementById('arenaPortableFullscreen');
     const pause=document.getElementById('arenaMobilePause');
     const modeShortcut=document.getElementById('arenaMobileModeShortcut');
@@ -163,23 +166,53 @@ function arenaPortableReport(message){
     if(toast){toast.textContent=message;toast.hidden=false;}
     const status=document.getElementById('arenaPortableFeedback');if(status)status.textContent=message;
 }
+function arenaPortableFitMobileStage(){
+    const ratio=arenaPortableActiveRatio();
+    const card=document.getElementById(ratio==='16:9'?'card-16x9':'card-9x16');
+    const fullscreen=!!document.fullscreenElement||arenaPortableTheater;
+    const stage=document.getElementById('broadcastStageSection');
+    const height=fullscreen?window.innerHeight:(stage?.getBoundingClientRect().height||window.innerHeight-60);
+    const director=arenaPortableProfile.mode===ARENA_MOBILE_MODES.DIRECTOR;
+    const shelf=director||arenaPortableProfile.touchMode!=='touch';
+    const bottom=shelf?(window.innerHeight<=600?76:92):0;
+    const head=fullscreen?65:0;
+    const usable=Math.max(80,Math.floor(height-bottom-head-18));
+    document.documentElement.style.setProperty('--arena-mobile-video-height',usable+'px');
+    if(typeof arenaMobileKeepStreamerSkillsVisible==='function')arenaMobileKeepStreamerSkillsVisible();
+    if(typeof arenaMobilePositionTestDrawer==='function')arenaMobilePositionTestDrawer();
+    if(typeof arenaMobileApplyLayout==='function')arenaMobileApplyLayout();
+}
+function arenaPortableSetTheater(enabled){
+    arenaPortableTheater=!!enabled;
+    document.documentElement.classList.toggle('arena-mobile-theater',arenaPortableTheater);
+    arenaPortableDockForView?.();
+    requestAnimationFrame(arenaPortableFitMobileStage);
+    refreshArenaPortableFloatingUI();
+}
 async function arenaPortableToggleFullscreen(){
     closeArenaOperatorPopover(false);
+    if(arenaPortableTheater){arenaPortableSetTheater(false);return true;}
+    if(document.fullscreenElement){
+        try{await document.exitFullscreen();return true;}catch(_){return false;}
+    }
     const ratio=arenaPortableActiveRatio();
-    if(!document.fullscreenEnabled){
-        arenaPortableReport('El navegador no permite pantalla completa. Abre el archivo en Chrome y prueba de nuevo.');
-        return false;
+    if(document.fullscreenEnabled){
+        try{
+            const ok=await toggleArenaFullscreen(ratio);
+            if(ok&&document.fullscreenElement){
+                requestAnimationFrame(arenaPortableFitMobileStage);
+                refreshArenaPortableFloatingUI();
+                return true;
+            }
+        }catch(_){/* Some Android content:// viewers disallow native fullscreen. */}
     }
-    try{
-        // Reuse the battle's existing fullscreen handler, never duplicate game state.
-        const ok=await toggleArenaFullscreen(ratio);
-        if(!ok)throw new Error('fullscreen denied');
-        refreshArenaPortableFloatingUI();
-        return true;
-    }catch(_){
-        arenaPortableReport('No se pudo activar pantalla completa en este navegador.');
-        return false;
-    }
+    // Chrome's file/content provider may block requestFullscreen. Keep one
+    // real responsive overlay inside the usable browser viewport, not a dead
+    // fullscreen button. Browser chrome itself cannot be hidden with CSS.
+    arenaPortableSetTheater(true);
+    const feedback=document.getElementById('arenaPortableFeedback');
+    if(feedback)feedback.textContent='Vista ampliada. Para ocultar las barras de Chrome, abre desde un servidor HTTPS compatible.';
+    return true;
 }
 function installArenaPortableFloatingUI(){
     const hud=document.createElement('nav');
@@ -299,7 +332,7 @@ function arenaPortableReady() {
     const footer=document.querySelector('#settingsPauseModal>div>div:last-child');
     if(footer){const note=document.createElement('span');note.textContent=' · Archivo móvil sin conexión';note.setAttribute('data-no-translate','');footer.appendChild(note);}
     function dockForView(){
-        const fullscreen=document.fullscreenElement?.id;
+        const fullscreen=document.fullscreenElement?.id || (arenaPortableTheater ? (monitorFocus==='16:9'?'card-16x9':'card-9x16') : null);
         const horizontal=fullscreen==='card-16x9'||(fullscreen!=='card-9x16'&&monitorFocus==='16:9');
         const view=document.getElementById(horizontal?'viewport16x9':'viewport9x16');
         if(!view)return;
@@ -332,23 +365,29 @@ function arenaPortableReady() {
         const setup=document.getElementById('arenaPortableSetup');
         if(setup)(fullscreen?view:document.body).appendChild(setup);
         refreshArenaPortableFloatingUI();
+        requestAnimationFrame(arenaPortableFitMobileStage);
     }
     // Direct touch and floating UI follow the active portrait/landscape view.
     const oldFocus=setMonitorFocus;setMonitorFocus=function(focus){oldFocus(focus);dockForView();};
+    arenaPortableDockForView=dockForView;
     dockForView();
     document.addEventListener('fullscreenchange',()=>{
         document.dispatchEvent(new Event('arena-touch-disable'));
         dockForView();
+        requestAnimationFrame(arenaPortableFitMobileStage);
         if(document.fullscreenElement)document.getElementById('arenaMobileFloating')?.querySelector('#arenaPortableFullscreen')?.focus({preventScroll:true});
     });
     window.matchMedia('(orientation:portrait)').addEventListener('change',()=>{
         document.dispatchEvent(new Event('arena-touch-disable'));
-        if(!document.fullscreenElement){setMonitorFocus(arenaPreparationDefaultFocus());requestAnimationFrame(fitDualMonitorsSideBySide);}
+        if(!document.fullscreenElement&&!arenaPortableTheater){setMonitorFocus(arenaPreparationDefaultFocus());requestAnimationFrame(fitDualMonitorsSideBySide);}else requestAnimationFrame(arenaPortableFitMobileStage);
     });
     document.addEventListener('visibilitychange',()=>{
         arenaPortableSuspended=document.hidden;previousFrameTime=null;simulationAccumulator=0;arenaLastRenderTime=null;
         if(document.hidden)document.dispatchEvent(new Event('arena-touch-disable'));
     });
+    window.addEventListener('resize',()=>requestAnimationFrame(arenaPortableFitMobileStage));
+    window.visualViewport?.addEventListener('resize',()=>requestAnimationFrame(arenaPortableFitMobileStage));
+    if(window.ResizeObserver){const ro=new ResizeObserver(()=>requestAnimationFrame(arenaPortableFitMobileStage));ro.observe(document.getElementById('broadcastStageSection'));}
     setArenaPortableGuideVisible(arenaPortableGuideVisible,false);
     arenaPortableSyncModeControls();
     arenaPortableOpen();
