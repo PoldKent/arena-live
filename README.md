@@ -2,6 +2,13 @@
 
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
+
+### Versión móvil autónoma v0.40.3
+
+El archivo oficial `mobile-builds/Arena-Live-v0.40.3-movil.html` es una exportación completa y sin conexión; reutiliza el mismo motor de combate de `main`, no una bifurcación. En Android: **Modo jugador** usa joystick y tres botones o gestos (Ajustes → Controles); **Modo Streamer** muestra las cinco habilidades de clase siempre visibles y abre las pruebas desde 🧪. La ventana de menú se cierra con **X**, **☰** nuevamente o **Atrás/Escape**, consumiendo primero submenús y herramientas sin cerrar la vista ampliada. El comportamiento de Atrás en fullscreen nativo también depende del navegador/Android.
+
+En Windows PowerShell: `npm.cmd ci`, `npm.cmd test`, `npm.cmd run build:mobile` y `npm.cmd start`; el servidor local se abre en `http://127.0.0.1:4173`. El comando de compilación genera también `dist/Arena-Live-v0.40.3-movil.html`.
+
 ## Versión principal
 
 `main` contiene TikTok LIVE, las potencias por modo, los comandos visibles y la arena isométrica con caída y rescate. Ambas capturas se dibujan en Full HD: **1920 × 1080** horizontal y **1080 × 1920** vertical. Usa **`npm.cmd start`** y **http://127.0.0.1:4173**. El pie de Ajustes, la API y el paquete identifican la versión 0.40. [Panel único de v0.18](docs/RELEASE-0.18-PANEL-UNICO.md). [Las seis correcciones y su validación](docs/RELEASE-0.15-CORRECCIONES.md).
