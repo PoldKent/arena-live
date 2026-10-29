@@ -149,6 +149,33 @@ await check('Preparation restores dock positions, expanded panels, widths and ch
  await page.reload({waitUntil:'load'});await page.waitForFunction(()=>arenaLiveInitialized);await page.evaluate(()=>countdownsEnabled=false);
  assert.equal(await page.locator('#arenaDockRight>#arenaPanelPlayers').count(),1);assert.equal(await page.locator('#arenaPanelPlayers').evaluate(n=>n.open),true);assert.equal(await page.locator('#arenaChatTabLocal').getAttribute('aria-selected'),'true');assert.equal(await page.evaluate(()=>arenaWorkspace.layouts.preparation.leftWidth),300);
 });
+await check('Dual mobile preview fits both complete streams between chat and tests at 1404x1056',async()=>{
+ await page.setViewportSize({width:1404,height:1056});
+ await page.evaluate(()=>setMonitorFocus('dual'));
+ await page.waitForTimeout(160);
+ const frame=await page.evaluate(()=>{
+  const r=id=>document.getElementById(id).getBoundingClientRect();
+  const stage=r('broadcastStageSection'),horizontal=r('viewport16x9'),vertical=r('viewport9x16');
+  const chat=r('arenaDockLeft'),tools=r('arenaDockRight');
+  return {stage:{left:stage.left,right:stage.right,top:stage.top,bottom:stage.bottom},
+   horizontal:{left:horizontal.left,right:horizontal.right,top:horizontal.top,bottom:horizontal.bottom,width:horizontal.width,height:horizontal.height},
+   vertical:{left:vertical.left,right:vertical.right,top:vertical.top,bottom:vertical.bottom,width:vertical.width,height:vertical.height},
+   chatRight:chat.right,toolsLeft:tools.left,stacked:document.getElementById('dualMonitorsGrid').classList.contains('mobile-dual-stacked')};
+ });
+ const f=frame,h=f.horizontal,v=f.vertical,s=f.stage;
+ assert.equal(f.stacked,true,JSON.stringify(f));
+ for(const stream of [h,v]){
+  assert.ok(stream.left>=s.left-2 && stream.right<=s.right+2,JSON.stringify(f));
+  assert.ok(stream.top>=s.top-2 && stream.bottom<=s.bottom+2,JSON.stringify(f));
+ }
+ assert.ok(s.left>=f.chatRight-2 && s.right<=f.toolsLeft+2,JSON.stringify(f));
+ assert.ok(h.bottom<=v.top+2,JSON.stringify(f));
+ assert.ok(Math.abs(h.width/h.height-16/9)<.02,JSON.stringify(f));
+ assert.ok(Math.abs(v.width/v.height-9/16)<.02,JSON.stringify(f));
+ await shot('dual-tall-center-with-panels');
+ await page.setViewportSize({width:1720,height:720});
+ await page.evaluate(()=>setMonitorFocus('16:9'));
+});
 await check('OBS calibration keeps the established key and applies exact saved values',async()=>{
  await page.locator('#arenaDualSettingsBtn').click();await settingsSection(2);
  await page.locator('#arenaObsVerticalOffset').evaluate(n=>{n.value='8';n.dispatchEvent(new Event('input',{bubbles:true}));n.dispatchEvent(new Event('change',{bubbles:true}));});
