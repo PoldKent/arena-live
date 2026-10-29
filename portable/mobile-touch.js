@@ -44,7 +44,9 @@ function arenaMobileSaveTestPrefs(){
 function arenaMobileApplyTestOpacity(){
     const drawer=document.getElementById('arenaPortableTestDrawer');
     if(!drawer)return;
-    drawer.style.setProperty('--arena-tests-opacity',String(1-arenaMobileTestState.transparency/100));
+    // Preserve full text/controls legibility; only the drawer backdrop fades.
+    drawer.style.setProperty('--arena-tests-opacity','1');
+    drawer.style.setProperty('--arena-tests-background-alpha',String(1-arenaMobileTestState.transparency/100));
     const input=document.getElementById('arenaPortableTestTransparency');
     if(input){input.value=String(arenaMobileTestState.transparency);input.setAttribute('aria-valuetext',arenaMobileTestState.transparency+'% de transparencia');}
     const label=document.getElementById('arenaPortableTransparencyValue');
