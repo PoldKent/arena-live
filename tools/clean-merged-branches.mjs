@@ -1,4 +1,5 @@
-// Retire only the known pre-v0.6 branches after their history is in origin/main.
+// Retire explicitly listed branches ONLY when their full commit history is in origin/main.
+// Divergent feature/fix/release branches are intentionally excluded to avoid losing work.
 // Uses the owner's existing Git authentication; never rewrites main or local files.
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -8,7 +9,11 @@ export const RETIRED_BRANCHES = Object.freeze([
   'analysis/class-balance-v05',
   'feature/performance-128-v05',
   'feature/tiktok-live-chat-mvp',
-  'preview/class-balance-v05'
+  'preview/class-balance-v05',
+  // Verified on 2026-10-29: these three remote heads are ancestors of main.
+  'fix/mobile-v0405-clean-rebuild',
+  'refactor/official-v0405-index-cleanup',
+  'restore/mobile-v037-contract'
 ]);
 const root = fileURLToPath(new URL('../', import.meta.url));
 export function cleanMergedBranches({ cwd = root, dryRun = false } = {}) {

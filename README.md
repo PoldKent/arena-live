@@ -1,20 +1,22 @@
-# Arena Live · v0.40
+# Arena Live · v0.40.6
 
-Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
+Juego para transmisiones con una única simulación y dos capturas sincronizadas, 16:9 y 9:16. El servidor local incluye el puente TikTok LIVE para **@polkent.live** y la versión móvil utiliza el mismo motor, sin bifurcaciones funcionales.
 
+## Versiones vigentes
 
-### Versión móvil autónoma v0.40.5
+- **Aplicación principal (PC y OBS):** `npm.cmd start` → `http://127.0.0.1:4173/`.
+- **Móvil autónomo actual:** [Arena Live v0.40.6](mobile-builds/Arena-Live-v0.40.6-movil.html), completo y sin conexión (menos de 500 KB). `npm.cmd run build:mobile` genera `dist/Arena-Live-v0.40.6-movil.html`.
+- **Regresión inmediata:** [v0.40.5](mobile-builds/Arena-Live-v0.40.5-movil.html). Se conservan [v0.36](mobile-builds/Arena-Live-v0.36.0-movil.html), [v0.37](mobile-builds/Arena-Live-v0.37.0-movil.html) y [v0.37 RC4](mobile-builds/Arena-Live-Mobile-v037-GAMEBOY-RC4.html) como referencias visuales, no como alternativas de desarrollo.
 
-El HTML completo v0.40.5 es autónomo y comprimido sin pérdida: máximo 500.000 bytes en disco, sin conexión al abrirlo. La descompresión local recupera el motor original y todas las herramientas.
+En **v0.40.6**, los golpes normales y los especiales aceptan apuntado frontal, arriba y abajo; el modo joystick admite hasta cinco contactos táctiles. Las indicaciones translúcidas de gestos solo aparecen en modo táctil sin joystick. Las cinco habilidades del Streamer, los controles en pantalla completa y el tamaño 9:16 permanecen integrados en `main`.
 
-La hoja `portable/mobile.css` fue reconstruida, eliminando los parches móviles acumulados. `#arenaMobileActionLayer` contiene los botones originales de Salto, Ataque y Poder; la antigua `#arenaHeaderActions` no se monta en la capa táctil. El escenario nunca pierde tamaño por controles o paneles. Joystick y habilidades flotan debajo del horizonte visual, pudiendo sobresalir del marco. El panel Streamer admite transparencia real de 0–100% sin desvanecer el texto. Los marcos 9:16–9:21 no afectan OBS ni el tamaño real del video.
+En PowerShell: `git switch main`, `git pull --ff-only origin main`, `npm.cmd ci`, `npm.cmd test`, `npm.cmd run build:mobile`, `npm.cmd start`.
 
-En PowerShell: `git pull --ff-only origin main`, `npm.cmd ci`, `npm.cmd test`, `npm.cmd run test:mobile`, `npm.cmd run build:mobile`. La exportación aparece en `dist/Arena-Live-v0.40.5-movil.html`.
+### Política de limpieza
 
+`main` es la única rama de desarrollo. Las exportaciones antiguas retiradas del árbol activo se conservan en el historial Git; los documentos en `docs/` permanecen como referencia histórica. Para retirar **solo ramas totalmente integradas**, ejecuta `npm.cmd run clean:branches -- --dry-run` y luego `npm.cmd run clean:branches`, desde `main` y con autorización Git para el remoto. El script conserva automáticamente cualquier rama con commits exclusivos.
 
-El archivo oficial `mobile-builds/Arena-Live-v0.40.5-movil.html` es una exportación completa y sin conexión; reutiliza el mismo motor de combate de `main`, no una bifurcación. En Android: **Modo jugador** usa joystick y tres botones o gestos (Ajustes → Controles); **Modo Streamer** muestra las cinco habilidades de clase siempre visibles y abre las pruebas desde 🧪. La ventana de menú se cierra con **X**, **☰** nuevamente o **Atrás/Escape**, consumiendo primero submenús y herramientas sin cerrar la vista ampliada. El comportamiento de Atrás en fullscreen nativo también depende del navegador/Android.
-
-**Regla móvil v0.40.5:** el escenario nunca pierde tamaño por la presencia de joystick, acciones, cinco poderes o paneles. Los controles se superponen al juego; joystick y habilidades pueden sobresalir del marco 9:16. En Ajustes → Controles móviles → Pantalla completa está disponible la referencia automática/9:16/9:19.5/9:20/9:21; el motor y video reales mantienen 9:16 y la calibración OBS es independiente.\n\nEn Windows PowerShell: `npm.cmd ci`, `npm.cmd test`, `npm.cmd run build:mobile` y `npm.cmd start`; el servidor local se abre en `http://127.0.0.1:4173`. El comando de compilación genera también `dist/Arena-Live-v0.40.5-movil.html`.
+## Arquitectura y cambios históricos
 
 ### Versión oficial para PC · código reorganizado
 
@@ -76,7 +78,7 @@ Las capturas **Full HD 16:9 y 9:16** seleccionan automáticamente la ruta de dib
 
 ## Probar en un celular con un solo archivo
 
-Descarga la [exportación móvil oficial v0.40 del juego completo](mobile-builds/Arena-Live-v0.40.2-movil.html) (en GitHub usa **Download raw file**) o ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.40.2-movil.html`. Copia ese HTML al teléfono y ábrelo desde Chrome o un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
+Descarga la [exportación móvil oficial v0.40.6](mobile-builds/Arena-Live-v0.40.6-movil.html) (en GitHub usa **Download raw file**) o ejecuta **`npm.cmd run build:mobile`** para generar `dist/Arena-Live-v0.40.6-movil.html`. Copia ese HTML al teléfono y ábrelo desde Chrome o un navegador que ejecute archivos HTML locales. No necesita npm, internet ni archivos adicionales en el celular. Incluye inicio rápido de 2 a 128 peleadores, Prota táctil, Ajustes, pruebas, comandos y radar de clases.
 
 La exportación usa el combate de `main`; comienza en 720p, dibujo a 30 FPS y calidad Rendimiento. Permite cambiar a 540p/1080p y 30/60 FPS. TikTok LIVE real sigue necesitando el servidor: este archivo ofrece pruebas locales. [Uso, optimizaciones y límites de la exportación móvil](docs/MOVIL-MONOLITICO.md).
 
@@ -135,7 +137,7 @@ npm.cmd ci
 npm.cmd start
 ```
 
-**`npm.cmd start` regenera automáticamente `dist/Arena-Live-v0.40.2-movil.html` desde el motor principal antes de iniciar el servidor**. No necesitas mantener otro juego ni compilarlo manualmente. Abre **http://127.0.0.1:4173/** para la aplicación principal con TikTok LIVE, OBS y el motor completo. Abre **http://127.0.0.1:4173/mobile** para ver en tu PC la interfaz móvil generada desde ese mismo motor (el módulo móvil simula interacciones: no conecta al LIVE). En Chrome puedes pulsar **F12 → Ctrl+Shift+M** para emular un celular. Conserva abierta la consola; TikTok comienza desconectado y solo se conecta cuando pulsas **📡 TikTok**.
+**`npm.cmd start` regenera automáticamente `dist/Arena-Live-v0.40.6-movil.html` desde el motor principal antes de iniciar el servidor**. No necesitas mantener otro juego ni compilarlo manualmente. Abre **http://127.0.0.1:4173/** para la aplicación principal con TikTok LIVE, OBS y el motor completo. Abre **http://127.0.0.1:4173/mobile** para ver en tu PC la interfaz móvil generada desde ese mismo motor (el módulo móvil simula interacciones: no conecta al LIVE). En Chrome puedes pulsar **F12 → Ctrl+Shift+M** para emular un celular. Conserva abierta la consola; TikTok comienza desconectado y solo se conecta cuando pulsas **📡 TikTok**.
 
 Para actualizar, detén el servidor con **Ctrl+C**, ejecuta `git pull --ff-only origin main`, `npm.cmd ci` y `npm.cmd start` desde `main`. Detente si falla algún paso. Conserva los cambios locales antes de descargar si Git los señala. Recarga con **Ctrl+F5** y comprueba **v0.40 en el pie de Ajustes**.
 
