@@ -94,7 +94,7 @@ function arenaPortableResolution(value) {
 }
 function arenaPortableClose() {
     const dialog=document.getElementById('arenaPortableSetup');if(!dialog)return;
-    dialog.hidden=true;arenaPortableSetupOpen=false;isGamePaused=arenaPortablePreviousPause;
+    dialog.hidden=true;arenaPortableSetupOpen=false;document.documentElement.classList.remove('arena-mobile-setup-open');isGamePaused=arenaPortablePreviousPause;
     previousFrameTime=null;simulationAccumulator=0;arenaLastRenderTime=null;
     updateTouchControlsVisibility();document.getElementById('arenaMobileMoreBtn')?.focus({preventScroll:true});refreshArenaPortableFloatingUI();
 }
@@ -115,7 +115,7 @@ function arenaPortableOpen() {
     document.getElementById('arenaPortableNotice').hidden=hideNotice;
     document.getElementById('arenaPortableDontShow').checked=hideNotice;
     arenaPortablePreviousPause=isGamePaused;
-    dialog.hidden=false;arenaPortableSetupOpen=true;isGamePaused=true;
+    dialog.hidden=false;arenaPortableSetupOpen=true;document.documentElement.classList.add('arena-mobile-setup-open');isGamePaused=true;
     document.dispatchEvent(new Event('arena-touch-disable'));updateTouchControlsVisibility();
     document.getElementById('arenaPortableCount').focus({preventScroll:true});
 }
@@ -378,7 +378,7 @@ function arenaPortableReady() {
         if(typeof arenaMobileMountTestDrawer==='function')arenaMobileMountTestDrawer();
         if(typeof arenaMobileApplyLayout==='function')requestAnimationFrame(arenaMobileApplyLayout);
         const setup=document.getElementById('arenaPortableSetup');
-        if(setup)(fullscreen?view:document.body).appendChild(setup);
+        if(setup)(fullscreen?card:document.body).appendChild(setup);
         refreshArenaPortableFloatingUI();
         requestAnimationFrame(arenaPortableFitMobileStage);
     }
