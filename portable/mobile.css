@@ -643,3 +643,22 @@ html.arena-mobile-offline.arena-mobile-setup-open #arenaMobileFloating{visibilit
 @media(max-width:380px){html.arena-mobile-offline #arenaMobileFloating button:not([hidden]){width:34px!important;height:34px!important}html.arena-mobile-offline #arenaMobileFloating{height:44px!important;gap:2px!important}html.arena-mobile-offline #arenaTopBarInner .arena-brand-block{max-width:36%!important}}
 
 html.arena-mobile-offline #arenaOperatorPopover.hidden,html.arena-mobile-offline #arenaOperatorPopover[hidden]{display:none!important}
+
+/* v0.40.6: unobtrusive, transparent legend exclusively for button-free touch mode. */
+html.arena-mobile-offline #arenaMobileGestureGuide{display:none!important;pointer-events:none!important}
+html.arena-mobile-offline[data-mobile-mode="player"][data-mobile-touch-mode="touch"]:not(.arena-mobile-setup-open):not(.arena-mobile-overlay-open) #arenaMobileGestureGuide{
+ display:flex!important;position:absolute!important;z-index:81!important;left:50%!important;bottom:clamp(118px,22%,210px)!important;
+ transform:translateX(-50%)!important;flex-wrap:wrap!important;justify-content:center!important;gap:4px 14px!important;
+ box-sizing:border-box!important;width:min(92%,370px)!important;max-width:calc(100% - 14px)!important;
+ padding:7px 11px!important;border-radius:14px!important;border:1px solid rgba(139,220,238,.16)!important;
+ color:rgba(223,248,255,.74)!important;background:rgba(3,22,35,.19)!important;
+ box-shadow:0 4px 18px rgba(0,0,0,.10)!important;backdrop-filter:blur(3px)!important;-webkit-backdrop-filter:blur(3px)!important;
+ text-align:center!important;font:500 clamp(9px,2.1vw,11px)/1.5 system-ui,sans-serif!important;
+ letter-spacing:.015em!important;text-shadow:0 1px 5px rgba(0,0,0,.55)!important;
+}
+html.arena-mobile-offline #arenaMobileGestureGuide .arena-mobile-gesture-side{display:inline!important;white-space:normal!important}
+html.arena-mobile-offline #arenaMobileGestureGuide strong{font-size:.93em!important;letter-spacing:.09em!important;color:rgba(119,238,244,.88)!important}
+html.arena-mobile-offline #arenaMobileGestureGuide i{font-style:normal!important;opacity:.38!important}
+@media(prefers-reduced-transparency:reduce){
+ html.arena-mobile-offline #arenaMobileGestureGuide{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+}
