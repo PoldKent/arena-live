@@ -2,11 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {readEngineSource} from './read-engine-source.mjs';
-import {unpackMobile} from '../tools/build-mobile.mjs';
+import {buildMobile,unpackMobile} from '../tools/build-mobile.mjs';
 const html=await readEngineSource();
 const mobile=await readFile(new URL('../portable/mobile.css',import.meta.url),'utf8');
-const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));
-const wrapped=await readFile(new URL('../mobile-builds/Arena-Live-v'+pkg.version+'-movil.html',import.meta.url),'utf8');
+// The official mobile export is generated from main; older releases remain historical.
+// Never require a previously committed copy of the new version to run the suite.
+const currentBuild=await buildMobile();
+const wrapped=await readFile(currentBuild.path,'utf8');
 const encoded=wrapped.match(/"([A-Za-z0-9+/=]{10000,})"/)?.[1];
 if(!encoded)throw Error('Missing complete portable game');
 const expanded=unpackMobile(encoded);
