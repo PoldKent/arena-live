@@ -1,5 +1,6 @@
-// Retire explicitly listed branches ONLY when their full commit history is in origin/main.
-// All listed heads were verified as ancestors of main after consolidation on 2026-10-29.
+// Retire the explicitly audited branches, retaining the only required branch: main.
+// Eleven heads are ancestors of main; the twelfth is an unused experiment whose
+// combat behaviors are superseded in main. Verify its exact SHA and main ancestry.
 // Uses the owner's existing Git authentication; never rewrites main or local files.
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -18,8 +19,14 @@ export const RETIRED_BRANCHES = Object.freeze([
   "release/arena-live-v040-full",
   "restore/mobile-v037-contract"
 ]);
+export const SUPERSEDED_EXPERIMENT = Object.freeze({
+  branch: "fix/free-reentry-melee-collision-vertical-ai",
+  sha: "ed16906342905d254a91fef4b5a7ab4b8d7cb6b5",
+  // This main commit contains the integrated NPC aim, basic clash and ground bounce.
+  mainContains: "e6225d13ec89a60f6091b6d4318c5f320d132786"
+});
 const root = fileURLToPath(new URL('../', import.meta.url));
-export function cleanMergedBranches({ cwd = root, dryRun = false } = {}) {
+export function cleanMergedBranches({ cwd = root, dryRun = false, superseded = SUPERSEDED_EXPERIMENT } = {}) {
   const git = (args, allowed = [0]) => {
     const r = spawnSync('git', args, { cwd, encoding: 'utf8', windowsHide: true });
     if (r.error) throw r.error;
@@ -36,6 +43,16 @@ export function cleanMergedBranches({ cwd = root, dryRun = false } = {}) {
     const retained = git(['merge-base','--is-ancestor',ref.output,main], [0,1]);
     if (retained.status !== 0) throw new Error(`La rama ${branch} contiene cambios fuera de main. No se ha eliminado ninguna rama.`);
     plan.push({ branch, sha: ref.output });
+  }
+  if (superseded) {
+    const { branch, sha, mainContains } = superseded;
+    const ref = git(['rev-parse','--verify',`refs/remotes/origin/${branch}`], [0,128]);
+    if (ref.status === 0) {
+      if (ref.output !== sha) throw new Error(`La rama ${branch} cambió desde la auditoría. No se ha eliminado ninguna rama.`);
+      if (git(['merge-base','--is-ancestor',mainContains,main], [0,1]).status !== 0)
+        throw new Error(`main ya no contiene la implementación que reemplaza ${branch}. No se ha eliminado ninguna rama.`);
+      plan.push({ branch, sha: ref.output });
+    }
   }
   if (plan.length && !dryRun) {
     // Atomic deletion and one lease per ref prevent deleting a branch that has
@@ -55,7 +72,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const result = cleanMergedBranches({ dryRun: process.argv.includes('--dry-run') });
     console.log(result.branches.length
       ? `${result.dryRun ? 'Ramas verificadas' : 'Ramas retiradas'}: ${result.branches.join(', ')}`
-      : 'Las ramas antiguas ya están retiradas.');
+      : 'Las ramas auditadas ya están retiradas.');
     console.log('main conserva el historial; los archivos locales se mantienen.');
   } catch (error) { console.error(error.message); process.exitCode = 1; }
 }
