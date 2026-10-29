@@ -416,7 +416,8 @@ function arenaMobileApplyLayout(){
     const bounds=shelf.getBoundingClientRect();
     // Keep each full hit-target visible on narrow devices, after rotation and
     // when the user increases button size. Percentages remain stored in settings.
-    const size=Math.max(56,Math.min(94,arenaMobileLayout.size));
+    const desiredSize=Math.max(56,Math.min(94,arenaMobileLayout.size));
+    const size=Math.min(desiredSize,Math.max(56,Math.floor(bounds.width*.24)));
     // The Gameboy controls require two staggered rows, not a 94px dock
     // with 70-94px circles. Match dock height to the chosen button size.
     const controlHeight=Math.max(144,Math.ceil(size*2.07));
@@ -427,7 +428,7 @@ function arenaMobileApplyLayout(){
         const btn=document.getElementById(id);if(!btn)continue;
         const radius=size/2+4;
         const x=Math.min(Math.max(radius,bounds.width*position[0]/100),Math.max(radius,bounds.width-radius));
-        const y=Math.min(Math.max(radius,bounds.height*position[1]/100),Math.max(radius,bounds.height-radius));
+        const y=Math.min(Math.max(radius,controlHeight*position[1]/100),Math.max(radius,controlHeight-radius));
         if(id==='arenaMobileMoreBtn')continue; // old layouts may still contain a floating menu position
         if(id==='touchJoystick'){analog?.style.setProperty('--mobile-joy-x',x+'px');analog?.style.setProperty('--mobile-joy-y',y+'px');}
         else {btn.style.setProperty('--mobile-x',x+'px');btn.style.setProperty('--mobile-y',y+'px');}
@@ -436,8 +437,9 @@ function arenaMobileApplyLayout(){
     }
     document.documentElement.classList.toggle('arena-mobile-edit-controls',arenaMobileEditing);
     const edit=document.getElementById('arenaMobileEditDone');if(edit)edit.hidden=!arenaMobileEditing;
-    const slider=document.getElementById('arenaMobileSize');if(slider)slider.value=String(size);
-    const text=document.getElementById('arenaMobileSizeValue');if(text)text.textContent=size+' px';
+    const slider=document.getElementById('arenaMobileSize');if(slider)slider.value=String(desiredSize);
+    const text=document.getElementById('arenaMobileSizeValue');
+    if(text)text.textContent=size===desiredSize?size+' px':size+' px (adaptado; preferencia '+desiredSize+' px)';
 }
 function arenaMobileEditButtons(on=true){
     if(on&&arenaPortableProfile.touchMode!=='joystick')return;
