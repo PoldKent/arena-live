@@ -1622,9 +1622,14 @@
         // ==================== 3. INPUT: KEYBOARD + TOUCH ====================
         // Keyboard and touch feed the same canonical key state and combat methods.
         const keys = { w: false, a: false, s: false, d: false, space: false, jumpPressed: false };
+        const arenaMobileContacts=window.ArenaMobileContacts||(window.ArenaMobileContacts=new Set());
+        function arenaMobileClaimContact(e){if(e.pointerType!=='touch'&&e.pointerType!=='pen')return true;if(arenaMobileContacts.has(e.pointerId))return true;if(arenaMobileContacts.size>=5)return false;arenaMobileContacts.add(e.pointerId);return true;}
+        function arenaMobileReleaseContact(e){if(e?.pointerId!=null)arenaMobileContacts.delete(e.pointerId);}
+        function arenaAttackAim(a){return a==='up'||a==='down'?a:'forward';}
+        function arenaKeyboardAttackAim(){return keys.w?'up':keys.s?'down':'forward';}
         // One deterministic special for each class, triggered by R or a sustained touch.
         // Both inputs call this same action; class selection remains in the lobby.
-        function triggerProtagonistSpecialAttack() {
+        function triggerProtagonistSpecialAttack(aim='forward') {
             if (!arenaClassPowersAllowed() || isGamePaused || isSettingsOpen || gameState !== 'COMBAT' || !streamerManualControl) return false;
             const protagonist = fighters.find(f => f.isStreamer && !f.eliminated);
             if (!protagonist || protagonist.castingSkill) return false;
@@ -1632,7 +1637,7 @@
             const command = classConfig?.powers?.[0];
             if (!command) return false;
             spawnFloatingText(protagonist.x, protagonist.y - 48, `${classConfig.icon} ${protagonistShortLabel()}: ${localizedChatCommand(command, currentLanguage)}`, '#ffbe0b', 14);
-            queueFighterSkillWindup(protagonist, command);
+            queueFighterSkillWindup(protagonist, command, 'operator', aim);
             return true;
         }
 
@@ -1663,8 +1668,8 @@
             if (!e.repeat && streamerManualControl && gameState === 'COMBAT') {
                 const streamer = fighters.find(f => f.isStreamer && !f.eliminated);
                 if (streamer) {
-                    if (k === 'e') performMeleeAttack(streamer);
-                    if (k === 'r') triggerProtagonistSpecialAttack();
+                    if (k === 'e') performMeleeAttack(streamer,arenaKeyboardAttackAim());
+                    if (k === 'r') triggerProtagonistSpecialAttack(arenaKeyboardAttackAim());
                 }
             }
         });
@@ -2855,8 +2860,9 @@
         /*************************************************************************
          * 5. SLOWER COMBAT MECHANICS, WIND-UP SKILLS & FINAL K.O. SLOW-MO
          *************************************************************************/
-        function performMeleeAttack(attacker) {
+        function performMeleeAttack(attacker,requestedAim='forward') {
             if (attacker.attackCooldown > 0 || attacker.castingSkill) return;
+            const aim=arenaAttackAim(requestedAim);attacker.lastAttackAim=aim;
 
             attacker.attackCooldown = attacker.berserkTimer > 0 ? 58 : (92 + arenaRandom() * 35);
             attacker.attackAnimTimer = 18;
@@ -2865,6 +2871,7 @@
                 const dx = other.x - attacker.x;
                 const dy = other.y - attacker.y;
                 const forward = activeMode === 'iso' || Math.sign(dx) === attacker.facing || Math.abs(dx) < 30;
+                if(aim==='up'||aim==='down'){const vertical=aim==='up'?-dy:dy;return vertical>attacker.radius*.6&&vertical<reach*1.65&&Math.abs(dx)<Math.max(36,reach*.85);}
                 return Math.hypot(dx, dy) <= reach && forward && Math.abs(dy) < 58;
             });
             if (!target) return;
@@ -2874,7 +2881,7 @@
             dmg *= getFighterAttackDamageMultiplier(attacker);
             if (isCrit) dmg *= 1.65;
             const damageAmount = Math.round(dmg);
-            applyDamage(target, damageAmount, attacker, isCrit, 'normal');
+            applyDamage(target, damageAmount, attacker, isCrit, 'normal',aim);
             attacker.energy = Math.min(100, attacker.energy + 14);
             playSound('hit');
         }
@@ -3174,17 +3181,23 @@
         }
         function announceArenaActionRejected(f,reason){const now=Date.now();if(f.lastActionFeedback===reason&&now-(f.lastActionFeedbackAt||0)<1000)return;f.lastActionFeedback=reason;f.lastActionFeedbackAt=now;appendChatMessage('@ArenaSystem',f.platformKey,'⏳ '+getFighterDisplayName(f)+' · '+arenaActionText(reason),'normal');}
         // Dramatic Skill Wind-up ("CARGANDO PODER...") before releasing attack
-        function queueFighterSkillWindup(fighter,command,origin='operator'){
+        function queueFighterSkillWindup(fighter,command,origin='operator',requestedAim='forward'){
             const cmd=getMatchedSkillCommand(command),validation=validateArenaSpecialAction(fighter,cmd,origin);
             if(!validation.allowed){if(fighter&&origin!=='ai')announceArenaActionRejected(fighter,validation.reason);return false;}
             const rule=getFighterSpecialRule(fighter),spent=Math.min(45,Math.max(0,fighter.energy));
             fighter.energy=Math.max(0,fighter.energy-spent);playSound('charge');
-            fighter.castingSkill={cmd,origin,timer:rule.windup,maxTimer:rule.windup,powerFactor:Math.max(.25,spent/45)};
+            fighter.castingSkill={cmd,origin,aim:arenaAttackAim(requestedAim),timer:rule.windup,maxTimer:rule.windup,powerFactor:Math.max(.25,spent/45)};
             fighter.aiSpecialCooldown=Math.max(fighter.aiSpecialCooldown,AI_SPECIAL_RULES.cooldownFrames);
             spawnFloatingText(fighter.x,fighter.y-48,'⚡ '+arenaActionText('charging')+' '+cmd.toUpperCase(),'#ffbe0b',16);
             return true;
         }
 
+        function arenaSpecialTargetInDirection(fighter,target,aim,range,width=85){
+            const dx=target.x-fighter.x,dy=target.y-fighter.y;
+            return aim==='forward'
+                ?dx*fighter.facing>-10&&Math.abs(dy)<=width&&Math.hypot(dx,dy)<=range
+                :(aim==='up'?-dy:dy)>10&&Math.abs(dx)<=width&&Math.hypot(dx,dy)<=range;
+        }
         // MODULE BLOCK G: COMBAT ACTIONS + DAMAGE + K.O. (future js/combat.js).
         function executeFighterSkill(fighter, cmd) {
             if (arenaRuntime.specialSource==='none' || !arenaClassPowersAllowed() || !fighter || fighter.eliminated || fighter.fallDrop > 0) return false;
@@ -3192,9 +3205,10 @@
             const requiredClass=SKILL_REQUIRED_CLASS[cmd];
             if(!requiredClass||fighter.archetypeKey!==requiredClass)return false;
             if (!getFighterSpecialRule(fighter)) return false;
+            const aim=arenaAttackAim(fighter.activeSpecialAim);
             // Observe the real release once, for AI, chat, tools and Prota alike.
             // Never route this history entry back through commands (which would execute it twice).
-            appendFighterCommand(fighter, cmd, 'special');
+            appendFighterCommand(fighter, cmd, 'special',aim);
             // Clear special-charge burst with class-colored particles. Both canvases render it.
             const specialColors = { kame:'#00e5ff', ninja:'#a855f7', trueno:'#facc15', titan:'#fb7185', esmeralda:'#4ade80' };
             const burstColor = specialColors[fighter.archetypeKey] || fighter.color;
@@ -3209,34 +3223,33 @@
             if (cmd === '!kame' || cmd === '!kamehameha') {
                 playSound('laser');
                 screenShake = 12;
-                const dir = fighter.facing;
+                const dir=fighter.facing,dirY=aim==='up'?-1:aim==='down'?1:0;
                 addActiveEffect({
                     type: 'kamehameha',
-                    x: fighter.x + dir * 20,
-                    y: fighter.y,
-                    dir: dir,
+                    x: fighter.x + (dirY?0:dir*20),
+                    y: fighter.y + dirY*20,
+                    dir:dir,dirY,
                     color: '#00f3ff',
                     timer: 36,
                     maxTimer: 36
                 });
                 spawnFloatingText(fighter.x, fighter.y - 44, `☄️ ${arenaPowerName('!kame')}`, '#00f3ff', 18, 'power');
 
-                getFighterSpecialTargets(fighter, target =>
-                    (dir === 1 ? target.x > fighter.x - 10 : target.x < fighter.x + 10)
-                    && Math.abs(target.y - fighter.y) < 75).forEach(target => {
-                    if (!canFighterAttack(fighter, target)) return;
-                    const inFront = dir === 1 ? target.x > fighter.x - 10 : target.x < fighter.x + 10;
-                    if (inFront && Math.abs(target.y - fighter.y) < 75) {
-                        // A K.O. can change mode and reposition survivors during this cast.
-                        applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 'special');
-                    }
+                getFighterSpecialTargets(fighter,target=>aim==='forward'
+                    ?(target.x-fighter.x)*dir>-10&&Math.abs(target.y-fighter.y)<75
+                    :arenaSpecialTargetInDirection(fighter,target,aim,720,75)).forEach(target=>{
+                    if(!canFighterAttack(fighter,target))return;
+                    if(aim==='forward'?(target.x-fighter.x)*dir>-10&&Math.abs(target.y-fighter.y)<75
+                        :arenaSpecialTargetInDirection(fighter,target,aim,720,75))
+                        applyDamage(target,getFighterSpecialRule(fighter).damage,fighter,true,'special',aim);
                 });
 
             } else if (cmd === '!rasen' || cmd === '!rasengan') {
                 playSound('laser');
                 screenShake = 10;
                 const dir = fighter.facing;
-                fighter.vx = dir * 13;
+                if(aim==='forward')fighter.vx=dir*13;
+                else{fighter.vx*=.35;fighter.vy=aim==='up'?-11:11;}
                 addActiveEffect({
                     type: 'rasengan',
                     fighterId: fighter.id,
@@ -3248,9 +3261,9 @@
                 spawnFloatingText(fighter.x, fighter.y - 44, `🌀 ${arenaPowerName('!rasen')}`, '#38bdf8', 18, 'power');
 
                 const target = findPreferredCombatTarget(fighter, other =>
-                    Math.hypot(other.x - fighter.x, other.y - fighter.y) < 170
-                    && Math.sign(other.x - fighter.x || dir) === dir);
-                if (target) applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 'special');
+                    Math.hypot(other.x-fighter.x,other.y-fighter.y)<170
+                    &&(aim==='forward'?Math.sign(other.x-fighter.x||dir)===dir:arenaSpecialTargetInDirection(fighter,other,aim,170,100)));
+                if (target) applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 'special',aim);
 
             } else if (cmd === '!trueno') {
                 playSound('thunder');
@@ -3260,8 +3273,9 @@
                 spawnFloatingText(fighter.x, fighter.y - 44, `⚡ ${arenaPowerName('!trueno')}`, '#c084fc', 18, 'power');
 
                 let struck = 0;
-                getFighterSpecialTargets(fighter, target =>
-                    Math.hypot(target.x - fighter.x, target.y - fighter.y) < 300).forEach(target => {
+                getFighterSpecialTargets(fighter,target=>
+                    Math.hypot(target.x-fighter.x,target.y-fighter.y)<300
+                    &&(aim==='forward'||arenaSpecialTargetInDirection(fighter,target,aim,300,165))).forEach(target=>{
                         struck++;
                         addActiveEffect({
                             type: 'lightning',
@@ -3270,13 +3284,13 @@
                             timer: 28,
                             maxTimer: 28
                         });
-                        applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 'special');
+                        applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 'special',aim);
                 });
                 if (struck === 0) {
                     addActiveEffect({
                         type: 'lightning',
-                        x: fighter.x + fighter.facing * 90,
-                        y: fighter.y,
+                        x: fighter.x + (aim==='forward'?fighter.facing*90:0),
+                        y: fighter.y + (aim==='up'?-90:aim==='down'?90:0),
                         timer: 28,
                         maxTimer: 28
                     });
@@ -3289,6 +3303,7 @@
                 const dir = fighter.facing;
                 const targets=getFighterSpecialTargets(fighter,other=>{
                     const dx=(other.x-fighter.x)*dir,dy=Math.abs(other.y-fighter.y);
+                    if(aim!=='forward')return arenaSpecialTargetInDirection(fighter,other,aim,340,135);
                     return activeMode==='iso'?Math.hypot(other.x-fighter.x,other.y-fighter.y)<300:dx>0&&dx<340&&dy<135;
                 });
                 let previous=fighter;
@@ -3296,22 +3311,23 @@
                     reserveParticleSlots(12);
                     for(let step=1;step<=12;step++){const t=step/12;spawnParticle(previous.x+(target.x-previous.x)*t,previous.y+(target.y-previous.y)*t,'#4ade80',3.2+arenaVisualRandom()*1.4,22,.05);}
                     addActiveEffect({type:'thornVine',x:target.x,y:target.y,color:'#4ade80',timer:28,maxTimer:28});
-                    applyDamage(target,getFighterSpecialRule(fighter).damage,fighter,true,'special');previous=target;
+                    applyDamage(target,getFighterSpecialRule(fighter).damage,fighter,true,'special',aim);previous=target;
                 }
-                if(!targets.length){reserveParticleSlots(8);for(let step=1;step<=8;step++)spawnParticle(fighter.x+dir*step*22,fighter.y-6,'#4ade80',2.8,18,.05);}
+                if(!targets.length){reserveParticleSlots(8);for(let step=1;step<=8;step++)spawnParticle(fighter.x+(aim==='forward'?dir*step*22:0),fighter.y-6+(aim==='up'?-step*22:aim==='down'?step*22:0),'#4ade80',2.8,18,.05);}
                 spawnFloatingText(fighter.x, fighter.y - 44, `🌿 ${arenaPowerName('!enred')}`, '#4ade80', 20, 'power');
 
             } else if (cmd === '!coloso' || cmd === '!golpecolosal') {
                 playSound('hit');
                 screenShake = Math.max(screenShake, 14);
                 addActiveEffect({ type: 'titanQuake', x: fighter.x, y: fighter.y + fighter.radius, color: '#f43f5e', timer: 25, maxTimer: 25 });
-                getFighterSpecialTargets(fighter, target =>
-                    Math.hypot(target.x - fighter.x, target.y - fighter.y) <= 135).forEach(target => {
+                getFighterSpecialTargets(fighter,target=>
+                    Math.hypot(target.x-fighter.x,target.y-fighter.y)<=135
+                    &&(aim==='forward'||arenaSpecialTargetInDirection(fighter,target,aim,135,105))).forEach(target=>{
                     if (!canFighterAttack(fighter, target)) return;
                     const distance = Math.hypot(target.x - fighter.x, target.y - fighter.y);
                     if (distance <= 135) {
                         target.vx += Math.sign(target.x - fighter.x || fighter.facing) * 16 * arenaCombatRules.knockback;
-                        applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 'special');
+                        applyDamage(target, getFighterSpecialRule(fighter).damage, fighter, true, 'special',aim);
                     }
                 });
                 reserveParticleSlots(22);
@@ -3321,7 +3337,7 @@
             }
         }
 
-        function applyDamage(target, amount, attacker, isCrit = false, attackType = 'normal') {
+        function applyDamage(target, amount, attacker, isCrit = false, attackType = 'normal',requestedAim='forward') {
             if(target.eliminated||gameState!=='COMBAT'||koSequenceActive)return;
             if(attackType==='special'&&arenaCombatRules.powerMode==='melee')return;
             if (attacker && !canFighterAttack(attacker, target)) return;
@@ -3329,6 +3345,7 @@
             if(attacker){target.lastAttacker=attacker;target.lastHitTick=arenaSimulationTick;target.lastHitLife=target.lifeSerial;}
             const damageBeforeHit = Math.max(0, Number(target.damageTaken) || 0);
             const special = attackType === 'special';
+            const attackAim=arenaAttackAim(requestedAim);
             const boostedAmount = special
                 ? Math.max(1, Math.round(amount * getFighterAttackDamageMultiplier(attacker, 'special') * (attacker?.activeSpecialFactor ?? 1)))
                 : amount;
@@ -3381,16 +3398,17 @@
                 target.knockbackTimer = Math.max(Number(target.knockbackTimer) || 0, knockbackFrames);
                 if (!target.isStreamer) target.edgeRecoveryPending = true;
 
-                if (activeMode === 'iso') {
-                    const angle = Math.atan2(target.y - (attacker ? attacker.y : WORLD_H * 0.5),
-                        target.x - (attacker ? attacker.x : WORLD_W * 0.5));
-                    target.vx = Math.cos(angle) * launchPower;
-                    target.vy = Math.sin(angle) * launchPower * 0.78;
-                    target.vz = Math.min(9, 4.5 + launchPower * 0.12)*arenaCombatRules.knockback;
-                } else {
-                    target.vx = dirX * launchPower;
-                    target.vy = -(special ? 14.5 : 9.2) * (1 + accumulatedRatio * 0.12)*arenaCombatRules.knockback;
-                    target.onGround = false;
+                if(activeMode==='iso'){
+                    const angle=Math.atan2(target.y-(attacker?attacker.y:WORLD_H*.5),target.x-(attacker?attacker.x:WORLD_W*.5));
+                    target.vx=attackAim==='forward'?Math.cos(angle)*launchPower:dirX*launchPower*.25;
+                    target.vy=attackAim==='forward'?Math.sin(angle)*launchPower*.78:(attackAim==='up'?-1:1)*launchPower*.88;
+                    target.vz=(attackAim==='forward'?Math.min(9,4.5+launchPower*.12):3.5)*arenaCombatRules.knockback;
+                }else{
+                    target.vx=dirX*launchPower*(attackAim==='forward'?1:.28);
+                    target.vy=attackAim==='forward'
+                        ?-(special?14.5:9.2)*(1+accumulatedRatio*.12)*arenaCombatRules.knockback
+                        :(attackAim==='up'?-1:1)*Math.min(26,launchPower*(special?1.1:1));
+                    target.onGround=false;
                 }
 
             }
@@ -3639,12 +3657,12 @@
                         );
                     }
                     if (f.castingSkill.timer <= 0) {
-                        const skillToFire = f.castingSkill.cmd;
-                        const powerFactor = f.castingSkill.powerFactor ?? 1;
-                        f.castingSkill = null;
-                        f.activeSpecialFactor = powerFactor;
-                        try { executeFighterSkill(f, skillToFire); }
-                        finally { f.activeSpecialFactor = 1; }
+                        const skillToFire=f.castingSkill.cmd;
+                        const powerFactor=f.castingSkill.powerFactor??1;
+                        const attackAim=f.castingSkill.aim||'forward';
+                        f.castingSkill=null;f.activeSpecialFactor=powerFactor;f.activeSpecialAim=attackAim;
+                        try{executeFighterSkill(f,skillToFire);}
+                        finally{f.activeSpecialFactor=1;f.activeSpecialAim='forward';}
                     }
                     if (activeMode !== 'iso') continue;
                 }
@@ -4566,9 +4584,10 @@
                 targetCtx.strokeStyle = f.berserkTimer > 0 ? '#ffbe0b' : '#ffffff';
                 targetCtx.lineWidth = 4;
                 targetCtx.beginPath();
-                const startAngle = f.facing === 1 ? -0.9 : Math.PI - 0.9;
-                const endAngle = f.facing === 1 ? 0.9 : Math.PI + 0.9;
-                targetCtx.arc(drawX + f.facing * 8, drawY, r * 1.65, startAngle, endAngle);
+                const aimAngle=f.lastAttackAim==='up'?-Math.PI/2:f.lastAttackAim==='down'?Math.PI/2:null;
+                const startAngle=aimAngle===null?(f.facing===1?-.9:Math.PI-.9):aimAngle-.9;
+                const endAngle=aimAngle===null?(f.facing===1?.9:Math.PI+.9):aimAngle+.9;
+                targetCtx.arc(drawX+(aimAngle===null?f.facing*8:0),drawY,r*1.65,startAngle,endAngle);
                 targetCtx.stroke();
             }
 
@@ -4661,7 +4680,8 @@
                 const progress = ef.timer / ef.maxTimer;
 
                 if (ef.type === 'kamehameha') {
-                    const endX = ef.dir === 1 ? Math.max(ef.x, bounds.right + 40) : Math.min(ef.x, bounds.left - 40);
+                    const endX=ef.dirY?ef.x:(ef.dir===1?Math.max(ef.x,bounds.right+40):Math.min(ef.x,bounds.left-40));
+                    const endY=ef.dirY?(ef.dirY<0?Math.min(ef.y,bounds.top-40):Math.max(ef.y,bounds.bottom+40)):ef.y;
                     const beamHeight = 36 * progress;
 
                     targetCtx.strokeStyle = 'rgba(0, 243, 255, 0.45)';
@@ -4669,14 +4689,14 @@
                     targetCtx.lineCap = 'round';
                     targetCtx.beginPath();
                     targetCtx.moveTo(ef.x, ef.y);
-                    targetCtx.lineTo(endX, ef.y);
+                    targetCtx.lineTo(endX, endY);
                     targetCtx.stroke();
 
                     targetCtx.strokeStyle = '#ffffff';
                     targetCtx.lineWidth = beamHeight * 0.65;
                     targetCtx.beginPath();
                     targetCtx.moveTo(ef.x, ef.y);
-                    targetCtx.lineTo(endX, ef.y);
+                    targetCtx.lineTo(endX, endY);
                     targetCtx.stroke();
 
                 } else if (ef.type === 'rasengan') {
@@ -5056,9 +5076,9 @@
             if (wasActive && !active) document.dispatchEvent(new Event('arena-touch-disable'));
         }
 
-        function arenaMobileMelee() {
+        function arenaMobileMelee(aim='forward') {
             if(isGamePaused||isSettingsOpen||gameState!=='COMBAT'||!streamerManualControl)return;
-            const protagonist=fighters.find(f=>f.isStreamer&&!f.eliminated);if(protagonist)performMeleeAttack(protagonist);
+            const protagonist=fighters.find(f=>f.isStreamer&&!f.eliminated);if(protagonist)performMeleeAttack(protagonist,aim);
         }
 
         function triggerManualJump() {
@@ -5085,7 +5105,8 @@
             // modes, vertical stick travel does NOT jump; jumping is a separate tap.
             let joystickPointerId = null;
             const setJoystickKeys = (nx, ny) => {
-                const deadzone = 0.32;
+                const deadzone=0.32;
+                window.ArenaMobileJoystickAim=ny<-.44?'up':ny>.44?'down':'forward';
                 keys.a = nx < -deadzone;
                 keys.d = nx > deadzone;
                 keys.s = ny > deadzone;
@@ -5108,7 +5129,8 @@
             };
             const releaseJoystick = event => {
                 if (joystickPointerId === null || (event && event.pointerId !== joystickPointerId)) return;
-                joystickPointerId = null;
+                arenaMobileReleaseContact({pointerId:joystickPointerId});
+                joystickPointerId=null;window.ArenaMobileJoystickAim='forward';
                 joystick.classList.remove('is-active');
                 knob.style.setProperty('--stick-x', '0px');
                 knob.style.setProperty('--stick-y', '0px');
@@ -5116,9 +5138,9 @@
             };
             joystick.addEventListener('pointerdown', event => {
                 if (event.pointerType === 'mouse' || isGamePaused || isSettingsOpen || gameState !== 'COMBAT' || !streamerManualControl || joystickPointerId !== null) return;
-                event.preventDefault();
-                event.stopPropagation();
-                joystickPointerId = event.pointerId;
+                if(!arenaMobileClaimContact(event))return;
+                event.preventDefault();event.stopPropagation();
+                joystickPointerId=event.pointerId;
                 joystick.classList.add('is-active');
                 try { joystick.setPointerCapture(event.pointerId); } catch (_e) { /* Optional on embedded browsers. */ }
                 moveJoystick(event);
@@ -5145,38 +5167,37 @@
                 if (gesture.holdTimer !== null) clearTimeout(gesture.holdTimer);
                 gesture.holdTimer = null;
             };
-            const resetGesture = () => {
-                clearHoldTimer();
-                gesture.pointerId = null;
+            const resetGesture=()=>{
+                clearHoldTimer();arenaMobileReleaseContact({pointerId:gesture.pointerId});
+                gesture.pointerId=null;gesture.aim='forward';
                 gesture.specialFired = false;
                 gesture.moved = false;
             };
             const onScreenPointerDown = event => {
                 if (event.pointerType === 'mouse' || !canAct() || gesture.pointerId !== null) return;
-                if (event.target instanceof Element && event.target.closest('#touchControlDock')) return;
-                event.preventDefault();
-                gesture.pointerId = event.pointerId;
+                if(event.target instanceof Element&&event.target.closest('#touchControlDock'))return;
+                if(!arenaMobileClaimContact(event))return;
+                event.preventDefault();gesture.pointerId=event.pointerId;
                 gesture.startX = gesture.x = event.clientX;
                 gesture.startY = gesture.y = event.clientY;
                 gesture.startedAt = performance.now();
-                gesture.specialFired = false;
-                gesture.moved = false;
+                gesture.specialFired=false;
+                gesture.moved=false;gesture.aim='forward';
                 try { event.currentTarget.setPointerCapture(event.pointerId); } catch (_e) { /* Optional in webviews. */ }
                 gesture.holdTimer = setTimeout(() => {
-                    if (gesture.pointerId !== event.pointerId || gesture.moved || !canAct()) return;
-                    gesture.holdTimer = null;
-                    gesture.specialFired = true; // consumes this touch; no jump on release
-                    if (triggerProtagonistSpecialAttack() && navigator.vibrate) navigator.vibrate(12);
+                    if(gesture.pointerId!==event.pointerId||(gesture.moved&&gesture.aim==='forward')||!canAct())return;
+                    gesture.holdTimer=null;gesture.specialFired=true;
+                    if(triggerProtagonistSpecialAttack(gesture.aim)&&navigator.vibrate)navigator.vibrate(12);
                 }, HOLD_MS);
             };
             const onScreenPointerMove = event => {
                 if (gesture.pointerId !== event.pointerId) return;
                 gesture.x = event.clientX;
                 gesture.y = event.clientY;
-                if (Math.hypot(gesture.x - gesture.startX, gesture.y - gesture.startY) > TAP_SLOP_PX) {
-                    gesture.moved = true;
-                    clearHoldTimer();
-                }
+                const dx=gesture.x-gesture.startX,dy=gesture.y-gesture.startY;
+                if(Math.abs(dy)>22&&Math.abs(dy)>Math.abs(dx)*1.25)gesture.aim=dy<0?'up':'down';
+                else if(Math.abs(dx)>22)gesture.aim='forward';
+                if(Math.hypot(dx,dy)>TAP_SLOP_PX){gesture.moved=true;if(gesture.aim==='forward'||Math.abs(dy)>120)clearHoldTimer();}
             };
             const finishScreenPointer = event => {
                 if (gesture.pointerId !== event.pointerId) return;
@@ -5186,19 +5207,19 @@
                 const dy = gesture.y - gesture.startY;
                 const elapsed = performance.now() - gesture.startedAt;
                 const specialFired = gesture.specialFired;
-                const moved = gesture.moved;
+                const moved=gesture.moved,aim=gesture.aim;
                 resetGesture();
-                if (!canAct() || specialFired) return;
+                if(!canAct()||specialFired)return;
                 // When a hold callback is delayed by a busy frame, still recognize it.
-                if (!moved && elapsed >= HOLD_MS) {
-                    if (triggerProtagonistSpecialAttack() && navigator.vibrate) navigator.vibrate(12);
-                } else if (Math.abs(dx) >= SWIPE_PX && Math.abs(dx) > Math.abs(dy) * 1.2) {
-                    const protagonist = fighters.find(f => f.isStreamer && !f.eliminated);
-                    if (protagonist) {
-                        protagonist.facing = dx > 0 ? 1 : -1;
-                        performMeleeAttack(protagonist);
+                if(elapsed>=HOLD_MS&&(!moved||aim!=='forward')){
+                    if(triggerProtagonistSpecialAttack(aim)&&navigator.vibrate)navigator.vibrate(12);
+                }else if(Math.hypot(dx,dy)>=SWIPE_PX&&elapsed<=500){
+                    const protagonist=fighters.find(f=>f.isStreamer&&!f.eliminated);
+                    if(protagonist){const swipeAim=Math.abs(dy)>Math.abs(dx)*1.2?(dy<0?'up':'down'):'forward';
+                        if(swipeAim==='forward'&&Math.abs(dx)>6)protagonist.facing=dx>0?1:-1;
+                        performMeleeAttack(protagonist,swipeAim);
                     }
-                } else if (Math.hypot(dx, dy) <= TAP_SLOP_PX && elapsed < HOLD_MS) {
+                }else if(Math.hypot(dx,dy)<=TAP_SLOP_PX&&elapsed<HOLD_MS){
                     triggerManualJump(); // no double-tap delay: responsive even for aerial recovery
                 }
             };
@@ -5219,7 +5240,7 @@
                     if (isTouchDevice() && canAct()) event.preventDefault();
                 });
             });
-            const stopTouch = () => { releaseJoystick(); resetGesture(); };
+            const stopTouch = () => { releaseJoystick();resetGesture();arenaMobileContacts.clear(); };
             document.addEventListener('arena-touch-disable', stopTouch);
             window.addEventListener('blur', stopTouch);
             document.addEventListener('visibilitychange', () => { if (document.hidden) stopTouch(); });
@@ -7494,7 +7515,7 @@
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.40.5',
+            version: '0.40.6',
             edition: 'tiktok',
             renderSpriteMode: arenaGpuSpritesEnabled ? 'hardware-candidate' : 'software-safe-vectors',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,
