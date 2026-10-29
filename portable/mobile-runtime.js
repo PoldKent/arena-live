@@ -168,38 +168,75 @@ function arenaPortableReport(message){
     if(toast){toast.textContent=message;toast.hidden=false;}
     const status=document.getElementById('arenaPortableFeedback');if(status)status.textContent=message;
 }
+/* Mobile fullscreen format is an outer presentation guide. Never resize or
+   crop the true 9:16 world; OBS calibration remains independent. */
+const ARENA_MOBILE_FRAME_FORMAT_KEY='arenaMobileFrameFormatV01';
+const ARENA_MOBILE_FRAME_FORMATS=Object.freeze(['auto','16','19.5','20','21']);
+let arenaMobileFrameFormat='auto';
+try{
+    const saved=localStorage.getItem(ARENA_MOBILE_FRAME_FORMAT_KEY);
+    if(ARENA_MOBILE_FRAME_FORMATS.includes(saved))arenaMobileFrameFormat=saved;
+}catch(_){}
+function arenaMobileSyncFrameGuide(){
+    const guide=document.getElementById('arenaMobileFrameGuide');
+    if(!guide)return;
+    const root=document.documentElement;
+    const fullscreen=!!document.fullscreenElement||arenaPortableTheater;
+    const display=fullscreen&&arenaPortableFrameGuideHost?.id==='card-9x16'&&arenaMobileFrameFormat!=='auto';
+    guide.hidden=!display;
+    root.dataset.mobileFrameFormat=arenaMobileFrameFormat;
+    guide.style.setProperty('--arena-mobile-frame-height',arenaMobileFrameFormat==='auto'?'16':arenaMobileFrameFormat);
+    if(display)guide.setAttribute('aria-label','Marco de referencia vertical 9:'+arenaMobileFrameFormat);
+    const choice=document.getElementById('arenaMobileFullscreenFormat');
+    if(choice&&choice.value!==arenaMobileFrameFormat)choice.value=arenaMobileFrameFormat;
+}
+let arenaPortableFrameGuideHost=null;
+function arenaMobileSetFullscreenFormat(format){
+    if(!ARENA_MOBILE_FRAME_FORMATS.includes(String(format)))return false;
+    arenaMobileFrameFormat=String(format);
+    try{localStorage.setItem(ARENA_MOBILE_FRAME_FORMAT_KEY,arenaMobileFrameFormat);}catch(_){}
+    arenaMobileSyncFrameGuide();
+    return true;
+}
+function arenaMobileInstallFrameGuide(){
+    const guide=document.createElement('div');
+    guide.id='arenaMobileFrameGuide';
+    guide.hidden=true;
+    guide.setAttribute('aria-hidden','true');
+    document.body.appendChild(guide);
+}
+
 function arenaPortableFitMobileStage(){
     const ratio=arenaPortableActiveRatio();
     const video=document.getElementById(ratio==='16:9'?'viewport16x9':'viewport9x16');
     const stage=document.getElementById('broadcastStageSection');
     const fullscreen=!!document.fullscreenElement||arenaPortableTheater;
-    const director=arenaPortableProfile.mode===ARENA_MOBILE_MODES.DIRECTOR;
-    const controlsVisible=director||arenaPortableProfile.touchMode==='joystick';
-    const viewHeight=Math.max(1,Math.min(window.innerHeight,window.visualViewport?.height||window.innerHeight));
-    const top=fullscreen?Math.max(56,56+(window.visualViewport?.offsetTop||0)):Math.max(58,stage?.getBoundingClientRect().top||58);
     const root=document.documentElement;
-    const playerBand=Math.max(144,Number.parseFloat(root.style.getPropertyValue('--arena-mobile-player-shelf-height'))||145);
-    const band=controlsVisible?(director?78:playerBand):0;
-    // Calculate from the real visual viewport, not document/scroll height.
-    // This leaves a real control band below the 9:16 video on Android.
-    const usable=Math.max(80,Math.floor(viewHeight-top-band-14));
+    const viewportHeight=Math.max(1,Math.min(window.innerHeight,window.visualViewport?.height||window.innerHeight));
+    const top=fullscreen?56:Math.max(0,stage?.getBoundingClientRect().top||0);
+    // UI LAYOUT CONTRACT: only the physical header bounds the scene.
+    // Gameboy, Streamer abilities, panels, menus, and their sizes never subtract
+    // any height from the game. They may overlay or extend past its 9:16 frame.
+    const usable=Math.max(100,Math.floor(viewportHeight-top-(fullscreen?2:0)));
     const next=usable+'px';
     if(root.style.getPropertyValue('--arena-mobile-video-height')!==next)
         root.style.setProperty('--arena-mobile-video-height',next);
+    root.style.setProperty('--arena-mobile-reserved-bottom','0px');
     if(typeof arenaMobileKeepStreamerSkillsVisible==='function')arenaMobileKeepStreamerSkillsVisible();
     if(typeof arenaMobileApplyLayout==='function')arenaMobileApplyLayout();
-    if(video){
-        const rect=video.getBoundingClientRect();
-        const desired=rect.bottom+6;
-        const maxTop=Math.max(54,viewHeight-band-6);
-        const controlTop=Math.round(Math.max(54,Math.min(desired,maxTop)));
-        const nextTop=controlTop+'px';
-        if(root.style.getPropertyValue('--arena-mobile-controls-top')!==nextTop)
-            root.style.setProperty('--arena-mobile-controls-top',nextTop);
-    }
-    root.style.setProperty('--arena-mobile-reserved-bottom',Math.ceil(band+10)+'px');
+    const shelf=document.getElementById('arenaMobileControlShelf');
+    const shelfH=(arenaPortableProfile.mode===ARENA_MOBILE_MODES.DIRECTOR?74:
+        Math.max(144,Number.parseFloat(root.style.getPropertyValue('--arena-mobile-player-shelf-height'))||145));
+    // The shelf is a transparent overlay anchored to the *physical display*,
+    // not a reserve under the video. A large joystick can cross the video edge.
+    const topPx=Math.round(Math.max(0,viewportHeight-shelfH-5))+'px';
+    if(root.style.getPropertyValue('--arena-mobile-controls-top')!==topPx)
+        root.style.setProperty('--arena-mobile-controls-top',topPx);
+    if(shelf)shelf.setAttribute('data-overlay-only','true');
     if(typeof arenaMobilePositionTestDrawer==='function')arenaMobilePositionTestDrawer();
+    arenaMobileSyncFrameGuide();
 }
+
 function arenaPortableSetTheater(enabled){
     arenaPortableTheater=!!enabled;
     document.documentElement.classList.toggle('arena-mobile-theater',arenaPortableTheater);
@@ -276,7 +313,8 @@ function arenaMobileInstallBackAndMenuClose(){
     const menu=document.querySelector('#arenaOperatorPopover [data-operator-panel="mobile"]');
     if(menu&&!document.getElementById('arenaMobileMenuClose')){
         const button=document.createElement('button');
-        button.id='arenaMobileMenuClose';button.type='button';button.textContent='×';
+        button.id='arenaMobileMenuClose';button.type='button';
+        button.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" focusable="false"><path d="M5 5L19 19M19 5L5 19" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg>';
         button.title='Cerrar menú';button.setAttribute('aria-label','Cerrar menú');
         // Insert before the grid content so it remains visible at the top.
         (menu.querySelector('.arena-portable-menu-heading')||menu).appendChild(button);
@@ -419,6 +457,7 @@ function arenaPortableReady() {
     }
     installArenaPortableFloatingUI();
     arenaMobileInstallBackAndMenuClose();
+    arenaMobileInstallFrameGuide();
     const playerShelf=document.createElement('section');playerShelf.id='arenaMobileControlShelf';playerShelf.setAttribute('aria-label','Controles del juego y herramientas');
     document.getElementById('card-9x16')?.appendChild(playerShelf);
     const playerStatus=document.createElement('output');
@@ -465,6 +504,11 @@ function arenaPortableReady() {
             if(toolbar&&header)header.appendChild(toolbar);
             if(fullscreenBar){fullscreenBar.hidden=true;if(fullscreenBar.parentElement!==document.body)document.body.appendChild(fullscreenBar);}
         }
+        const frameGuide=document.getElementById('arenaMobileFrameGuide');
+        if(frameGuide){const guideHost=card||document.body;arenaPortableFrameGuideHost=guideHost;
+            if(frameGuide.parentElement!==guideHost)guideHost.appendChild(frameGuide);
+            arenaMobileSyncFrameGuide();
+        }
         if(menu)(fullscreen?card:document.body)?.appendChild(menu);
         if(guide)card?.appendChild(guide);
         const shelfHost=fullscreen?card:document.body;
@@ -506,5 +550,6 @@ function arenaPortableReady() {
     arenaPortableOpen();
 }
 window.addEventListener('load',arenaPortableReady,{once:true});
+window.ArenaMobileFrame=Object.freeze({set:arenaMobileSetFullscreenFormat,get:()=>arenaMobileFrameFormat});
 window.ArenaPortable=Object.freeze({build:ARENA_PORTABLE_BUILD,open:arenaPortableOpen,close:arenaPortableClose,start:arenaPortableStart,setMode:arenaPortableSetMode,setResolution:arenaPortableResolution,
     getProfile(){return Object.freeze({...arenaPortableProfile,fps:arenaRuntime.renderFps});}});
