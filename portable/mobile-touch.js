@@ -424,14 +424,40 @@ function arenaMobileApplyLayout(){
     const root=document.documentElement;
     root.style.setProperty('--arena-mobile-button-size',size+'px');
     root.style.setProperty('--arena-mobile-player-shelf-height',controlHeight+'px');
-    for(const [id,position]of Object.entries(arenaMobileLayout.points)){
-        const btn=document.getElementById(id);if(!btn)continue;
-        const radius=size/2+4;
+    const radius=size/2+4;
+    const points={};
+    for(const [id,position] of Object.entries(arenaMobileLayout.points)){
+        if(!['touchJoystick','arenaMobilePower','arenaMobileJump','arenaMobileAttack'].includes(id))continue;
         const x=Math.min(Math.max(radius,bounds.width*position[0]/100),Math.max(radius,bounds.width-radius));
-        const y=Math.min(Math.max(radius,controlHeight*position[1]/100),Math.max(radius,controlHeight-radius));
-        if(id==='arenaMobileMoreBtn')continue; // old layouts may still contain a floating menu position
-        if(id==='touchJoystick'){analog?.style.setProperty('--mobile-joy-x',x+'px');analog?.style.setProperty('--mobile-joy-y',y+'px');}
-        else {btn.style.setProperty('--mobile-x',x+'px');btn.style.setProperty('--mobile-y',y+'px');}
+        const y=id==='touchJoystick'
+            ?controlHeight*position[1]/100 // Joystick may extend beyond the arena frame.
+            :Math.min(Math.max(radius,controlHeight*position[1]/100),Math.max(radius,controlHeight-radius));
+        points[id]=[x,y];
+    }
+    const actions=['arenaMobilePower','arenaMobileJump','arenaMobileAttack'];
+    const collides=()=>actions.some((id,i)=>actions.slice(i+1).some(other=>
+        points[id]&&points[other]&&Math.hypot(points[id][0]-points[other][0],points[id][1]-points[other][1])<size+7));
+    if(collides()){
+        // A saved custom layout may have intersecting hitboxes. Keep the user's
+        // saved data, but show safe positions until it is moved again in Edit.
+        for(const id of actions){
+            const p=arenaMobileLayoutDefaults[id];
+            points[id]=[
+                Math.min(Math.max(radius,bounds.width*p[0]/100),Math.max(radius,bounds.width-radius)),
+                Math.min(Math.max(radius,controlHeight*p[1]/100),Math.max(radius,controlHeight-radius))
+            ];
+        }
+        root.dataset.mobileAutoSeparated='true';
+    }else delete root.dataset.mobileAutoSeparated;
+    for(const [id,[x,y]] of Object.entries(points)){
+        const btn=document.getElementById(id);if(!btn)continue;
+        if(id==='touchJoystick'){
+            analog?.style.setProperty('--mobile-joy-x',x+'px');
+            analog?.style.setProperty('--mobile-joy-y',y+'px');
+        }else {
+            btn.style.setProperty('--mobile-x',x+'px');
+            btn.style.setProperty('--mobile-y',y+'px');
+        }
         btn.setAttribute('data-mobile-positioned','true');
         btn.setAttribute('aria-description',arenaMobileEditing?'Desliza para colocar el botón':'Posición ajustable desde Ajustes');
     }
@@ -471,6 +497,14 @@ function arenaMobileInstallLayoutSettings(){
     const control=document.createElement('section');control.id='arenaMobileControlSettings';control.setAttribute('aria-label','Acomodar botones');
     control.innerHTML='<h3>📱 Modo jugador: controles</h3><fieldset id="arenaMobileTouchModeOptions"><legend>Elige cómo controlar al protagonista</legend><label><input type="radio" name="arenaMobileTouchMode" value="touch"> Táctil total — sin botones sobre el juego</label><label><input type="radio" name="arenaMobileTouchMode" value="joystick"> Joystick — analógico izquierdo y botones acomodables</label></fieldset><p id="arenaMobileTouchHelp">Elige un esquema de controles. Tus preferencias se guardan.</p><div id="arenaMobileArrangeSettings"><p>Mueve el analógico y los botones a posiciones cómodas. Guarda cada cambio para próximas partidas.</p><button type="button" id="arenaMobileArrange">✥ Acomodar analógico y botones</button><label for="arenaMobileSize">Tamaño de botones <output id="arenaMobileSizeValue">70 px</output></label><input id="arenaMobileSize" type="range" min="56" max="94" step="2" value="70"><button type="button" id="arenaMobileReset">↺ Restablecer posiciones</button><small>Salto: 1 toque. Doble salto: 2 toques rápidos en ↑. Mueve el analógico izquierdo para desplazarte.</small></div>';
     target.appendChild(control);
+    const format=document.createElement('section');
+    format.id='arenaMobileDisplaySettings';
+    format.setAttribute('aria-label','Formato de pantalla completa');
+    format.innerHTML='<h3>📐 Pantalla completa</h3><label for="arenaMobileFullscreenFormat">Marco vertical de presentación</label><select id="arenaMobileFullscreenFormat"><option value="auto">Automático · máximo tamaño</option><option value="16">9:16</option><option value="19.5">9:19.5</option><option value="20">9:20</option><option value="21">9:21</option></select><small>El marco es una referencia del formato del teléfono. El escenario real conserva 9:16 y siempre su máximo tamaño; los controles flotan encima y no lo reducen. Independiente de OBS.</small>';
+    target.appendChild(format);
+    const formatSelect=format.querySelector('select');
+    formatSelect.value=window.ArenaMobileFrame?.get?.()||'auto';
+    formatSelect.addEventListener('change',()=>window.ArenaMobileFrame?.set?.(formatSelect.value));
     // HUD transparency has one canonical control in Pantalla y HUD, shared
     // with desktop. Do not create or move a second opacity slider here.
     const note=document.createElement('small');
@@ -494,7 +528,7 @@ function arenaMobileSyncTouchMode(){
     document.documentElement.dataset.mobileTouchMode=mode;
     document.querySelectorAll('input[name="arenaMobileTouchMode"]').forEach(input=>input.checked=input.value===mode);
     const advanced=document.getElementById('arenaMobileArrangeSettings');if(advanced)advanced.hidden=mode!=='joystick';
-    const help=document.getElementById('arenaMobileTouchHelp');if(help)help.textContent=mode==='touch'?'Táctil total: dedo izquierdo para movimiento; con el derecho toca para saltar, dos toques para doble salto, desliza para golpear y mantén para el poder.':'Joystick: analógico a la izquierda y Salto, Golpe y Poder a la derecha, justo debajo del escenario. Puedes acomodarlos.';
+    const help=document.getElementById('arenaMobileTouchHelp');if(help)help.textContent=mode==='touch'?'Táctil total: dedo izquierdo para movimiento; con el derecho toca para saltar, dos toques para doble salto, desliza para golpear y mantén para el poder.':'Joystick: analógico a la izquierda y Salto, Golpe y Poder a la derecha, sobre el escenario o fuera de su marco sin reducirlo. Puedes acomodarlos.';
     if(typeof arenaMobileApplyLayout==='function')arenaMobileApplyLayout();
 }
 function arenaMobileInstallControlDragging(){
