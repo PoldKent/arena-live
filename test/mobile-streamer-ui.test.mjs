@@ -93,3 +93,9 @@ test('JavaScript modules have valid syntax',()=>{
     assert.doesNotThrow(()=>new Function(runtime));
     assert.doesNotThrow(()=>new Function(touch));
 });
+
+test('offline start button and form both cancel native navigation before starting',()=>{
+    assert.match(runtime,/arenaPortableStart'\)\.onclick=event=>\{event\.preventDefault\(\);startPortableSession\(\)/);
+    assert.match(runtime,/arenaPortableForm'\)\.onsubmit=event=>\{event\.preventDefault\(\);startPortableSession\(\)/);
+    assert.match(runtime,/const startPortableSession=\(\)=>arenaPortableStart/);
+});
