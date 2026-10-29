@@ -132,3 +132,15 @@ test('RC3 keeps one mobile toolbar row and isolates controls per mode',()=>{
   assert.match(runtime,/const shelfHost=fullscreen\?card:document\.body/);
   assert.match(runtime,/shelfHost\.appendChild\(playerShelf\)/);
 });
+
+test('RC4 isolates the new-match modal from controls and honors mode-exclusive powers',()=>{
+  assert.match(runtime,/document\.documentElement\.classList\.add\('arena-mobile-setup-open'\)/);
+  assert.match(runtime,/document\.documentElement\.classList\.remove\('arena-mobile-setup-open'\)/);
+  assert.match(runtime,/if\(setup\)\(fullscreen\?card:document\.body\)\.appendChild\(setup\)/);
+  assert.match(css,/MOBILE RESTORE RC4/);
+  assert.match(css,/arena-mobile-setup-open #arenaMobileControlShelf/);
+  assert.match(css,/arena-mobile-setup-open #arenaMobileFloating/);
+  assert.match(css,/not\(\[data-mobile-mode="director"\]\) #arenaStreamerSkillsDock/);
+  assert.match(css,/data-mobile-mode="player"\] #arenaMobileControlShelf #arenaHeaderActions\.arena-operator-toolbar/);
+  assert.match(css,/#card-9x16:fullscreen #viewport9x16/);
+});
