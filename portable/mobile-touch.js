@@ -32,7 +32,7 @@ const arenaMobileTestState={open:false,active:'arenaPanelPowers',position:null,t
 try {
     const saved=JSON.parse(localStorage.getItem(ARENA_MOBILE_TEST_PREFS_KEY)||'null');
     if(saved&&Number.isFinite(saved.transparency))
-        arenaMobileTestState.transparency=Math.min(75,Math.max(0,saved.transparency));
+        arenaMobileTestState.transparency=Math.min(100,Math.max(0,saved.transparency));
     if(saved?.position&&Number.isFinite(saved.position.x)&&Number.isFinite(saved.position.y))
         arenaMobileTestState.position={x:Math.min(1,Math.max(0,saved.position.x)),y:Math.min(1,Math.max(0,saved.position.y))};
 } catch (_) {}
@@ -115,7 +115,7 @@ function arenaMobileInstallTestDragging(drawer){
     head.addEventListener('pointercancel',finish);
     head.addEventListener('lostpointercapture',finish);
     drawer.querySelector('#arenaPortableTestTransparency').addEventListener('input',event=>{
-        arenaMobileTestState.transparency=Math.min(75,Math.max(0,Number(event.target.value)||0));
+        arenaMobileTestState.transparency=Math.min(100,Math.max(0,Number(event.target.value)||0));
         arenaMobileApplyTestOpacity();
         arenaMobileSaveTestPrefs();
     });
