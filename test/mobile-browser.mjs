@@ -400,6 +400,37 @@ try{
         await page.waitForFunction(()=>!document.fullscreenElement);
         assert.equal(await page.locator('#arenaPortableTestDrawer').evaluate(n=>n.parentElement===document.body),true);
     });
+    await check('16:9-only view hides 9:16 on the wide mobile HTML, and switching restores both',async()=>{
+        await page.setViewportSize({width:1856,height:824});
+        const cases=[
+          ['16:9',true,false],
+          ['9:16',false,true],
+          ['dual',true,true],
+          ['16:9',true,false]
+        ];
+        for(const [focus,show16,show9] of cases){
+            await page.evaluate(mode=>setMonitorFocus(mode),focus);
+            await page.waitForTimeout(80);
+            const result=await page.evaluate(()=>{
+                const grid=document.getElementById('dualMonitorsGrid');
+                const horizontal=document.getElementById('card-16x9');
+                const portrait=document.getElementById('card-9x16');
+                const visible=node=>getComputedStyle(node).display!=='none'&&node.getBoundingClientRect().width>0;
+                return {focus:grid.dataset.focus,horizontal:visible(horizontal),portrait:visible(portrait),
+                    horizontalHidden:horizontal.hidden,portraitHidden:portrait.hidden};
+            });
+            assert.equal(result.focus,focus,JSON.stringify(result));
+            assert.equal(result.horizontal,show16,JSON.stringify(result));
+            assert.equal(result.portrait,show9,JSON.stringify(result));
+            assert.equal(result.horizontalHidden,!show16,JSON.stringify(result));
+            assert.equal(result.portraitHidden,!show9,JSON.stringify(result));
+        }
+        if(output)await page.screenshot({path:join(output,'mobile-wide-only-16x9.png')});
+        await page.setViewportSize({width:390,height:844});
+        await page.evaluate(()=>setMonitorFocus('9:16'));
+        assert.equal(await page.locator('#card-16x9').isVisible(),false);
+        assert.equal(await page.locator('#card-9x16').isVisible(),true);
+    });
     await check('phone rotation keeps floating buttons and tests within the active capture',async()=>{
         await page.setViewportSize({width:844,height:390});
         await page.evaluate(()=>{setMonitorFocus('16:9');ArenaPortable.start({count:9,join:true});renderBothScreensSimultaneously();});
