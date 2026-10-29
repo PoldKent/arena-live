@@ -10,5 +10,5 @@ export async function readEngineSource(){
     ]);
     const marker='<script src="engine/arena-game.js?v=0.40"></script>';
     if(index.split(marker).length!==2)throw Error('Official classic-game entry changed');
-    return index.replace(marker,'<script>'+game+'</script>').replace(/\r\n?/g,'\n');
+    return index.replace(marker,()=>'<script>'+game+'</script>').replace(/\r\n?/g,'\n');
 }
