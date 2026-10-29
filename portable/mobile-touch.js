@@ -1,11 +1,26 @@
 // Touch-first controls and a movable test panel for the standalone phone edition.
 // Desktop/OBS retains its own controls; this adapter never changes combat rules.
 const ARENA_MOBILE_TAP_GAP=325;
-const ARENA_MOBILE_LAYOUT_KEY='arenaLiveMobileButtonsV1';
-const arenaMobileLayoutDefaults=Object.freeze({touchJoystick:[13,50],arenaMobilePower:[46,50],arenaMobileJump:[67,50],arenaMobileAttack:[89,50]});
+const ARENA_MOBILE_LAYOUT_KEY='arenaLiveMobileButtonsV2';
+const ARENA_MOBILE_LAYOUT_LEGACY_KEY='arenaLiveMobileButtonsV1';
+// Two-handed Gameboy layout: analog left, power/jump/attack on a staggered right cluster.
+const arenaMobileLayoutDefaults=Object.freeze({touchJoystick:[14,50],arenaMobilePower:[58,70],arenaMobileJump:[74,30],arenaMobileAttack:[88,70]});
+const arenaMobileLegacyDefaults={touchJoystick:[13,50],arenaMobilePower:[46,50],arenaMobileJump:[67,50],arenaMobileAttack:[89,50]};
 let arenaMobileLayout={size:70,points:Object.fromEntries(Object.entries(arenaMobileLayoutDefaults).map(([k,v])=>[k,[...v]]))};
 let arenaMobileEditing=false;
-try{const saved=JSON.parse(localStorage.getItem(ARENA_MOBILE_LAYOUT_KEY)||'null');if(saved&&Number.isFinite(saved.size))arenaMobileLayout.size=Math.max(56,Math.min(94,saved.size));for(const [id,p]of Object.entries(saved?.points||{})){if(Object.hasOwn(arenaMobileLayoutDefaults,id)&&Array.isArray(p)&&p.length===2&&p.every(Number.isFinite))arenaMobileLayout.points[id]=[Math.max(7,Math.min(93,p[0])),Math.max(8,Math.min(95,p[1]))];}}catch(_){}
+try{
+    const current=JSON.parse(localStorage.getItem(ARENA_MOBILE_LAYOUT_KEY)||'null');
+    const legacy=current?null:JSON.parse(localStorage.getItem(ARENA_MOBILE_LAYOUT_LEGACY_KEY)||'null');
+    // Old default positions were widely spaced and often clipped the buttons.
+    // Migrate ONLY user-customized coordinates; preserve their size preference.
+    const saved=current||legacy;
+    if(saved&&Number.isFinite(saved.size))arenaMobileLayout.size=Math.max(56,Math.min(94,saved.size));
+    for(const [id,p] of Object.entries(saved?.points||{})){
+        if(!Object.hasOwn(arenaMobileLayoutDefaults,id)||!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite))continue;
+        const isOldDefault=!current&&arenaMobileLegacyDefaults[id].every((n,i)=>Math.abs(n-p[i])<0.5);
+        if(!isOldDefault)arenaMobileLayout.points[id]=[Math.max(7,Math.min(93,p[0])),Math.max(8,Math.min(95,p[1]))];
+    }
+}catch(_){}
 const ARENA_MOBILE_HOLD_MS=460;
 const ARENA_MOBILE_SWIPE_PX=34;
 const arenaMobileTouchState={pointerId:null,startX:0,startY:0,x:0,y:0,tapCount:0,lastTapAt:0,lastTapX:0,lastTapY:0,jumpRetry:null};
@@ -466,7 +481,7 @@ function arenaMobileSyncTouchMode(){
     document.documentElement.dataset.mobileTouchMode=mode;
     document.querySelectorAll('input[name="arenaMobileTouchMode"]').forEach(input=>input.checked=input.value===mode);
     const advanced=document.getElementById('arenaMobileArrangeSettings');if(advanced)advanced.hidden=mode!=='joystick';
-    const help=document.getElementById('arenaMobileTouchHelp');if(help)help.textContent=mode==='touch'?'Táctil total: dedo izquierdo para movimiento; con el derecho toca para saltar, dos toques para doble salto, desliza para golpear y mantén para el poder.':'Joystick: mueve el analógico izquierdo y usa Salto, Golpe y Poder. Puedes acomodar los cuatro controles.';
+    const help=document.getElementById('arenaMobileTouchHelp');if(help)help.textContent=mode==='touch'?'Táctil total: dedo izquierdo para movimiento; con el derecho toca para saltar, dos toques para doble salto, desliza para golpear y mantén para el poder.':'Joystick: analógico a la izquierda y Salto, Golpe y Poder a la derecha, justo debajo del escenario. Puedes acomodarlos.';
     if(typeof arenaMobileApplyLayout==='function')arenaMobileApplyLayout();
 }
 function arenaMobileInstallControlDragging(){
