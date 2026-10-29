@@ -229,7 +229,14 @@ function arenaPortableFitMobileStage(){
         Math.max(144,Number.parseFloat(root.style.getPropertyValue('--arena-mobile-player-shelf-height'))||145));
     // The shelf is a transparent overlay anchored to the *physical display*,
     // not a reserve under the video. A large joystick can cross the video edge.
-    const topPx=Math.round(Math.max(0,viewportHeight-shelfH-5))+'px';
+    // Overlay controls live below the visual arena horizon, never in a
+    // reserved footer that would reduce the gameplay canvas.
+    const box=video?.getBoundingClientRect();
+    const fraction=arenaPortableProfile.mode===ARENA_MOBILE_MODES.DIRECTOR?.87:.73;
+    const candidate=box&&box.height>80
+        ?box.top+box.height*fraction
+        :viewportHeight-shelfH*.85;
+    const topPx=Math.round(Math.max(56,Math.min(viewportHeight-44,candidate)))+'px';
     if(root.style.getPropertyValue('--arena-mobile-controls-top')!==topPx)
         root.style.setProperty('--arena-mobile-controls-top',topPx);
     if(shelf)shelf.setAttribute('data-overlay-only','true');
@@ -524,7 +531,7 @@ function arenaPortableReady() {
         if(playerShelf&&shelfHost&&playerShelf.parentElement!==shelfHost)shelfHost.appendChild(playerShelf);
         // The compact tests panel is independent of the skill shelf. Mount it
         // on body in normal mode and inside the fullscreen card when necessary.
-        for(const id of ['arenaHeaderActions','touchControlDock','arenaStreamerSkillsDock']){const node=document.getElementById(id);if(node)playerShelf?.appendChild(node);}
+        for(const id of ['arenaMobileActionLayer','touchControlDock','arenaStreamerSkillsDock']){const node=document.getElementById(id);if(node)playerShelf?.appendChild(node);}
         if(typeof arenaMobileKeepStreamerSkillsVisible==='function')arenaMobileKeepStreamerSkillsVisible();
         if(typeof arenaMobileMountTestDrawer==='function')arenaMobileMountTestDrawer();
         if(typeof arenaMobileApplyLayout==='function')requestAnimationFrame(arenaMobileApplyLayout);
