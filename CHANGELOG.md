@@ -1,3 +1,12 @@
+## v0.40.7 — Choques, reingreso y rebote de suelo (2026-10-29)
+
+- Libre: entradas/reingresos ilimitados mientras la ronda está abierta, salvo el duelo 1vs1; las reglas de vidas y tiempo conservan sus restricciones.
+- El golpe básico usa 6 fotogramas de recarga (4 en berserk). NPCs orientan el ataque básico arriba o abajo para alcanzar blancos en vertical.
+- Básicos recíprocos en un mismo tick: choque, retroceso de ambos y cero daño entre ellos.
+- Golpe hacia abajo contra el suelo: rebote ascendente y lateral que daña y empuja como máximo a un rival próximo a izquierda y uno a derecha.
+- El especial mantiene la interacción preexistente: la carga puede interrumpirse con daño básico; el especial ya disparado aplica su impacto normal. El choque explícito básico/especial queda para decisión de diseño.
+- Un solo motor para escritorio, TikTok y exportación móvil. La exportación v0.40.7 se regenera con el build oficial.
+
 ## v0.40.6 — Golpes verticales y control móvil multitáctil (2026-10-29)
 - Golpes básicos y especiales hacia arriba/abajo con hitboxes y empuje direccional real, apuntado con analógico/WASD o con gestos verticales.
 - Joystick móvil: hasta cinco contactos independientes a la vez (analógico, tres botones y un gesto sobre el escenario), liberación por dedo o cancelación.

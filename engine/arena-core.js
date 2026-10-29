@@ -10,7 +10,7 @@
         Object.assign(f,{eliminated:false,permanentlyOut:false,hp:f.maxHp,energy,lastAttacker:null,
             lastHitTick:null,lastHitLife:null,castingSkill:null,activeSpecialFactor:1,recoveryJumpUsed:false,
             extraRecoveryUsed:false,edgeRecoveryPending:false,onGround:false,jumpsLeft:f.maxJumps||2,
-            attackCooldown:45,aiSpecialCooldown:100,lifeSerial:(f.lifeSerial||0)+1});
+            attackCooldown:6,aiSpecialCooldown:100,lifeSerial:(f.lifeSerial||0)+1});
         if(protection){f.shieldTimer=110;f.shieldHP=45;}
         if(round)Object.assign(f,{joinsUsed:1,blockedAttempts:0,kills:0,damageDealt:0,likesReceived:0});
         return f;

@@ -44,8 +44,8 @@
         });
         const PROTAGONIST_SHORT_LABELS = Object.freeze({ es: 'Prota', pt: 'Prota', it: 'Prota', en: 'MC', fr: 'MC', de: 'MC', ja: 'Shujinkou', zh: 'Zhujiao' });
         const UI_COPY = Object.freeze({
-            es: { join: 'Unirse como Prota', rejoin: 'Reingresar Prota', lobbyJoined: 'Prota inscrito', inArena: 'Prota en arena', available: 'Disponible en lobby', finalizing: 'Partida finalizando', joinTitle: 'Prota puede unirse desde el lobby o durante cualquier modo de combate.', ai: 'IA', manual: 'MANUAL', manualTitle: '🎮 Control manual de Prota', timerRemaining: 'Tiempo restante', timerUnlimited: 'Sin límite', joinStatus: 'Prota puede unirse desde el lobby o durante el combate, con cualquier regla.', specialAttack: 'ataque especial', specialAttackTitle: 'Ataque especial (R)' , "classShort": "Clase", "audio": "Audio", "playerTarget": "🎯 Jugador objetivo"},
-            en: { join: 'Join as MC', rejoin: 'Rejoin MC', lobbyJoined: 'MC joined', inArena: 'MC in arena', available: 'Available in lobby', finalizing: 'Match ending', joinTitle: 'MC can join from the lobby or during any combat mode.', ai: 'AI', manual: 'MANUAL', manualTitle: '🎮 MC manual controls', timerRemaining: 'Time remaining', timerUnlimited: 'No time limit', joinStatus: 'MC can join from the lobby or during combat under any rule.', specialAttack: 'special attack', specialAttackTitle: 'Special attack (R)' , "classShort": "Class", "audio": "Audio", "playerTarget": "🎯 Target Player"},
+            es: { join: 'Unirse como Prota', rejoin: 'Reingresar Prota', lobbyJoined: 'Prota inscrito', inArena: 'Prota en arena', available: 'Disponible en lobby', finalizing: 'Partida finalizando', joinTitle: 'Prota puede unirse en el lobby o durante Arena/Smash, excepto 1vs1.', ai: 'IA', manual: 'MANUAL', manualTitle: '🎮 Control manual de Prota', timerRemaining: 'Tiempo restante', timerUnlimited: 'Sin límite', joinStatus: 'Prota puede unirse con cualquier regla, excepto durante 1vs1.', specialAttack: 'ataque especial', specialAttackTitle: 'Ataque especial (R)' , "classShort": "Clase", "audio": "Audio", "playerTarget": "🎯 Jugador objetivo"},
+            en: { join: 'Join as MC', rejoin: 'Rejoin MC', lobbyJoined: 'MC joined', inArena: 'MC in arena', available: 'Available in lobby', finalizing: 'Match ending', joinTitle: 'MC can join in the lobby or during Arena/Smash, except 1v1.', ai: 'AI', manual: 'MANUAL', manualTitle: '🎮 MC manual controls', timerRemaining: 'Time remaining', timerUnlimited: 'No time limit', joinStatus: 'MC can join with any rule except during 1v1.', specialAttack: 'special attack', specialAttackTitle: 'Special attack (R)' , "classShort": "Class", "audio": "Audio", "playerTarget": "🎯 Target Player"},
             fr: { join: 'Rejoindre avec MC', rejoin: 'Réintégrer avec MC', lobbyJoined: 'MC inscrit', inArena: 'MC dans l’arène', available: 'Disponible au lobby', finalizing: 'Fin du match', joinTitle: 'MC peut rejoindre depuis le lobby ou pendant tout mode de combat.', ai: 'IA', manual: 'MANUEL', manualTitle: '🎮 Commandes manuelles MC', timerRemaining: 'Temps restant', timerUnlimited: 'Sans limite', joinStatus: 'MC peut rejoindre le lobby ou le combat, quelle que soit la règle.', specialAttack: 'attaque spéciale', specialAttackTitle: 'Attaque spéciale (R)' , "classShort": "Classe", "audio": "Audio", "playerTarget": "🎯 Joueur ciblé"},
             de: { join: 'Als MC beitreten', rejoin: 'MC erneut beitreten', lobbyJoined: 'MC angemeldet', inArena: 'MC in der Arena', available: 'In der Lobby verfügbar', finalizing: 'Match endet', joinTitle: 'MC kann in der Lobby oder in jedem Kampfmodus beitreten.', ai: 'KI', manual: 'MANUELL', manualTitle: '🎮 MC-Steuerung', timerRemaining: 'Verbleibende Zeit', timerUnlimited: 'Kein Zeitlimit', joinStatus: 'MC kann unabhängig von der Regel in der Lobby oder im Kampf beitreten.', specialAttack: 'Spezialangriff', specialAttackTitle: 'Spezialangriff (R)' , "classShort": "Klasse", "audio": "Audio", "playerTarget": "🎯 Zielspieler"},
             zh: { join: '加入 Zhujiao', rejoin: 'Zhujiao 重新加入', lobbyJoined: 'Zhujiao 已加入', inArena: 'Zhujiao 在竞技场', available: '大厅可加入', finalizing: '对局结束中', joinTitle: 'Zhujiao 可在大厅或任何战斗模式中加入。', ai: 'AI', manual: '手动', manualTitle: '🎮 Zhujiao 手动控制', timerRemaining: '剩余时间', timerUnlimited: '不限时', joinStatus: 'Zhujiao 可在大厅或战斗中加入，不受规则限制。', specialAttack: '特殊攻击', specialAttackTitle: '特殊攻击 (R)' , "classShort": "职业", "audio": "音频", "playerTarget": "🎯 目标玩家"},
@@ -1880,7 +1880,7 @@
                 this.knockbackTimer = 0;
 
                 // Timers & States
-                this.attackCooldown = 40 + arenaRandom() * 40;
+                this.attackCooldown = 3 + arenaRandom() * 3;
                 this.attackAnimTimer = 0;
                 this.hurtTimer = 0;
                 this.critBoostTimer = 0;
@@ -2165,12 +2165,17 @@
             return true;
         }
 
+        function arenaEntryLocked(isStreamer = false) {
+            return gameState === 'VICTORY' || koSequenceActive
+                || (gameState === 'COMBAT' && (activeMode === '1v1'
+                    || (rejoinRuleMode === 'timed' && matchTimeSeconds <= 0 && !isStreamer)));
+        }
+
         function addOrBoostFighter(username, platformKey = 'tiktok', isStreamer = false, preferredClassKey = null, silentBanner = false) {
             if (!isStreamer) username = normalizeChatUsername(username);
             platformKey = Object.prototype.hasOwnProperty.call(PLATFORMS, platformKey) ? platformKey : 'tiktok';
-            // A finished result cannot lose a bot or eliminated player to admission.
-            if (gameState === 'VICTORY' || koSequenceActive
-                || (gameState === 'COMBAT' && rejoinRuleMode === 'timed' && matchTimeSeconds <= 0 && !isStreamer)) {
+            // Duel admission is closed; outside it, only timed/lives rules restrict re-entry.
+            if (arenaEntryLocked(isStreamer)) {
                 if (isStreamer) updateStreamerJoinButton();
                 return null;
             }
@@ -2206,9 +2211,8 @@
                 profile = rememberViewerProfile(username, platformKey, preferredClassKey, !!preferredClassKey);
                 if (!preferredClassKey && profile?.archetypeKey) preferredClassKey = profile.archetypeKey;
             }
-            // Every gameplay and re-entry rule still admits Prota until the result locks.
-            // The final duel can be interrupted by a legal !jugar admission.
-            // Only an actual final K.O. or victory locks the roster.
+            // Free entry never consumes limited lives or expires on the match timer.
+            // All admission sources share this logic; the final 1v1 remains closed.
             // Identity is platform-scoped: the same handle on two platforms is a different profile.
             const identityPlatform = Object.prototype.hasOwnProperty.call(PLATFORMS, platformKey) ? platformKey : 'tiktok';
             const normalizedIdentity = String(username ?? '').trim().toLocaleLowerCase();
@@ -2258,7 +2262,7 @@
                     showDualBanner(`🔄 ¡${getFighterDisplayName(existing).toUpperCase()} RE-INGRESÓ A LA ARENA!`,
                         rejoinRuleMode === '3_lives'
                             ? `Vida ${existing.joinsUsed} de ${MAX_OPPORTUNITIES} ${existing.joinsUsed === MAX_OPPORTUNITIES ? '• ¡ÚLTIMA VIDA!' : ''}`
-                            : `Re-ingreso Ilimitado #${existing.joinsUsed} en modo Por Tiempo`);
+                            : `Reingreso ilimitado #${existing.joinsUsed} · ${rejoinRuleMode === 'free' ? 'Entrada libre' : 'Por tiempo'}`);
                 }
                 refreshArenaRosterUI();
                 return existing;
@@ -2521,6 +2525,7 @@
         function startCombatFromLobby() {
             arenaRoundRevision++;
             arenaRoundClockTicks=0;arenaAudienceQueue.length=0;arenaNextQueueTick=arenaSimulationTick;
+            pendingMeleeAttacks.length=0;
             trimArenaRosterToLimit();
             currentWinner=pendingArenaResult=arenaRoundResult=arenaVictoryActor=null;
             if (fighters.length < 2) {
@@ -2544,7 +2549,7 @@
 
             fighters.forEach((f, idx) => {
                 ArenaCore.resetLife(f,{round:true});
-                f.attackCooldown=45+arenaRandom()*45;
+                f.attackCooldown=3+arenaRandom()*3;
                 f.aiSpecialCooldown=150+arenaRandom()*90;
 
                 if (activeMode === '1v1' && fighters.length === 2) {
@@ -2872,30 +2877,107 @@
         /*************************************************************************
          * 5. SLOWER COMBAT MECHANICS, WIND-UP SKILLS & FINAL K.O. SLOW-MO
          *************************************************************************/
-        function performMeleeAttack(attacker,requestedAim='forward') {
-            if (attacker.attackCooldown > 0 || attacker.castingSkill) return;
+        // Resolve basic attack intents together, after physics, to detect
+        // reciprocal strikes on the same simulation step before applying damage.
+        const pendingMeleeAttacks=[];
+        function arenaChooseMeleeAim(attacker,target,reach){
+            const dx=target.x-attacker.x,dy=target.y-attacker.y;
+            return Math.abs(dx)<reach*.85&&Math.abs(dy)>attacker.radius*.6&&Math.abs(dy)<reach*1.65
+                ?(dy<0?'up':'down'):'forward';
+        }
+        function arenaGroundBounceTargets(attacker,primaryTarget,reach){
+            const floorY=WORLD_H*.79;
+            const groundImpact=activeMode==='iso'
+                ?attacker.z<=10&&attacker.fallDrop<=0
+                :attacker.x>=STAGE_LEFT&&attacker.x<=STAGE_RIGHT
+                    &&floorY-(attacker.y+attacker.radius)>=-12
+                    &&floorY-(attacker.y+attacker.radius)<=reach;
+            if(!groundImpact)return [];
+            const closest=[null,null],distance=[Infinity,Infinity];
+            for(const other of fighters){
+                if(other===primaryTarget||!canFighterAttack(attacker,other))continue;
+                const dx=other.x-attacker.x,side=dx<0?0:1;
+                if(Math.abs(dx)<attacker.radius*.7||Math.abs(dx)>reach*3.1)continue;
+                const grounded=activeMode==='iso'
+                    ?other.z<=10&&Math.abs(other.y-attacker.y)<=reach
+                    :(other.onGround||Math.abs(other.y+other.radius-floorY)<=10)
+                        &&Math.abs(other.y+other.radius-floorY)<=14;
+                if(grounded&&Math.abs(dx)<distance[side]){
+                    closest[side]=other;distance[side]=Math.abs(dx);
+                }
+            }
+            return closest.filter(Boolean);
+        }
+        function performMeleeAttack(attacker,requestedAim='forward'){
+            if(!attacker||attacker.eliminated||attacker.fallDrop>0||gameState!=='COMBAT'
+                ||koSequenceActive||attacker.attackCooldown>0||attacker.castingSkill)return false;
             const aim=arenaAttackAim(requestedAim);attacker.lastAttackAim=aim;
-
-            attacker.attackCooldown = attacker.berserkTimer > 0 ? 58 : (92 + arenaRandom() * 35);
-            attacker.attackAnimTimer = 18;
-            const reach = (attacker.radius * 2.75) * (attacker.berserkTimer > 0 ? 1.25 : 1);
-            const target = findPreferredCombatTarget(attacker, other => {
-                const dx = other.x - attacker.x;
-                const dy = other.y - attacker.y;
-                const forward = activeMode === 'iso' || Math.sign(dx) === attacker.facing || Math.abs(dx) < 30;
-                if(aim==='up'||aim==='down'){const vertical=aim==='up'?-dy:dy;return vertical>attacker.radius*.6&&vertical<reach*1.65&&Math.abs(dx)<Math.max(36,reach*.85);}
-                return Math.hypot(dx, dy) <= reach && forward && Math.abs(dy) < 58;
+            attacker.attackCooldown=attacker.berserkTimer>0?4:6;
+            attacker.attackAnimTimer=8;
+            const reach=(attacker.radius*2.75)*(attacker.berserkTimer>0?1.25:1);
+            const target=findPreferredCombatTarget(attacker,other=>{
+                const dx=other.x-attacker.x,dy=other.y-attacker.y;
+                const forward=activeMode==='iso'||Math.sign(dx)===attacker.facing||Math.abs(dx)<30;
+                if(aim==='up'||aim==='down'){
+                    const vertical=aim==='up'?-dy:dy;
+                    return vertical>attacker.radius*.6&&vertical<reach*1.65
+                        &&Math.abs(dx)<Math.max(36,reach*.85);
+                }
+                return Math.hypot(dx,dy)<=reach&&forward&&Math.abs(dy)<58;
             });
-            if (!target) return;
-
-            const isCrit = arenaRandom() < (attacker.critChance + (attacker.critBoostTimer > 0 ? 0.35 : 0));
-            let dmg = attacker.baseDamage * (attacker.berserkTimer > 0 ? 1.6 : 1);
-            dmg *= getFighterAttackDamageMultiplier(attacker);
-            if (isCrit) dmg *= 1.65;
-            const damageAmount = Math.round(dmg);
-            applyDamage(target, damageAmount, attacker, isCrit, 'normal',aim);
-            attacker.energy = Math.min(100, attacker.energy + 14);
-            playSound('hit');
+            const hits=target?[{target,aim}]:[];
+            if(aim==='down'){
+                const bounce=arenaGroundBounceTargets(attacker,target,reach);
+                for(const other of bounce)hits.push({target:other,aim:'groundBounce'});
+                if(bounce.length)addActiveEffect({type:'doubleJump',x:attacker.x,
+                    y:activeMode==='iso'?attacker.y:WORLD_H*.79,color:attacker.color,timer:12,maxTimer:12});
+            }
+            if(!hits.length)return false;
+            const isCrit=arenaRandom()<(attacker.critChance+(attacker.critBoostTimer>0?.35:0));
+            let damage=attacker.baseDamage*(attacker.berserkTimer>0?1.6:1);
+            damage*=getFighterAttackDamageMultiplier(attacker);
+            if(isCrit)damage*=1.65;
+            pendingMeleeAttacks.push({attacker,hits,damage:Math.round(damage),isCrit});
+            return true;
+        }
+        function resolveMeleeAttacks(){
+            const attacks=pendingMeleeAttacks.splice(0);
+            if(!attacks.length||gameState!=='COMBAT'||koSequenceActive)return;
+            const byAttacker=new Map(attacks.map(attack=>[attack.attacker.id,attack]));
+            const cancelled=new Set(),clashes=new Set();
+            for(const attack of attacks){
+                for(const hit of attack.hits){
+                    const rival=byAttacker.get(hit.target.id);
+                    if(!rival||!rival.hits.some(other=>other.target===attack.attacker))continue;
+                    const ids=[String(attack.attacker.id),String(rival.attacker.id)].sort();
+                    const key=ids.join(':');
+                    if(clashes.has(key))continue;
+                    clashes.add(key);cancelled.add(attack);cancelled.add(rival);
+                    const a=attack.attacker,b=rival.attacker;
+                    const direction=a.x===b.x?(String(a.id)<String(b.id)?-1:1):(a.x<b.x?-1:1);
+                    const push=Math.max(4,ARENA_GROUND_JUMP_IMPULSE*.68*arenaCombatRules.knockback);
+                    a.vx=direction*push;b.vx=-direction*push;
+                    if(activeMode==='iso'){
+                        a.vz=Math.max(a.vz||0,3);b.vz=Math.max(b.vz||0,3);
+                    }else{
+                        a.vy=Math.min(a.vy,-4.5);b.vy=Math.min(b.vy,-4.5);
+                        a.onGround=b.onGround=false;
+                    }
+                    a.knockbackTimer=Math.max(a.knockbackTimer||0,10);
+                    b.knockbackTimer=Math.max(b.knockbackTimer||0,10);
+                    spawnFloatingText((a.x+b.x)/2,Math.min(a.y,b.y)-22,'⚔️ ¡CHOQUE!','#facc15',15);
+                    playSound('hit');
+                }
+            }
+            for(const attack of attacks){
+                if(cancelled.has(attack)||attack.attacker.eliminated)continue;
+                for(const {target,aim} of attack.hits){
+                    if(target.eliminated||!canFighterAttack(attack.attacker,target))continue;
+                    applyDamage(target,attack.damage,attack.attacker,attack.isCrit,'normal',aim);
+                    attack.attacker.energy=Math.min(100,attack.attacker.energy+14);
+                    playSound('hit');
+                }
+            }
         }
 
         // ==================== COMBAT RULES: BALANCE + LAUNCH ====================
@@ -3357,7 +3439,7 @@
             if(attacker){target.lastAttacker=attacker;target.lastHitTick=arenaSimulationTick;target.lastHitLife=target.lifeSerial;}
             const damageBeforeHit = Math.max(0, Number(target.damageTaken) || 0);
             const special = attackType === 'special';
-            const attackAim=requestedAim==='up'||requestedAim==='down'?requestedAim:'forward';
+            const attackAim=['up','down','groundBounce'].includes(requestedAim)?requestedAim:'forward';
             const boostedAmount = special
                 ? Math.max(1, Math.round(amount * getFighterAttackDamageMultiplier(attacker, 'special') * (attacker?.activeSpecialFactor ?? 1)))
                 : amount;
@@ -3412,13 +3494,17 @@
 
                 if(activeMode==='iso'){
                     const angle=Math.atan2(target.y-(attacker?attacker.y:WORLD_H*.5),target.x-(attacker?attacker.x:WORLD_W*.5));
-                    target.vx=attackAim==='forward'?Math.cos(angle)*launchPower:dirX*launchPower*.25;
-                    target.vy=attackAim==='forward'?Math.sin(angle)*launchPower*.78:(attackAim==='up'?-1:1)*launchPower*.88;
-                    target.vz=(attackAim==='forward'?Math.min(9,4.5+launchPower*.12):3.5)*arenaCombatRules.knockback;
+                    target.vx=attackAim==='forward'?Math.cos(angle)*launchPower
+                        :dirX*launchPower*(attackAim==='groundBounce'?.9:.25);
+                    target.vy=attackAim==='forward'?Math.sin(angle)*launchPower*.78
+                        :attackAim==='groundBounce'?-launchPower*.25:(attackAim==='up'?-1:1)*launchPower*.88;
+                    target.vz=(attackAim==='forward'?Math.min(9,4.5+launchPower*.12)
+                        :attackAim==='groundBounce'?Math.min(12,launchPower*.8):3.5)*arenaCombatRules.knockback;
                 }else{
-                    target.vx=dirX*launchPower*(attackAim==='forward'?1:.28);
+                    target.vx=dirX*launchPower*(attackAim==='forward'?1:attackAim==='groundBounce'?.9:.28);
                     target.vy=attackAim==='forward'
                         ?-(special?14.5:9.2)*(1+accumulatedRatio*.12)*arenaCombatRules.knockback
+                        :attackAim==='groundBounce'?-Math.min(24,launchPower*1.05)
                         :(attackAim==='up'?-1:1)*Math.min(26,launchPower*(special?1.1:1));
                     target.onGround=false;
                 }
@@ -3732,7 +3818,7 @@
                             f.walkCycle += 0.14 * dt;
                         } else {
                             // Don't pin the fighter in place while the attack cooldown is active.
-                            if (autoAttackEnabled) performMeleeAttack(f);
+                            if (autoAttackEnabled) performMeleeAttack(f,arenaChooseMeleeAim(f,target,f.radius*3.15));
                             if (dist > f.radius * 1.45) {
                                 f.vx += (dx / dist) * 0.08 * dt;
                                 f.vy += (dy / dist) * 0.06 * dt;
@@ -3818,7 +3904,7 @@
                                 f.walkCycle += 0.14 * dt;
                             } else {
                                 f.vx *= Math.pow(0.8, dt);
-                                if (autoAttackEnabled && Math.abs(dx) <= attackReach) performMeleeAttack(f);
+                                if (autoAttackEnabled && Math.abs(dx) <= attackReach) performMeleeAttack(f,arenaChooseMeleeAim(f,target,attackReach));
                                 if (Math.abs(dx) > f.radius * 2.0 && !nearLeftEdge && !nearRightEdge) f.vx += Math.sign(dx) * 0.08 * dt;
                             }
 
@@ -3926,6 +4012,7 @@
                 }
             }
 
+            resolveMeleeAttacks();
             // Update Smart 9:16 Vertical Camera (Tracks Center of Mass & Bounding Spread of Active Fighters)
             updateSmartCamera9x16();
 
@@ -5375,7 +5462,7 @@
             const finalizing = koSequenceActive;
             const hasSlot=!!protagonist||fighters.length<getArenaPlayerLimit()||
                 fighters.some(f=>!f.isStreamer&&(f.eliminated||isBuiltInSpectatorBot(f.name)));
-            const allowed = gameState !== 'VICTORY' && !finalizing && !alive && hasSlot;
+            const allowed = !arenaEntryLocked(true) && !alive && hasSlot;
             button.disabled = !allowed;
             button.classList.toggle('opacity-50', !allowed);
             button.classList.toggle('cursor-not-allowed', !allowed);
@@ -7527,7 +7614,7 @@
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.40.6',
+            version: '0.40.7',
             edition: 'tiktok',
             renderSpriteMode: arenaGpuSpritesEnabled ? 'hardware-candidate' : 'software-safe-vectors',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,
@@ -7588,16 +7675,13 @@
             joinOnTap({ username = '', platformKey = 'tiktok' } = {}) {
                 if (!['LOBBY','COMBAT'].includes(gameState) || koSequenceActive || platformKey !== 'tiktok') return false;
                 if (typeof username !== 'string' || !/^@[a-zA-Z0-9_.-]{1,24}$/.test(username)) return false;
-                if (gameState === 'COMBAT' && rejoinRuleMode === 'timed' && matchTimeSeconds <= 0) return false;
+                if (arenaEntryLocked(false)) return false;
                 const identity = viewerIdentityKey(username, platformKey);
                 const existing = fighters.find(f => viewerIdentityKey(f.name, f.platformKey) === identity);
                 if (existing && !existing.eliminated) {
                     existing.joinedByTikTok = true; // A tap confirms even an already-active preset fighter.
                     return false;
                 }
-                if (existing && rejoinRuleMode === '3_lives'
-                    && (existing.permanentlyOut || existing.joinsUsed >= MAX_OPPORTUNITIES)) return false;
-                if (!existing && fighters.length >= getArenaPlayerLimit()) return false;
                 const joined=addOrBoostFighter(username, platformKey, false, null, true);
                 if(joined)joined.joinedByTikTok=true;
                 return !!joined;
