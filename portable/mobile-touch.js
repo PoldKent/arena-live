@@ -4,7 +4,8 @@ const ARENA_MOBILE_TAP_GAP=325;
 const ARENA_MOBILE_LAYOUT_KEY='arenaLiveMobileButtonsV2';
 const ARENA_MOBILE_LAYOUT_LEGACY_KEY='arenaLiveMobileButtonsV1';
 // Two-handed Gameboy layout: analog left, power/jump/attack on a staggered right cluster.
-const arenaMobileLayoutDefaults=Object.freeze({touchJoystick:[14,50],arenaMobilePower:[58,70],arenaMobileJump:[74,30],arenaMobileAttack:[88,70]});
+const arenaMobileLayoutDefaults=Object.freeze({touchJoystick:[15,50],arenaMobilePower:[60,74],arenaMobileJump:[75,22],arenaMobileAttack:[90,74]});
+const arenaMobileRC2Defaults={touchJoystick:[14,50],arenaMobilePower:[58,70],arenaMobileJump:[74,30],arenaMobileAttack:[88,70]};
 const arenaMobileLegacyDefaults={touchJoystick:[13,50],arenaMobilePower:[46,50],arenaMobileJump:[67,50],arenaMobileAttack:[89,50]};
 let arenaMobileLayout={size:70,points:Object.fromEntries(Object.entries(arenaMobileLayoutDefaults).map(([k,v])=>[k,[...v]]))};
 let arenaMobileEditing=false;
@@ -17,7 +18,8 @@ try{
     if(saved&&Number.isFinite(saved.size))arenaMobileLayout.size=Math.max(56,Math.min(94,saved.size));
     for(const [id,p] of Object.entries(saved?.points||{})){
         if(!Object.hasOwn(arenaMobileLayoutDefaults,id)||!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite))continue;
-        const isOldDefault=!current&&arenaMobileLegacyDefaults[id].every((n,i)=>Math.abs(n-p[i])<0.5);
+        const isOldDefault=(!current&&arenaMobileLegacyDefaults[id].every((n,i)=>Math.abs(n-p[i])<0.5))||
+            (!!current&&arenaMobileRC2Defaults[id].every((n,i)=>Math.abs(n-p[i])<0.5));
         if(!isOldDefault)arenaMobileLayout.points[id]=[Math.max(7,Math.min(93,p[0])),Math.max(8,Math.min(95,p[1]))];
     }
 }catch(_){}
@@ -413,7 +415,12 @@ function arenaMobileApplyLayout(){
     // Keep each full hit-target visible on narrow devices, after rotation and
     // when the user increases button size. Percentages remain stored in settings.
     const size=Math.max(56,Math.min(94,arenaMobileLayout.size));
-    document.documentElement.style.setProperty('--arena-mobile-button-size',size+'px');
+    // The Gameboy controls require two staggered rows, not a 94px dock
+    // with 70-94px circles. Match dock height to the chosen button size.
+    const controlHeight=Math.max(144,Math.ceil(size*2.07));
+    const root=document.documentElement;
+    root.style.setProperty('--arena-mobile-button-size',size+'px');
+    root.style.setProperty('--arena-mobile-player-shelf-height',controlHeight+'px');
     for(const [id,position]of Object.entries(arenaMobileLayout.points)){
         const btn=document.getElementById(id);if(!btn)continue;
         const radius=size/2+4;
