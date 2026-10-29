@@ -242,7 +242,7 @@ try{
         });
         assert.ok(result.afterOne<result.initial);assert.equal(result.doubleRequested,true);
     });
-    await check('RC2 Gameboy layout: analog left and action trio right immediately after video',async()=>{
+    await check('Gameboy overlay: analog and action trio are independent of maximal video',async()=>{
         await page.evaluate(()=>{ArenaPortable.setMode('player');ArenaMobileTouch.setTouchMode('joystick');ArenaMobileTouch.resetButtons();});
         await page.waitForTimeout(150);
         const r=await page.evaluate(()=>{
@@ -268,7 +268,8 @@ try{
         assert.ok(separation(r.power,r.jump)>=70,JSON.stringify(r));
         assert.ok(separation(r.attack,r.jump)>=70,JSON.stringify(r));
         assert.ok(separation(r.power,r.attack)>=70,JSON.stringify(r));
-        assert.ok(r.rail.top>=r.game.bottom-2,JSON.stringify(r));
+        // Controls deliberately overlap the game and never reserve vertical height.
+        assert.ok(r.rail.top<r.h&&r.rail.top>=0,JSON.stringify(r));
         assert.ok(r.rail.bottom<=r.h+2,JSON.stringify(r));
         assert.equal(r.hint,'none',JSON.stringify(r));
     });
@@ -410,7 +411,7 @@ try{
         });
         assert.equal(layout.powers.length,5,JSON.stringify(layout));
         assert.ok(layout.powers.every(b=>b.width>20&&b.top>=0&&b.bottom<=layout.viewportHeight+1),JSON.stringify(layout));
-        assert.ok(layout.videoBottom<=layout.railTop+2,JSON.stringify(layout));
+        assert.ok(layout.videoRatio>.54&&layout.videoRatio<.58,JSON.stringify(layout));
         assert.ok(layout.railBottom<=layout.viewportHeight+1,JSON.stringify(layout));
         assert.ok(Math.abs(layout.videoRatio-9/16)<.02,JSON.stringify(layout));
         await page.locator('#arenaMobileTestsShortcut').tap();
@@ -440,7 +441,8 @@ try{
         assert.equal(bounds.buttons.length,5);
         assert.ok(bounds.buttons.every(w=>w>=25),JSON.stringify(bounds));
         assert.ok(bounds.rail.bottom<=bounds.screen+1,JSON.stringify(bounds));
-        assert.ok(bounds.video.bottom<=bounds.rail.top+2,JSON.stringify(bounds));
+        assert.ok(bounds.video.top>=bounds.toolbar.bottom-2,JSON.stringify(bounds));
+        assert.ok(bounds.video.height>bounds.rail.height*3,JSON.stringify(bounds));
         assert.ok(bounds.toolbar.bottom<=bounds.video.top+2,JSON.stringify(bounds));
         assert.ok(Math.abs(bounds.video.width/bounds.video.height-9/16)<.02,JSON.stringify(bounds));
         await page.locator('#arenaMobileTestsShortcut').tap();
@@ -486,6 +488,41 @@ try{
         await page.locator('#arenaPortableFullscreen').tap();
         assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('arena-mobile-theater')),false);
         await page.evaluate(()=>delete document.fullscreenEnabled);
+    });
+    await check('RC6 mobile format selector changes guide without resizing 9:16 game',async()=>{
+        await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(false);});
+        await page.evaluate(()=>Object.defineProperty(document,'fullscreenEnabled',{value:false,configurable:true}));
+        await page.locator('#arenaPortableFullscreen').tap();
+        await page.waitForFunction(()=>document.documentElement.classList.contains('arena-mobile-theater'));
+        const initial=await page.locator('#viewport9x16').boundingBox();
+        const options=await page.locator('#arenaMobileFullscreenFormat').locator('option').evaluateAll(nodes=>nodes.map(n=>n.value));
+        assert.deepEqual(options,['auto','16','19.5','20','21']);
+        for(const ratio of ['16','19.5','20','21','auto']){
+            await page.locator('#arenaMobileFullscreenFormat').evaluate((select,v)=>{
+                select.value=v;select.dispatchEvent(new Event('change',{bubbles:true}));
+            },ratio);
+            const bounds=await page.locator('#viewport9x16').boundingBox();
+            assert.ok(Math.abs(bounds.width-initial.width)<1&&Math.abs(bounds.height-initial.height)<1,
+                JSON.stringify({ratio,initial,bounds}));
+            assert.equal(await page.locator('#arenaMobileFrameGuide').isVisible(),ratio!=='auto');
+        }
+        await page.locator('#arenaPortableFullscreen').tap();
+        await page.evaluate(()=>delete document.fullscreenEnabled);
+    });
+    await check('RC6 menu X centered, controls hidden, stage unchanged',async()=>{
+        await page.evaluate(()=>ArenaPortable.setMode('player'));
+        const baseline=await page.locator('#viewport9x16').boundingBox();
+        await page.locator('#arenaMobileMoreBtn').tap();
+        assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),true);
+        assert.equal(await page.locator('#arenaMobileControlShelf').isVisible(),false);
+        const x=await page.locator('#arenaMobileMenuClose').evaluate(n=>{
+            const b=n.getBoundingClientRect(),p=n.querySelector('svg').getBoundingClientRect();
+            return {dx:Math.abs((b.left+b.right-p.left-p.right)/2),dy:Math.abs((b.top+b.bottom-p.top-p.bottom)/2)};
+        });
+        assert.ok(x.dx<2&&x.dy<2,JSON.stringify(x));
+        await page.locator('#arenaMobileMenuClose').tap();
+        const after=await page.locator('#viewport9x16').boundingBox();
+        assert.ok(Math.abs(after.width-baseline.width)<1&&Math.abs(after.height-baseline.height)<1);
     });
     await check('native fullscreen keeps Streamer tests, menu and controls visible and the 9:16 centered',async()=>{
         await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(false);});
