@@ -145,7 +145,7 @@ test('Streamer power rail retains five colors and is independent of video frame'
   assert.match(css,/#arenaMobileControlShelf::before/);
   assert.match(css,/#arenaMobileControlShelf #arenaHeaderActions::before/);
   assert.match(css,/data-mobile-mode="director"\] #arenaMobileControlShelf #arenaStreamerSkillsDock/);
-  assert.match(css,/data-mobile-mode="director"\] #arenaStreamerSkillsDock \.arena-skill-buttons>button\[data-command-label\]/);
+  assert.match(css,/#arenaStreamerSkillsDock \\.arena-skill-buttons>button:nth-child\\(5\\)/);
   assert.match(css,/#arenaPortableTestBody/);
 });
 test('the Prota status is aligned to its video frame rather than physical screen edge',()=>{
