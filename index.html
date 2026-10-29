@@ -856,8 +856,10 @@ body.touch-controls-active #portraitChatOverlay {
     box-shadow: none !important;
 }
 #card-16x9:fullscreen::backdrop, #card-9x16:fullscreen::backdrop { background: #000; }
-#card-16x9:fullscreen > :not(#viewport16x9):not(#settingsPauseModal),
-#card-9x16:fullscreen > :not(#viewport9x16):not(#settingsPauseModal) { display: none !important; }
+/* In the standalone mobile edition, original buttons and tests live in the
+   fullscreen card; only the PC/OBS capture hides all non-video siblings. */
+html:not(.arena-mobile-offline) #card-16x9:fullscreen > :not(#viewport16x9):not(#settingsPauseModal),
+html:not(.arena-mobile-offline) #card-9x16:fullscreen > :not(#viewport9x16):not(#settingsPauseModal) { display: none !important; }
 #card-16x9:fullscreen #viewport16x9 {
     width: min(100vw, 177.777778dvh) !important;
     height: min(100dvh, 56.25vw) !important;
