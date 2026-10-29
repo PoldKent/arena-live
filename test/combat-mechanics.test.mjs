@@ -42,6 +42,8 @@ test('downward floor bounce hits one grounded opponent per side',()=>{
         fighters:[fighter,...targets],canFighterAttack:(a,b)=>a!==b&&!b.eliminated});
     vm.runInContext(sourceFunction('arenaGroundBounceTargets'),ctx);
     assert.deepEqual(Array.from(ctx.arenaGroundBounceTargets(fighter,null,50),x=>x.id),['L','R']);
+    assert.deepEqual(Array.from(ctx.arenaGroundBounceTargets(fighter,targets[0],50),x=>x.id),['R'],
+        'a direct grounded hit already uses the left-side damage slot');
     fighter.y=240;assert.equal(ctx.arenaGroundBounceTargets(fighter,null,50).length,0);
 });
 test('simultaneous mutual basics clash with no mutual damage and both recoil',()=>{

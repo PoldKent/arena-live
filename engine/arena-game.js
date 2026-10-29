@@ -2894,6 +2894,9 @@
                     &&floorY-(attacker.y+attacker.radius)<=reach;
             if(!groundImpact)return [];
             const closest=[null,null],distance=[Infinity,Infinity];
+            // A direct downward victim already counts toward that side's one-hit cap.
+            if(primaryTarget&&Math.abs(primaryTarget.x-attacker.x)>=attacker.radius*.7)
+                distance[primaryTarget.x<attacker.x?0:1]=0;
             for(const other of fighters){
                 if(other===primaryTarget||!canFighterAttack(attacker,other))continue;
                 const dx=other.x-attacker.x,side=dx<0?0:1;
@@ -3665,7 +3668,7 @@
             }
             // Dodging a close opponent's visible swing is an optional tactical jump.
             if (fighter.onGround && nearby && Math.abs(dy) < 50 && Math.abs(dx) < 100
-                && target.attackAnimTimer > 9 && arenaRandom() < 0.045) {
+                && target.attackAnimTimer > 4 && arenaRandom() < 0.045) {
                 fighter.aiJumpCooldown = 60;
                 return performFighterJump(fighter, false, false);
             }
