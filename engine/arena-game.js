@@ -859,6 +859,7 @@
             refreshArenaCameraSettings();
             refreshArenaRuntimeControls();
             refreshArenaBalancePanel(true);
+            refreshArenaCombatRuleControls();
             syncChatDisclosureState();
             refreshArenaOperatorToolbar();
             document.querySelectorAll('#killFeed16 [data-original-notice], #killFeed9 [data-original-notice]').forEach(badge => {
