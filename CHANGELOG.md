@@ -1,5 +1,15 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-29 — Arena Live v0.40.5 · Reconstrucción móvil y archivo menor a 500 KB
+
+- Reconstrucción del CSS móvil: eliminados los parches históricos y el antiguo contenedor visual de controles. Los tres botones originales conservan sus funciones dentro de una capa independiente.
+- Escenario 9:16 siempre a tamaño máximo. Joystick, botones y cinco poderes Streamer flotan debajo del horizonte visual sin reducir ni recortar el juego.
+- Menú con X centrada, Atrás/Escape y doble ☰; Streamer con panel desplazable, clases intactas y transparencia de fondo real de 0–100%, manteniendo la legibilidad del texto.
+- Opción móvil de marco automático, 9:16, 9:19.5, 9:20 y 9:21 independiente de OBS.
+- HTML offline, compacto, íntegro, descomprimible en el navegador: `mobile-builds/Arena-Live-v0.40.5-movil.html` con límite estricto de 500.000 bytes.
+- Nuevas comprobaciones estáticas y de empaquetado; pendiente validación visual/táctil de la versión en Android.
+
+
 ## 2026-10-29 — Arena Live v0.40.4 · Escenario siempre máximo / controles flotantes
 
 - Revisión de las siete capturas Android posteriores a 0.40.3: no se reserva espacio inferior ni se reduce el escenario para joystick, botones, cinco poderes, panel de pruebas o menús. La arena 9:16 mantiene su escala máxima dentro de los límites reales de pantalla y barra superior; los controles son capas transparentes superpuestas y pueden sobresalir de su marco.
