@@ -1,5 +1,14 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-29 — Arena Live v0.40.5 · Refactorización de la versión oficial PC/OBS/TikTok
+
+- El HTML oficial `index.html` pasa de aproximadamente 755 KB a 174 KB, sin eliminar el juego: se extraen intactos sus ~581 KB de lógica clásica a `engine/arena-game.js` y se cargan en el mismo orden que antes.
+- El servidor local autoriza explícitamente la nueva ruta del motor, conservando su seguridad de origen local, la integración TikTok LIVE y el cliente puente; los estilos y capturas OBS no se modifican.
+- Los tests de código y equilibrio pueden reconstruir virtualmente la fuente monolítica original para verificar las reglas existentes; se agregan pruebas del límite de 500 KB, el orden de dependencias, los módulos, fullscreen y el paquete móvil.
+- Se conserva el generador de la versión móvil autónoma, que vuelve a incrustar el mismo motor para descomprimirlo localmente. Tanto el paquete móvil publicado como el HTML oficial mantienen la versión 0.40.5.
+- El HTML oficial depende del resto de archivos del proyecto y debe iniciarse desde el servidor local (`npm.cmd start`); no es un archivo HTML autónomo. Pendiente validación de navegador y conexión TikTok LIVE real.
+
+
 ## 2026-10-29 — Arena Live v0.40.5 · Reconstrucción móvil y archivo menor a 500 KB
 
 - Reconstrucción del CSS móvil: eliminados los parches históricos y el antiguo contenedor visual de controles. Los tres botones originales conservan sus funciones dentro de una capa independiente.
