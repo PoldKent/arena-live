@@ -264,6 +264,10 @@ try{
         assert.ok(r.joy.right<r.power.left&&r.joy.right<r.jump.left&&r.joy.right<r.attack.left,JSON.stringify(r));
         assert.ok(r.power.left<r.jump.left&&r.jump.left<r.attack.left,JSON.stringify(r));
         assert.ok(r.jump.top<r.power.top&&r.jump.top<r.attack.top,JSON.stringify(r));
+        const separation=(a,b)=>Math.hypot((a.left+a.right-b.left-b.right)/2,(a.top+a.bottom-b.top-b.bottom)/2);
+        assert.ok(separation(r.power,r.jump)>=70,JSON.stringify(r));
+        assert.ok(separation(r.attack,r.jump)>=70,JSON.stringify(r));
+        assert.ok(separation(r.power,r.attack)>=70,JSON.stringify(r));
         assert.ok(r.rail.top>=r.game.bottom-2,JSON.stringify(r));
         assert.ok(r.rail.bottom<=r.h+2,JSON.stringify(r));
         assert.equal(r.hint,'none',JSON.stringify(r));
@@ -443,6 +447,42 @@ try{
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
         assert.equal(await page.locator('#arenaStreamerSkillsDock').isVisible(),true);
         await page.locator('#arenaPortableTestClose').tap();
+        await page.locator('#arenaPortableFullscreen').tap();
+        assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('arena-mobile-theater')),false);
+        await page.evaluate(()=>delete document.fullscreenEnabled);
+    });
+
+    await check('RC5 menu closes by button, X, Escape and Android Back without leaving theater',async()=>{
+        await page.evaluate(()=>{
+            ArenaPortable.setMode('player');
+            Object.defineProperty(document,'fullscreenEnabled',{value:false,configurable:true});
+        });
+        await page.locator('#arenaPortableFullscreen').tap();
+        await page.waitForFunction(()=>document.documentElement.classList.contains('arena-mobile-theater'));
+        await page.locator('#arenaMobileMoreBtn').tap();
+        assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),true);
+        await page.locator('#arenaMobileMoreBtn').tap();
+        assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),false);
+        await page.locator('#arenaMobileMoreBtn').tap();
+        await page.locator('#arenaMobileMenuClose').tap();
+        assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),false);
+        await page.locator('#arenaMobileMoreBtn').tap();
+        await page.keyboard.press('Escape');
+        assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),false);
+        await page.locator('#arenaMobileMoreBtn').tap();
+        await page.locator('.arena-mobile-match-menu summary').tap();
+        assert.equal(await page.locator('.arena-mobile-match-menu').evaluate(n=>n.open),true);
+        await page.keyboard.press('Escape');
+        assert.equal(await page.locator('.arena-mobile-match-menu').evaluate(n=>n.open),false);
+        assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),true);
+        await page.keyboard.press('Escape');
+        assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),false);
+        assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('arena-mobile-theater')),true);
+        await page.locator('#arenaMobileTestsShortcut').tap();
+        assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
+        await page.keyboard.press('Escape');
+        assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),false);
+        assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('arena-mobile-theater')),true);
         await page.locator('#arenaPortableFullscreen').tap();
         assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('arena-mobile-theater')),false);
         await page.evaluate(()=>delete document.fullscreenEnabled);
