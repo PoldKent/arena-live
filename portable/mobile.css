@@ -662,3 +662,5 @@ html.arena-mobile-offline #arenaMobileGestureGuide i{font-style:normal!important
 @media(prefers-reduced-transparency:reduce){
  html.arena-mobile-offline #arenaMobileGestureGuide{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 }
+/* Retain the 44px ergonomic top-button target from the mobile controls branch on wider phones. */
+@media(min-width:420px){html.arena-mobile-offline #arenaMobileFloating button:not([hidden]):not(#arenaPortableToggleGuide){width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important}}
