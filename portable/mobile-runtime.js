@@ -279,7 +279,7 @@ function arenaMobileInstallBackAndMenuClose(){
         button.id='arenaMobileMenuClose';button.type='button';button.textContent='×';
         button.title='Cerrar menú';button.setAttribute('aria-label','Cerrar menú');
         // Insert before the grid content so it remains visible at the top.
-        menu.prepend(button);
+        (menu.querySelector('.arena-portable-menu-heading')||menu).appendChild(button);
         button.addEventListener('click',event=>{
             event.preventDefault();event.stopPropagation();
             closeArenaOperatorPopover(false);
