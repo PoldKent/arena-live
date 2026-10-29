@@ -1,63 +1,45 @@
-# Arena Live v0.18.0 · Un archivo para celular
+# Arena Live · móvil autónomo (fuente 0.40.7)
 
-La descarga móvil es una exportación del juego de `main`, sin una rama de desarrollo ni una implementación distinta del combate. Reúne el HTML, estilos y cinco módulos del motor en un solo archivo. El formato es **HTML**, no APK ni aplicación de App Store.
+El **móvil offline** es un archivo HTML compilado desde `main`: no es una segunda rama, otro motor de combate, una APK ni un cliente TikTok LIVE autónomo. La exportación conserva el combate de la aplicación PC y añade únicamente adaptadores de interfaz y controles.
 
-## Descargar y jugar
+## Estado de la distribución
 
-1. Guarda `Arena-Live-v0.18.0-movil.html` en el teléfono.
-2. Ábrelo con un navegador o visor que permita ejecutar JavaScript en archivos HTML locales. Algunas vistas previas de archivos muestran solo el documento o su código: en ese caso utiliza «Abrir con» un navegador compatible. La disponibilidad de esa opción depende del sistema y del gestor de archivos.
-3. Elige la cantidad de peleadores y tu clase. Con «Jugar como Prota» desmarcado observas a la IA.
-4. Pulsa **Iniciar partida**. El total seleccionado incluye a Prota.
-5. Usa el joystick para moverte y la barra inferior para **Saltar**, **Golpe** y **Poder**. **☰ Menú** contiene **Nueva prueba**, **Ajustes**, **Pruebas**, **Chat**, **Clase**, audio, revancha y lobby.
+- **Fuentes actuales:** `package.json` versión **0.40.7**.
+- **Última exportación móvil guardada en GitHub:** [0.40.6](../mobile-builds/Arena-Live-v0.40.6-movil.html), anterior al código vigente.
+- **Para construir 0.40.7:** desde el proyecto, ejecuta `npm.cmd run build:mobile` y utiliza `dist/Arena-Live-v0.40.7-movil.html`.
+- `npm.cmd start` o `npm.cmd run dev` también compilan el móvil durante el paso `prestart`/`predev` y lo muestran en http://127.0.0.1:4173/mobile.
 
-La pantalla se adapta al girar el teléfono. El joystick cambia a la vista activa. El modo de pantalla completa depende del soporte del navegador; no es necesario para jugar.
+La generación utiliza `index.html`, `styles/arena-ui.css`, los seis scripts `engine/` y `portable/mobile-*`. Incluye los scripts y CSS completos; no descarga paquetes externos. Cada compilación añade información de los archivos fuente para identificarla. El exportador exige **500.000 bytes como máximo** y verifica la descompresión sin pérdida. **El límite es un contrato del generador, no una validación actual de todos los teléfonos.**
 
-No necesita internet, servidor ni instalación de dependencias en el celular. **TikTok LIVE real requiere el servidor de Arena Live**. Los comandos, mensajes y apoyos del archivo son pruebas locales. La exportación conserva sus controles y señala esta limitación en el inicio y el panel de conexión.
+## Abrir en Android
 
-## Comandos visibles y formato de emisión
+1. Genera el archivo desde una copia actualizada de `main`.
+2. Copia el HTML al teléfono.
+3. Abre con Chrome u otro navegador que admita archivos HTML locales y JavaScript. Las vistas previas del gestor de archivos pueden mostrar el texto del código en vez de ejecutarlo.
+4. Configura luchadores, clase, escenario y si incluir a Prota; inicia la pelea.
 
-La versión HTML móvil offline conserva una vista vertical **9:16** sin deformación (720 × 1280 inicialmente; hasta 1080 × 1920). El **marco 9:21** que centra el vídeo 9:16 corresponde al **Modo Stream dual del servidor**, no a esta previsualización offline. El marco puede ajustarse proporcionalmente a pantallas 9:19.5, 9:20 y 9:21.
+Algunos visores `content://` no permiten pantalla completa nativa, almacenamiento persistente o la ejecución del HTML. La interfaz ofrece una vista ampliada cuando el navegador lo permite, pero **no puede ocultar las barras de Android si el sistema no concede pantalla completa**.
 
-La bienvenida de lobby y la guía de comandos de clase aparecen en las dos capturas. La tira inferior sigue visible durante el combate; los botones y joysticks del modo offline son controles locales y no sustituyen la interacción real desde TikTok LIVE.
+## Modos y controles
 
-## Perfil de rendimiento
+- **Modo Jugador:** controla a Prota. Puedes utilizar Táctil total o Joystick, según lo seleccionado y disponible.
+- **Modo Streamer:** interfaz de dirección y pruebas con cinco habilidades originales, selector y panel móvil. Se conserva el identificador interno `director` para no romper preferencias guardadas.
+- La arena vertical mantiene proporción **9:16**. La barra superior y las habilidades tienen espacio propio; el panel de pruebas es flotante y desplazable.
+- Los botones de dirección y acción admiten ajustes de posición/tamaño. El joystick y los gestos táctiles deben probarse en el dispositivo de destino.
 
-| Opción | Inicio | Alternativas |
-| --- | --- | --- |
-| Resolución de dibujo | 720p | 540p para ahorrar, 1080p para más detalle |
-| Dibujo | Límite de 30 FPS | 60 FPS |
-| Partículas visibles | Rendimiento | Cambiable en Ajustes → Sesión y rendimiento |
-| Simulación | 60 pasos por segundo | Mismas reglas y ritmo que el principal |
+La configuración móvil conserva claves y preferencias del juego principal; los valores locales pueden no persistir cuando el navegador bloquea almacenamiento.
 
-720p corresponde a **1280 × 720** horizontal o **720 × 1280** vertical. Tiene un 56 % menos de píxeles que la captura Full HD. El canvas oculto pasa a 1 × 1 y libera su fondo almacenado; al volver a mostrarlo recupera la resolución elegida. Si seleccionas ambas vistas se dibujan ambas desde la misma partida.
+## Rendimiento y pruebas
 
-El perfil reduce filtros de fondo y animaciones de interfaz, utiliza fuentes e iconos locales, evita trabajo de simulación/dibujo con el documento oculto y reinicia el acumulador al regresar de otra aplicación. Mientras está pausado, dibuja como máximo cinco veces por segundo. No elimina peleadores ni efectos de la simulación para reducir la carga visual.
-
-Con 128 peleadores, empieza en **540p y 30 FPS** si el teléfono pierde fluidez. Los FPS elegidos son un límite de dibujo, no una garantía de rendimiento. No se ha medido un teléfono físico ni una GPU física. Canvas 2D conserva la posibilidad de aceleración que decida el navegador.
-
-## Ajustes y equilibrio
-
-Se conservan el cupo de jugadores, restricciones de clase, poderes, parámetros de batalla, tres modos automáticos, rivalidades ±10 %, el radar pentagonal y los informes medidos del equilibrio. El inicio rápido respeta el cupo configurado; si es menor que el escenario solicitado no lo salta.
-
-Abrir Ajustes pausa y cerrarlo reanuda. Las claves del juego principal se conservan. El perfil móvil añade solo `arenaLivePortableV1`, para resolución, escenario, clase e inclusión de Prota. La persistencia de archivos locales depende del navegador: cuando el almacenamiento está bloqueado se puede jugar en memoria. Exportar/importar configuración sigue disponible en Ajustes.
-
-La resolución de esta exportación no cambia las capturas Full HD ni la calibración OBS del servidor principal.
-
-## Generar desde el principal
-
-En la carpeta habitual del proyecto, después de actualizar `main`:
-
-```powershell
-npm.cmd run build:mobile
-```
-
-Resultado: `dist/Arena-Live-v0.18.0-movil.html`. La generación usa solo Node, no requiere minificadores ni nuevas dependencias. `dist` no se rastrea para evitar mantener una copia del motor a mano. El HTML incluye hashes SHA-256 de sus entradas. El generador se detiene si cambian los puntos de adaptación esperados.
-
-Pruebas:
+La exportación puede comenzar con 720p, 30 FPS de dibujo y calidad Rendimiento; se puede elegir 540p/1080p o 60 FPS según el equipo. La simulación conserva el paso del motor y **el límite de dibujo no garantiza FPS reales**. En teléfonos lentos prueba **540p y 30 FPS** antes de reducir el número de luchadores.
 
 ```powershell
 npm.cmd test
+npm.cmd run build:mobile
+npx.cmd playwright install chromium
 npm.cmd run test:mobile
 ```
 
-`test:mobile` abre el archivo con `file://` en Chromium sin red y con emulación táctil de teléfono. Cubre los tres modos, 128 peleadores, controles, calidad, rotación, reglas y radar, persistencia, regreso desde otra app, almacenamiento bloqueado y ausencia de solicitudes HTTP/WebSocket. Compara también un combate con la misma semilla entre 540p/30 FPS y 1080p/60 FPS. No sustituye una prueba de Safari/WebKit ni la prueba en el teléfono del usuario.
+Estas pruebas utilizan navegador emulado y simulación local; no sustituyen Android físico, Safari/WebKit, una emisión OBS ni un LIVE real. TikTok, sus eventos y el servidor local se prueban por separado.
+
+[README principal](../README.md) · [Controles v0.40](MOBILE-CONTROLES-V040.md) · [Pruebas y riesgos de la auditoría](AUDITORIA-INTEGRAL-2026-10-29.md)
