@@ -1,3 +1,9 @@
+## v0.40.6 — Golpes verticales y control móvil multitáctil (2026-10-29)
+- Golpes básicos y especiales hacia arriba/abajo con hitboxes y empuje direccional real, apuntado con analógico/WASD o con gestos verticales.
+- Joystick móvil: hasta cinco contactos independientes a la vez (analógico, tres botones y un gesto sobre el escenario), liberación por dedo o cancelación.
+- Leyenda compacta y translúcida visible solo en Táctil total sin joystick, sobre el escenario sin reducir las capturas 9:16 y 16:9.
+- Pruebas de navegador de golpes verticales, especial apuntado y cinco contactos; el HTML móvil se genera desde la versión principal.
+
 # Registro de cambios — Arena Live
 
 ## 2026-10-29 — Arena Live v0.40.5 · Refactorización de la versión oficial PC/OBS/TikTok
