@@ -93,8 +93,8 @@ try{
         assert.ok(result.toolbar.bottom<result.video.top,JSON.stringify(result));
         assert.ok(result.shelf.top>=result.video.bottom-1,JSON.stringify(result));
         assert.ok(Math.abs(result.video.width/result.video.height-9/16)<.02,JSON.stringify(result));
-        // v0.37-style compact circular top icons use 40px targets; action buttons remain >=44px.
-        assert.ok(result.rects.every(([left,right,width,height],i)=>left>=0&&right<=result.screen&&width>=(i<3?44:40)&&height>=(i<3?44:40)),JSON.stringify(result));
+        // RC2: compact circular toolbar uses 38px and action buttons remain >=44px.
+        assert.ok(result.rects.every(([left,right,width,height],i)=>left>=0&&right<=result.screen&&width>=(i<3?44:38)&&height>=(i<3?44:38)),JSON.stringify(result));
         const toolbar=await page.locator('#arenaMobileFloating').evaluate(node=>{
             const rect=node.getBoundingClientRect();
             const video=document.getElementById('viewport9x16').getBoundingClientRect();
@@ -103,8 +103,8 @@ try{
                 fixed:getComputedStyle(node).position==='fixed',
                 circle:btn.borderRadius==='50%',w:parseFloat(btn.width)};
         });
-        assert.ok(toolbar.fixed&&toolbar.circle&&toolbar.w===40,JSON.stringify(toolbar));
-        assert.ok(toolbar.y>=0&&toolbar.right<=result.screen&&toolbar.y+44<=toolbar.videoTop,JSON.stringify(toolbar));
+        assert.ok(!toolbar.fixed&&toolbar.circle&&toolbar.w===38,JSON.stringify(toolbar));
+        assert.ok(toolbar.y>=0&&toolbar.right<=result.screen&&toolbar.y+toolbar.w<=toolbar.videoTop,JSON.stringify(toolbar));
         await page.locator('#arenaMobileMoreBtn').tap();
         assert.equal(await page.locator('#arenaPortableModePlayer').isVisible(),true);
         assert.equal(await page.locator('#arenaPortableModeDirector').isVisible(),true);
