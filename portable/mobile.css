@@ -1363,3 +1363,174 @@ html.arena-mobile-offline.arena-mobile-setup-open #card-16x9:fullscreen > #arena
 html.arena-mobile-offline.arena-mobile-setup-open.arena-mobile-theater #arenaMobileControlShelf{
  display:none!important;visibility:hidden!important;pointer-events:none!important;
 }
+
+/* =========================================================================
+ * MOBILE RC5 — visual contract for menu, fullscreen, Gameboy, and Streamer.
+ * Mobile only. Never resize the video when a drawer or menu is opened.
+ * ========================================================================= */
+html.arena-mobile-offline{
+ --arena-mobile-player-shelf-height:145px;
+ --arena-mobile-reserved-bottom:155px;
+ --arena-mobile-menu-top:54px;
+}
+/* Remove the empty inherited toolbar frame (the long glass-outline crossing
+   the joystick and skill buttons). All touch hit targets remain interactive. */
+html.arena-mobile-offline #arenaMobileControlShelf,
+html.arena-mobile-offline #arenaMobileControlShelf #arenaHeaderActions.arena-operator-toolbar{
+ background:none!important;border:0!important;border-radius:0!important;
+ outline:none!important;box-shadow:none!important;
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+html.arena-mobile-offline #arenaMobileControlShelf #arenaHeaderActions.arena-operator-toolbar::before,
+html.arena-mobile-offline #arenaMobileControlShelf #arenaHeaderActions.arena-operator-toolbar::after{
+ content:none!important;display:none!important;
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf #arenaHeaderActions{
+ display:none!important;
+}
+html.arena-mobile-offline[data-mobile-mode="player"][data-mobile-touch-mode="joystick"] #arenaMobileControlShelf{
+ height:var(--arena-mobile-player-shelf-height)!important;
+ min-height:var(--arena-mobile-player-shelf-height)!important;
+ max-height:var(--arena-mobile-player-shelf-height)!important;
+}
+html.arena-mobile-offline[data-mobile-mode="player"][data-mobile-touch-mode="joystick"] #arenaMobileControlShelf #arenaHeaderActions > :is(#arenaMobilePower,#arenaMobileJump,#arenaMobileAttack){
+ flex:none!important;max-width:none!important;
+ pointer-events:auto!important;
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf{
+ height:78px!important;min-height:78px!important;max-height:78px!important;
+}
+/* Fullscreen and Android theater reserve exact heights for the header and
+   mobile action shelf. This prevents clipping the 9:16 top border/HUD. */
+html.arena-mobile-offline #card-9x16:fullscreen,
+html.arena-mobile-offline #card-16x9:fullscreen,
+html.arena-mobile-offline.arena-mobile-theater #card-9x16:not([hidden]),
+html.arena-mobile-offline.arena-mobile-theater #card-16x9:not([hidden]){
+ padding-top:calc(56px + env(safe-area-inset-top))!important;
+ padding-bottom:var(--arena-mobile-reserved-bottom)!important;
+ justify-content:center!important;align-items:center!important;
+}
+html.arena-mobile-offline #card-9x16:fullscreen #viewport9x16,
+html.arena-mobile-offline.arena-mobile-theater #card-9x16 #viewport9x16{
+ max-height:min(var(--arena-mobile-video-height,550px),calc(100dvh - 70px - var(--arena-mobile-reserved-bottom)))!important;
+ border:2px solid rgba(236,72,153,.65)!important;
+ border-radius:18px!important;
+ box-sizing:border-box!important;
+}
+html.arena-mobile-offline #card-9x16:fullscreen > #arenaMobileControlShelf,
+html.arena-mobile-offline #card-16x9:fullscreen > #arenaMobileControlShelf,
+html.arena-mobile-offline.arena-mobile-theater #arenaMobileControlShelf{
+ visibility:visible!important;
+ position:absolute!important;z-index:945!important;
+ top:var(--arena-mobile-controls-top,calc(100dvh - 150px))!important;
+}
+html.arena-mobile-offline:not(.arena-mobile-theater) body > header:first-of-type{
+ z-index:780!important;
+}
+/* For cards in regular view the rail is mounted on body; in native fullscreen
+   it is a card child. Always use the viewport-based top coordinate. */
+html.arena-mobile-offline #arenaMobileControlShelf{pointer-events:none!important}
+html.arena-mobile-offline #arenaMobileControlShelf #arenaStreamerSkillsDock,
+html.arena-mobile-offline #arenaMobileControlShelf #touchControlDock,
+html.arena-mobile-offline #arenaMobileControlShelf #arenaHeaderActions > :is(#arenaMobileJump,#arenaMobileAttack,#arenaMobilePower){
+ pointer-events:auto!important;
+}
+/* Never mix the five Streamer class skills with the Player controls. */
+html.arena-mobile-offline[data-mobile-mode="player"] #arenaStreamerSkillsDock{display:none!important}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf #touchControlDock{display:none!important}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaStreamerSkillsDock .arena-skill-buttons>button [data-command-label]{
+ display:block!important;visibility:visible!important;
+ font-size:clamp(8px,2vw,10px)!important;max-width:100%!important;
+ text-overflow:ellipsis!important;overflow:hidden!important;
+ line-height:1.1!important;
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaStreamerSkillsDock>.arena-skill-buttons>button{
+ gap:3px!important;
+}
+/* Menu: compact scrollable sheet, unmistakable X, with foreground priority.
+   Everything behind the menu is inert to touches and visually de-emphasized. */
+html.arena-mobile-offline #arenaOperatorPopover:not([hidden]){
+ max-height:min(62dvh,470px)!important;overflow-y:auto!important;
+ overscroll-behavior:contain!important;z-index:1040!important;
+}
+html.arena-mobile-offline #arenaOperatorPopover #arenaMobileMenuClose{
+ position:sticky!important;top:0!important;left:auto!important;
+ display:grid!important;place-items:center!important;float:right!important;
+ width:40px!important;min-width:40px!important;max-width:40px!important;
+ height:40px!important;min-height:40px!important;max-height:40px!important;
+ border-radius:50%!important;border:1px solid #587b92!important;
+ margin:0 0 7px auto!important;
+ background:#18364b!important;color:#e9fbff!important;
+ font:800 24px/1 system-ui,sans-serif!important;
+ z-index:5!important;pointer-events:auto!important;
+}
+html.arena-mobile-offline #arenaOperatorPopover .arena-mobile-match-menu[open]{
+ display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+ gap:5px!important;align-items:center!important;
+}
+html.arena-mobile-offline #arenaOperatorPopover .arena-mobile-match-menu[open]>summary{
+ grid-column:1/-1!important;
+}
+html.arena-mobile-offline #arenaOperatorPopover .arena-mobile-match-menu[open]>button{
+ min-height:44px!important;max-width:100%!important;
+ padding:6px 5px!important;line-height:1.15!important;font-size:11px!important;
+ text-align:center!important;justify-content:center!important;
+}
+html.arena-mobile-offline.arena-mobile-overlay-open #arenaMobileControlShelf{
+ visibility:hidden!important;pointer-events:none!important;
+}
+html.arena-mobile-offline.arena-mobile-overlay-open #arenaStreamerSkillsDock,
+html.arena-mobile-offline.arena-mobile-overlay-open #touchControlDock{
+ pointer-events:none!important;
+}
+html.arena-mobile-offline.arena-mobile-overlay-open #arenaOperatorPopover,
+html.arena-mobile-offline.arena-mobile-overlay-open #settingsPauseModal,
+html.arena-mobile-offline.arena-mobile-overlay-open #arenaPortableTestDrawer:not([hidden]){
+ pointer-events:auto!important;
+}
+html.arena-mobile-offline #settingsPauseModal:not(.hidden){z-index:1050!important}
+/* Compact, high-contrast streamer test panel. Transparency affects only its
+   backdrop; the text and form elements remain 100% legible. */
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
+ opacity:1!important;
+ background:rgba(12,36,55,var(--arena-tests-background-alpha,.92))!important;
+ height:min(28dvh,216px)!important;
+ max-height:min(28dvh,216px)!important;
+ width:min(calc(100vw - 12px),390px)!important;
+ box-shadow:0 12px 36px #0008!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer.is-collapsed:not([hidden]){
+ height:40px!important;max-height:40px!important;
+}
+html.arena-mobile-offline #arenaPortableTestBody{
+ overflow-y:auto!important;overscroll-behavior:contain!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer .arena-work-panel{
+ color:#eaf6ff!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer #arenaPortableTestHead{
+ background:rgba(18,57,78,.97)!important;color:#e8faff!important;
+}
+/* Player vs Streamer startup is explicit; avoid an apparently disabled start. */
+html.arena-mobile-offline #arenaPortableStart:not(:disabled){
+ background:#67e8f9!important;color:#061421!important;
+ font-weight:850!important;opacity:1!important;
+}
+html.arena-mobile-offline #arenaPortableStart:disabled{
+ opacity:.55!important;cursor:not-allowed!important;
+}
+html.arena-mobile-offline #arenaPortableSetup #arenaPortableClass:disabled{
+ opacity:.7!important;
+}
+html.arena-mobile-offline #arenaPortableSetup .arena-portable-card{
+ max-height:calc(100dvh - 24px)!important;overscroll-behavior:contain!important;
+}
+/* On short/landscape phones use a narrow menu, not a panel blocking the game. */
+@media(max-height:620px){
+ html.arena-mobile-offline #arenaOperatorPopover:not([hidden]){
+  max-height:min(78dvh,400px)!important;
+ }
+ html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
+  height:min(34dvh,190px)!important;max-height:min(34dvh,190px)!important;
+ }
+}
