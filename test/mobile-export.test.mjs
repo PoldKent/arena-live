@@ -6,8 +6,8 @@ import {join} from 'node:path';
 import {Script} from 'node:vm';
 import {buildMobile,packMobile,unpackMobile} from '../tools/build-mobile.mjs';
 
-test('v0.40.5 is under 500 KB, fully offline and decompresses losslessly',async()=>{
-    const dir=await mkdtemp(join(tmpdir(),'arena-mobile-405-'));
+test('current release is under 500 KB, fully offline and decompresses losslessly',async()=>{
+    const dir=await mkdtemp(join(tmpdir(),'arena-mobile-release-'));
     try{
         const a=await buildMobile(join(dir,'one.html'));
         const b=await buildMobile(join(dir,'two.html'));
@@ -15,7 +15,7 @@ test('v0.40.5 is under 500 KB, fully offline and decompresses losslessly',async(
         assert.ok(a.bytes<=500000,'maximum 500,000 bytes');
         const wrapped=await readFile(a.path,'utf8');
         assert.ok(Buffer.byteLength(wrapped)<=500000);
-        assert.match(wrapped,/Arena Live v0\.40\.5/);
+        assert.ok(wrapped.includes('Arena Live v'+a.version+' · Móvil'),'wrapper title must match build version');
         assert.doesNotMatch(wrapped,/<(?:script|link)\b[^>]+(?:src|href)\s*=/i);
         const encoded=wrapped.match(/"([A-Za-z0-9+/=]{10000,})"/)?.[1];
         assert.ok(encoded,'offline payload embedded in the HTML');
@@ -41,7 +41,7 @@ test('v0.40.5 is under 500 KB, fully offline and decompresses losslessly',async(
         }
         const [manifest]=[html.match(/<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object\.freeze\((\{[^;]+\})\);<\/script>/)?.[1]];
         assert.ok(manifest,'embedded source manifest');
-        assert.equal(JSON.parse(manifest).version,'0.40.5');
+        assert.equal(JSON.parse(manifest).version,a.version);
         for(const [,source]of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))new Script(source);
     }finally{await rm(dir,{recursive:true,force:true});}
 });
