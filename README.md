@@ -3,11 +3,11 @@
 Juego para transmisiones con una sola partida y vistas sincronizadas 16:9 y 9:16. Incluye el puente local de chat de TikTok LIVE para **@polkent.live**.
 
 
-### Versión móvil autónoma v0.40.3
+### Versión móvil autónoma v0.40.4
 
-El archivo oficial `mobile-builds/Arena-Live-v0.40.3-movil.html` es una exportación completa y sin conexión; reutiliza el mismo motor de combate de `main`, no una bifurcación. En Android: **Modo jugador** usa joystick y tres botones o gestos (Ajustes → Controles); **Modo Streamer** muestra las cinco habilidades de clase siempre visibles y abre las pruebas desde 🧪. La ventana de menú se cierra con **X**, **☰** nuevamente o **Atrás/Escape**, consumiendo primero submenús y herramientas sin cerrar la vista ampliada. El comportamiento de Atrás en fullscreen nativo también depende del navegador/Android.
+El archivo oficial `mobile-builds/Arena-Live-v0.40.4-movil.html` es una exportación completa y sin conexión; reutiliza el mismo motor de combate de `main`, no una bifurcación. En Android: **Modo jugador** usa joystick y tres botones o gestos (Ajustes → Controles); **Modo Streamer** muestra las cinco habilidades de clase siempre visibles y abre las pruebas desde 🧪. La ventana de menú se cierra con **X**, **☰** nuevamente o **Atrás/Escape**, consumiendo primero submenús y herramientas sin cerrar la vista ampliada. El comportamiento de Atrás en fullscreen nativo también depende del navegador/Android.
 
-En Windows PowerShell: `npm.cmd ci`, `npm.cmd test`, `npm.cmd run build:mobile` y `npm.cmd start`; el servidor local se abre en `http://127.0.0.1:4173`. El comando de compilación genera también `dist/Arena-Live-v0.40.3-movil.html`.
+**Regla móvil v0.40.4:** el escenario nunca pierde tamaño por la presencia de joystick, acciones, cinco poderes o paneles. Los controles se superponen al juego; joystick y habilidades pueden sobresalir del marco 9:16. En Ajustes → Controles móviles → Pantalla completa está disponible la referencia automática/9:16/9:19.5/9:20/9:21; el motor y video reales mantienen 9:16 y la calibración OBS es independiente.\n\nEn Windows PowerShell: `npm.cmd ci`, `npm.cmd test`, `npm.cmd run build:mobile` y `npm.cmd start`; el servidor local se abre en `http://127.0.0.1:4173`. El comando de compilación genera también `dist/Arena-Live-v0.40.4-movil.html`.
 
 ## Versión principal
 
