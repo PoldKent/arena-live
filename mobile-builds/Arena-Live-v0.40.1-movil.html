@@ -982,7 +982,15 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 #arenaDockBottom>#arenaPanelChat[open] {height:300px;max-height:34dvh}
 #arenaDockFloat {position:absolute;inset:0;pointer-events:none;z-index:80;overflow:hidden}
 #arenaWorkspace>#broadcastStageSection:not(:fullscreen) {grid-column:2;grid-row:1;display:flex!important;min-height:0!important;height:100%!important;max-height:100%;padding:6px!important;border:1px solid #232d3a;background:#0a0f17;border-radius:7px;overflow:hidden!important;justify-content:center}
-#broadcastStageSection>#dualMonitorsGrid {height:100%;min-height:0;align-items:center;justify-content:center;padding:0!important;gap:0}
+/* Dual previews must size within the central dock, never from their intrinsic canvases. */
+#broadcastStageSection:not(:fullscreen)>#dualMonitorsGrid {
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  min-height:0!important;height:100%!important;flex:1 1 0%!important;
+  box-sizing:border-box;align-items:center;justify-content:center;padding:0!important;gap:0;
+}
+#broadcastStageSection:not(:fullscreen)>#dualMonitorsGrid.mobile-dual-stacked {
+  flex:1 1 0%!important;justify-content:center!important;gap:8px!important;
+}
 #broadcastStageSection:not(:fullscreen) #card-16x9,#broadcastStageSection:not(:fullscreen) #card-9x16 {margin:0!important;padding:0!important;max-width:100%;min-width:0}
 #broadcastStageSection:not(:fullscreen) #card-16x9:not(:fullscreen)>:not(#viewport16x9):not(#settingsPauseModal),#broadcastStageSection:not(:fullscreen) #card-9x16:not(:fullscreen)>:not(#viewport9x16):not(#settingsPauseModal) {display:none!important}
 #viewport16x9,#viewport9x16 {transition:none!important;flex:none!important}
@@ -2640,6 +2648,15 @@ html.arena-mobile-offline[data-mobile-mode="director"] #card-9x16:fullscreen #vi
     width:min(100%,calc((100dvh - 140px) * 9 / 16))!important;
     max-height:calc(100dvh - 140px)!important;
   }
+}
+
+/* Dual monitor preview: remove single-phone-only size floors ONLY while both
+   streams are present. Streamer skill controls stay mounted below the image. */
+html.arena-mobile-offline #dualMonitorsGrid.arena-dual-preview #card-9x16:not(:fullscreen){
+  width:auto!important;min-height:0!important;margin:0!important;
+}
+html.arena-mobile-offline #dualMonitorsGrid.arena-dual-preview #viewport9x16{
+  max-height:none!important;margin:0!important;
 }
 
 </style>
@@ -8770,72 +8787,74 @@ const ARENA_BALANCE_EVIDENCE=Object.freeze({"version":"0.15.0","sample":{"matche
         // MODULE BLOCK J: DOM UI + MONITOR LAYOUT (future js/ui.js).
         function fitDualMonitorsSideBySide() {
             const stageGrid = document.getElementById('dualMonitorsGrid');
+            const stage = document.getElementById('broadcastStageSection');
             const wrap16 = document.getElementById('card-16x9');
             const wrap9 = document.getElementById('card-9x16');
             const vp16 = document.getElementById('viewport16x9');
             const vp9 = document.getElementById('viewport9x16');
-            if (!stageGrid || !wrap16 || !wrap9 || !vp16 || !vp9) return;
-
-            if (document.fullscreenElement === document.getElementById('broadcastStageSection')) {
+            if (!stageGrid || !stage || !wrap16 || !wrap9 || !vp16 || !vp9) return;
+            if (document.fullscreenElement === stage) {
                 fitArenaDualOperatorMonitors();
                 return;
             }
 
-            const stageRect = stageGrid.getBoundingClientRect();
-            const availW = Math.max(180, stageRect.width - 12);
-            const viewportMaxH = Math.max(80, stageRect.height - 8);
-            const portraitViewport = !!(window.matchMedia && window.matchMedia('(orientation: portrait)').matches);
-            const compactDual = monitorFocus === 'dual' && (
-                window.innerWidth < 760 || availW < 480 || (portraitViewport && window.innerWidth < 1100)
-            );
-
-            // Mobile dual layout: keep both streams visible, horizontal first and vertical below it.
-            if (compactDual) {
-                stageGrid.classList.add('mobile-dual-stacked');
-                wrap16.classList.remove('hidden');
-                wrap9.classList.remove('hidden');
-
-                const horizontalW = Math.floor(Math.min(availW, viewportMaxH * (16 / 9)));
-                const horizontalH = Math.floor(horizontalW * (9 / 16));
-                const verticalH = Math.floor(Math.min(viewportMaxH, availW * (16 / 9)));
-                const verticalW = Math.floor(verticalH * (9 / 16));
-
-                vp16.style.width = `${horizontalW}px`;
-                vp16.style.height = `${horizontalH}px`;
-                vp9.style.width = `${verticalW}px`;
-                vp9.style.height = `${verticalH}px`;
-                return;
-            }
-
-            stageGrid.classList.remove('mobile-dual-stacked');
-
+            // The window width includes chat and testing docks; it is NOT the
+            // space available to the two streams. Cap measurements by the
+            // central stage's actual content box to break intrinsic-size loops.
+            const stageStyle = getComputedStyle(stage);
+            const insetW = parseFloat(stageStyle.paddingLeft) + parseFloat(stageStyle.paddingRight);
+            const insetH = parseFloat(stageStyle.paddingTop) + parseFloat(stageStyle.paddingBottom);
+            const contentW = Math.max(1, stage.clientWidth - insetW);
+            const contentH = Math.max(1, stage.clientHeight - insetH);
+            const availW = Math.max(1, Math.floor(Math.min(contentW, stageGrid.clientWidth || contentW) - 8));
+            const offline = document.documentElement.classList.contains('arena-mobile-offline');
+            const shelf = offline ? document.getElementById('arenaMobileControlShelf') : null;
+            const shelfHeight = shelf && getComputedStyle(shelf).display !== 'none'
+                ? Math.max(0, Math.min(150, shelf.getBoundingClientRect().height)) : 0;
+            const availH = Math.max(1, Math.floor(Math.min(contentH, stageGrid.clientHeight || contentH) - 8 -
+                (monitorFocus === 'dual' ? shelfHeight : 0)));
+            const setSize = (node, width, height, important = false) => {
+                node.style.setProperty('width', Math.max(1, Math.floor(width)) + 'px', important ? 'important' : '');
+                node.style.setProperty('height', Math.max(1, Math.floor(height)) + 'px', important ? 'important' : '');
+            };
+            stageGrid.classList.toggle('arena-dual-preview', monitorFocus === 'dual');
             if (monitorFocus === 'dual') {
                 wrap16.classList.remove('hidden');
                 wrap9.classList.remove('hidden');
-                const gapPx = 14;
-                const combinedAspect = (16 / 9) + (9 / 16);
-                const maxHFromWidth = Math.max(1, (availW - gapPx) / combinedAspect);
-                const targetH = Math.max(150, Math.min(viewportMaxH, maxHFromWidth));
-                const h = Math.floor(targetH);
-                vp16.style.width = `${Math.floor(h * (16 / 9))}px`;
-                vp16.style.height = `${h}px`;
-                vp9.style.width = `${Math.floor(h * (9 / 16))}px`;
-                vp9.style.height = `${h}px`;
-            } else if (monitorFocus === '16:9') {
-                wrap16.classList.remove('hidden');
-                wrap9.classList.add('hidden');
-                const targetH = Math.max(40, Math.min(viewportMaxH, availW / (16 / 9)));
-                vp16.style.width = `${Math.floor(targetH * (16 / 9))}px`;
-                vp16.style.height = `${Math.floor(targetH)}px`;
-            } else if (monitorFocus === '9:16') {
-                wrap16.classList.add('hidden');
-                wrap9.classList.remove('hidden');
-                const targetH = Math.max(40, Math.min(viewportMaxH, availW / (9 / 16)));
-                vp9.style.width = `${Math.floor(targetH * (9 / 16))}px`;
-                vp9.style.height = `${Math.floor(targetH)}px`;
+                // A tall/narrow center dock has more room for a large stacked
+                // 16:9 + 9:16 pair, even on a wide desktop monitor.
+                const stacked = window.innerWidth < 760 || availW < 720 ||
+                    availW / Math.max(1, availH) < 1.25;
+                stageGrid.classList.toggle('mobile-dual-stacked', stacked);
+                const gap = stacked ? 8 : 14;
+                if (stacked) {
+                    const h16 = Math.min(availW * 9 / 16, Math.max(1, (availH - gap) * .60));
+                    const h9 = Math.min(availW * 16 / 9, Math.max(1, availH - gap - h16));
+                    setSize(vp16, h16 * 16 / 9, h16);
+                    setSize(vp9, h9 * 9 / 16, h9, offline);
+                } else {
+                    const h = Math.max(1, Math.min(availH, (availW - gap) / (16 / 9 + 9 / 16)));
+                    setSize(vp16, h * 16 / 9, h);
+                    setSize(vp9, h * 9 / 16, h, offline);
+                }
+            } else {
+                stageGrid.classList.remove('mobile-dual-stacked');
+                if (monitorFocus === '16:9') {
+                    wrap16.classList.remove('hidden');
+                    wrap9.classList.add('hidden');
+                    const h = Math.max(1, Math.min(availH, availW * 9 / 16));
+                    setSize(vp16, h * 16 / 9, h);
+                    // Release the forced dual width so the phone's original
+                    // single-view 9:16 styling remains authoritative.
+                    if (offline) { vp9.style.removeProperty('width'); vp9.style.removeProperty('height'); }
+                } else if (monitorFocus === '9:16') {
+                    wrap16.classList.add('hidden');
+                    wrap9.classList.remove('hidden');
+                    const h = Math.max(1, Math.min(availH, availW * 16 / 9));
+                    setSize(vp9, h * 9 / 16, h);
+                }
             }
         }
-
         function setMonitorFocus(focusMode) {
             monitorFocus = focusMode;
             updateArenaPreparationSwitchLabel();
@@ -11516,7 +11535,7 @@ const ARENA_BALANCE_EVIDENCE=Object.freeze({"version":"0.15.0","sample":{"matche
             }
         });
     </script>
-<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze({"version":"0.40.1","edition":"mobile-offline","sourceBlobs":{"index.html":"41ade2a99d9d9788ffc41942eba47abcd1f576be","styles/arena-ui.css":"c933a9cfb504daa6d27800c6098396b3aa57114f","styles/TAILWIND-LICENSE.txt":"d6a82290738a9f78946cbcb4594535d6984086dd","engine/arena-core.js":"ac22091a1263e294b733a337f8c6ebc4f2e1bc9d","engine/arena-render.js":"6c9603974d2c02d0f0fb52857992211c08cd6725","engine/arena-audio.js":"319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934","engine/arena-settings.js":"f1fbbd2492b4be8cfb725e72cd0ab604894681cf","engine/arena-balance-evidence.js":"0aab05b49f0ef9e80c43810b2bfc929b4f695cdf","portable/mobile.css":"c9b6773fa5c2f050670e81dbf53d7b5b563cb624","portable/mobile-runtime.js":"29f30d79aedf48d51eda169c27b36230be13a2a6","portable/mobile-touch.js":"7cf89894450e82ccd26c1beb489b812af5f7fa00"}});</script>
+<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze({"version":"0.40.1","edition":"mobile-offline","sourceBlobs":{"index.html":"1aff102165b52d11051c5a44b527de12b242c241","styles/arena-ui.css":"c933a9cfb504daa6d27800c6098396b3aa57114f","styles/TAILWIND-LICENSE.txt":"d6a82290738a9f78946cbcb4594535d6984086dd","engine/arena-core.js":"ac22091a1263e294b733a337f8c6ebc4f2e1bc9d","engine/arena-render.js":"6c9603974d2c02d0f0fb52857992211c08cd6725","engine/arena-audio.js":"319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934","engine/arena-settings.js":"f1fbbd2492b4be8cfb725e72cd0ab604894681cf","engine/arena-balance-evidence.js":"0aab05b49f0ef9e80c43810b2bfc929b4f695cdf","portable/mobile.css":"283f4974af744c35887dc260796d31affa4cc522","portable/mobile-runtime.js":"29f30d79aedf48d51eda169c27b36230be13a2a6","portable/mobile-touch.js":"7cf89894450e82ccd26c1beb489b812af5f7fa00"}});</script>
 <script id="arena-mobile-runtime">
 // Loaded inline after the unchanged classic engine, before its load bootstrap.
 // This adapter changes presentation and test setup, never combat decisions.
