@@ -1,11 +1,28 @@
 // Touch-first controls and a movable test panel for the standalone phone edition.
 // Desktop/OBS retains its own controls; this adapter never changes combat rules.
 const ARENA_MOBILE_TAP_GAP=325;
-const ARENA_MOBILE_LAYOUT_KEY='arenaLiveMobileButtonsV1';
-const arenaMobileLayoutDefaults=Object.freeze({touchJoystick:[13,50],arenaMobilePower:[46,50],arenaMobileJump:[67,50],arenaMobileAttack:[89,50]});
+const ARENA_MOBILE_LAYOUT_KEY='arenaLiveMobileButtonsV2';
+const ARENA_MOBILE_LAYOUT_LEGACY_KEY='arenaLiveMobileButtonsV1';
+// Two-handed Gameboy layout: analog left, power/jump/attack on a staggered right cluster.
+const arenaMobileLayoutDefaults=Object.freeze({touchJoystick:[15,50],arenaMobilePower:[60,74],arenaMobileJump:[75,22],arenaMobileAttack:[90,74]});
+const arenaMobileRC2Defaults={touchJoystick:[14,50],arenaMobilePower:[58,70],arenaMobileJump:[74,30],arenaMobileAttack:[88,70]};
+const arenaMobileLegacyDefaults={touchJoystick:[13,50],arenaMobilePower:[46,50],arenaMobileJump:[67,50],arenaMobileAttack:[89,50]};
 let arenaMobileLayout={size:70,points:Object.fromEntries(Object.entries(arenaMobileLayoutDefaults).map(([k,v])=>[k,[...v]]))};
 let arenaMobileEditing=false;
-try{const saved=JSON.parse(localStorage.getItem(ARENA_MOBILE_LAYOUT_KEY)||'null');if(saved&&Number.isFinite(saved.size))arenaMobileLayout.size=Math.max(56,Math.min(94,saved.size));for(const [id,p]of Object.entries(saved?.points||{})){if(Object.hasOwn(arenaMobileLayoutDefaults,id)&&Array.isArray(p)&&p.length===2&&p.every(Number.isFinite))arenaMobileLayout.points[id]=[Math.max(7,Math.min(93,p[0])),Math.max(8,Math.min(95,p[1]))];}}catch(_){}
+try{
+    const current=JSON.parse(localStorage.getItem(ARENA_MOBILE_LAYOUT_KEY)||'null');
+    const legacy=current?null:JSON.parse(localStorage.getItem(ARENA_MOBILE_LAYOUT_LEGACY_KEY)||'null');
+    // Old default positions were widely spaced and often clipped the buttons.
+    // Migrate ONLY user-customized coordinates; preserve their size preference.
+    const saved=current||legacy;
+    if(saved&&Number.isFinite(saved.size))arenaMobileLayout.size=Math.max(56,Math.min(94,saved.size));
+    for(const [id,p] of Object.entries(saved?.points||{})){
+        if(!Object.hasOwn(arenaMobileLayoutDefaults,id)||!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite))continue;
+        const isOldDefault=(!current&&arenaMobileLegacyDefaults[id].every((n,i)=>Math.abs(n-p[i])<0.5))||
+            (!!current&&arenaMobileRC2Defaults[id].every((n,i)=>Math.abs(n-p[i])<0.5));
+        if(!isOldDefault)arenaMobileLayout.points[id]=[Math.max(7,Math.min(93,p[0])),Math.max(8,Math.min(95,p[1]))];
+    }
+}catch(_){}
 const ARENA_MOBILE_HOLD_MS=460;
 const ARENA_MOBILE_SWIPE_PX=34;
 const arenaMobileTouchState={pointerId:null,startX:0,startY:0,x:0,y:0,tapCount:0,lastTapAt:0,lastTapX:0,lastTapY:0,jumpRetry:null};
@@ -27,7 +44,9 @@ function arenaMobileSaveTestPrefs(){
 function arenaMobileApplyTestOpacity(){
     const drawer=document.getElementById('arenaPortableTestDrawer');
     if(!drawer)return;
-    drawer.style.setProperty('--arena-tests-opacity',String(1-arenaMobileTestState.transparency/100));
+    // Preserve full text/controls legibility; only the drawer backdrop fades.
+    drawer.style.setProperty('--arena-tests-opacity','1');
+    drawer.style.setProperty('--arena-tests-background-alpha',String(1-arenaMobileTestState.transparency/100));
     const input=document.getElementById('arenaPortableTestTransparency');
     if(input){input.value=String(arenaMobileTestState.transparency);input.setAttribute('aria-valuetext',arenaMobileTestState.transparency+'% de transparencia');}
     const label=document.getElementById('arenaPortableTransparencyValue');
@@ -397,13 +416,19 @@ function arenaMobileApplyLayout(){
     const bounds=shelf.getBoundingClientRect();
     // Keep each full hit-target visible on narrow devices, after rotation and
     // when the user increases button size. Percentages remain stored in settings.
-    const size=Math.max(56,Math.min(94,arenaMobileLayout.size));
-    document.documentElement.style.setProperty('--arena-mobile-button-size',size+'px');
+    const desiredSize=Math.max(56,Math.min(94,arenaMobileLayout.size));
+    const size=Math.min(desiredSize,Math.max(56,Math.floor(bounds.width*.24)));
+    // The Gameboy controls require two staggered rows, not a 94px dock
+    // with 70-94px circles. Match dock height to the chosen button size.
+    const controlHeight=Math.max(144,Math.ceil(size*2.07));
+    const root=document.documentElement;
+    root.style.setProperty('--arena-mobile-button-size',size+'px');
+    root.style.setProperty('--arena-mobile-player-shelf-height',controlHeight+'px');
     for(const [id,position]of Object.entries(arenaMobileLayout.points)){
         const btn=document.getElementById(id);if(!btn)continue;
         const radius=size/2+4;
         const x=Math.min(Math.max(radius,bounds.width*position[0]/100),Math.max(radius,bounds.width-radius));
-        const y=Math.min(Math.max(radius,bounds.height*position[1]/100),Math.max(radius,bounds.height-radius));
+        const y=Math.min(Math.max(radius,controlHeight*position[1]/100),Math.max(radius,controlHeight-radius));
         if(id==='arenaMobileMoreBtn')continue; // old layouts may still contain a floating menu position
         if(id==='touchJoystick'){analog?.style.setProperty('--mobile-joy-x',x+'px');analog?.style.setProperty('--mobile-joy-y',y+'px');}
         else {btn.style.setProperty('--mobile-x',x+'px');btn.style.setProperty('--mobile-y',y+'px');}
@@ -412,8 +437,9 @@ function arenaMobileApplyLayout(){
     }
     document.documentElement.classList.toggle('arena-mobile-edit-controls',arenaMobileEditing);
     const edit=document.getElementById('arenaMobileEditDone');if(edit)edit.hidden=!arenaMobileEditing;
-    const slider=document.getElementById('arenaMobileSize');if(slider)slider.value=String(size);
-    const text=document.getElementById('arenaMobileSizeValue');if(text)text.textContent=size+' px';
+    const slider=document.getElementById('arenaMobileSize');if(slider)slider.value=String(desiredSize);
+    const text=document.getElementById('arenaMobileSizeValue');
+    if(text)text.textContent=size===desiredSize?size+' px':size+' px (adaptado; preferencia '+desiredSize+' px)';
 }
 function arenaMobileEditButtons(on=true){
     if(on&&arenaPortableProfile.touchMode!=='joystick')return;
@@ -430,10 +456,12 @@ function arenaMobileEditButtons(on=true){
 function arenaMobileSetButtonSize(size){
     arenaMobileLayout.size=Math.max(56,Math.min(94,Number(size)||70));
     arenaMobileApplyLayout();arenaMobileSaveLayout();
+    requestAnimationFrame(arenaPortableFitMobileStage);
 }
 function arenaMobileResetButtons(){
     arenaMobileLayout={size:70,points:Object.fromEntries(Object.entries(arenaMobileLayoutDefaults).map(([k,v])=>[k,[...v]]))};
     arenaMobileSaveLayout();arenaMobileApplyLayout();
+    requestAnimationFrame(arenaPortableFitMobileStage);
 }
 function arenaMobileInstallLayoutSettings(){
     const sections=[...document.querySelectorAll('#settingsGeneralPanel>.arena-settings-section')];
@@ -466,7 +494,7 @@ function arenaMobileSyncTouchMode(){
     document.documentElement.dataset.mobileTouchMode=mode;
     document.querySelectorAll('input[name="arenaMobileTouchMode"]').forEach(input=>input.checked=input.value===mode);
     const advanced=document.getElementById('arenaMobileArrangeSettings');if(advanced)advanced.hidden=mode!=='joystick';
-    const help=document.getElementById('arenaMobileTouchHelp');if(help)help.textContent=mode==='touch'?'Táctil total: dedo izquierdo para movimiento; con el derecho toca para saltar, dos toques para doble salto, desliza para golpear y mantén para el poder.':'Joystick: mueve el analógico izquierdo y usa Salto, Golpe y Poder. Puedes acomodar los cuatro controles.';
+    const help=document.getElementById('arenaMobileTouchHelp');if(help)help.textContent=mode==='touch'?'Táctil total: dedo izquierdo para movimiento; con el derecho toca para saltar, dos toques para doble salto, desliza para golpear y mantén para el poder.':'Joystick: analógico a la izquierda y Salto, Golpe y Poder a la derecha, justo debajo del escenario. Puedes acomodarlos.';
     if(typeof arenaMobileApplyLayout==='function')arenaMobileApplyLayout();
 }
 function arenaMobileInstallControlDragging(){

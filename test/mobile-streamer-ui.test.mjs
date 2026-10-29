@@ -1,125 +1,117 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+
 const css=await readFile(new URL('../portable/mobile.css',import.meta.url),'utf8');
 const runtime=await readFile(new URL('../portable/mobile-runtime.js',import.meta.url),'utf8');
 const touch=await readFile(new URL('../portable/mobile-touch.js',import.meta.url),'utf8');
 
-test('Streamer naming is standard and the legacy director preference stays compatible',()=>{
+test('mobile role naming and original engine hooks survive unchanged',()=>{
   assert.match(runtime,/Modo Streamer/);
-  assert.doesNotMatch(runtime,/Modo Director/);
+  assert.match(runtime,/Modo jugador/);
   assert.match(runtime,/DIRECTOR:'director'/);
-  assert.match(touch,/Opciones del Modo Streamer/);
-  assert.doesNotMatch(touch,/Herramientas de direcci/);
+  assert.match(touch,/function arenaMobileCanControl\(\)/);
+  assert.match(runtime,/window\.ArenaPortable=Object\.freeze/);
+  assert.doesNotMatch(runtime,/Modo Director/);
 });
-test('mobile toolbar is top-aligned, preserves native pause and menu actions',()=>{
+test('top toolbar reuses the actual pause, menu, fullscreen and role switches',()=>{
   assert.match(runtime,/hud\.prepend\(pause\)/);
   assert.match(runtime,/hud\.insertBefore\(topMenu,fullscreenControl\)/);
-  assert.match(css,/#arenaMobileFloating #arenaMobilePause/);
-  assert.match(css,/#arenaMobileFloating #arenaMobileMoreBtn/);
-  assert.match(css,/#arenaMobileFloating #arenaPortableFullscreen/);
-  assert.match(css,/#arenaPortableToggleGuide,\s*\nhtml\.arena-mobile-offline #arenaMobileTestFab\{display:none/);
+  assert.match(runtime,/id='arenaMobileModeShortcut'/);
+  assert.match(runtime,/id='arenaMobileTestsShortcut'/);
+  assert.match(css,/#arenaMobileFullscreenBar #arenaMobileFloating/);
+  assert.match(css,/#arenaMobileFloating button:not\(\[hidden\]\)/);
 });
-test('Streamer abilities are a bottom strip containing the original five class buttons',()=>{
+test('Streamer retains five original class powers in one independent row',()=>{
   assert.match(touch,/function arenaMobileInstallStreamerSkills\(\)/);
   assert.match(touch,/const source=document\.querySelector\('#arenaPanelPowers \.arena-skill-buttons'\)/);
   assert.match(touch,/dock\.appendChild\(source\)/);
-  assert.match(css,/#arenaStreamerSkillsDock>\.arena-skill-buttons\{[\s\S]*?repeat\(5,minmax\(0,1fr\)\)/);
-  assert.match(css,/#arenaStreamerSkillsDock .arena-skill-buttons>button\{[\s\S]*?height:49px/);
-  assert.doesNotMatch(runtime,/arenaMobileShowTestDrawer\(true\)/);
-});
-test('mobile Combat settings have bounded widths, independent scrolling and responsive selects',()=>{
-  assert.match(css,/#settingsPanelsScroll\{[\s\S]*?overflow-x:hidden!important;overflow-y:auto!important/);
-  assert.match(css,/#settingsGeneralPanel \.arena-settings-content :is\(select,input:not/);
-  assert.match(css,/#settingsGeneralPanel \.arena-settings-content select\{[\s\S]*?text-overflow:ellipsis/);
-  assert.match(css,/#arenaSettingsTabs\{[\s\S]*?grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
-});
-
-test('Player supports saved touch-total or joystick controls, with no unwanted game overlay',()=>{
-  assert.match(runtime,/touchMode:'joystick'/);
-  assert.match(runtime,/dataset\.mobileTouchMode/);
-  assert.match(touch,/function arenaMobileSetTouchMode\(mode\)/);
-  assert.match(touch,/function arenaMobileSyncTouchMode\(\)/);
-  assert.match(touch,/name="arenaMobileTouchMode"/);
-  assert.match(touch,/Táctil total/);
-  assert.match(touch,/Joystick/);
-  assert.doesNotMatch(touch,/touchControlDock'\)\?\.remove\(\)/);
-  assert.match(touch,/touchJoystick:\[13,50\]/);
-  assert.match(runtime,/const header=document\.getElementById\('arenaTopBarInner'\)/);
-  assert.match(runtime,/fullscreen\?card:header/);
-  assert.match(runtime,/id='arenaMobileGestureGuide'/);
-  assert.match(css,/#arenaMobileGestureGuide/);
-  assert.match(css,/data-mobile-touch-mode="touch"/);
-  assert.match(css,/data-mobile-touch-mode="joystick"/);
-  assert.match(css,/#card-9x16:fullscreen #viewport9x16/);
-  assert.match(runtime,/id='arenaMobileControlShelf'/);
-  assert.match(touch,/const shelf=document.getElementById\('arenaMobileControlShelf'\)/);
-  assert.match(css,/#arenaMobileControlShelf #touchJoystick/);
-  assert.match(css,/#arenaMobileControlShelf #arenaPortableTestDrawer/);
-  assert.match(runtime,/id='arenaMobileModeShortcut'/);
-  assert.match(runtime,/id='arenaMobileTestsShortcut'/);
-  assert.match(touch,/const arenaMobileActionState=/);
-  assert.match(touch,/pointerId===event.pointerId/);
-});
-
-test('Pruebas is never clipped by the control shelf and stays visible in fullscreen',()=>{
-  assert.match(touch,/const host=card\|\|document\.body/);
-  assert.match(touch,/if\(drawer\.parentElement!==host\)host\.appendChild\(drawer\)/);
-  assert.match(touch,/drawer\.hidden=!open/);
-  assert.match(touch,/drawer\.classList\.remove\('is-collapsed'\)/);
-  assert.match(touch,/arena-tests-visible/);
-  assert.match(css,/#arenaPortableTestDrawer:not\(\[hidden\]\)\{/);
-  assert.match(css,/position:fixed!important/);
-  assert.match(css,/#card-9x16:fullscreen #arenaPortableTestDrawer:not/);
-  assert.match(css,/#arenaPortableTestBody\{/);
-  assert.match(runtime,/arenaMobileMountTestDrawer\(\)/);
-  assert.doesNotMatch(runtime,/\['arenaHeaderActions','touchControlDock','arenaStreamerSkillsDock','arenaPortableTestDrawer'\]/);
-});
-
-test('v0.36–v0.37 top-right floating capsule is restored without overlapping 9:16',()=>{
-  const restored=css.split('/* Restore the v0.36–v0.37 compact top-right capsule')[1];
-  assert.ok(restored,'The version 0.37 restoration is present');
-  assert.match(restored,/position:fixed!important/);
-  assert.match(restored,/right:max\(8px,env\(safe-area-inset-right\)\)!important/);
-  assert.match(restored,/border-radius:24px!important/);
-  assert.match(restored,/border-radius:50%!important/);
-  assert.match(restored,/width:40px!important;height:40px!important/);
-  assert.match(css,/min-height:60px!important;z-index:230!important/);
-  assert.match(css,/#card-9x16:fullscreen #arenaMobileFloating,[\s\S]*?position:absolute!important/);
-  assert.match(css,/padding:calc\(53px \+ env\(safe-area-inset-top\)\)/);
-  assert.match(runtime,/hud\.prepend\(pause\)/);
-  assert.match(runtime,/id='arenaMobileModeShortcut'/);
-  assert.match(runtime,/id='arenaMobileTestsShortcut'/);
-  assert.match(runtime,/hud\.insertBefore\(topMenu,fullscreenControl\)/);
-  assert.match(touch,/function arenaMobileMountTestDrawer\(\)/);
-});
-
-test('Streamer Pruebas is a compact overlay, never reduces the arena or covers five skills',()=>{
-  assert.match(touch,/function arenaMobilePositionTestDrawer\(\)/);
-  assert.match(touch,/getElementById\('arenaStreamerSkillsDock'\)/);
-  assert.match(touch,/const rail=skills\?\.getBoundingClientRect\(\)/);
-  assert.match(touch,/drawer\.style\.setProperty\('--arena-tests-bottom'/);
-  assert.match(css,/bottom:var\(--arena-tests-bottom,80px\)!important/);
-  assert.match(css,/#arenaMobileControlShelf #arenaStreamerSkillsDock\{/);
-  assert.match(css,/#arenaStreamerSkillsDock>[.]arena-skill-buttons/);
-  assert.doesNotMatch(css,/#card-9x16[.]arena-tests-visible #viewport9x16/);
-  assert.doesNotMatch(css,/#card-9x16:has\(#arenaMobileControlShelf[.]has-open-tests\) #viewport9x16/);
-  assert.doesNotMatch(css,/#card-9x16:fullscreen[.]arena-tests-visible #viewport9x16/);
-  assert.doesNotMatch(css,/#card-9x16:fullscreen:has\(#arenaMobileControlShelf[.]has-open-tests\) #viewport9x16/);
-});
-
-
-test('v0.40.1 keeps all five original Streamer skills visible and the 9:16 fixed when tests open',()=>{
   assert.match(touch,/function arenaMobileKeepStreamerSkillsVisible\(\)/);
-  assert.match(touch,/if\(skills\.parentElement!==shelf\)shelf\.appendChild\(skills\)/);
-  assert.match(touch,/skills\.hidden=false/);
-  assert.match(touch,/arenaMobileKeepStreamerSkillsVisible\(\);\s*if\(open\)/);
-  assert.match(css,/v0\.40\.1 · Canonical mobile Streamer contract/);
-  const latest=css.split('/* v0.40.1 · Canonical mobile Streamer contract')[1];
-  assert.match(latest,/data-mobile-mode="director"\] #arenaMobileControlShelf #arenaStreamerSkillsDock/);
-  assert.match(latest,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
-  assert.match(latest,/#card-9x16:fullscreen #arenaPortableTestDrawer:not/);
-  assert.match(latest,/max-height:calc\(100dvh - 162px\)/);
-  assert.doesNotMatch(latest,/\.arena-tests-visible/);
-  assert.doesNotMatch(latest,/\.has-open-tests #viewport9x16/);
+  assert.match(css,/repeat\(5,minmax\(0,1fr\)\)/);
+  assert.match(css,/data-mobile-mode="director"\] #arenaStreamerSkillsDock \.arena-skill-buttons>button \[data-command-label\]/);
+  assert.match(css,/data-mobile-mode="player"\] #arenaStreamerSkillsDock\{display:none!important\}/);
+});
+test('Player Gameboy actions use separate hit targets without phantom toolbar',()=>{
+  assert.match(touch,/const arenaMobileLayoutDefaults=Object\.freeze/);
+  assert.match(touch,/const arenaMobileRC2Defaults=/);
+  assert.match(touch,/const desiredSize=Math\.max\(56,Math\.min\(94,arenaMobileLayout\.size\)\)/);
+  assert.match(touch,/const size=Math\.min\(desiredSize,Math\.max\(56,Math\.floor\(bounds\.width\*\.24\)\)\)/);
+  assert.match(touch,/const controlHeight=Math\.max\(144,Math\.ceil\(size\*2\.07\)\)/);
+  assert.match(css,/data-mobile-mode="director"\] #arenaMobileControlShelf #arenaHeaderActions\{\s*display:none!important/);
+  assert.match(css,/#arenaMobileControlShelf #arenaHeaderActions\.arena-operator-toolbar::before/);
+  assert.match(css,/#arenaMobileControlShelf #arenaHeaderActions\.arena-operator-toolbar::after/);
+});
+test('default Gameboy layout prevents circle overlap at narrow widths and large requested size',()=>{
+  const raw=touch.match(/const arenaMobileLayoutDefaults=Object\.freeze\((\{[^;]+\})\);/)?.[1];
+  assert.ok(raw,'missing Gameboy defaults');
+  const values=Function('return ('+raw+')')();
+  for(const width of [320,360,390,560]){
+    for(const desired of [70,94]){
+      const w=Math.min(width-10,560);
+      const size=Math.min(desired,Math.max(56,Math.floor(w*.24)));
+      const h=Math.max(144,Math.ceil(size*2.07));
+      const r=size/2+4;
+      const center=id=>{
+        const [x,y]=values[id];
+        return [Math.min(Math.max(r,w*x/100),Math.max(r,w-r)),Math.min(Math.max(r,h*y/100),Math.max(r,h-r))];
+      };
+      const points=['arenaMobilePower','arenaMobileJump','arenaMobileAttack'].map(center);
+      for(let i=0;i<points.length;i++)for(let j=i+1;j<points.length;j++){
+        const dist=Math.hypot(points[i][0]-points[j][0],points[i][1]-points[j][1]);
+        assert.ok(dist>=size+1,'overlap at '+width+'px and requested '+desired+'px');
+      }
+    }
+  }
+});
+test('fullscreen reserves top status and dynamic bottom controls without resizing on tests',()=>{
+  assert.match(runtime,/function arenaPortableFitMobileStage\(\)/);
+  assert.match(runtime,/--arena-mobile-reserved-bottom/);
+  assert.match(runtime,/--arena-mobile-player-shelf-height/);
+  assert.match(runtime,/const shelfHost=fullscreen\?card:document\.body/);
+  assert.match(css,/#card-9x16:fullscreen #viewport9x16/);
+  assert.match(css,/max-height:min\(var\(--arena-mobile-video-height/);
+  assert.doesNotMatch(css,/#card-9x16\.arena-tests-visible #viewport9x16/);
+});
+test('native fullscreen, Android theater and normal mode keep one original HUD',()=>{
+  assert.match(runtime,/function arenaPortableSetTheater\(enabled\)/);
+  assert.match(runtime,/function arenaPortableToggleFullscreen\(\)/);
+  assert.match(runtime,/if\(toolbar\)fullscreenBar\.appendChild\(toolbar\)/);
+  assert.match(runtime,/if\(playerShelf&&shelfHost&&playerShelf\.parentElement!==shelfHost\)shelfHost\.appendChild\(playerShelf\)/);
+  assert.match(css,/html\.arena-mobile-offline\.arena-mobile-theater #card-9x16/);
+});
+test('menu X, repeat-menu click, Escape and Android Back consume overlays before fullscreen',()=>{
+  assert.match(runtime,/function arenaMobileInstallBackAndMenuClose\(\)/);
+  assert.match(runtime,/button\.id='arenaMobileMenuClose'/);
+  assert.match(runtime,/event\.key==='Escape'/);
+  assert.match(runtime,/event\.key!=='Escape'&&event\.key!=='Backspace'/);
+  assert.match(runtime,/window\.addEventListener\('popstate'/);
+  assert.match(runtime,/function arenaMobileCloseTopPanel\(\)/);
+  assert.match(runtime,/const details=menu&&!menu\.hidden\?menu\.querySelector/);
+  assert.match(runtime,/closeArenaOperatorPopover\(false\)/);
+  assert.match(css,/#arenaOperatorPopover #arenaMobileMenuClose/);
+});
+test('setup and menus are isolated from gameplay controls',()=>{
+  assert.match(runtime,/classList\.add\('arena-mobile-setup-open'\)/);
+  assert.match(runtime,/classList\.remove\('arena-mobile-setup-open'\)/);
+  assert.match(runtime,/if\(setup\)\(fullscreen\?card:document\.body\)\.appendChild\(setup\)/);
+  assert.match(css,/arena-mobile-setup-open #arenaMobileControlShelf/);
+  assert.match(css,/arena-mobile-overlay-open #arenaMobileControlShelf/);
+  assert.match(css,/#arenaPortableStart:not\(:disabled\)/);
+});
+test('tests drawer is draggable, scrollable, bounded and legible at any transparency',()=>{
+  assert.match(touch,/function arenaMobilePositionTestDrawer\(\)/);
+  assert.match(touch,/function arenaMobileInstallTestDragging\(drawer\)/);
+  assert.match(touch,/const host=card\|\|document\.body/);
+  assert.match(touch,/--arena-tests-background-alpha/);
+  assert.match(css,/#arenaPortableTestDrawer:not\(\[hidden\]\)\{[\s\S]*?opacity:1!important/);
+  assert.match(css,/#arenaPortableTestBody\{[\s\S]*?overflow-y:auto!important/);
+  assert.match(css,/#arenaStreamerSkillsDock/);
+});
+test('protagonist status and role compatibility do not modify combat logic',()=>{
+  assert.match(runtime,/function arenaMobileRefreshProtaStatus\(\)/);
+  assert.match(runtime,/playerStatus\.textContent='Prota fuera de combate'/);
+  assert.match(runtime,/alive\.length>=24/);
+  assert.match(touch,/function arenaMobileTouchStart\(event\)/);
+  assert.match(touch,/arenaMobileJumpTap\(\)/);
+  assert.match(touch,/function arenaMobileInstallControlDragging\(\)/);
 });

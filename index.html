@@ -856,8 +856,10 @@ body.touch-controls-active #portraitChatOverlay {
     box-shadow: none !important;
 }
 #card-16x9:fullscreen::backdrop, #card-9x16:fullscreen::backdrop { background: #000; }
-#card-16x9:fullscreen > :not(#viewport16x9):not(#settingsPauseModal),
-#card-9x16:fullscreen > :not(#viewport9x16):not(#settingsPauseModal) { display: none !important; }
+/* In the standalone mobile edition, original buttons and tests live in the
+   fullscreen card; only the PC/OBS capture hides all non-video siblings. */
+html:not(.arena-mobile-offline) #card-16x9:fullscreen > :not(#viewport16x9):not(#settingsPauseModal),
+html:not(.arena-mobile-offline) #card-9x16:fullscreen > :not(#viewport9x16):not(#settingsPauseModal) { display: none !important; }
 #card-16x9:fullscreen #viewport16x9 {
     width: min(100vw, 177.777778dvh) !important;
     height: min(100dvh, 56.25vw) !important;
@@ -9510,7 +9512,7 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.40.2',
+            version: '0.40.3',
             edition: 'tiktok',
             renderSpriteMode: arenaGpuSpritesEnabled ? 'hardware-candidate' : 'software-safe-vectors',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,

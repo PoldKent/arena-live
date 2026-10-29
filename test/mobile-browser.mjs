@@ -93,8 +93,8 @@ try{
         assert.ok(result.toolbar.bottom<result.video.top,JSON.stringify(result));
         assert.ok(result.shelf.top>=result.video.bottom-1,JSON.stringify(result));
         assert.ok(Math.abs(result.video.width/result.video.height-9/16)<.02,JSON.stringify(result));
-        // v0.37-style compact circular top icons use 40px targets; action buttons remain >=44px.
-        assert.ok(result.rects.every(([left,right,width,height],i)=>left>=0&&right<=result.screen&&width>=(i<3?44:40)&&height>=(i<3?44:40)),JSON.stringify(result));
+        // RC2: compact circular toolbar uses 38px and action buttons remain >=44px.
+        assert.ok(result.rects.every(([left,right,width,height],i)=>left>=0&&right<=result.screen&&width>=(i<3?44:38)&&height>=(i<3?44:38)),JSON.stringify(result));
         const toolbar=await page.locator('#arenaMobileFloating').evaluate(node=>{
             const rect=node.getBoundingClientRect();
             const video=document.getElementById('viewport9x16').getBoundingClientRect();
@@ -103,8 +103,8 @@ try{
                 fixed:getComputedStyle(node).position==='fixed',
                 circle:btn.borderRadius==='50%',w:parseFloat(btn.width)};
         });
-        assert.ok(toolbar.fixed&&toolbar.circle&&toolbar.w===40,JSON.stringify(toolbar));
-        assert.ok(toolbar.y>=0&&toolbar.right<=result.screen&&toolbar.y+44<=toolbar.videoTop,JSON.stringify(toolbar));
+        assert.ok(!toolbar.fixed&&toolbar.circle&&toolbar.w===38,JSON.stringify(toolbar));
+        assert.ok(toolbar.y>=0&&toolbar.right<=result.screen&&toolbar.y+toolbar.w<=toolbar.videoTop,JSON.stringify(toolbar));
         await page.locator('#arenaMobileMoreBtn').tap();
         assert.equal(await page.locator('#arenaPortableModePlayer').isVisible(),true);
         assert.equal(await page.locator('#arenaPortableModeDirector').isVisible(),true);
@@ -242,6 +242,36 @@ try{
         });
         assert.ok(result.afterOne<result.initial);assert.equal(result.doubleRequested,true);
     });
+    await check('RC2 Gameboy layout: analog left and action trio right immediately after video',async()=>{
+        await page.evaluate(()=>{ArenaPortable.setMode('player');ArenaMobileTouch.setTouchMode('joystick');ArenaMobileTouch.resetButtons();});
+        await page.waitForTimeout(150);
+        const r=await page.evaluate(()=>{
+            const get=id=>document.getElementById(id).getBoundingClientRect();
+            const game=get('viewport9x16'),rail=get('arenaMobileControlShelf');
+            const joy=get('touchJoystick'),power=get('arenaMobilePower'),jump=get('arenaMobileJump'),attack=get('arenaMobileAttack');
+            const toolbar=get('arenaMobileFloating');
+            const header=document.querySelector('body>header').getBoundingClientRect();
+            return {game:{top:game.top,bottom:game.bottom,width:game.width,height:game.height},
+                rail:{top:rail.top,bottom:rail.bottom},joy:{left:joy.left,right:joy.right,top:joy.top,bottom:joy.bottom},
+                power:{left:power.left,right:power.right,top:power.top,bottom:power.bottom},
+                jump:{left:jump.left,right:jump.right,top:jump.top,bottom:jump.bottom},
+                attack:{left:attack.left,right:attack.right,top:attack.top,bottom:attack.bottom},
+                toolbar:{top:toolbar.top,bottom:toolbar.bottom},header:{top:header.top,bottom:header.bottom},h:innerHeight,
+                hint:getComputedStyle(document.getElementById('arenaMobileGestureGuide')).display};
+        });
+        assert.ok(r.toolbar.bottom<=r.game.top+2,JSON.stringify(r));
+        assert.ok(r.toolbar.top>=r.header.top&&r.toolbar.bottom<=r.header.bottom+2,JSON.stringify(r));
+        assert.ok(r.joy.right<r.power.left&&r.joy.right<r.jump.left&&r.joy.right<r.attack.left,JSON.stringify(r));
+        assert.ok(r.power.left<r.jump.left&&r.jump.left<r.attack.left,JSON.stringify(r));
+        assert.ok(r.jump.top<r.power.top&&r.jump.top<r.attack.top,JSON.stringify(r));
+        const separation=(a,b)=>Math.hypot((a.left+a.right-b.left-b.right)/2,(a.top+a.bottom-b.top-b.bottom)/2);
+        assert.ok(separation(r.power,r.jump)>=70,JSON.stringify(r));
+        assert.ok(separation(r.attack,r.jump)>=70,JSON.stringify(r));
+        assert.ok(separation(r.power,r.attack)>=70,JSON.stringify(r));
+        assert.ok(r.rail.top>=r.game.bottom-2,JSON.stringify(r));
+        assert.ok(r.rail.bottom<=r.h+2,JSON.stringify(r));
+        assert.equal(r.hint,'none',JSON.stringify(r));
+    });
     await check('joystick plus action button positions can be saved, modified and restored',async()=>{
         const result=await page.evaluate(()=>{
             ArenaMobileTouch.setTouchMode('joystick');
@@ -352,6 +382,42 @@ try{
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),false);
         await page.evaluate(()=>ArenaPortable.setMode('player'));
     });
+    await check('restored v0.37 UI is the actual stylesheet and has single focus + fixed powers rail',async()=>{
+        const result=await page.evaluate(()=>{
+            const css=document.getElementById('arena-mobile-profile').textContent;
+            return {baseline:css.includes('v0.37: Director controls stay within one compact scrollable panel'),
+              restored:css.includes('RESTORE MOBILE v0.37 UI · RC1'),
+              oldPatchStack:css.includes('v0.40.3 · Single mobile theater'),
+              fixFullscreenCSS:document.getElementById('arena-fullscreen-capture').textContent.includes('html:not(.arena-mobile-offline) #card-9x16:fullscreen'),
+              mode:document.documentElement.dataset.mobileMode};
+        });
+        assert.equal(result.baseline,true,JSON.stringify(result));
+        assert.equal(result.restored,true,JSON.stringify(result));
+        assert.equal(result.oldPatchStack,false,JSON.stringify(result));
+        assert.equal(result.fixFullscreenCSS,true,JSON.stringify(result));
+        await page.evaluate(()=>{ArenaPortable.setMode('director');setMonitorFocus('9:16');ArenaMobileTouch.openTests(false);});
+        await page.waitForTimeout(120);
+        const layout=await page.evaluate(()=>{
+            const r=id=>document.getElementById(id).getBoundingClientRect();
+            const video=r('viewport9x16'),rail=r('arenaStreamerSkillsDock');
+            return {videoBottom:video.bottom,videoRatio:video.width/video.height,
+              railTop:rail.top,railBottom:rail.bottom,
+              railDisplay:getComputedStyle(document.getElementById('arenaStreamerSkillsDock')).display,
+              powers:[...document.querySelectorAll('#arenaStreamerSkillsDock .arena-skill-buttons>button')].map(n=>{
+                const b=n.getBoundingClientRect();return {width:b.width,height:b.height,top:b.top,bottom:b.bottom};
+              }),
+              viewportHeight:innerHeight};
+        });
+        assert.equal(layout.powers.length,5,JSON.stringify(layout));
+        assert.ok(layout.powers.every(b=>b.width>20&&b.top>=0&&b.bottom<=layout.viewportHeight+1),JSON.stringify(layout));
+        assert.ok(layout.videoBottom<=layout.railTop+2,JSON.stringify(layout));
+        assert.ok(layout.railBottom<=layout.viewportHeight+1,JSON.stringify(layout));
+        assert.ok(Math.abs(layout.videoRatio-9/16)<.02,JSON.stringify(layout));
+        await page.locator('#arenaMobileTestsShortcut').tap();
+        const after=await page.locator('#viewport9x16').boundingBox();
+        assert.ok(Math.abs(after.y+after.height-layout.videoBottom)<2,JSON.stringify({layout,after}));
+        await page.locator('#arenaPortableTestClose').tap();
+    });
     await check('Android content URL fallback preserves five Streamer powers and upper toolbar without cropping',async()=>{
         await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(false);});
         await page.evaluate(()=>Object.defineProperty(document,'fullscreenEnabled',{value:false,configurable:true}));
@@ -381,6 +447,42 @@ try{
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
         assert.equal(await page.locator('#arenaStreamerSkillsDock').isVisible(),true);
         await page.locator('#arenaPortableTestClose').tap();
+        await page.locator('#arenaPortableFullscreen').tap();
+        assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('arena-mobile-theater')),false);
+        await page.evaluate(()=>delete document.fullscreenEnabled);
+    });
+
+    await check('RC5 menu closes by button, X, Escape and Android Back without leaving theater',async()=>{
+        await page.evaluate(()=>{
+            ArenaPortable.setMode('player');
+            Object.defineProperty(document,'fullscreenEnabled',{value:false,configurable:true});
+        });
+        await page.locator('#arenaPortableFullscreen').tap();
+        await page.waitForFunction(()=>document.documentElement.classList.contains('arena-mobile-theater'));
+        await page.locator('#arenaMobileMoreBtn').tap();
+        assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),true);
+        await page.locator('#arenaMobileMoreBtn').tap();
+        assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),false);
+        await page.locator('#arenaMobileMoreBtn').tap();
+        await page.locator('#arenaMobileMenuClose').tap();
+        assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),false);
+        await page.locator('#arenaMobileMoreBtn').tap();
+        await page.keyboard.press('Escape');
+        assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),false);
+        await page.locator('#arenaMobileMoreBtn').tap();
+        await page.locator('.arena-mobile-match-menu summary').tap();
+        assert.equal(await page.locator('.arena-mobile-match-menu').evaluate(n=>n.open),true);
+        await page.keyboard.press('Escape');
+        assert.equal(await page.locator('.arena-mobile-match-menu').evaluate(n=>n.open),false);
+        assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),true);
+        await page.keyboard.press('Escape');
+        assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),false);
+        assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('arena-mobile-theater')),true);
+        await page.locator('#arenaMobileTestsShortcut').tap();
+        assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
+        await page.keyboard.press('Escape');
+        assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),false);
+        assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('arena-mobile-theater')),true);
         await page.locator('#arenaPortableFullscreen').tap();
         assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('arena-mobile-theater')),false);
         await page.evaluate(()=>delete document.fullscreenEnabled);
@@ -444,7 +546,10 @@ try{
         await page.locator('#arenaPortableTestTransparency').evaluate(n=>{
             n.value='45';n.dispatchEvent(new Event('input',{bubbles:true}));
         });
-        assert.ok(Math.abs(Number(await page.locator('#arenaPortableTestDrawer').evaluate(n=>getComputedStyle(n).opacity))-.55)<.02);
+        assert.equal(Number(await page.locator('#arenaPortableTestDrawer').evaluate(n=>getComputedStyle(n).opacity)),1);
+        const panelAlpha=await page.locator('#arenaPortableTestDrawer').evaluate(n=>
+            Number(getComputedStyle(n).getPropertyValue('--arena-tests-background-alpha')));
+        assert.ok(Math.abs(panelAlpha-.55)<.02);
         assert.equal(await page.locator('#arenaPortableTransparencyValue').textContent(),'45%');
         assert.equal(await page.locator('#arenaStreamerSkillsDock .arena-skill-buttons>button').count(),5);
         assert.equal(await page.locator('#arenaMobileFullscreenBar').isVisible(),true);

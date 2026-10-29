@@ -1,5 +1,17 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-29 — Arena Live v0.40.3 · Interfaz móvil y navegación segura
+
+- Corregida la franja vacía de la antigua barra táctil. Jugador conserva joystick, salto, golpe y poder sin mostrar el rail de cinco clases del Streamer; Streamer conserva exclusivamente sus cinco habilidades originales, con nombres visibles.
+- Posiciones Gameboy escalonadas y con reserva vertical adaptada al tamaño de botones. Migración de posiciones predeterminadas v0.40 RC2 y conservación de preferencias personalizadas; cambiar tamaño recalcula el espacio de la arena.
+- Pantalla completa nativa y teatro Android reservan cabecera y zona táctil sin ocultar el borde superior del marco 9:16 ni cambiar la simulación. El panel de pruebas y el menú no alteran el tamaño del video.
+- Menú compacto con botón X; pulsar de nuevo ☰ lo cierra. Escape / Atrás gestionan submenús, menú, ajustes y pruebas antes de abandonar la vista; se utiliza historial cuando el navegador admite pushState sobre el archivo local. El sistema operativo puede conservar prioridad sobre el fullscreen nativo.
+- Panel del Streamer con desplazamiento interno y altura limitada. La transparencia desvanece el fondo, nunca el texto ni los formularios; los cinco botones quedan independientes.
+- Mejorado contraste del botón Iniciar partida y desambiguación del modo activo; aviso legible de Prota para combates multitudinarios o al quedar fuera de combate.
+- Paquete oficial monolítico generado desde el mismo motor y estado de main: `mobile-builds/Arena-Live-v0.40.3-movil.html`. Los históricos RC1–RC4 se conservan como referencia.
+- Añadidas pruebas estáticas y de navegador para aislamiento, cierre, fullscreen, separación geométrica de botones y transparencia. La validación CI de GitHub Actions debe ejecutarse en un runner; el servidor no modifica reglas físicas, TikTok LIVE ni OBS.
+
+
 ## 2026-10-28 — Arena Live v0.39 · Sincronización y regresiones móviles
 
 - Sincronizadas las referencias de estilo y de los cinco módulos del motor con la versión 0.39 para evitar fallos al generar el HTML móvil desde los archivos fuente (quedaban referencias a v0.36).

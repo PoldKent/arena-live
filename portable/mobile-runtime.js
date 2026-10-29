@@ -94,7 +94,8 @@ function arenaPortableResolution(value) {
 }
 function arenaPortableClose() {
     const dialog=document.getElementById('arenaPortableSetup');if(!dialog)return;
-    dialog.hidden=true;arenaPortableSetupOpen=false;isGamePaused=arenaPortablePreviousPause;
+    dialog.hidden=true;arenaPortableSetupOpen=false;document.documentElement.classList.remove('arena-mobile-setup-open');isGamePaused=arenaPortablePreviousPause;
+    requestAnimationFrame(arenaMobileSyncOverlayNavigation);
     previousFrameTime=null;simulationAccumulator=0;arenaLastRenderTime=null;
     updateTouchControlsVisibility();document.getElementById('arenaMobileMoreBtn')?.focus({preventScroll:true});refreshArenaPortableFloatingUI();
 }
@@ -115,7 +116,8 @@ function arenaPortableOpen() {
     document.getElementById('arenaPortableNotice').hidden=hideNotice;
     document.getElementById('arenaPortableDontShow').checked=hideNotice;
     arenaPortablePreviousPause=isGamePaused;
-    dialog.hidden=false;arenaPortableSetupOpen=true;isGamePaused=true;
+    dialog.hidden=false;arenaPortableSetupOpen=true;document.documentElement.classList.add('arena-mobile-setup-open');isGamePaused=true;
+    requestAnimationFrame(arenaMobileSyncOverlayNavigation);
     document.dispatchEvent(new Event('arena-touch-disable'));updateTouchControlsVisibility();
     document.getElementById('arenaPortableCount').focus({preventScroll:true});
 }
@@ -168,19 +170,35 @@ function arenaPortableReport(message){
 }
 function arenaPortableFitMobileStage(){
     const ratio=arenaPortableActiveRatio();
-    const card=document.getElementById(ratio==='16:9'?'card-16x9':'card-9x16');
-    const fullscreen=!!document.fullscreenElement||arenaPortableTheater;
+    const video=document.getElementById(ratio==='16:9'?'viewport16x9':'viewport9x16');
     const stage=document.getElementById('broadcastStageSection');
-    const height=fullscreen?window.innerHeight:(stage?.getBoundingClientRect().height||window.innerHeight-60);
+    const fullscreen=!!document.fullscreenElement||arenaPortableTheater;
     const director=arenaPortableProfile.mode===ARENA_MOBILE_MODES.DIRECTOR;
-    const shelf=director||arenaPortableProfile.touchMode!=='touch';
-    const bottom=shelf?(window.innerHeight<=600?76:92):0;
-    const head=fullscreen?65:0;
-    const usable=Math.max(80,Math.floor(height-bottom-head-18));
-    document.documentElement.style.setProperty('--arena-mobile-video-height',usable+'px');
+    const controlsVisible=director||arenaPortableProfile.touchMode==='joystick';
+    const viewHeight=Math.max(1,Math.min(window.innerHeight,window.visualViewport?.height||window.innerHeight));
+    const top=fullscreen?Math.max(56,56+(window.visualViewport?.offsetTop||0)):Math.max(58,stage?.getBoundingClientRect().top||58);
+    const root=document.documentElement;
+    const playerBand=Math.max(144,Number.parseFloat(root.style.getPropertyValue('--arena-mobile-player-shelf-height'))||145);
+    const band=controlsVisible?(director?78:playerBand):0;
+    // Calculate from the real visual viewport, not document/scroll height.
+    // This leaves a real control band below the 9:16 video on Android.
+    const usable=Math.max(80,Math.floor(viewHeight-top-band-14));
+    const next=usable+'px';
+    if(root.style.getPropertyValue('--arena-mobile-video-height')!==next)
+        root.style.setProperty('--arena-mobile-video-height',next);
     if(typeof arenaMobileKeepStreamerSkillsVisible==='function')arenaMobileKeepStreamerSkillsVisible();
-    if(typeof arenaMobilePositionTestDrawer==='function')arenaMobilePositionTestDrawer();
     if(typeof arenaMobileApplyLayout==='function')arenaMobileApplyLayout();
+    if(video){
+        const rect=video.getBoundingClientRect();
+        const desired=rect.bottom+6;
+        const maxTop=Math.max(54,viewHeight-band-6);
+        const controlTop=Math.round(Math.max(54,Math.min(desired,maxTop)));
+        const nextTop=controlTop+'px';
+        if(root.style.getPropertyValue('--arena-mobile-controls-top')!==nextTop)
+            root.style.setProperty('--arena-mobile-controls-top',nextTop);
+    }
+    root.style.setProperty('--arena-mobile-reserved-bottom',Math.ceil(band+10)+'px');
+    if(typeof arenaMobilePositionTestDrawer==='function')arenaMobilePositionTestDrawer();
 }
 function arenaPortableSetTheater(enabled){
     arenaPortableTheater=!!enabled;
@@ -191,6 +209,7 @@ function arenaPortableSetTheater(enabled){
 }
 async function arenaPortableToggleFullscreen(){
     closeArenaOperatorPopover(false);
+    arenaMobileSyncOverlayNavigation();
     if(arenaPortableTheater){arenaPortableSetTheater(false);return true;}
     if(document.fullscreenElement){
         try{await document.exitFullscreen();return true;}catch(_){return false;}
@@ -214,6 +233,83 @@ async function arenaPortableToggleFullscreen(){
     if(feedback)feedback.textContent='Vista ampliada. Para ocultar las barras de Chrome, abre desde un servidor HTTPS compatible.';
     return true;
 }
+
+/* Mobile navigation consumes overlays before allowing a fullscreen exit.
+   The history marker also lets Android's Back button close the current panel
+   without navigating away from the standalone file. */
+function arenaMobileCurrentOverlay(){
+    const dialog=document.getElementById('arenaPortableSetup');
+    if(dialog&&!dialog.hidden)return 'setup';
+    if(isSettingsOpen)return 'settings';
+    const menu=document.getElementById('arenaOperatorPopover');
+    if(menu&&!menu.hidden)return 'menu';
+    if(typeof arenaMobileTestState!=='undefined'&&arenaMobileTestState.open)return 'tests';
+    return null;
+}
+function arenaMobileSyncOverlayNavigation(){
+    const current=arenaMobileCurrentOverlay();
+    const root=document.documentElement;
+    root.classList.toggle('arena-mobile-overlay-open',current==='menu'||current==='settings'||current==='setup');
+    if(current){
+        if(!history.state?.arenaMobilePanel){
+            try{history.pushState({...history.state,arenaMobilePanel:true},'');}catch(_){/* content:// may disallow pushState */}
+        }
+    }else if(history.state?.arenaMobilePanel){
+        // Discard just our overlay entry, not the underlying page or fullscreen.
+        history.back();
+    }
+}
+function arenaMobileCloseTopPanel(){
+    const menu=document.getElementById('arenaOperatorPopover');
+    const details=menu&&!menu.hidden?menu.querySelector('.arena-mobile-match-menu[open]'):null;
+    if(details){details.open=false;return 'submenu';}
+    const dialog=document.getElementById('arenaPortableSetup');
+    if(dialog&&!dialog.hidden){arenaPortableClose();return 'setup';}
+    if(isSettingsOpen){toggleSettingsModal(false);return 'settings';}
+    if(menu&&!menu.hidden){closeArenaOperatorPopover(false);return 'menu';}
+    if(typeof arenaMobileTestState!=='undefined'&&arenaMobileTestState.open){
+        arenaMobileShowTestDrawer(false);return 'tests';
+    }
+    return null;
+}
+function arenaMobileInstallBackAndMenuClose(){
+    const menu=document.querySelector('#arenaOperatorPopover [data-operator-panel="mobile"]');
+    if(menu&&!document.getElementById('arenaMobileMenuClose')){
+        const button=document.createElement('button');
+        button.id='arenaMobileMenuClose';button.type='button';button.textContent='×';
+        button.title='Cerrar menú';button.setAttribute('aria-label','Cerrar menú');
+        // Insert before the grid content so it remains visible at the top.
+        (menu.querySelector('.arena-portable-menu-heading')||menu).appendChild(button);
+        button.addEventListener('click',event=>{
+            event.preventDefault();event.stopPropagation();
+            closeArenaOperatorPopover(false);
+            arenaMobileSyncOverlayNavigation();
+        });
+    }
+    document.addEventListener('keydown',event=>{
+        if(event.key!=='Escape'&&event.key!=='Backspace'&&event.key!=='BrowserBack')return;
+        if(event.key==='Backspace'&&['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
+        if(!arenaMobileCurrentOverlay())return;
+        event.preventDefault();event.stopImmediatePropagation();
+        arenaMobileCloseTopPanel();arenaMobileSyncOverlayNavigation();
+    },true);
+    window.addEventListener('popstate',()=>{
+        const result=arenaMobileCloseTopPanel();
+        if(result==='submenu'&&arenaMobileCurrentOverlay()){
+            // The first Back leaves an open submenu and returns to the main menu.
+            try{history.pushState({...history.state,arenaMobilePanel:true},'');}catch(_){}
+        }
+        document.documentElement.classList.toggle('arena-mobile-overlay-open',
+            ['menu','settings','setup'].includes(arenaMobileCurrentOverlay()));
+    });
+    // Native menu and settings handlers execute during bubbling; measure their
+    // final state on the next frame, including toggle-to-close and outside taps.
+    for(const type of ['click','change','toggle']){
+        document.addEventListener(type,()=>requestAnimationFrame(arenaMobileSyncOverlayNavigation),true);
+    }
+    requestAnimationFrame(arenaMobileSyncOverlayNavigation);
+}
+
 function installArenaPortableFloatingUI(){
     const hud=document.createElement('nav');
     hud.id='arenaMobileFloating';
@@ -322,8 +418,24 @@ function arenaPortableReady() {
         if(lobby){lobby.setAttribute('aria-label','Preparar combate');const heading=lobby.querySelector('.arena-onboarding-card h2');if(heading)heading.textContent='Preparar combate';}
     }
     installArenaPortableFloatingUI();
+    arenaMobileInstallBackAndMenuClose();
     const playerShelf=document.createElement('section');playerShelf.id='arenaMobileControlShelf';playerShelf.setAttribute('aria-label','Controles del juego y herramientas');
     document.getElementById('card-9x16')?.appendChild(playerShelf);
+    const playerStatus=document.createElement('output');
+    playerStatus.id='arenaMobileProtaStatus';playerStatus.hidden=true;
+    playerStatus.setAttribute('role','status');playerStatus.setAttribute('aria-live','polite');
+    playerShelf.appendChild(playerStatus);
+    function arenaMobileRefreshProtaStatus(){
+        if(arenaPortableProfile.mode!==ARENA_MOBILE_MODES.PLAYER||arenaPortableSetupOpen||typeof fighters==='undefined'||gameState!=='COMBAT'){
+            playerStatus.hidden=true;return;
+        }
+        const alive=fighters.filter(f=>!f.eliminated);
+        const prota=alive.find(f=>f.isStreamer);
+        if(!prota){playerStatus.textContent='Prota fuera de combate';playerStatus.hidden=false;}
+        else if(alive.length>=24){playerStatus.textContent='🎮 Prota en combate · '+alive.length+' luchadores';playerStatus.hidden=false;}
+        else playerStatus.hidden=true;
+    }
+    setInterval(arenaMobileRefreshProtaStatus,700);
     const gestureGuide=document.createElement('aside');gestureGuide.id='arenaMobileGestureGuide';gestureGuide.setAttribute('aria-label','Cómo controlar el protagonista');
     gestureGuide.textContent='Táctil total: izquierda, desliza para moverte. Derecha, toca para saltar, dos toques para doble salto; desliza para golpear o mantén pulsado para el poder.';
     document.getElementById('card-9x16')?.appendChild(gestureGuide);
@@ -355,7 +467,8 @@ function arenaPortableReady() {
         }
         if(menu)(fullscreen?card:document.body)?.appendChild(menu);
         if(guide)card?.appendChild(guide);
-        if(playerShelf&&card&&playerShelf.parentElement!==card)card.appendChild(playerShelf);
+        const shelfHost=fullscreen?card:document.body;
+        if(playerShelf&&shelfHost&&playerShelf.parentElement!==shelfHost)shelfHost.appendChild(playerShelf);
         // The compact tests panel is independent of the skill shelf. Mount it
         // on body in normal mode and inside the fullscreen card when necessary.
         for(const id of ['arenaHeaderActions','touchControlDock','arenaStreamerSkillsDock']){const node=document.getElementById(id);if(node)playerShelf?.appendChild(node);}
@@ -363,7 +476,7 @@ function arenaPortableReady() {
         if(typeof arenaMobileMountTestDrawer==='function')arenaMobileMountTestDrawer();
         if(typeof arenaMobileApplyLayout==='function')requestAnimationFrame(arenaMobileApplyLayout);
         const setup=document.getElementById('arenaPortableSetup');
-        if(setup)(fullscreen?view:document.body).appendChild(setup);
+        if(setup)(fullscreen?card:document.body).appendChild(setup);
         refreshArenaPortableFloatingUI();
         requestAnimationFrame(arenaPortableFitMobileStage);
     }
