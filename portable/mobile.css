@@ -1668,3 +1668,15 @@ html.arena-mobile-offline.arena-mobile-theater #arenaPortableTestDrawer:not([hid
   left:var(--arena-tests-x,8px)!important;top:var(--arena-tests-y,65px)!important;
   right:auto!important;bottom:auto!important;
 }
+
+/* The single-portrait preview selector has two IDs and otherwise outranks
+   theater sizing. In fallback fullscreen the viewport, not the old grid,
+   must establish the frame height. */
+html.arena-mobile-offline.arena-mobile-theater #dualMonitorsGrid[data-focus="9:16"] > #card-9x16:not([hidden]){
+  display:flex!important;position:fixed!important;inset:0!important;
+  width:100vw!important;height:100dvh!important;min-width:0!important;
+  min-height:0!important;max-width:none!important;max-height:none!important;
+  margin:0!important;padding:calc(64px + env(safe-area-inset-top)) 4px 98px!important;
+  box-sizing:border-box!important;border:0!important;border-radius:0!important;
+  z-index:500!important;background:#08101e!important;overflow:hidden!important;
+}
