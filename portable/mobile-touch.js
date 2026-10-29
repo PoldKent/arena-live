@@ -36,6 +36,7 @@ function arenaMobileApplyTestOpacity(){
 function arenaMobileTestSurface(){
     const fullscreen=document.fullscreenElement;
     if(fullscreen?.matches?.('#card-9x16,#card-16x9'))return fullscreen.getBoundingClientRect();
+    if(document.documentElement.classList.contains('arena-mobile-theater'))return document.getElementById(monitorFocus==='16:9'?'card-16x9':'card-9x16').getBoundingClientRect();
     return {left:0,top:0,width:window.innerWidth,height:window.innerHeight};
 }
 function arenaMobileTestLimits(drawer){
@@ -261,7 +262,7 @@ function arenaMobilePositionTestDrawer(){
     arenaMobileKeepStreamerSkillsVisible();
     const skills=document.getElementById('arenaStreamerSkillsDock');
     const fullscreen=document.fullscreenElement;
-    const host=fullscreen?.matches?.('#card-9x16,#card-16x9')?fullscreen:null;
+    const host=fullscreen?.matches?.('#card-9x16,#card-16x9')?fullscreen:(document.documentElement.classList.contains('arena-mobile-theater')?document.getElementById(monitorFocus==='16:9'?'card-16x9':'card-9x16'):null);
     const bottom=host?host.getBoundingClientRect().bottom:window.innerHeight;
     const rail=skills?.getBoundingClientRect();
     const usable=rail&&rail.height>=30&&rail.top>=0&&rail.top<bottom;
@@ -279,7 +280,8 @@ function arenaMobileMountTestDrawer(){
     // the fullscreen card (not into the 9:16 video) and restore it afterward.
     const fullscreen=document.fullscreenElement;
     const card=fullscreen?.matches?.('#card-9x16,#card-16x9')
-        ?fullscreen:fullscreen?.querySelector?.('#card-9x16,#card-16x9');
+        ?fullscreen:fullscreen?.querySelector?.('#card-9x16,#card-16x9') ||
+        (document.documentElement.classList.contains('arena-mobile-theater')?document.getElementById(monitorFocus==='16:9'?'card-16x9':'card-9x16'):null);
     const host=card||document.body;
     if(drawer.parentElement!==host)host.appendChild(drawer);
     // Position and opacity persist across opening, rotation and fullscreen.
@@ -423,6 +425,7 @@ function arenaMobileEditButtons(on=true){
         document.dispatchEvent(new Event('arena-touch-disable'));
     }else arenaMobileSaveLayout();
     arenaMobileApplyLayout();
+    requestAnimationFrame(arenaPortableFitMobileStage);
 }
 function arenaMobileSetButtonSize(size){
     arenaMobileLayout.size=Math.max(56,Math.min(94,Number(size)||70));
@@ -507,7 +510,7 @@ function arenaMobileInstallControlDragging(){
         });
     }
     const done=document.createElement('button');done.id='arenaMobileEditDone';done.type='button';
-    done.textContent='✓ Guardar posiciones';done.hidden=true;
+    done.textContent='✓';done.title='Guardar posiciones';done.setAttribute('aria-label','Guardar posiciones');done.hidden=true;
     done.onclick=()=>arenaMobileEditButtons(false);
     document.getElementById('arenaMobileFloating')?.appendChild(done);
     arenaMobileInstallLayoutSettings();
