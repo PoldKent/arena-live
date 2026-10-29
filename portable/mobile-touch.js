@@ -454,10 +454,12 @@ function arenaMobileEditButtons(on=true){
 function arenaMobileSetButtonSize(size){
     arenaMobileLayout.size=Math.max(56,Math.min(94,Number(size)||70));
     arenaMobileApplyLayout();arenaMobileSaveLayout();
+    requestAnimationFrame(arenaPortableFitMobileStage);
 }
 function arenaMobileResetButtons(){
     arenaMobileLayout={size:70,points:Object.fromEntries(Object.entries(arenaMobileLayoutDefaults).map(([k,v])=>[k,[...v]]))};
     arenaMobileSaveLayout();arenaMobileApplyLayout();
+    requestAnimationFrame(arenaPortableFitMobileStage);
 }
 function arenaMobileInstallLayoutSettings(){
     const sections=[...document.querySelectorAll('#settingsGeneralPanel>.arena-settings-section')];
