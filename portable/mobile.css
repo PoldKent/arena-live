@@ -756,6 +756,11 @@ html.arena-mobile-offline{
  --mobile-restore-bottom:94px;
  --mobile-restore-gap:8px;
 }
+/* Bottom controls are FIXED, so older v0.37 reserved bottom padding must
+   not be counted again by the video fit calculation. */
+html.arena-mobile-offline body>main#arenaWorkspace{
+ padding-bottom:0!important;
+}
 html.arena-mobile-offline #arenaMobileFloating{
  display:flex!important;align-items:center!important;justify-content:flex-end!important;
  position:fixed!important;inset:auto max(7px,env(safe-area-inset-right)) auto auto!important;
