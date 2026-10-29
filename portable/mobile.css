@@ -1177,3 +1177,85 @@ html.arena-mobile-offline #arenaMobileFullscreenBar #arenaMobileFloating{
   min-width:34px!important;min-height:34px!important;
  }
 }
+
+/* ========================================================================
+ * MOBILE RESTORE RC3 — Android screenshot regressions (2026-10-29).
+ * Keep both gameplay and Streamer controls OUTSIDE a scrolled game preview.
+ * ======================================================================== */
+/* The five Streamer abilities are never part of the Player/Gameboy layout. */
+html.arena-mobile-offline[data-mobile-mode="player"] #arenaMobileControlShelf #arenaStreamerSkillsDock{
+ display:none!important;visibility:hidden!important;pointer-events:none!important;
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf #touchControlDock{
+ display:none!important;visibility:hidden!important;pointer-events:none!important;
+}
+/* Keep the brand and all five toolbar buttons on ONE line on real phones.
+   The combat-state badge is already visible on the arena capture. */
+html.arena-mobile-offline #arenaTopBarInner,
+html.arena-mobile-offline #arenaMobileFullscreenBar{
+ flex-wrap:nowrap!important;align-items:center!important;gap:3px!important;
+}
+html.arena-mobile-offline #arenaTopBarInner > .arena-brand-block,
+html.arena-mobile-offline #arenaMobileFullscreenBar > .arena-brand-block{
+ display:flex!important;align-items:center!important;flex:0 1 39%!important;
+ max-width:39%!important;min-width:0!important;overflow:hidden!important;
+ margin:0!important;gap:3px!important;
+}
+html.arena-mobile-offline #arenaTopBarInner .arena-brand-meta,
+html.arena-mobile-offline #arenaMobileFullscreenBar .arena-brand-meta{
+ display:flex!important;flex-wrap:nowrap!important;align-items:center!important;
+ gap:4px!important;min-width:0!important;max-width:100%!important;
+}
+html.arena-mobile-offline #arenaTopBarInner #headerStateBadge,
+html.arena-mobile-offline #arenaMobileFullscreenBar #headerStateBadge{
+ display:none!important;
+}
+html.arena-mobile-offline #arenaTopBarInner .arena-brand-meta h1,
+html.arena-mobile-offline #arenaMobileFullscreenBar .arena-brand-meta h1{
+ flex:0 1 auto!important;min-width:0!important;white-space:nowrap!important;
+ font-size:clamp(10px,2.9vw,12px)!important;
+}
+html.arena-mobile-offline #arenaTopBarInner #pausedBadgeHeader,
+html.arena-mobile-offline #arenaMobileFullscreenBar #pausedBadgeHeader{
+ flex:0 0 auto!important;white-space:nowrap!important;letter-spacing:.03em!important;
+ font-size:9px!important;padding:3px 5px!important;
+}
+html.arena-mobile-offline #arenaTopBarInner #arenaMobileFloating,
+html.arena-mobile-offline #arenaMobileFullscreenBar #arenaMobileFloating{
+ flex:0 0 auto!important;display:flex!important;align-items:center!important;
+ align-self:center!important;position:relative!important;top:auto!important;
+ bottom:auto!important;left:auto!important;right:auto!important;inset:auto!important;
+ margin:0 0 0 auto!important;transform:none!important;
+ width:max-content!important;max-width:61%!important;height:44px!important;
+ gap:2px!important;padding:2px!important;
+}
+html.arena-mobile-offline #arenaMobileFullscreenBar{
+ height:calc(54px + env(safe-area-inset-top))!important;
+ min-height:54px!important;box-sizing:border-box!important;
+ padding:env(safe-area-inset-top) 6px 0!important;
+}
+html.arena-mobile-offline #arenaMobileFullscreenBar .arena-brand-block > div:first-child,
+html.arena-mobile-offline #arenaTopBarInner .arena-brand-block > div:first-child{
+ display:none!important;
+}
+@media(max-width:380px){
+ html.arena-mobile-offline #arenaTopBarInner > .arena-brand-block,
+ html.arena-mobile-offline #arenaMobileFullscreenBar > .arena-brand-block{
+  flex-basis:37%!important;max-width:37%!important;
+ }
+ html.arena-mobile-offline #arenaTopBarInner #arenaMobileFloating,
+ html.arena-mobile-offline #arenaMobileFullscreenBar #arenaMobileFloating{
+  max-width:63%!important;
+ }
+}
+/* Control shelf is mounted on body in normal mode, and inside the selected
+   card in fullscreen. Its position always tracks the video lower edge. */
+html.arena-mobile-offline #arenaMobileControlShelf{
+ z-index:945!important;
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf #arenaStreamerSkillsDock{
+ display:block!important;visibility:visible!important;pointer-events:auto!important;
+}
+html.arena-mobile-offline #arenaMobileControlShelf #arenaStreamerSkillsDock>.arena-skill-buttons{
+ min-width:0!important;max-width:100%!important;
+}
