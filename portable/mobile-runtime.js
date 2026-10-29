@@ -492,7 +492,7 @@ function arenaPortableReady() {
     }
     setInterval(arenaMobileRefreshProtaStatus,700);
     const gestureGuide=document.createElement('aside');gestureGuide.id='arenaMobileGestureGuide';gestureGuide.setAttribute('aria-label','Cómo controlar el protagonista');
-    gestureGuide.textContent='Táctil total: izquierda, desliza para moverte. Derecha, toca para saltar, dos toques para doble salto; desliza para golpear o mantén pulsado para el poder.';
+    gestureGuide.innerHTML='<span class="arena-mobile-gesture-side"><strong>IZQUIERDA</strong> Desliza · mover</span><span class="arena-mobile-gesture-side"><strong>DERECHA</strong> Toca · saltar <i>·</i> Desliza ↑↓←→ · golpear <i>·</i> Mantén + ↑↓ · especial</span>';
     document.getElementById('card-9x16')?.appendChild(gestureGuide);
     const unavailable=document.getElementById('arenaTikTokChatStatus');if(unavailable)unavailable.textContent='Sin conexión LIVE';
     selectArenaChatTab('local',false);
