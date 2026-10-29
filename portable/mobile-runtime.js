@@ -95,6 +95,7 @@ function arenaPortableResolution(value) {
 function arenaPortableClose() {
     const dialog=document.getElementById('arenaPortableSetup');if(!dialog)return;
     dialog.hidden=true;arenaPortableSetupOpen=false;document.documentElement.classList.remove('arena-mobile-setup-open');isGamePaused=arenaPortablePreviousPause;
+    requestAnimationFrame(arenaMobileSyncOverlayNavigation);
     previousFrameTime=null;simulationAccumulator=0;arenaLastRenderTime=null;
     updateTouchControlsVisibility();document.getElementById('arenaMobileMoreBtn')?.focus({preventScroll:true});refreshArenaPortableFloatingUI();
 }
@@ -116,6 +117,7 @@ function arenaPortableOpen() {
     document.getElementById('arenaPortableDontShow').checked=hideNotice;
     arenaPortablePreviousPause=isGamePaused;
     dialog.hidden=false;arenaPortableSetupOpen=true;document.documentElement.classList.add('arena-mobile-setup-open');isGamePaused=true;
+    requestAnimationFrame(arenaMobileSyncOverlayNavigation);
     document.dispatchEvent(new Event('arena-touch-disable'));updateTouchControlsVisibility();
     document.getElementById('arenaPortableCount').focus({preventScroll:true});
 }
@@ -207,6 +209,7 @@ function arenaPortableSetTheater(enabled){
 }
 async function arenaPortableToggleFullscreen(){
     closeArenaOperatorPopover(false);
+    arenaMobileSyncOverlayNavigation();
     if(arenaPortableTheater){arenaPortableSetTheater(false);return true;}
     if(document.fullscreenElement){
         try{await document.exitFullscreen();return true;}catch(_){return false;}
@@ -230,6 +233,83 @@ async function arenaPortableToggleFullscreen(){
     if(feedback)feedback.textContent='Vista ampliada. Para ocultar las barras de Chrome, abre desde un servidor HTTPS compatible.';
     return true;
 }
+
+/* Mobile navigation consumes overlays before allowing a fullscreen exit.
+   The history marker also lets Android's Back button close the current panel
+   without navigating away from the standalone file. */
+function arenaMobileCurrentOverlay(){
+    const dialog=document.getElementById('arenaPortableSetup');
+    if(dialog&&!dialog.hidden)return 'setup';
+    if(isSettingsOpen)return 'settings';
+    const menu=document.getElementById('arenaOperatorPopover');
+    if(menu&&!menu.hidden)return 'menu';
+    if(typeof arenaMobileTestState!=='undefined'&&arenaMobileTestState.open)return 'tests';
+    return null;
+}
+function arenaMobileSyncOverlayNavigation(){
+    const current=arenaMobileCurrentOverlay();
+    const root=document.documentElement;
+    root.classList.toggle('arena-mobile-overlay-open',current==='menu'||current==='settings'||current==='setup');
+    if(current){
+        if(!history.state?.arenaMobilePanel){
+            try{history.pushState({...history.state,arenaMobilePanel:true},'');}catch(_){/* content:// may disallow pushState */}
+        }
+    }else if(history.state?.arenaMobilePanel){
+        // Discard just our overlay entry, not the underlying page or fullscreen.
+        history.back();
+    }
+}
+function arenaMobileCloseTopPanel(){
+    const menu=document.getElementById('arenaOperatorPopover');
+    const details=menu&&!menu.hidden?menu.querySelector('.arena-mobile-match-menu[open]'):null;
+    if(details){details.open=false;return 'submenu';}
+    const dialog=document.getElementById('arenaPortableSetup');
+    if(dialog&&!dialog.hidden){arenaPortableClose();return 'setup';}
+    if(isSettingsOpen){toggleSettingsModal(false);return 'settings';}
+    if(menu&&!menu.hidden){closeArenaOperatorPopover(false);return 'menu';}
+    if(typeof arenaMobileTestState!=='undefined'&&arenaMobileTestState.open){
+        arenaMobileShowTestDrawer(false);return 'tests';
+    }
+    return null;
+}
+function arenaMobileInstallBackAndMenuClose(){
+    const menu=document.querySelector('#arenaOperatorPopover [data-operator-panel="mobile"]');
+    if(menu&&!document.getElementById('arenaMobileMenuClose')){
+        const button=document.createElement('button');
+        button.id='arenaMobileMenuClose';button.type='button';button.textContent='×';
+        button.title='Cerrar menú';button.setAttribute('aria-label','Cerrar menú');
+        // Insert before the grid content so it remains visible at the top.
+        menu.prepend(button);
+        button.addEventListener('click',event=>{
+            event.preventDefault();event.stopPropagation();
+            closeArenaOperatorPopover(false);
+            arenaMobileSyncOverlayNavigation();
+        });
+    }
+    document.addEventListener('keydown',event=>{
+        if(event.key!=='Escape'&&event.key!=='Backspace'&&event.key!=='BrowserBack')return;
+        if(event.key==='Backspace'&&['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
+        if(!arenaMobileCurrentOverlay())return;
+        event.preventDefault();event.stopImmediatePropagation();
+        arenaMobileCloseTopPanel();arenaMobileSyncOverlayNavigation();
+    },true);
+    window.addEventListener('popstate',()=>{
+        const result=arenaMobileCloseTopPanel();
+        if(result==='submenu'&&arenaMobileCurrentOverlay()){
+            // The first Back leaves an open submenu and returns to the main menu.
+            try{history.pushState({...history.state,arenaMobilePanel:true},'');}catch(_){}
+        }
+        document.documentElement.classList.toggle('arena-mobile-overlay-open',
+            ['menu','settings','setup'].includes(arenaMobileCurrentOverlay()));
+    });
+    // Native menu and settings handlers execute during bubbling; measure their
+    // final state on the next frame, including toggle-to-close and outside taps.
+    for(const type of ['click','change','toggle']){
+        document.addEventListener(type,()=>requestAnimationFrame(arenaMobileSyncOverlayNavigation),true);
+    }
+    requestAnimationFrame(arenaMobileSyncOverlayNavigation);
+}
+
 function installArenaPortableFloatingUI(){
     const hud=document.createElement('nav');
     hud.id='arenaMobileFloating';
@@ -338,6 +418,7 @@ function arenaPortableReady() {
         if(lobby){lobby.setAttribute('aria-label','Preparar combate');const heading=lobby.querySelector('.arena-onboarding-card h2');if(heading)heading.textContent='Preparar combate';}
     }
     installArenaPortableFloatingUI();
+    arenaMobileInstallBackAndMenuClose();
     const playerShelf=document.createElement('section');playerShelf.id='arenaMobileControlShelf';playerShelf.setAttribute('aria-label','Controles del juego y herramientas');
     document.getElementById('card-9x16')?.appendChild(playerShelf);
     const gestureGuide=document.createElement('aside');gestureGuide.id='arenaMobileGestureGuide';gestureGuide.setAttribute('aria-label','Cómo controlar el protagonista');
