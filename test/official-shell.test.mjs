@@ -34,7 +34,7 @@ test('official classic engine runs at its original position, once, after depende
     assert.doesNotThrow(()=>new Script(game));
 });
 test('regression source is exactly the original HTML plus its original engine',async()=>{
-    const expected=html.replace('<script src="engine/arena-game.js?v=0.40"></script>','<script>'+game+'</script>');
+    const expected=html.replace('<script src="engine/arena-game.js?v=0.40"></script>',()=>'<script>'+game+'</script>');
     assert.equal(await readEngineSource(),expected.replace(/\r\n?/g,'\n'));
 });
 test('extracting the official engine does not alter its LIVE and OBS interfaces',()=>{
