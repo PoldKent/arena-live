@@ -991,6 +991,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 #broadcastStageSection:not(:fullscreen)>#dualMonitorsGrid.mobile-dual-stacked {
   flex:1 1 0%!important;justify-content:center!important;gap:8px!important;
 }
+/* The active capture is explicit: neither the offline mobile layout nor
+   fullscreen flex rules may resurrect an inactive 16:9/9:16 card. */
+#dualMonitorsGrid[data-focus="16:9"] > #card-9x16,
+#dualMonitorsGrid[data-focus="9:16"] > #card-16x9 {
+  display:none!important;
+}
 #broadcastStageSection:not(:fullscreen) #card-16x9,#broadcastStageSection:not(:fullscreen) #card-9x16 {margin:0!important;padding:0!important;max-width:100%;min-width:0}
 #broadcastStageSection:not(:fullscreen) #card-16x9:not(:fullscreen)>:not(#viewport16x9):not(#settingsPauseModal),#broadcastStageSection:not(:fullscreen) #card-9x16:not(:fullscreen)>:not(#viewport9x16):not(#settingsPauseModal) {display:none!important}
 #viewport16x9,#viewport9x16 {transition:none!important;flex:none!important}
@@ -2165,9 +2171,14 @@ html.arena-mobile-offline body>main#arenaWorkspace{
 /* Restore the v0.36/v0.37 centered 9:16 presentation.
    Top icons and bottom controls remain outside the broadcast capture. */
 html.arena-mobile-offline #card-9x16{
-  display:flex!important;flex-direction:column!important;align-items:center!important;
+  flex-direction:column!important;align-items:center!important;
   justify-content:center!important;width:100%!important;min-width:0!important;gap:5px!important;
   margin-block:auto!important;overflow:visible!important;
+}
+/* Only the selected 9:16 or dual view may force this card visible. */
+html.arena-mobile-offline #dualMonitorsGrid[data-focus="9:16"] > #card-9x16,
+html.arena-mobile-offline #dualMonitorsGrid[data-focus="dual"] > #card-9x16{
+  display:flex!important;
 }
 html.arena-mobile-offline #card-9x16:not(:fullscreen){
   box-sizing:border-box!important;min-height:max(0px,calc(100dvh - 76px))!important;
@@ -8856,10 +8867,19 @@ const ARENA_BALANCE_EVIDENCE=Object.freeze({"version":"0.15.0","sample":{"matche
             }
         }
         function setMonitorFocus(focusMode) {
+            focusMode = ['16:9', '9:16', 'dual'].includes(focusMode) ? focusMode : 'dual';
             monitorFocus = focusMode;
             updateArenaPreparationSwitchLabel();
+            const stageGrid = document.getElementById('dualMonitorsGrid');
             const wrap16 = document.getElementById('card-16x9');
             const wrap9 = document.getElementById('card-9x16');
+            // Explicitly own which capture exists in the preview. A mobile
+            // display:flex!important rule must never resurrect an inactive view.
+            if (stageGrid) stageGrid.dataset.focus = focusMode;
+            wrap16.hidden = focusMode === '9:16';
+            wrap9.hidden = focusMode === '16:9';
+            wrap16.classList.toggle('hidden', wrap16.hidden);
+            wrap9.classList.toggle('hidden', wrap9.hidden);
             const btnDual = document.getElementById('btnViewDual');
             const btn16 = document.getElementById('btnView16x9');
             const btn9 = document.getElementById('btnView9x16');
@@ -8870,16 +8890,10 @@ const ARENA_BALANCE_EVIDENCE=Object.freeze({"version":"0.15.0","sample":{"matche
             if (btn9) btn9.className = inactiveClass;
 
             if (focusMode === '16:9') {
-                wrap16.classList.remove('hidden');
-                wrap9.classList.add('hidden');
                 if (btn16) btn16.className = 'px-2.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-cyan-500 text-slate-950 shadow-md';
             } else if (focusMode === '9:16') {
-                wrap16.classList.add('hidden');
-                wrap9.classList.remove('hidden');
                 if (btn9) btn9.className = 'px-2.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-pink-500 text-white shadow-md';
             } else {
-                wrap16.classList.remove('hidden');
-                wrap9.classList.remove('hidden');
                 if (btnDual) btnDual.className = 'px-2.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-cyan-500 text-slate-950 shadow-md';
             }
 
@@ -11535,7 +11549,7 @@ const ARENA_BALANCE_EVIDENCE=Object.freeze({"version":"0.15.0","sample":{"matche
             }
         });
     </script>
-<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze({"version":"0.40.1","edition":"mobile-offline","sourceBlobs":{"index.html":"1aff102165b52d11051c5a44b527de12b242c241","styles/arena-ui.css":"c933a9cfb504daa6d27800c6098396b3aa57114f","styles/TAILWIND-LICENSE.txt":"d6a82290738a9f78946cbcb4594535d6984086dd","engine/arena-core.js":"ac22091a1263e294b733a337f8c6ebc4f2e1bc9d","engine/arena-render.js":"6c9603974d2c02d0f0fb52857992211c08cd6725","engine/arena-audio.js":"319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934","engine/arena-settings.js":"f1fbbd2492b4be8cfb725e72cd0ab604894681cf","engine/arena-balance-evidence.js":"0aab05b49f0ef9e80c43810b2bfc929b4f695cdf","portable/mobile.css":"283f4974af744c35887dc260796d31affa4cc522","portable/mobile-runtime.js":"29f30d79aedf48d51eda169c27b36230be13a2a6","portable/mobile-touch.js":"7cf89894450e82ccd26c1beb489b812af5f7fa00"}});</script>
+<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object.freeze({"version":"0.40.1","edition":"mobile-offline","sourceBlobs":{"index.html":"5a26a0fabc437c365f0ad6c6e8e32a47aa6d1aa7","styles/arena-ui.css":"c933a9cfb504daa6d27800c6098396b3aa57114f","styles/TAILWIND-LICENSE.txt":"d6a82290738a9f78946cbcb4594535d6984086dd","engine/arena-core.js":"ac22091a1263e294b733a337f8c6ebc4f2e1bc9d","engine/arena-render.js":"6c9603974d2c02d0f0fb52857992211c08cd6725","engine/arena-audio.js":"319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934","engine/arena-settings.js":"f1fbbd2492b4be8cfb725e72cd0ab604894681cf","engine/arena-balance-evidence.js":"0aab05b49f0ef9e80c43810b2bfc929b4f695cdf","portable/mobile.css":"4d241a740ec71aee8ab45d11feff7a9f7de41660","portable/mobile-runtime.js":"29f30d79aedf48d51eda169c27b36230be13a2a6","portable/mobile-touch.js":"7cf89894450e82ccd26c1beb489b812af5f7fa00"}});</script>
 <script id="arena-mobile-runtime">
 // Loaded inline after the unchanged classic engine, before its load bootstrap.
 // This adapter changes presentation and test setup, never combat decisions.
