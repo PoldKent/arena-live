@@ -3345,7 +3345,7 @@
             if(attacker){target.lastAttacker=attacker;target.lastHitTick=arenaSimulationTick;target.lastHitLife=target.lifeSerial;}
             const damageBeforeHit = Math.max(0, Number(target.damageTaken) || 0);
             const special = attackType === 'special';
-            const attackAim=arenaAttackAim(requestedAim);
+            const attackAim=requestedAim==='up'||requestedAim==='down'?requestedAim:'forward';
             const boostedAmount = special
                 ? Math.max(1, Math.round(amount * getFighterAttackDamageMultiplier(attacker, 'special') * (attacker?.activeSpecialFactor ?? 1)))
                 : amount;
@@ -4680,8 +4680,8 @@
                 const progress = ef.timer / ef.maxTimer;
 
                 if (ef.type === 'kamehameha') {
-                    const endX=ef.dirY?ef.x:(ef.dir===1?Math.max(ef.x,bounds.right+40):Math.min(ef.x,bounds.left-40));
-                    const endY=ef.dirY?(ef.dirY<0?Math.min(ef.y,bounds.top-40):Math.max(ef.y,bounds.bottom+40)):ef.y;
+                    const endX=ef.dirY?ef.x:(ef.dir===1?Math.max(ef.x,bounds.right+40):Math.min(ef.x,bounds.left - 40));
+                    const endY=ef.dirY?(ef.dirY<0?Math.min(ef.y,bounds.top - 40):Math.max(ef.y,bounds.bottom+40)):ef.y;
                     const beamHeight = 36 * progress;
 
                     targetCtx.strokeStyle = 'rgba(0, 243, 255, 0.45)';
