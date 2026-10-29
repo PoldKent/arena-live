@@ -361,7 +361,13 @@ try{
         await page.locator('#arenaPortableFullscreen').tap();
         await page.waitForFunction(()=>document.fullscreenElement?.id==='card-9x16');
         assert.equal(await page.locator('#arenaMobileFloating').isVisible(),true);
+        assert.equal(await page.locator('#arenaMobileFullscreenBar').isVisible(),true);
+        assert.equal(await page.locator('#arenaMobileFullscreenBar .arena-brand-block').count(),1);
+        assert.equal(await page.locator('#arenaMobileFullscreenBar #arenaMobileFloating').count(),1);
         assert.equal(await page.locator('#arenaStreamerSkillsDock').isVisible(),true);
+        assert.equal(await page.locator('#arenaStreamerSkillsDock .arena-skill-buttons>button').count(),5);
+        assert.equal(await page.locator('#arenaStreamerSkillsDock .arena-skill-buttons>button').first().isVisible(),true);
+        assert.equal(await page.locator('#arenaMobileControlShelf').isVisible(),true);
         const geometry=await page.evaluate(()=>{
             const v=document.getElementById('viewport9x16').getBoundingClientRect();
             const skills=document.getElementById('arenaStreamerSkillsDock').getBoundingClientRect();
@@ -392,6 +398,25 @@ try{
         assert.equal(state.videoUnchanged,true,JSON.stringify(state));
         assert.ok(Math.abs(state.videoRatio-9/16)<.02,JSON.stringify(state));
         if(output)await page.screenshot({path:join(output,'mobile-fullscreen-tests.png')});
+        // Drag tests by the title: neither the viewport nor the five powers resize.
+        const head=await page.locator('#arenaPortableTestHead').boundingBox();
+        const initial=await page.locator('#arenaPortableTestDrawer').boundingBox();
+        await page.mouse.move(head.x+20,head.y+head.height/2);
+        await page.mouse.down();
+        await page.mouse.move(head.x-25,head.y-36,{steps:6});
+        await page.mouse.up();
+        const dragged=await page.locator('#arenaPortableTestDrawer').boundingBox();
+        assert.equal(await page.locator('#arenaPortableTestDrawer').evaluate(n=>n.classList.contains('is-positioned')),true);
+        assert.ok(Math.abs(dragged.x-initial.x)>3||Math.abs(dragged.y-initial.y)>3,JSON.stringify({initial,dragged}));
+        await page.locator('#arenaPortableTestTransparency').evaluate(n=>{
+            n.value='45';n.dispatchEvent(new Event('input',{bubbles:true}));
+        });
+        assert.ok(Math.abs(Number(await page.locator('#arenaPortableTestDrawer').evaluate(n=>getComputedStyle(n).opacity))-.55)<.02);
+        assert.equal(await page.locator('#arenaPortableTransparencyValue').textContent(),'45%');
+        assert.equal(await page.locator('#arenaStreamerSkillsDock .arena-skill-buttons>button').count(),5);
+        assert.equal(await page.locator('#arenaMobileFullscreenBar').isVisible(),true);
+        const movedVideo=await page.locator('#viewport9x16').boundingBox();
+        assert.ok(Math.abs(movedVideo.width-geometry.w)<1&&Math.abs(movedVideo.height-geometry.h)<1);
         await page.locator('#arenaPortableTestClose').tap();
         await page.locator('#arenaMobileMoreBtn').tap();
         assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),true);
