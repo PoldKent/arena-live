@@ -14,6 +14,11 @@ const constant=name=>{
 function display(){
  const saved=new Map(),inputs={showCombatNumbersToggle:{checked:false},showPowerTextToggle:{checked:false}};
  const e=vm.createContext({floatingTexts:[],showCombatNumbers:false,showPowerText:false,
+  // The production toggle updates all eight display flags; the isolated VM
+  // must supply the same defaults even when exercising just numbers/powers.
+  showFighterNames:true,showSimulatedFighterNames:true,
+  showFighterHpBars:true,showSimulatedFighterHpBars:true,
+  showFighterEnergyBars:true,showSimulatedFighterEnergyBars:true,
   MAX_FLOATING_TEXTS:120,ARENA_COMBAT_DISPLAY_KEY:'test-display',currentLanguage:'es',localizeText:s=>s,
   document:{getElementById:id=>inputs[id]},localStorage:{setItem:(k,v)=>saved.set(k,v),getItem:k=>saved.get(k)??null}});
  vm.runInContext(['spawnFloatingText','setCombatDisplayOption','loadCombatDisplayOptions'].map(source).join('\n'),e);
