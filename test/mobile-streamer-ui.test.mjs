@@ -144,3 +144,17 @@ test('RC4 isolates the new-match modal from controls and honors mode-exclusive p
   assert.match(css,/data-mobile-mode="player"\] #arenaMobileControlShelf #arenaHeaderActions\.arena-operator-toolbar/);
   assert.match(css,/#card-9x16:fullscreen #viewport9x16/);
 });
+
+test('RC5 closes overlays without dismissing fullscreen and preserves Gameboy separation',()=>{
+  assert.match(runtime,/function arenaMobileCloseTopPanel\(\)/);
+  assert.match(runtime,/function arenaMobileInstallBackAndMenuClose\(\)/);
+  assert.match(runtime,/window\.addEventListener\('popstate'/);
+  assert.match(runtime,/id='arenaMobileMenuClose'/);
+  assert.match(css,/MOBILE RC5/);
+  assert.match(css,/\.arena-mobile-overlay-open #arenaMobileControlShelf/);
+  assert.match(css,/data-mobile-mode="director"\] #arenaMobileControlShelf #arenaHeaderActions\{[\s\S]*?display:none!important/);
+  assert.match(css,/--arena-mobile-player-shelf-height/);
+  assert.match(css,/#arenaPortableTestDrawer:not\(\[hidden\]\)\{[\s\S]*?opacity:1!important/);
+  assert.match(touch,/arenaMobileRC2Defaults/);
+  assert.match(touch,/const controlHeight=Math\.max\(144,Math\.ceil\(size\*2\.07\)\)/);
+});
