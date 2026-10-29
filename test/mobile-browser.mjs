@@ -242,6 +242,32 @@ try{
         });
         assert.ok(result.afterOne<result.initial);assert.equal(result.doubleRequested,true);
     });
+    await check('RC2 Gameboy layout: analog left and action trio right immediately after video',async()=>{
+        await page.evaluate(()=>{ArenaPortable.setMode('player');ArenaMobileTouch.setTouchMode('joystick');ArenaMobileTouch.resetButtons();});
+        await page.waitForTimeout(150);
+        const r=await page.evaluate(()=>{
+            const get=id=>document.getElementById(id).getBoundingClientRect();
+            const game=get('viewport9x16'),rail=get('arenaMobileControlShelf');
+            const joy=get('touchJoystick'),power=get('arenaMobilePower'),jump=get('arenaMobileJump'),attack=get('arenaMobileAttack');
+            const toolbar=get('arenaMobileFloating');
+            const header=document.querySelector('body>header').getBoundingClientRect();
+            return {game:{top:game.top,bottom:game.bottom,width:game.width,height:game.height},
+                rail:{top:rail.top,bottom:rail.bottom},joy:{left:joy.left,right:joy.right,top:joy.top,bottom:joy.bottom},
+                power:{left:power.left,right:power.right,top:power.top,bottom:power.bottom},
+                jump:{left:jump.left,right:jump.right,top:jump.top,bottom:jump.bottom},
+                attack:{left:attack.left,right:attack.right,top:attack.top,bottom:attack.bottom},
+                toolbar:{top:toolbar.top,bottom:toolbar.bottom},header:{top:header.top,bottom:header.bottom},h:innerHeight,
+                hint:getComputedStyle(document.getElementById('arenaMobileGestureGuide')).display};
+        });
+        assert.ok(r.toolbar.bottom<=r.game.top+2,JSON.stringify(r));
+        assert.ok(r.toolbar.top>=r.header.top&&r.toolbar.bottom<=r.header.bottom+2,JSON.stringify(r));
+        assert.ok(r.joy.right<r.power.left&&r.joy.right<r.jump.left&&r.joy.right<r.attack.left,JSON.stringify(r));
+        assert.ok(r.power.left<r.jump.left&&r.jump.left<r.attack.left,JSON.stringify(r));
+        assert.ok(r.jump.top<r.power.top&&r.jump.top<r.attack.top,JSON.stringify(r));
+        assert.ok(r.rail.top>=r.game.bottom-2,JSON.stringify(r));
+        assert.ok(r.rail.bottom<=r.h+2,JSON.stringify(r));
+        assert.equal(r.hint,'none',JSON.stringify(r));
+    });
     await check('joystick plus action button positions can be saved, modified and restored',async()=>{
         const result=await page.evaluate(()=>{
             ArenaMobileTouch.setTouchMode('joystick');
