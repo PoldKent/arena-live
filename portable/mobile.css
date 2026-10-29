@@ -1259,3 +1259,13 @@ html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf 
 html.arena-mobile-offline #arenaMobileControlShelf #arenaStreamerSkillsDock>.arena-skill-buttons{
  min-width:0!important;max-width:100%!important;
 }
+
+
+/* Native fullscreen's original :fullscreen selector is more specific than the
+   plain fullscreen-bar selector. Neutralize its legacy 10px offset explicitly. */
+html.arena-mobile-offline #card-9x16:fullscreen #arenaMobileFullscreenBar #arenaMobileFloating,
+html.arena-mobile-offline #card-16x9:fullscreen #arenaMobileFullscreenBar #arenaMobileFloating{
+ position:relative!important;inset:auto!important;top:auto!important;
+ right:auto!important;bottom:auto!important;left:auto!important;
+ transform:none!important;align-self:center!important;
+}
