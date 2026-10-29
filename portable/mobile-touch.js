@@ -355,7 +355,7 @@ function arenaMobileInstallTestDrawer(){
     drawer.id='arenaPortableTestDrawer';drawer.hidden=true;
     drawer.setAttribute('role','region');drawer.setAttribute('aria-live','off');
     drawer.setAttribute('aria-label','Opciones del Modo Streamer');
-    drawer.innerHTML='<div id="arenaPortableTestHead" title="Arrastra para mover el panel"><span>🎛 Modo Streamer</span><label class="arena-tests-transparency" title="Transparencia del panel"><span>◐</span><input type="range" id="arenaPortableTestTransparency" min="0" max="75" step="5" value="0" aria-label="Transparencia del panel de pruebas"><output id="arenaPortableTransparencyValue">0%</output></label><button type="button" id="arenaPortableTestCollapse" aria-label="Minimizar panel">−</button><button type="button" id="arenaPortableTestClose" aria-label="Cerrar pruebas">×</button></div><label class="arena-portable-test-picker">Herramienta<select id="arenaPortableTestSelect"><option value="arenaPanelPowers">Jugador y comandos</option><option value="arenaPanelPlayers">Participantes y K.O.</option><option value="arenaPanelScenarios">Escenarios</option><option value="arenaPanelSocial">Interacciones</option><option value="arenaPanelSimulation">Simulación</option></select></label><div id="arenaPortableTestBody"></div>';
+    drawer.innerHTML='<div id="arenaPortableTestHead" title="Arrastra para mover el panel"><span>🎛 Modo Streamer</span><label class="arena-tests-transparency" title="Transparencia del panel"><span>◐</span><input type="range" id="arenaPortableTestTransparency" min="0" max="100" step="5" value="0" aria-label="Transparencia del panel de pruebas"><output id="arenaPortableTransparencyValue">0%</output></label><button type="button" id="arenaPortableTestCollapse" aria-label="Minimizar panel">−</button><button type="button" id="arenaPortableTestClose" aria-label="Cerrar pruebas">×</button></div><label class="arena-portable-test-picker">Herramienta<select id="arenaPortableTestSelect"><option value="arenaPanelPowers">Jugador y comandos</option><option value="arenaPanelPlayers">Participantes y K.O.</option><option value="arenaPanelScenarios">Escenarios</option><option value="arenaPanelSocial">Interacciones</option><option value="arenaPanelSimulation">Simulación</option></select></label><div id="arenaPortableTestBody"></div>';
     document.body.appendChild(drawer);
     arenaMobileInstallTestDragging(drawer);
     drawer.querySelector('#arenaPortableTestSelect').addEventListener('change',event=>arenaMobileSelectTestPanel(event.target.value));
@@ -409,10 +409,22 @@ function arenaMobileInstallStreamerSkills(){
 function arenaMobileSaveLayout(){try{localStorage.setItem(ARENA_MOBILE_LAYOUT_KEY,JSON.stringify(arenaMobileLayout));}catch(_){}}
 function arenaMobileApplyLayout(){
     const shelf=document.getElementById('arenaMobileControlShelf');
-    const bar=document.getElementById('arenaHeaderActions');if(!shelf||!bar)return;
+    if(!shelf)return;
+    // Move the three ORIGINAL action buttons, preserving their handlers.
+    // The old operator toolbar never becomes part of the touch overlay.
+    let actionLayer=document.getElementById('arenaMobileActionLayer');
+    if(!actionLayer){
+        actionLayer=document.createElement('nav');
+        actionLayer.id='arenaMobileActionLayer';
+        actionLayer.setAttribute('aria-label','Acciones táctiles del protagonista');
+        shelf.appendChild(actionLayer);
+    }
+    for(const id of ['arenaMobileJump','arenaMobileAttack','arenaMobilePower']){
+        const button=document.getElementById(id);
+        if(button&&button.parentElement!==actionLayer)actionLayer.appendChild(button);
+    }
     const analog=document.getElementById('touchControlDock');
     if(analog&&analog.parentElement!==shelf)shelf.appendChild(analog);
-    if(bar.parentElement!==shelf)shelf.appendChild(bar);
     const bounds=shelf.getBoundingClientRect();
     // Keep each full hit-target visible on narrow devices, after rotation and
     // when the user increases button size. Percentages remain stored in settings.
