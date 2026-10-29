@@ -1,5 +1,16 @@
 # Registro de cambios — Arena Live
 
+## 2026-10-29 — Arena Live v0.40.4 · Escenario siempre máximo / controles flotantes
+
+- Revisión de las siete capturas Android posteriores a 0.40.3: no se reserva espacio inferior ni se reduce el escenario para joystick, botones, cinco poderes, panel de pruebas o menús. La arena 9:16 mantiene su escala máxima dentro de los límites reales de pantalla y barra superior; los controles son capas transparentes superpuestas y pueden sobresalir de su marco.
+- Corregida la barra fantasma: la antigua barra de operador no dibuja contorno cuando sus botones se usan como controles Gameboy, y la fila original de cinco habilidades conserva colores distintivos y nombres.
+- Botones de acción con separación de áreas táctiles: se usan las preferencias guardadas y, si están superpuestas, se presentan temporalmente en posiciones seguras sin borrar el ajuste previo. Joystick independiente de los límites del marco del video.
+- X de menú sustituida por SVG centrado; menú flotante más compacto, controles ocultos mientras está abierto y cierre mediante X, segundo toque ☰ o Atrás/Escape cuando el navegador entrega el evento, sin cambiar el tamaño del juego.
+- Panel Streamer compacto y desplazable, con scrolling interno y cinco habilidades visibles. Aviso de Prota limitado a los bordes reales del video.
+- Ajustes móviles: marco de referencia automático/9:16/9:19.5/9:20/9:21 para pantalla completa; el marco no reduce, recorta ni cambia el motor 9:16. La calibración OBS del proyecto principal permanece independiente.
+- Publicado el HTML monolítico completo `mobile-builds/Arena-Live-v0.40.4-movil.html`. Extensión de pruebas de regresión de interfaz y tamaño invariante. Validación visual real en Android y ejecución de navegador siguen siendo necesarias antes de considerarlo cerrado.
+
+
 ## 2026-10-29 — Arena Live v0.40.3 · Interfaz móvil y navegación segura
 
 - Corregida la franja vacía de la antigua barra táctil. Jugador conserva joystick, salto, golpe y poder sin mostrar el rail de cinco clases del Streamer; Streamer conserva exclusivamente sus cinco habilidades originales, con nombres visibles.
