@@ -174,12 +174,13 @@ function arenaPortableFitMobileStage(){
     const director=arenaPortableProfile.mode===ARENA_MOBILE_MODES.DIRECTOR;
     const controlsVisible=director||arenaPortableProfile.touchMode==='joystick';
     const viewHeight=Math.max(1,Math.min(window.innerHeight,window.visualViewport?.height||window.innerHeight));
-    const top=fullscreen?63:Math.max(58,stage?.getBoundingClientRect().top||58);
-    const band=controlsVisible?(director?78:124):0;
+    const top=fullscreen?Math.max(56,56+(window.visualViewport?.offsetTop||0)):Math.max(58,stage?.getBoundingClientRect().top||58);
+    const root=document.documentElement;
+    const playerBand=Math.max(144,Number.parseFloat(root.style.getPropertyValue('--arena-mobile-player-shelf-height'))||145);
+    const band=controlsVisible?(director?78:playerBand):0;
     // Calculate from the real visual viewport, not document/scroll height.
     // This leaves a real control band below the 9:16 video on Android.
     const usable=Math.max(80,Math.floor(viewHeight-top-band-14));
-    const root=document.documentElement;
     const next=usable+'px';
     if(root.style.getPropertyValue('--arena-mobile-video-height')!==next)
         root.style.setProperty('--arena-mobile-video-height',next);
@@ -194,6 +195,7 @@ function arenaPortableFitMobileStage(){
         if(root.style.getPropertyValue('--arena-mobile-controls-top')!==nextTop)
             root.style.setProperty('--arena-mobile-controls-top',nextTop);
     }
+    root.style.setProperty('--arena-mobile-reserved-bottom',Math.ceil(band+10)+'px');
     if(typeof arenaMobilePositionTestDrawer==='function')arenaMobilePositionTestDrawer();
 }
 function arenaPortableSetTheater(enabled){
