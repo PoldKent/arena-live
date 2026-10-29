@@ -1442,3 +1442,12 @@ html.arena-mobile-offline[data-mobile-mode="director"] #card-9x16:fullscreen #vi
     max-height:calc(100dvh - 140px)!important;
   }
 }
+
+/* Dual monitor preview: remove single-phone-only size floors ONLY while both
+   streams are present. Streamer skill controls stay mounted below the image. */
+html.arena-mobile-offline #dualMonitorsGrid.arena-dual-preview #card-9x16:not(:fullscreen){
+  width:auto!important;min-height:0!important;margin:0!important;
+}
+html.arena-mobile-offline #dualMonitorsGrid.arena-dual-preview #viewport9x16{
+  max-height:none!important;margin:0!important;
+}
