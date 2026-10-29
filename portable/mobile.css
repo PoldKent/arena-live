@@ -1546,3 +1546,125 @@ html.arena-mobile-offline #arenaPortableTestDrawer #arenaPortableTransparencyVal
   }
   html.arena-mobile-offline #arenaPortableTestDrawer #arenaPortableTransparencyValue{display:none!important}
 }
+
+/* v0.40.3 · Single mobile theater: reserve the five real powers within the
+   VISUAL viewport, including Android content:// providers with browser bars.
+   A test drawer can never steal space from the original 9:16 capture. */
+html.arena-mobile-offline #dualMonitorsGrid[data-focus="9:16"] > #card-9x16:not(:fullscreen){
+  box-sizing:border-box!important;
+  width:100%!important;height:100%!important;min-height:0!important;
+  max-height:100%!important;margin:0!important;
+  padding:0 5px 98px!important;overflow:visible!important;
+  flex:1 1 0%!important;justify-content:center!important;
+}
+html.arena-mobile-offline #dualMonitorsGrid[data-focus="9:16"] > #card-9x16 #viewport9x16{
+  box-sizing:border-box!important;flex:0 0 auto!important;
+  width:min(calc(100% - 6px),calc(var(--arena-mobile-video-height,560px) * 9 / 16))!important;
+  max-width:100%!important;max-height:var(--arena-mobile-video-height,560px)!important;
+  height:auto!important;aspect-ratio:9/16!important;
+  margin:0 auto!important;
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf,
+html.arena-mobile-offline[data-mobile-touch-mode="joystick"] #arenaMobileControlShelf{
+  display:flex!important;position:fixed!important;
+  box-sizing:border-box!important;
+  left:50%!important;right:auto!important;
+  top:auto!important;bottom:max(5px,env(safe-area-inset-bottom))!important;
+  transform:translateX(-50%)!important;
+  width:min(calc(100vw - 12px),560px)!important;
+  min-height:75px!important;height:92px!important;max-height:92px!important;
+  padding:2px 3px!important;margin:0!important;
+  overflow:visible!important;z-index:610!important;visibility:visible!important;
+  pointer-events:auto!important;
+}
+html.arena-mobile-offline[data-mobile-mode="player"][data-mobile-touch-mode="touch"] #arenaMobileControlShelf{
+  display:none!important;
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf #arenaStreamerSkillsDock{
+  display:block!important;visibility:visible!important;
+  opacity:1!important;position:relative!important;
+  width:100%!important;min-height:62px!important;
+}
+html.arena-mobile-offline[data-mobile-mode="director"] #arenaMobileControlShelf #arenaStreamerSkillsDock>.arena-skill-buttons{
+  display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;
+}
+html.arena-mobile-offline #arenaMobileFloating #arenaMobileEditDone:not([hidden]){
+  display:grid!important;place-items:center!important;flex:0 0 40px!important;
+  width:40px!important;min-width:40px!important;max-width:40px!important;
+  height:40px!important;min-height:40px!important;max-height:40px!important;
+  font-size:19px!important;border-radius:50%!important;
+  padding:0!important;
+}
+/* Native fullscreen and the fallback theater share geometry. Native fullscreen
+   may remove browser chrome; CSS theater cannot hide Chrome's address bar. */
+html.arena-mobile-offline #card-9x16:fullscreen,
+html.arena-mobile-offline #card-16x9:fullscreen,
+html.arena-mobile-offline.arena-mobile-theater #card-9x16:not([hidden]),
+html.arena-mobile-offline.arena-mobile-theater #card-16x9:not([hidden]){
+  box-sizing:border-box!important;
+  justify-content:center!important;align-items:center!important;
+  padding:calc(64px + env(safe-area-inset-top)) 4px 98px!important;
+}
+html.arena-mobile-offline.arena-mobile-theater #card-9x16:not([hidden]),
+html.arena-mobile-offline.arena-mobile-theater #card-16x9:not([hidden]){
+  display:flex!important;flex-direction:column!important;
+  position:fixed!important;inset:0!important;width:100vw!important;
+  height:100dvh!important;min-width:0!important;min-height:0!important;
+  max-width:none!important;max-height:none!important;
+  margin:0!important;border:0!important;border-radius:0!important;
+  background:#08101e!important;z-index:500!important;overflow:hidden!important;
+}
+html.arena-mobile-offline.arena-mobile-theater #card-9x16[hidden],
+html.arena-mobile-offline.arena-mobile-theater #card-16x9[hidden]{
+  display:none!important;
+}
+html.arena-mobile-offline.arena-mobile-theater #card-9x16 > #arenaMobileFullscreenBar,
+html.arena-mobile-offline.arena-mobile-theater #card-16x9 > #arenaMobileFullscreenBar{
+  display:flex!important;align-items:center!important;
+  justify-content:space-between!important;flex-direction:row!important;
+  position:absolute!important;top:0!important;left:0!important;right:0!important;
+  height:calc(58px + env(safe-area-inset-top))!important;
+  padding:env(safe-area-inset-top) 6px 3px!important;
+  background:#0b1525!important;border-bottom:1px solid #31475c!important;
+  z-index:650!important;pointer-events:auto!important;
+}
+html.arena-mobile-offline.arena-mobile-theater #arenaMobileFullscreenBar #arenaMobileFloating{
+  display:flex!important;position:relative!important;inset:auto!important;
+  margin:0 0 0 auto!important;transform:none!important;z-index:660!important;
+}
+html.arena-mobile-offline.arena-mobile-theater #arenaMobileFullscreenBar .arena-brand-block{
+  display:flex!important;align-items:center!important;flex:0 1 auto!important;width:auto!important;
+}
+html.arena-mobile-offline.arena-mobile-theater #arenaMobileFullscreenBar #headerStateBadge{
+  display:none!important;
+}
+html.arena-mobile-offline #card-9x16:fullscreen #viewport9x16,
+html.arena-mobile-offline.arena-mobile-theater #card-9x16 #viewport9x16{
+  width:min(calc(100% - 6px),calc(var(--arena-mobile-video-height,560px) * 9 / 16))!important;
+  max-height:var(--arena-mobile-video-height,560px)!important;
+  height:auto!important;flex:0 0 auto!important;aspect-ratio:9/16!important;
+}
+html.arena-mobile-offline #card-16x9:fullscreen #viewport16x9,
+html.arena-mobile-offline.arena-mobile-theater #card-16x9 #viewport16x9{
+  width:min(calc(100% - 6px),calc(var(--arena-mobile-video-height,300px) * 16 / 9))!important;
+  max-height:var(--arena-mobile-video-height,300px)!important;
+  height:auto!important;flex:0 0 auto!important;aspect-ratio:16/9!important;
+}
+html.arena-mobile-offline #card-9x16:fullscreen > #arenaOperatorPopover:not([hidden]),
+html.arena-mobile-offline #card-16x9:fullscreen > #arenaOperatorPopover:not([hidden]){
+  display:block!important;z-index:675!important;
+}
+/* The original five-skill rail stays mounted and clickable, not a screenshot
+   overlay. Its top edge is always above the bottom of the visible viewport. */
+html.arena-mobile-offline[data-mobile-mode="director"] #card-9x16:fullscreen > #arenaMobileControlShelf,
+html.arena-mobile-offline[data-mobile-mode="director"] #card-16x9:fullscreen > #arenaMobileControlShelf{
+  display:flex!important;visibility:visible!important;
+}
+html.arena-mobile-offline #arenaPortableTestDrawer:not([hidden]){
+  z-index:620!important;
+}
+html.arena-mobile-offline.arena-mobile-theater #arenaPortableTestDrawer:not([hidden]).is-positioned{
+  position:absolute!important;
+  left:var(--arena-tests-x,8px)!important;top:var(--arena-tests-y,65px)!important;
+  right:auto!important;bottom:auto!important;
+}
