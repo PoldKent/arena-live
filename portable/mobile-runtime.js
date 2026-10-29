@@ -447,7 +447,11 @@ function arenaPortableReady() {
         const selected=Number(document.getElementById('arenaPortableCount').value),limit=getArenaPlayerLimit();
         document.getElementById('arenaPortableStatus').textContent=selected>limit?`Tus reglas admiten ${limit} peleadores. Cambia ese límite en Ajustes para probar ${selected}.`:'';
     };
-    document.getElementById('arenaPortableForm').onsubmit=event=>{event.preventDefault();arenaPortableStart({count:document.getElementById('arenaPortableCount').value,classKey:document.getElementById('arenaPortableClass').value,mode:document.querySelector('input[name="arenaPortableMode"]:checked')?.value});};
+    // A direct start handler prevents native form navigation in offline Android/file:// browsers.
+    // The submit handler still supports Enter and programmatic form submission.
+    const startPortableSession=()=>arenaPortableStart({count:document.getElementById('arenaPortableCount').value,classKey:document.getElementById('arenaPortableClass').value,mode:document.querySelector('input[name="arenaPortableMode"]:checked')?.value});
+    document.getElementById('arenaPortableForm').onsubmit=event=>{event.preventDefault();startPortableSession();};
+    document.getElementById('arenaPortableStart').onclick=event=>{event.preventDefault();startPortableSession();};
     host.addEventListener('keydown',event=>{
         if(event.key==='Escape'){event.preventDefault();arenaPortableClose();}
         if(event.key!=='Tab')return;
