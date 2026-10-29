@@ -958,9 +958,14 @@ html.arena-mobile-offline body>main#arenaWorkspace{
 /* Restore the v0.36/v0.37 centered 9:16 presentation.
    Top icons and bottom controls remain outside the broadcast capture. */
 html.arena-mobile-offline #card-9x16{
-  display:flex!important;flex-direction:column!important;align-items:center!important;
+  flex-direction:column!important;align-items:center!important;
   justify-content:center!important;width:100%!important;min-width:0!important;gap:5px!important;
   margin-block:auto!important;overflow:visible!important;
+}
+/* Only the selected 9:16 or dual view may force this card visible. */
+html.arena-mobile-offline #dualMonitorsGrid[data-focus="9:16"] > #card-9x16,
+html.arena-mobile-offline #dualMonitorsGrid[data-focus="dual"] > #card-9x16{
+  display:flex!important;
 }
 html.arena-mobile-offline #card-9x16:not(:fullscreen){
   box-sizing:border-box!important;min-height:max(0px,calc(100dvh - 76px))!important;
