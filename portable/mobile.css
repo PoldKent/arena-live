@@ -1355,3 +1355,11 @@ html.arena-mobile-offline.arena-mobile-theater #card-9x16 #viewport9x16{
  border-radius:18px!important;
  box-sizing:border-box!important;
 }
+
+/* Fullscreen selectors use two IDs; explicitly hide the player shelf while
+   setup is open, even when :fullscreen carries stronger legacy specificity. */
+html.arena-mobile-offline.arena-mobile-setup-open #card-9x16:fullscreen > #arenaMobileControlShelf,
+html.arena-mobile-offline.arena-mobile-setup-open #card-16x9:fullscreen > #arenaMobileControlShelf,
+html.arena-mobile-offline.arena-mobile-setup-open.arena-mobile-theater #arenaMobileControlShelf{
+ display:none!important;visibility:hidden!important;pointer-events:none!important;
+}
