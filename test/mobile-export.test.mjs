@@ -26,7 +26,7 @@ test('v0.40.5 is under 500 KB, fully offline and decompresses losslessly',async(
         assert.doesNotMatch(html,/<(?:script|link)\b[^>]+(?:src|href)\s*=/i);
         assert.match(html,/ARENA_PORTABLE_BUILD/);
         assert.match(html,/arena-mobile-offline/);
-        assert.match(html,/id="arenaMobileActionLayer"/);
+        assert.match(html,/actionLayer\.id='arenaMobileActionLayer'/);
         assert.match(html,/arenaMobileFrameFormat/);
         assert.match(html,/No mostrar de nuevo/);
         assert.match(html,/id="arenaPortableFullscreen"/);
