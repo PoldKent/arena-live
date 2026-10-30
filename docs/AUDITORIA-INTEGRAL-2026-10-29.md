@@ -66,4 +66,8 @@ Inventario directo del árbol de GitHub en `main`: **164 archivos** y **3.232.50
 | TikTok LIVE real, reconexión y eventos | Sesión real del usuario | Pendiente |
 | Captura OBS 16:9 y 9:16 | Equipo de transmisión | Pendiente |
 
+## Verificaciones aisladas de esta revisión
+
+Se comprobó con ejecución aislada de JavaScript la sintaxis del motor y las utilidades de render, la deduplicación de 128 IDs en el podio, el cooldown restablecido y seis casos representativos de normalización LIVE. También se comprobó la coherencia documental de versión y la ausencia del comando de ramas en el paquete. **No equivalen a ejecutar `npm test` ni Playwright**.
+
 La siguiente etapa debe abordar la modularización y rendimiento de `arena-game.js` **por subsistemas y con pruebas verificables**. No borrar ni reescribir cientos de líneas sobre la base de coincidencias textuales; comparar los resultados antes y después.

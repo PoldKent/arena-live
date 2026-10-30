@@ -1,3 +1,12 @@
+## Mantenimiento de v0.40.7 — auditoría de código y documentación (2026-10-29)
+
+- README principal reorganizado por producto, arranque, arquitectura, pruebas y riesgos. Corregida la confusión entre la fuente 0.40.7 y el único HTML móvil rastreado, que continúa siendo 0.40.6.
+- Actualizada la guía móvil offline y añadida la matriz técnica `docs/AUDITORIA-INTEGRAL-2026-10-29.md` con alcance y validaciones pendientes.
+- Normalización de nombres de usuarios sociales LIVE centralizada para taps, compartir, follows, regalos, suscripciones y entradas informativas; añadidos casos de identificadores malformados.
+- Eliminado el escaneo cuadrático de IDs al construir los resultados de hasta 128 luchadores; ampliada prueba de unicidad del podio.
+- Concluida la limpieza de ramas: solo `main`. Retirados el comando y las pruebas del limpiador remoto ya innecesario; sus versiones se conservan en Git.
+- No se modifica la física, el balance, los controles o la facturación. Verificación aislada de sintaxis/funciones básicas realizada; suite completa Node, Playwright, exportación móvil y TikTok real pendientes porque Actions no asigna runners con presupuesto 0 USD.
+
 ## v0.40.7 — Choques, reingreso y rebote de suelo (2026-10-29)
 
 - Libre: entradas/reingresos ilimitados mientras la ronda está abierta, salvo el duelo 1vs1; las reglas de vidas y tiempo conservan sus restricciones.
