@@ -121,3 +121,9 @@ test('independent mobile layers, natural radios and bounded draggable panels',()
     assert.match(touch,/skills\.parentElement!==host\)host\.appendChild/);
     assert.match(touch,/style\.setProperty\('top',Math\.round\(y\)\+'px','important'\)/);
 });
+
+test('player setup falls back to streamer mode if the protagonist could not join',()=>{
+    assert.match(runtime,/const joined=!join\|\|fighters\.some/);
+    assert.match(runtime,/const effectiveMode=joined\?selectedMode:ARENA_MOBILE_MODES\.DIRECTOR/);
+    assert.match(runtime,/arenaPortableSetMode\(effectiveMode,\{remember:false\}\)/);
+});

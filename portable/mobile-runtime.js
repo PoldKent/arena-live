@@ -133,10 +133,15 @@ function arenaPortableStart({count=32,classKey='kame',mode,join}={}) {
     openLobby(true);applyPlayerCountPreset(actual-(join?1:0));
     if(join){document.getElementById('protagonistClassSelect').value=classKey;if(!streamerManualControl)toggleStreamerManualControl();joinAsStreamer();}
     else if(streamerManualControl)toggleStreamerManualControl();
+    // A requested Player start must not leave inactive Player controls when admission fails.
+    const joined=!join||fighters.some(f=>f.isStreamer&&!f.eliminated);
+    const effectiveMode=joined?selectedMode:ARENA_MOBILE_MODES.DIRECTOR;
+    if(!joined){arenaPortableProfile={...arenaPortableProfile,mode:effectiveMode,join:false};arenaPortableRemember();}
     if(typeof initAudio==='function')initAudio();
     arenaPortablePreviousPause=false;
     arenaPortableClose();startCombatFromLobby();updateTouchControlsVisibility();
-    arenaPortableSetMode(selectedMode,{remember:false});refreshArenaPortableFloatingUI();
+    arenaPortableSetMode(effectiveMode,{remember:false});refreshArenaPortableFloatingUI();
+    if(!joined)arenaPortableReport('No hay plaza disponible para Prota. Partida iniciada en Modo Streamer.');
     return true;
 }
 
