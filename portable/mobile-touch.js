@@ -9,6 +9,36 @@ const arenaMobileRC2Defaults={touchJoystick:[14,50],arenaMobilePower:[58,70],are
 const arenaMobileLegacyDefaults={touchJoystick:[13,50],arenaMobilePower:[46,50],arenaMobileJump:[67,50],arenaMobileAttack:[89,50]};
 let arenaMobileLayout={size:70,points:Object.fromEntries(Object.entries(arenaMobileLayoutDefaults).map(([k,v])=>[k,[...v]]))};
 let arenaMobileEditing=false;
+const ARENA_MOBILE_MODE_LAYOUT_KEY='arenaLiveMobileModeLayoutsV1';
+let arenaMobileLayouts={player:arenaMobileLayout,director:null};
+function arenaMobileCloneLayout(source=arenaMobileLayout){
+    return {size:source.size,points:Object.fromEntries(Object.entries(source.points).map(([id,p])=>[id,[...p]]))};
+}
+function arenaMobileModeKey(){return arenaPortableProfile.mode===ARENA_MOBILE_MODES.DIRECTOR?'director':'player';}
+function arenaMobileLoadModeLayout(){
+    try{
+        const saved=JSON.parse(localStorage.getItem(ARENA_MOBILE_MODE_LAYOUT_KEY)||'null');
+        for(const mode of ['player','director']){
+            const layout=saved?.[mode];
+            if(!layout||!Number.isFinite(layout.size))continue;
+            const points={};
+            for(const id of Object.keys(arenaMobileLayoutDefaults)){
+                const p=layout.points?.[id];
+                points[id]=Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)
+                    ?[Math.max(7,Math.min(93,p[0])),Math.max(8,Math.min(95,p[1]))]
+                    :[...arenaMobileLayoutDefaults[id]];
+            }
+            arenaMobileLayouts[mode]={size:Math.max(56,Math.min(94,layout.size)),points};
+        }
+    }catch(_){}
+    arenaMobileLayouts.director??=arenaMobileCloneLayout(arenaMobileLayouts.player);
+}
+function arenaMobileSwitchLayout(){
+    if(!arenaMobileLayouts.director)arenaMobileLoadModeLayout();
+    arenaMobileLayout=arenaMobileLayouts[arenaMobileModeKey()];
+    arenaMobileApplyLayout();
+}
+
 try{
     const current=JSON.parse(localStorage.getItem(ARENA_MOBILE_LAYOUT_KEY)||'null');
     const legacy=current?null:JSON.parse(localStorage.getItem(ARENA_MOBILE_LAYOUT_LEGACY_KEY)||'null');
@@ -424,8 +454,38 @@ function arenaMobileInstallStreamerSkills(){
     document.body.appendChild(dock);
     arenaMobileMountTestDrawer();
 }
-function arenaMobileSaveLayout(){try{localStorage.setItem(ARENA_MOBILE_LAYOUT_KEY,JSON.stringify(arenaMobileLayout));}catch(_){}}
+function arenaMobileSaveLayout(){
+    arenaMobileLayouts[arenaMobileModeKey()]=arenaMobileLayout;
+    try{
+        localStorage.setItem(ARENA_MOBILE_MODE_LAYOUT_KEY,JSON.stringify(arenaMobileLayouts));
+        // Preserve the old player's key for compatible upgrades.
+        localStorage.setItem(ARENA_MOBILE_LAYOUT_KEY,JSON.stringify(arenaMobileLayouts.player));
+    }catch(_){}
+}
+function arenaMobileSkillIcon(){
+    const actor=arenaMobileActor();
+    const cls=String(actor?.classType??actor?.classId??actor?.className??actor?.class??'').toLowerCase();
+    if(/shinobi|ninja/.test(cls))return ['🌀','Rasen'];
+    if(/titan|coloso/.test(cls))return ['🛡️','Coloso'];
+    if(/rayo|trueno/.test(cls))return ['⚡','Trueno'];
+    if(/espirit|spirit/.test(cls))return ['🌿','Enred'];
+    if(/guerrero|warrior/.test(cls))return ['🔥','Kame'];
+    return ['✦','Habilidad especial'];
+}
+function arenaMobileRefreshSkillIcon(){
+    const button=document.getElementById('arenaMobilePower');
+    if(!button)return;
+    const [icon,name]=arenaMobileSkillIcon();
+    if(button.dataset.skillIcon!==icon){
+        button.textContent=icon;
+        button.dataset.skillIcon=icon;
+    }
+    button.title=name;
+    button.setAttribute('aria-label',name);
+}
+
 function arenaMobileApplyLayout(){
+    arenaMobileRefreshSkillIcon();
     const shelf=document.getElementById('arenaMobileControlShelf');
     if(!shelf)return;
     // Move the three ORIGINAL action buttons, preserving their handlers.
@@ -498,7 +558,7 @@ function arenaMobileApplyLayout(){
     if(text)text.textContent=size===desiredSize?size+' px':size+' px (adaptado; preferencia '+desiredSize+' px)';
 }
 function arenaMobileEditButtons(on=true){
-    if(on&&arenaPortableProfile.touchMode!=='joystick')return;
+    if(on&&arenaPortableProfile.touchMode!=='joystick'&&arenaMobileModeKey()==='player')return;
     arenaMobileEditing=!!on;
     if(arenaMobileEditing){
         if(isSettingsOpen)toggleSettingsModal(false);
@@ -517,6 +577,7 @@ function arenaMobileSetButtonSize(size){
 }
 function arenaMobileResetButtons(){
     arenaMobileLayout={size:70,points:Object.fromEntries(Object.entries(arenaMobileLayoutDefaults).map(([k,v])=>[k,[...v]]))};
+    arenaMobileLayouts[arenaMobileModeKey()]=arenaMobileLayout;
     arenaMobileSaveLayout();arenaMobileApplyLayout();
     requestAnimationFrame(arenaPortableFitMobileStage);
 }
@@ -552,7 +613,7 @@ function arenaMobileInstallLayoutSettings(){
     const target=section?.querySelector('.arena-settings-content')||document.getElementById('settingsPanelsScroll');
     if(!target)return;
     const control=document.createElement('section');control.id='arenaMobileControlSettings';control.setAttribute('aria-label','Acomodar botones');
-    control.innerHTML='<h3>📱 Modo jugador: controles</h3><fieldset id="arenaMobileTouchModeOptions"><legend>Elige cómo controlar al protagonista</legend><label><input type="radio" name="arenaMobileTouchMode" value="touch"> Táctil total — sin botones sobre el juego</label><label><input type="radio" name="arenaMobileTouchMode" value="joystick"> Joystick — analógico izquierdo y botones acomodables</label></fieldset><p id="arenaMobileTouchHelp">Elige un esquema de controles. Tus preferencias se guardan.</p><div id="arenaMobileArrangeSettings"><p>Mueve el analógico y los botones a posiciones cómodas. Guarda cada cambio para próximas partidas.</p><button type="button" id="arenaMobileArrange">✥ Acomodar analógico y botones</button><label for="arenaMobileSize">Tamaño de botones <output id="arenaMobileSizeValue">70 px</output></label><input id="arenaMobileSize" type="range" min="56" max="94" step="2" value="70"><button type="button" id="arenaMobileReset">↺ Restablecer posiciones</button><small>Multitáctil: hasta 5 dedos. Apunta ↑ o ↓ con el joystick y pulsa ⚔ (golpe) o ⚡ (especial). ↑ salta; 2 toques hacen doble salto.</small></div>';
+    control.innerHTML='<h3>📱 Controles y distribución por modo</h3><fieldset id="arenaMobileTouchModeOptions"><legend>Elige cómo controlar al protagonista</legend><label><input type="radio" name="arenaMobileTouchMode" value="touch"> Táctil total — sin botones sobre el juego</label><label><input type="radio" name="arenaMobileTouchMode" value="joystick"> Joystick — analógico izquierdo y botones acomodables</label></fieldset><p id="arenaMobileTouchHelp">Elige un esquema de controles. Tus preferencias se guardan.</p><div id="arenaMobileArrangeSettings"><p>Mueve el analógico y los botones a posiciones cómodas. Guarda cada cambio para próximas partidas.</p><button type="button" id="arenaMobileArrange">✥ Acomodar analógico y botones</button><label for="arenaMobileSize">Tamaño de botones <output id="arenaMobileSizeValue">70 px</output></label><input id="arenaMobileSize" type="range" min="56" max="94" step="2" value="70"><button type="button" id="arenaMobileReset">↺ Restablecer posiciones</button><small>Multitáctil: hasta 5 dedos. Apunta ↑ o ↓ con el joystick y pulsa ⚔ (golpe) o ⚡ (especial). ↑ salta; 2 toques hacen doble salto.</small></div>';
     target.appendChild(control);
     // HUD transparency has one canonical control in Pantalla y HUD, shared
     // with desktop. Do not create or move a second opacity slider here.
@@ -676,16 +737,19 @@ function installArenaMobileTouch(){
     // Reuse the original analog, including its existing pointer handling and dead zone.
     // The same joystick moves between the 9:16 and 16:9 previews.
     document.getElementById('arenaPortableSetup')?.querySelector('.arena-portable-help')?.replaceChildren(document.createTextNode('En Modo jugador elige Controles táctiles o Joystick y botones. También puedes cambiarlos en Ajustes → Controles.'));
-    const labels={arenaMobileJump:'↑',arenaMobileAttack:'⚔',arenaMobilePower:'⚡',arenaMobileMoreBtn:'☰'};
+    const labels={arenaMobileJump:'↑',arenaMobileAttack:'⚔',arenaMobilePower:'✦',arenaMobileMoreBtn:'☰'};
     for(const [id,label]of Object.entries(labels)){
         const node=document.getElementById(id);if(!node)continue;
         node.textContent=label;node.removeAttribute('data-workspace-copy');node.classList.add('arena-portable-round-control');
         node.title=({arenaMobileJump:'Saltar',arenaMobileAttack:'Golpe básico',arenaMobilePower:'Poder especial',arenaMobileMoreBtn:'Abrir menú'}[id]);
         node.setAttribute('aria-label',node.title);
     }
+    arenaMobileLoadModeLayout();
+    arenaMobileSwitchLayout();
     arenaMobileInstallTestDrawer();
     arenaMobileInstallStreamerSkills();
     arenaMobileInstallControlDragging();
+    setInterval(arenaMobileRefreshSkillIcon,250);
     // Controls are recreated or relabeled when switching modes or opening tools.
     // Translate visible labels and accessible names after the originating click.
     for(const eventName of ['click','change']){
@@ -704,5 +768,6 @@ window.ArenaMobileTouch=Object.freeze({
     openTests:arenaMobileShowTestDrawer,selectTest:arenaMobileSelectTestPanel,editButtons:arenaMobileEditButtons,setButtonSize:arenaMobileSetButtonSize,resetButtons:arenaMobileResetButtons,
     setTouchMode:arenaMobileSetTouchMode,getTouchMode(){return arenaPortableProfile.touchMode;},
     getLayout(){return JSON.parse(JSON.stringify(arenaMobileLayout));},
+    getLayouts(){return JSON.parse(JSON.stringify(arenaMobileLayouts));},switchLayout:arenaMobileSwitchLayout,
     getState(){return {gestureActive:arenaMobileTouchState.pointerId!==null||arenaMobileActionState.pointerId!==null,tapCount:arenaMobileTouchState.tapCount,contacts:window.ArenaMobileContacts?.size||0,testOpen:arenaMobileTestState.open,testPanel:arenaMobileTestState.active};}
 });
