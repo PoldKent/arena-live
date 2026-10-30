@@ -37,6 +37,8 @@ function arenaPortableSyncModeControls(){
     if(selected&&selected.value!==mode){const radio=document.querySelector('input[name="arenaPortableMode"][value="'+mode+'"]');if(radio)radio.checked=true;}
     const cls=document.getElementById('arenaPortableClass');
     if(cls)cls.disabled=mode!==ARENA_MOBILE_MODES.PLAYER||arenaCombatRules.classRule!=='any';
+    const touchField=document.getElementById('arenaPortableTouchOptions');
+    if(touchField){touchField.hidden=mode!==ARENA_MOBILE_MODES.PLAYER;touchField.style.display=touchField.hidden?'none':'grid';}
     for(const key of [ARENA_MOBILE_MODES.PLAYER,ARENA_MOBILE_MODES.DIRECTOR]){
         const button=document.getElementById('arenaPortableMode'+(key==='player'?'Player':'Director'));
         if(button){button.setAttribute('aria-pressed',String(mode===key));button.classList.toggle('is-selected',mode===key);}
@@ -110,6 +112,8 @@ function arenaPortableOpen() {
     document.getElementById('arenaPortableFps').value=String(arenaRuntime.renderFps);
     const setupMode=document.querySelector('input[name="arenaPortableMode"][value="'+arenaPortableProfile.mode+'"]');
     if(setupMode)setupMode.checked=true;
+    const setupTouch=document.querySelector('input[name="arenaPortableTouch"][value="'+arenaPortableProfile.touchMode+'"]');
+    if(setupTouch)setupTouch.checked=true;
     arenaPortableSyncModeControls();
     if(arenaCombatRules.classRule!=='any')document.getElementById('arenaPortableClass').value=arenaCombatRules.classRule;
     document.getElementById('arenaPortableStatus').textContent='';
@@ -122,7 +126,7 @@ function arenaPortableOpen() {
     document.dispatchEvent(new Event('arena-touch-disable'));updateTouchControlsVisibility();
     document.getElementById('arenaPortableCount').focus({preventScroll:true});
 }
-function arenaPortableStart({count=32,classKey='kame',mode,join}={}) {
+function arenaPortableStart({count=32,classKey='kame',mode,join,touchMode}={}) {
     const selectedMode=mode??(typeof join==='boolean'?(join?ARENA_MOBILE_MODES.PLAYER:ARENA_MOBILE_MODES.DIRECTOR):arenaPortableProfile.mode);
     if(![ARENA_MOBILE_MODES.PLAYER,ARENA_MOBILE_MODES.DIRECTOR].includes(selectedMode))return false;
     join=selectedMode===ARENA_MOBILE_MODES.PLAYER;
@@ -130,7 +134,7 @@ function arenaPortableStart({count=32,classKey='kame',mode,join}={}) {
     const requested=Number(count),actual=Math.min(requested,getArenaPlayerLimit());
     if(actual<2)return false;
     arenaPortableClearReport();
-    arenaPortableProfile={...arenaPortableProfile,count:requested,classKey,mode:selectedMode,join};arenaPortableRemember();
+    arenaPortableProfile={...arenaPortableProfile,count:requested,classKey,mode:selectedMode,join,touchMode:join&&['touch','joystick'].includes(touchMode)?touchMode:arenaPortableProfile.touchMode};arenaPortableRemember();
     if(isSettingsOpen)toggleSettingsModal(false);
     openLobby(true);applyPlayerCountPreset(actual-(join?1:0));
     if(join){document.getElementById('protagonistClassSelect').value=classKey;if(!streamerManualControl)toggleStreamerManualControl();joinAsStreamer();}
@@ -446,7 +450,7 @@ function installArenaPortableFloatingUI(){
 function arenaPortableReady() {
     const host=document.createElement('section');host.id='arenaPortableSetup';host.hidden=true;
     host.setAttribute('role','dialog');host.setAttribute('aria-modal','true');host.setAttribute('aria-labelledby','arenaPortableTitle');host.setAttribute('aria-describedby','arenaPortableDescription');host.setAttribute('data-no-translate','');
-    host.innerHTML=`<div class="arena-portable-card"><button type="button" id="arenaPortableClose" aria-label="Cerrar prueba rápida">×</button><div class="arena-portable-kicker">ARENA LIVE · ARCHIVO SIN CONEXIÓN</div><h2 id="arenaPortableTitle">Nueva partida</h2><p id="arenaPortableDescription">Elige los luchadores y comienza a jugar.</p><aside id="arenaPortableNotice" aria-label="Sobre Arena Live"><strong>🎥 Un juego pensado para streaming</strong><p>Arena Live está diseñado para directos: quienes te ven pueden unirse a la arena escribiendo en el chat, elegir su clase y activar poderes con comandos. Esta versión móvil es una prueba sin conexión; simula el chat y sus interacciones.</p><label class="arena-portable-check"><input type="checkbox" id="arenaPortableDontShow"> No mostrar de nuevo</label></aside><form id="arenaPortableForm"><div class="arena-portable-grid"><label>Peleadores<select id="arenaPortableCount">${[2,4,9,32,64,128].map(n=>`<option value="${n}">${n} · ${n===2?'Duelo':n<=8?'Smash':'Arena'}</option>`).join('')}</select></label><label>Tu clase<select id="arenaPortableClass">${Object.keys(CLASS_COMMANDS).map(key=>`<option value="${key}">${escapeHTML(localizedClassName(key))}</option>`).join('')}</select></label><label>Resolución de dibujo<select id="arenaPortableResolution"><option value="540">540p · Ahorro</option><option value="720">720p · Normal</option><option value="1080">1080p · Detalle</option></select></label><label>Fluidez de dibujo<select id="arenaPortableFps"><option value="30">30 FPS · Ahorro</option><option value="60">60 FPS · Fluidez</option></select></label></div><fieldset id="arenaPortableModeOptions"><legend>¿Cómo quieres jugar?</legend><label class="arena-mobile-mode-choice"><input type="radio" name="arenaPortableMode" value="player" checked><span><b>🎮 Modo jugador</b><small>Controla a tu protagonista con gestos. La arena ocupa la pantalla y las pruebas permanecen ocultas.</small></span></label><label class="arena-mobile-mode-choice"><input type="radio" name="arenaPortableMode" value="director"><span><b>🎛 Modo Streamer</b><small>Dirige la partida con jugadores, poderes y comandos de prueba. No requiere conexión a redes.</small></span></label></fieldset><output id="arenaPortableStatus" role="status"></output><button type="submit" id="arenaPortableStart">▶ Iniciar partida</button></form><p class="arena-portable-help">Toca la arena para moverte; desliza rápido para golpear. En ↑, un toque salta y dos toques seguidos hacen doble salto. Mantén pulsado el escenario para usar el poder.</p></div>`;
+    host.innerHTML=`<div class="arena-portable-card"><button type="button" id="arenaPortableClose" aria-label="Cerrar prueba rápida">×</button><div class="arena-portable-kicker">ARENA LIVE · ARCHIVO SIN CONEXIÓN</div><h2 id="arenaPortableTitle">Nueva partida</h2><p id="arenaPortableDescription">Elige los luchadores y comienza a jugar.</p><aside id="arenaPortableNotice" aria-label="Sobre Arena Live"><strong>🎥 Un juego pensado para streaming</strong><p>Arena Live está diseñado para directos: quienes te ven pueden unirse a la arena escribiendo en el chat, elegir su clase y activar poderes con comandos. Esta versión móvil es una prueba sin conexión; simula el chat y sus interacciones.</p><label class="arena-portable-check"><input type="checkbox" id="arenaPortableDontShow"> No mostrar de nuevo</label></aside><form id="arenaPortableForm"><div class="arena-portable-grid"><label>Peleadores<select id="arenaPortableCount">${[2,4,9,32,64,128].map(n=>`<option value="${n}">${n} · ${n===2?'Duelo':n<=8?'Smash':'Arena'}</option>`).join('')}</select></label><label>Tu clase<select id="arenaPortableClass">${Object.keys(CLASS_COMMANDS).map(key=>`<option value="${key}">${escapeHTML(localizedClassName(key))}</option>`).join('')}</select></label><label>Resolución de dibujo<select id="arenaPortableResolution"><option value="540">540p · Ahorro</option><option value="720">720p · Normal</option><option value="1080">1080p · Detalle</option></select></label><label>Fluidez de dibujo<select id="arenaPortableFps"><option value="30">30 FPS · Ahorro</option><option value="60">60 FPS · Fluidez</option></select></label></div><fieldset id="arenaPortableModeOptions"><legend>¿Cómo quieres jugar?</legend><label class="arena-mobile-mode-choice"><input type="radio" name="arenaPortableMode" value="player" checked><span><b>🎮 Modo jugador</b><small>Elige controles táctiles o joystick. La arena ocupa la pantalla y las pruebas permanecen ocultas.</small></span></label><label class="arena-mobile-mode-choice"><input type="radio" name="arenaPortableMode" value="director"><span><b>🎛 Modo Streamer</b><small>Dirige la partida con jugadores, poderes y comandos de prueba. No requiere conexión a redes.</small></span></label></fieldset><fieldset id="arenaPortableTouchOptions"><legend>Controles del jugador</legend><label class="arena-mobile-mode-choice"><input type="radio" name="arenaPortableTouch" value="touch"><span><b>👆 Controles táctiles</b><small>Gestos sobre la arena, sin botones.</small></span></label><label class="arena-mobile-mode-choice"><input type="radio" name="arenaPortableTouch" value="joystick" checked><span><b>🕹 Joystick y botones</b><small>Analógico y tres botones acomodables.</small></span></label></fieldset><output id="arenaPortableStatus" role="status"></output><button type="submit" id="arenaPortableStart">▶ Iniciar partida</button></form><p class="arena-portable-help">Toca la arena para moverte; desliza rápido para golpear. En ↑, un toque salta y dos toques seguidos hacen doble salto. Mantén pulsado el escenario para usar el poder.</p></div>`;
     document.body.appendChild(host);
     document.getElementById('arenaPortableClose').onclick=arenaPortableClose;
     document.getElementById('arenaPortableDontShow').onchange=event=>{
@@ -458,6 +462,8 @@ function arenaPortableReady() {
         if(event.target.checked){
             const cls=document.getElementById('arenaPortableClass');
             if(cls)cls.disabled=event.target.value!==ARENA_MOBILE_MODES.PLAYER||arenaCombatRules.classRule!=='any';
+            const touchField=document.getElementById('arenaPortableTouchOptions');
+            if(touchField){touchField.hidden=event.target.value!==ARENA_MOBILE_MODES.PLAYER;touchField.style.display=touchField.hidden?'none':'grid';}
         }
     }));
     document.getElementById('arenaPortableResolution').onchange=event=>arenaPortableResolution(event.target.value);
@@ -468,7 +474,7 @@ function arenaPortableReady() {
     };
     // A direct start handler prevents native form navigation in offline Android/file:// browsers.
     // The submit handler still supports Enter and programmatic form submission.
-    const startPortableSession=()=>arenaPortableStart({count:document.getElementById('arenaPortableCount').value,classKey:document.getElementById('arenaPortableClass').value,mode:document.querySelector('input[name="arenaPortableMode"]:checked')?.value});
+    const startPortableSession=()=>arenaPortableStart({count:document.getElementById('arenaPortableCount').value,classKey:document.getElementById('arenaPortableClass').value,mode:document.querySelector('input[name="arenaPortableMode"]:checked')?.value,touchMode:document.querySelector('input[name="arenaPortableTouch"]:checked')?.value});
     document.getElementById('arenaPortableForm').onsubmit=event=>{event.preventDefault();startPortableSession();};
     document.getElementById('arenaPortableStart').onclick=event=>{event.preventDefault();startPortableSession();};
     host.addEventListener('keydown',event=>{
