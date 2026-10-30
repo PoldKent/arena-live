@@ -376,8 +376,8 @@ html.arena-mobile-offline #arenaPortableSetup .arena-portable-card{
 }
 html.arena-mobile-offline #arenaOperatorPopover button,
 html.arena-mobile-offline #arenaOperatorPopover select,
-html.arena-mobile-offline #arenaSettingsTabs button,
-html.arena-mobile-offline #settingsPauseModal button,
+html.arena-mobile-offline #arenaSettingsTabs button:not([aria-selected="true"]),
+html.arena-mobile-offline #settingsPauseModal button:not([aria-selected="true"]):not([aria-pressed]),
 html.arena-mobile-offline .arena-portable-card button,
 html.arena-mobile-offline .arena-mobile-mode-choice{
  background:rgba(20,48,73,var(--arena-hud-opacity,.85))!important;color:#eaffff!important
