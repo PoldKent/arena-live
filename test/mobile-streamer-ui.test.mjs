@@ -81,11 +81,12 @@ test('X, same menu button and Android Back consume overlays first',()=>{
     assert.match(css,/#arenaMobileMenuClose\{[^}]*justify-content:center!important/);
     assert.doesNotMatch(css,/#arenaMobileMenuClose svg/);
 });
-test('mobile fullscreen formats up to 9:21 are separate from OBS',()=>{
-    assert.match(runtime,/ARENA_MOBILE_FRAME_FORMATS=Object\.freeze\(\['auto','16','19\.5','20','21'\]\)/);
-    assert.match(runtime,/window\.ArenaMobileFrame=Object\.freeze/);
-    assert.match(touch,/Independiente de OBS/);
-    assert.match(css,/#arenaMobileFrameGuide:not\(\[hidden\]\)/);
+test('mobile keeps the true 9:16 game without a misleading frame-format selector',()=>{
+    assert.doesNotMatch(runtime,/arenaMobileFrameGuide|arenaMobileFullscreenFormat/);
+    assert.doesNotMatch(touch,/arenaMobileDisplaySettings|arenaMobileFullscreenFormat/);
+    assert.doesNotMatch(css,/#arenaMobileFrameGuide:not\(\[hidden\]\)/);
+    assert.match(runtime,/arenaMobileMatchShortcut/);
+    assert.match(runtime,/arenaMobileProtaShortcut/);
 });
 test('Prota status and new-game panel remain available',()=>{
     assert.match(runtime,/playerStatus\.textContent='Prota fuera de combate'/);
