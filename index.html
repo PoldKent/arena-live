@@ -954,7 +954,8 @@ body>header {position:relative!important;flex:none;padding:7px 10px!important;ba
 #arenaHeaderActions button[aria-pressed="true"],#arenaHeaderActions button[aria-expanded="true"] {border-color:#7395b7;background:#273c4e}
 #arenaHeaderActions button:disabled,.arena-work-panel button:disabled,#arenaOperatorPopover button:disabled {opacity:.45;cursor:default}
 #arenaHeaderActions #btnFullscreenDual {border-color:#4c756b;color:#c1e4d6}
-/* Desktop and stream quick actions reparent the existing controls; mobile has its own rail. */
+/* ARENA_DESKTOP_QUICK_CSS_BEGIN */
+/* Desktop and stream quick actions reparent the original controls. */
 #arenaDesktopQuickPanel[hidden],#arenaDesktopQuickPanel [hidden]{display:none!important}
 #arenaDesktopQuickPanel{position:fixed;z-index:140;width:min(280px,calc(100vw - 16px));max-height:calc(100dvh - 72px);overflow:auto;padding:10px;border:1px solid #55768b;border-radius:12px;background:#102438;color:#e9f8ff;box-shadow:0 15px 38px #000b;box-sizing:border-box}
 #arenaDesktopQuickPanel>div:not([hidden]){display:grid;gap:7px;min-width:0}
@@ -972,6 +973,7 @@ body>header {position:relative!important;flex:none;padding:7px 10px!important;ba
 }
 @media(max-width:767px){#arenaDesktopQuickPanel,#arenaHeaderActions .arena-desktop-quick{display:none!important}}
 html.arena-mobile-offline #arenaDesktopQuickPanel,html.arena-mobile-offline #arenaHeaderActions .arena-desktop-quick{display:none!important}
+/* ARENA_DESKTOP_QUICK_CSS_END */
 .arena-toolbar-separator {height:16px;flex:0 0 1px;background:#394250;margin:0 3px}
 :where(.arena-work-panel,#arenaOperatorPopover,#settingsPauseModal) :focus-visible,#arenaHeaderActions :focus-visible,.arena-dock-resizer:focus-visible {outline:2px solid #8ebddd;outline-offset:2px}
 #streamerJoinLabel {max-width:none!important}
