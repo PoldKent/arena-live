@@ -35,8 +35,8 @@ test('mobile Streamer moves existing skill buttons and controls without cloning 
   assert.match(touch,/document\.querySelector\('#arenaPanelPowers \.arena-skill-buttons'\)/);
   assert.match(touch,/dock\.appendChild\(source\)/);
   assert.match(touch,/arenaMobileKeepStreamerSkillsVisible/);
-  assert.match(runtime,/menu\.appendChild\(prota\)/);
-  assert.match(runtime,/\['arenaMobileActionLayer','touchControlDock','arenaStreamerSkillsDock'\]/);
+  assert.match(runtime,/getElementById\('arenaMobileProtaPanel'\)\?\.appendChild\(prota\)/);
+  assert.match(runtime,/\['arenaMobileActionLayer','touchControlDock'\]/);
   assert.match(css,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
   assert.match(css,/#arenaMobileControlShelf/);
   assert.match(css,/#arenaMobileGestureGuide/);
