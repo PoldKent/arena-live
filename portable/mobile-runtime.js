@@ -321,7 +321,7 @@ function arenaMobileInstallBackAndMenuClose(){
     if(menu&&!document.getElementById('arenaMobileMenuClose')){
         const button=document.createElement('button');
         button.id='arenaMobileMenuClose';button.type='button';
-        button.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" focusable="false"><path d="M5 5L19 19M19 5L5 19" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg>';
+        button.textContent='×'; // Match the existing mobile setup and test-panel close buttons.
         button.title='Cerrar menú';button.setAttribute('aria-label','Cerrar menú');
         // Insert before the grid content so it remains visible at the top.
         (menu.querySelector('.arena-portable-menu-heading')||menu).appendChild(button);

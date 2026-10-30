@@ -72,10 +72,11 @@ test('test panel can be dragged, scrolled and minimized without resizing the gam
 });
 test('X, same menu button and Android Back consume overlays first',()=>{
     assert.match(runtime,/button\.id='arenaMobileMenuClose'/);
-    assert.match(runtime,/button\.innerHTML='<svg/);
+    assert.match(runtime,/button\.textContent='×'/);
     assert.match(runtime,/function arenaMobileCloseTopPanel\(\)/);
     assert.match(runtime,/window\.addEventListener\('popstate'/);
-    assert.match(css,/#arenaMobileMenuClose svg/);
+    assert.match(css,/#arenaMobileMenuClose\{[^}]*justify-content:center!important/);
+    assert.doesNotMatch(css,/#arenaMobileMenuClose svg/);
 });
 test('mobile fullscreen formats up to 9:21 are separate from OBS',()=>{
     assert.match(runtime,/ARENA_MOBILE_FRAME_FORMATS=Object\.freeze\(\['auto','16','19\.5','20','21'\]\)/);
@@ -98,4 +99,13 @@ test('offline start button and form both cancel native navigation before startin
     assert.match(runtime,/arenaPortableStart'\)\.onclick=event=>\{event\.preventDefault\(\);startPortableSession\(\)/);
     assert.match(runtime,/arenaPortableForm'\)\.onsubmit=event=>\{event\.preventDefault\(\);startPortableSession\(\)/);
     assert.match(runtime,/const startPortableSession=\(\)=>arenaPortableStart/);
+});
+
+test('original header, no framed toolbar and independent touch surface',()=>{
+    assert.match(css,/#arenaTopBarInner\{[^}]*flex-direction:row!important/);
+    assert.match(css,/#arenaMobileFloating\{[^}]*background:transparent!important;[^}]*border:0!important/);
+    assert.doesNotMatch(css,/#arenaMobilePause\{[^}]*position:fixed!important/);
+    assert.match(css,/#arenaMobileControlShelf\{[^}]*position:fixed!important/);
+    assert.match(runtime,/--arena-mobile-reserved-bottom','0px'/);
+    assert.match(touch,/arenaLiveMobileButtonsV2/);
 });

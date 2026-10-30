@@ -890,8 +890,8 @@ html:not(.arena-mobile-offline) #card-9x16:fullscreen > :not(#viewport9x16):not(
     transition: none !important;
     overflow: hidden !important;
 }
-#card-16x9:fullscreen .arena-fullscreen-exit-button,
-#card-9x16:fullscreen .arena-fullscreen-exit-button {
+html:not(.arena-mobile-offline) #card-16x9:fullscreen .arena-fullscreen-exit-button,
+html:not(.arena-mobile-offline) #card-9x16:fullscreen .arena-fullscreen-exit-button {
     position: absolute;
     z-index: 90;
     top: max(9px, env(safe-area-inset-top));

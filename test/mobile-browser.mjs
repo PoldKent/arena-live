@@ -99,12 +99,20 @@ try{
             const rect=node.getBoundingClientRect();
             const video=document.getElementById('viewport9x16').getBoundingClientRect();
             const btn=getComputedStyle(node.querySelector('#arenaPortableFullscreen'));
+            const bar=getComputedStyle(node),header=document.getElementById('arenaTopBarInner');
+            const pause=document.getElementById('arenaMobilePause').getBoundingClientRect();
+            const h=header.getBoundingClientRect();
             return {x:rect.x,y:rect.y,right:rect.right,videoTop:video.top,
-                fixed:getComputedStyle(node).position==='fixed',
+                fixed:bar.position==='fixed',frame:bar.backgroundColor,border:bar.borderTopWidth,
+                row:getComputedStyle(header).flexDirection,pauseInBanner:pause.top>=h.top-1&&pause.bottom<=h.bottom+1,
                 circle:btn.borderRadius==='50%',w:parseFloat(btn.width)};
         });
-        assert.ok(!toolbar.fixed&&toolbar.circle&&toolbar.w===38,JSON.stringify(toolbar));
-        assert.ok(toolbar.y>=0&&toolbar.right<=result.screen&&toolbar.y+toolbar.w<=toolbar.videoTop,JSON.stringify(toolbar));
+        assert.ok(!toolbar.fixed&&toolbar.circle&&toolbar.w>=38&&toolbar.w<=44,JSON.stringify(toolbar));
+        assert.equal(toolbar.row,'row','mobile header must stay on one line');
+        assert.equal(toolbar.frame,'rgba(0, 0, 0, 0)','the old framed button container must be transparent');
+        assert.equal(toolbar.border,'0px','top buttons must sit directly in the banner');
+        assert.equal(toolbar.pauseInBanner,true,'pause must not float outside the banner');
+        assert.ok(toolbar.y>=0&&toolbar.right<=result.screen&&toolbar.y+48<=toolbar.videoTop,JSON.stringify(toolbar));
         await page.locator('#arenaMobileMoreBtn').tap();
         assert.equal(await page.locator('#arenaPortableModePlayer').isVisible(),true);
         assert.equal(await page.locator('#arenaPortableModeDirector').isVisible(),true);
@@ -556,17 +564,18 @@ try{
         await page.locator('#arenaPortableFullscreen').tap();
         await page.evaluate(()=>delete document.fullscreenEnabled);
     });
-    await check('v0.40.6 menu X centered, controls hidden, stage unchanged',async()=>{
+    await check('menu uses the standard centered close glyph and does not shrink 9:16',async()=>{
         await page.evaluate(()=>ArenaPortable.setMode('player'));
         const baseline=await page.locator('#viewport9x16').boundingBox();
         await page.locator('#arenaMobileMoreBtn').tap();
         assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),true);
         assert.equal(await page.locator('#arenaMobileControlShelf').isVisible(),false);
         const x=await page.locator('#arenaMobileMenuClose').evaluate(n=>{
-            const b=n.getBoundingClientRect(),p=n.querySelector('svg').getBoundingClientRect();
-            return {dx:Math.abs((b.left+b.right-p.left-p.right)/2),dy:Math.abs((b.top+b.bottom-p.top-p.bottom)/2)};
+            const style=getComputedStyle(n);
+            return {glyph:n.textContent.trim(),children:n.children.length,display:style.display,
+                horizontal:style.justifyContent,vertical:style.alignItems,textAlign:style.textAlign};
         });
-        assert.ok(x.dx<2&&x.dy<2,JSON.stringify(x));
+        assert.deepEqual(x,{glyph:'×',children:0,display:'flex',horizontal:'center',vertical:'center',textAlign:'center'});
         await page.locator('#arenaMobileMenuClose').tap();
         const after=await page.locator('#viewport9x16').boundingBox();
         assert.ok(Math.abs(after.width-baseline.width)<1&&Math.abs(after.height-baseline.height)<1);
@@ -619,6 +628,8 @@ try{
         }
         await page.locator('#arenaPortableFullscreen').tap();
         await page.waitForFunction(()=>document.fullscreenElement?.id==='card-9x16');
+        assert.equal(await page.locator('#btnExitFullscreen9').isVisible(),false,'no second exit icon over mobile combat');
+        assert.equal(await page.locator('#arenaPortableFullscreen').isVisible(),true);
         assert.equal(await page.locator('#arenaMobileFloating').isVisible(),true);
         assert.equal(await page.locator('#arenaMobileFullscreenBar').isVisible(),true);
         assert.equal(await page.locator('#arenaMobileFullscreenBar .arena-brand-block').count(),1);
