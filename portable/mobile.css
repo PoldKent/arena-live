@@ -380,7 +380,7 @@ html.arena-mobile-offline #arenaSettingsTabs button,
 html.arena-mobile-offline #settingsPauseModal button,
 html.arena-mobile-offline .arena-portable-card button,
 html.arena-mobile-offline .arena-mobile-mode-choice{
- background:rgba(20,48,73,var(--arena-hud-opacity,.85))!important
+ background:rgba(20,48,73,var(--arena-hud-opacity,.85))!important;color:#eaffff!important
 }
 html.arena-mobile-offline #arenaMobileControlSettings{
  display:grid;gap:8px;padding:12px;margin:8px 0;
@@ -437,7 +437,7 @@ html.arena-mobile-offline #arenaPortableTestBody button,
 html.arena-mobile-offline #arenaOperatorPopover .arena-mobile-match-menu>summary,
 html.arena-mobile-offline #arenaPortableSetup input:not([type=checkbox]):not([type=radio]):not([type=range]),
 html.arena-mobile-offline #arenaPortableSetup select{
- background-color:rgba(19,50,72,var(--arena-hud-opacity,.85))!important;
+ background-color:rgba(19,50,72,var(--arena-hud-opacity,.85))!important;color:#eaffff!important;
 }
 
 /* v0.37: Director controls stay within one compact scrollable panel. */
