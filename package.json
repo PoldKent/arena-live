@@ -21,6 +21,7 @@
     "build:styles": "node tools/build-styles.mjs",
     "build:mobile": "node tools/build-mobile.mjs",
     "build:preview": "node tools/build-preview-site.mjs",
+    "test:preview": "node tools/build-preview-site.mjs && node --test test/preview-site.test.mjs",
     "publish:preview": "node tools/publish-preview-site.mjs",
     "analyze:balance": "node test/balance-simulation.mjs"
   },
