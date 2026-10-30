@@ -554,14 +554,6 @@ function arenaMobileInstallLayoutSettings(){
     const control=document.createElement('section');control.id='arenaMobileControlSettings';control.setAttribute('aria-label','Acomodar botones');
     control.innerHTML='<h3>📱 Modo jugador: controles</h3><fieldset id="arenaMobileTouchModeOptions"><legend>Elige cómo controlar al protagonista</legend><label><input type="radio" name="arenaMobileTouchMode" value="touch"> Táctil total — sin botones sobre el juego</label><label><input type="radio" name="arenaMobileTouchMode" value="joystick"> Joystick — analógico izquierdo y botones acomodables</label></fieldset><p id="arenaMobileTouchHelp">Elige un esquema de controles. Tus preferencias se guardan.</p><div id="arenaMobileArrangeSettings"><p>Mueve el analógico y los botones a posiciones cómodas. Guarda cada cambio para próximas partidas.</p><button type="button" id="arenaMobileArrange">✥ Acomodar analógico y botones</button><label for="arenaMobileSize">Tamaño de botones <output id="arenaMobileSizeValue">70 px</output></label><input id="arenaMobileSize" type="range" min="56" max="94" step="2" value="70"><button type="button" id="arenaMobileReset">↺ Restablecer posiciones</button><small>Multitáctil: hasta 5 dedos. Apunta ↑ o ↓ con el joystick y pulsa ⚔ (golpe) o ⚡ (especial). ↑ salta; 2 toques hacen doble salto.</small></div>';
     target.appendChild(control);
-    const format=document.createElement('section');
-    format.id='arenaMobileDisplaySettings';
-    format.setAttribute('aria-label','Formato de pantalla completa');
-    format.innerHTML='<h3>📐 Pantalla completa</h3><label for="arenaMobileFullscreenFormat">Marco vertical de presentación</label><select id="arenaMobileFullscreenFormat"><option value="auto">Automático · máximo tamaño</option><option value="16">9:16</option><option value="19.5">9:19.5</option><option value="20">9:20</option><option value="21">9:21</option></select><small>El marco es una referencia del formato del teléfono. El escenario real conserva 9:16 y siempre su máximo tamaño; los controles flotan encima y no lo reducen. Independiente de OBS.</small>';
-    target.appendChild(format);
-    const formatSelect=format.querySelector('select');
-    formatSelect.value=window.ArenaMobileFrame?.get?.()||'auto';
-    formatSelect.addEventListener('change',()=>window.ArenaMobileFrame?.set?.(formatSelect.value));
     // HUD transparency has one canonical control in Pantalla y HUD, shared
     // with desktop. Do not create or move a second opacity slider here.
     const note=document.createElement('small');
