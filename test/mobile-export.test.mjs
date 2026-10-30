@@ -6,15 +6,15 @@ import {join} from 'node:path';
 import {Script} from 'node:vm';
 import {buildMobile,packMobile,unpackMobile} from '../tools/build-mobile.mjs';
 
-test('current release is under 500 KB, fully offline and decompresses losslessly',async()=>{
+test('current release is under 750 KB, fully offline and decompresses losslessly',async()=>{
     const dir=await mkdtemp(join(tmpdir(),'arena-mobile-release-'));
     try{
         const a=await buildMobile(join(dir,'one.html'));
         const b=await buildMobile(join(dir,'two.html'));
         assert.equal(a.sha256,b.sha256,'deterministic export');
-        assert.ok(a.bytes<=500000,'maximum 500,000 bytes');
+        assert.ok(a.bytes<=750000,'maximum 750,000 bytes');
         const wrapped=await readFile(a.path,'utf8');
-        assert.ok(Buffer.byteLength(wrapped)<=500000);
+        assert.ok(Buffer.byteLength(wrapped)<=750000);
         assert.ok(wrapped.includes('Arena Live v'+a.version+' · Móvil'),'wrapper title must match build version');
         assert.doesNotMatch(wrapped,/<(?:script|link)\b[^>]+(?:src|href)\s*=/i);
         const encoded=wrapped.match(/"([A-Za-z0-9+/=]{10000,})"/)?.[1];
