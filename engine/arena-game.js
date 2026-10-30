@@ -7611,7 +7611,7 @@
                 const protaActions=panel.querySelector('#arenaDesktopProtaActions');
                 const newMatch=document.createElement('button');
                 newMatch.id='arenaDesktopNewMatch';newMatch.type='button';newMatch.textContent='＋ Nueva partida';
-                newMatch.title='Preparar un nuevo combate';newMatch.onclick=()=>openLobby(true);
+                newMatch.title='Iniciar una partida nueva sin conservar al campeón anterior';newMatch.onclick=()=>{currentWinner=arenaRoundResult=arenaLobbyChampion=null;openLobby(true);};
                 matchActions.appendChild(newMatch);
                 const close=()=>{
                     panel.hidden=true;matchActions.hidden=true;protaActions.hidden=true;
