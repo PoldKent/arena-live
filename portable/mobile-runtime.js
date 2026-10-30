@@ -166,6 +166,9 @@ function refreshArenaPortableFloatingUI(){
     const pause=document.getElementById('arenaMobilePause');
     const modeShortcut=document.getElementById('arenaMobileModeShortcut');
     if(modeShortcut){const player=arenaPortableProfile.mode===ARENA_MOBILE_MODES.PLAYER;modeShortcut.textContent=player?'🎛':'🎮';modeShortcut.title=player?'Cambiar a Modo Streamer':'Cambiar a Modo jugador';modeShortcut.setAttribute('aria-label',modeShortcut.title);modeShortcut.setAttribute('aria-pressed',String(!player));}
+    const classSelect=document.getElementById('protagonistClassSelect');
+    const protaShortcut=document.getElementById('arenaMobileProtaShortcut');
+    if(protaShortcut&&classSelect){protaShortcut.textContent=({kame:'⚔️',ninja:'🌀',titan:'🛡️',trueno:'⚡',esmeralda:'🌿'})[classSelect.value]||'🎭';protaShortcut.title='Prota · '+(classSelect.selectedOptions[0]?.textContent||'Clase');protaShortcut.setAttribute('aria-label',protaShortcut.title);}
     if(pause){pause.textContent=isGamePaused?'▶':'⏸';pause.title=isGamePaused?'Continuar combate':'Pausar combate';pause.setAttribute('aria-label',pause.title);pause.setAttribute('aria-pressed',String(isGamePaused));}
     const guide=document.getElementById('arenaPortableToggleGuide');
     const menuGuide=document.getElementById('arenaPortableGuideMenu');
@@ -191,44 +194,6 @@ function arenaPortableReport(message){
     if(status)status.textContent=message;
     arenaPortableReportTimer=setTimeout(arenaPortableClearReport,4000);
 }
-/* Mobile fullscreen format is an outer presentation guide. Never resize or
-   crop the true 9:16 world; OBS calibration remains independent. */
-const ARENA_MOBILE_FRAME_FORMAT_KEY='arenaMobileFrameFormatV01';
-const ARENA_MOBILE_FRAME_FORMATS=Object.freeze(['auto','16','19.5','20','21']);
-let arenaMobileFrameFormat='auto';
-try{
-    const saved=localStorage.getItem(ARENA_MOBILE_FRAME_FORMAT_KEY);
-    if(ARENA_MOBILE_FRAME_FORMATS.includes(saved))arenaMobileFrameFormat=saved;
-}catch(_){}
-function arenaMobileSyncFrameGuide(){
-    const guide=document.getElementById('arenaMobileFrameGuide');
-    if(!guide)return;
-    const root=document.documentElement;
-    const fullscreen=!!document.fullscreenElement||arenaPortableTheater;
-    const display=fullscreen&&arenaPortableFrameGuideHost?.id==='card-9x16'&&arenaMobileFrameFormat!=='auto';
-    guide.hidden=!display;
-    root.dataset.mobileFrameFormat=arenaMobileFrameFormat;
-    guide.style.setProperty('--arena-mobile-frame-height',arenaMobileFrameFormat==='auto'?'16':arenaMobileFrameFormat);
-    if(display)guide.setAttribute('aria-label','Marco de referencia vertical 9:'+arenaMobileFrameFormat);
-    const choice=document.getElementById('arenaMobileFullscreenFormat');
-    if(choice&&choice.value!==arenaMobileFrameFormat)choice.value=arenaMobileFrameFormat;
-}
-let arenaPortableFrameGuideHost=null;
-function arenaMobileSetFullscreenFormat(format){
-    if(!ARENA_MOBILE_FRAME_FORMATS.includes(String(format)))return false;
-    arenaMobileFrameFormat=String(format);
-    try{localStorage.setItem(ARENA_MOBILE_FRAME_FORMAT_KEY,arenaMobileFrameFormat);}catch(_){}
-    arenaMobileSyncFrameGuide();
-    return true;
-}
-function arenaMobileInstallFrameGuide(){
-    const guide=document.createElement('div');
-    guide.id='arenaMobileFrameGuide';
-    guide.hidden=true;
-    guide.setAttribute('aria-hidden','true');
-    document.body.appendChild(guide);
-}
-
 function arenaPortableFitMobileStage(){
     const ratio=arenaPortableActiveRatio();
     const video=document.getElementById(ratio==='16:9'?'viewport16x9':'viewport9x16');
@@ -264,7 +229,6 @@ function arenaPortableFitMobileStage(){
         root.style.setProperty('--arena-mobile-controls-top',topPx);
     if(shelf)shelf.setAttribute('data-overlay-only','true');
     if(typeof arenaMobilePositionTestDrawer==='function')arenaMobilePositionTestDrawer();
-    arenaMobileSyncFrameGuide();
 }
 
 function arenaPortableSetTheater(enabled){
@@ -308,6 +272,8 @@ function arenaMobileCurrentOverlay(){
     const dialog=document.getElementById('arenaPortableSetup');
     if(dialog&&!dialog.hidden)return 'setup';
     if(isSettingsOpen)return 'settings';
+    const quick=document.getElementById('arenaMobileQuickPanel');
+    if(quick&&!quick.hidden)return 'quick';
     const menu=document.getElementById('arenaOperatorPopover');
     if(menu&&!menu.hidden)return 'menu';
     if(typeof arenaMobileTestState!=='undefined'&&arenaMobileTestState.open)return 'tests';
@@ -316,7 +282,7 @@ function arenaMobileCurrentOverlay(){
 function arenaMobileSyncOverlayNavigation(){
     const current=arenaMobileCurrentOverlay();
     const root=document.documentElement;
-    root.classList.toggle('arena-mobile-overlay-open',current==='menu'||current==='settings'||current==='setup');
+    root.classList.toggle('arena-mobile-overlay-open',current==='menu'||current==='settings'||current==='setup'||current==='quick');
     if(current){
         if(!history.state?.arenaMobilePanel){
             try{history.pushState({...history.state,arenaMobilePanel:true},'');}catch(_){/* content:// may disallow pushState */}
@@ -332,6 +298,8 @@ function arenaMobileCloseTopPanel(){
     if(details){details.open=false;return 'submenu';}
     const dialog=document.getElementById('arenaPortableSetup');
     if(dialog&&!dialog.hidden){arenaPortableClose();return 'setup';}
+    const quick=document.getElementById('arenaMobileQuickPanel');
+    if(quick&&!quick.hidden){arenaMobileHideQuickPanel();return 'quick';}
     if(isSettingsOpen){toggleSettingsModal(false);return 'settings';}
     if(menu&&!menu.hidden){closeArenaOperatorPopover(false);return 'menu';}
     if(typeof arenaMobileTestState!=='undefined'&&arenaMobileTestState.open){
@@ -368,7 +336,7 @@ function arenaMobileInstallBackAndMenuClose(){
             try{history.pushState({...history.state,arenaMobilePanel:true},'');}catch(_){}
         }
         document.documentElement.classList.toggle('arena-mobile-overlay-open',
-            ['menu','settings','setup'].includes(arenaMobileCurrentOverlay()));
+            ['menu','settings','setup','quick'].includes(arenaMobileCurrentOverlay()));
     });
     // Native menu and settings handlers execute during bubbling; measure their
     // final state on the next frame, including toggle-to-close and outside taps.
@@ -378,6 +346,27 @@ function arenaMobileInstallBackAndMenuClose(){
     requestAnimationFrame(arenaMobileSyncOverlayNavigation);
 }
 
+function arenaMobileHideQuickPanel(){
+    const panel=document.getElementById('arenaMobileQuickPanel');
+    if(!panel||panel.hidden)return;
+    panel.hidden=true;
+    for(const id of ['arenaMobileMatchShortcut','arenaMobileProtaShortcut'])document.getElementById(id)?.setAttribute('aria-expanded','false');
+    arenaMobileSyncOverlayNavigation();
+}
+function arenaMobileToggleQuickPanel(which){
+    const panel=document.getElementById('arenaMobileQuickPanel');
+    if(!panel)return;
+    const repeat=!panel.hidden&&panel.dataset.view===which;
+    arenaMobileHideQuickPanel();
+    if(repeat)return;
+    closeArenaOperatorPopover(false);
+    if(isSettingsOpen)toggleSettingsModal(false);
+    if(typeof arenaMobileTestState!=='undefined'&&arenaMobileTestState.open)arenaMobileShowTestDrawer(false);
+    panel.dataset.view=which;panel.hidden=false;
+    for(const id of ['arenaMobileMatchPanel','arenaMobileProtaPanel'])document.getElementById(id).hidden=(id!=='arenaMobile'+(which==='match'?'Match':'Prota')+'Panel');
+    document.getElementById(which==='match'?'arenaMobileMatchShortcut':'arenaMobileProtaShortcut')?.setAttribute('aria-expanded','true');
+    arenaMobileSyncOverlayNavigation();
+}
 function installArenaPortableFloatingUI(){
     const hud=document.createElement('nav');
     hud.id='arenaMobileFloating';
@@ -395,10 +384,13 @@ function installArenaPortableFloatingUI(){
     hud.prepend(pause);
     const shortcut=document.createElement('button');shortcut.id='arenaMobileModeShortcut';shortcut.type='button';shortcut.textContent='🎛';
     shortcut.onclick=()=>arenaPortableSetMode(arenaPortableProfile.mode===ARENA_MOBILE_MODES.PLAYER?ARENA_MOBILE_MODES.DIRECTOR:ARENA_MOBILE_MODES.PLAYER);
-    pause.after(shortcut);
     const tests=document.createElement('button');tests.id='arenaMobileTestsShortcut';tests.type='button';tests.textContent='🧪';tests.setAttribute('aria-label','Abrir opciones del Modo Streamer');
     tests.onclick=()=>{if(arenaPortableProfile.mode!==ARENA_MOBILE_MODES.DIRECTOR)arenaPortableSetMode(ARENA_MOBILE_MODES.DIRECTOR);arenaMobileShowTestDrawer(!arenaMobileTestState.open);};
-    shortcut.after(tests);
+    pause.after(tests);tests.after(shortcut);
+    const matchShortcut=document.createElement('button');matchShortcut.id='arenaMobileMatchShortcut';matchShortcut.type='button';matchShortcut.textContent='🎲';matchShortcut.title='Partida';matchShortcut.setAttribute('aria-label','Partida');matchShortcut.setAttribute('aria-expanded','false');matchShortcut.onclick=()=>arenaMobileToggleQuickPanel('match');shortcut.after(matchShortcut);
+    const protaShortcut=document.createElement('button');protaShortcut.id='arenaMobileProtaShortcut';protaShortcut.type='button';protaShortcut.textContent='⚔️';protaShortcut.title='Prota';protaShortcut.setAttribute('aria-label','Prota');protaShortcut.setAttribute('aria-expanded','false');protaShortcut.onclick=()=>arenaMobileToggleQuickPanel('prota');matchShortcut.after(protaShortcut);
+    const quickPanel=document.createElement('section');quickPanel.id='arenaMobileQuickPanel';quickPanel.hidden=true;quickPanel.setAttribute('aria-label','Accesos de Partida y Prota');quickPanel.innerHTML='<div id="arenaMobileMatchPanel" hidden></div><div id="arenaMobileProtaPanel" hidden></div>';document.body.appendChild(quickPanel);
+    document.addEventListener('pointerdown',event=>{if(!event.target.closest('#arenaMobileQuickPanel,#arenaMobileMatchShortcut,#arenaMobileProtaShortcut'))arenaMobileHideQuickPanel();},true);
     // The toolbar is outside the battle viewport, including in native fullscreen.
     const topMenu=document.getElementById('arenaMobileMoreBtn');
     const fullscreenControl=hud.querySelector('#arenaPortableFullscreen');
@@ -427,18 +419,19 @@ function installArenaPortableFloatingUI(){
         for(const key of ['arenaViewMenuBtn','arenaFullscreenMenuBtn','arenaDualChatToggleBtn','arenaDualTikTokConnectBtn','arenaDualTestsToggle','btnFullscreenDual']){
             menu.querySelector('[data-forward-control="'+key+'"]')?.remove();
         }
-        const round=document.createElement('details');round.className='arena-mobile-match-menu';
+        const round=document.createElement('div');round.className='arena-mobile-match-menu';
         round.setAttribute('aria-label','Partida');
-        round.innerHTML='<summary>🎮 Partida <span>Lobby · Nueva · Revancha</span></summary>';
+        round.innerHTML='<strong>🎲 Partida</strong>';
         const next=document.getElementById('arenaPortableQuick');
         const lobby=menu.querySelector('[data-forward-control="arenaDualLobbyBtn"]');
         const rematch=menu.querySelector('[data-forward-control="arenaDualRematchBtn"]');
         if(next){next.textContent='＋ Nueva partida';round.appendChild(next);}
         if(lobby){lobby.textContent='🚪 Abrir lobby';round.appendChild(lobby);}
         if(rematch){rematch.textContent='🔄 Revancha';round.appendChild(rematch);}
-        menu.insertBefore(round,menu.querySelector('[data-forward-control="arenaDualTestsToggle"]')||null);
+        document.getElementById('arenaMobileMatchPanel')?.appendChild(round);
+        round.addEventListener('click',event=>{if(event.target.closest('button'))arenaMobileHideQuickPanel();});
         const prota=document.getElementById('arenaProtaClassToolbar');
-        if(prota)menu.appendChild(prota); // Move the original select, keep its listeners and value.
+        if(prota){document.getElementById('arenaMobileProtaPanel')?.appendChild(prota);prota.querySelector('select')?.addEventListener('change',()=>{arenaMobileHideQuickPanel();refreshArenaPortableFloatingUI();});}
     }
     const label=document.getElementById('arenaProtaClassLabel');if(label)label.textContent='🎭 Protagonista';
     const bottom=document.getElementById('arenaMobileMoreBtn');
@@ -493,7 +486,6 @@ function arenaPortableReady() {
     }
     installArenaPortableFloatingUI();
     arenaMobileInstallBackAndMenuClose();
-    arenaMobileInstallFrameGuide();
     const playerShelf=document.createElement('section');playerShelf.id='arenaMobileControlShelf';playerShelf.setAttribute('aria-label','Controles del juego y herramientas');
     document.getElementById('card-9x16')?.appendChild(playerShelf);
     const playerStatus=document.createElement('output');
@@ -521,8 +513,8 @@ function arenaPortableReady() {
     }
     setInterval(arenaMobileRefreshProtaStatus,700);
     const gestureGuide=document.createElement('aside');gestureGuide.id='arenaMobileGestureGuide';gestureGuide.setAttribute('aria-label','Cómo controlar el protagonista');
-    gestureGuide.innerHTML='<span class="arena-mobile-gesture-side"><strong>IZQUIERDA</strong> Desliza · mover</span><span class="arena-mobile-gesture-side"><strong>DERECHA</strong> Toca · saltar <i>·</i> Desliza ↑↓←→ · golpear <i>·</i> Mantén + ↑↓ · especial</span>';
-    document.getElementById('card-9x16')?.appendChild(gestureGuide);
+    gestureGuide.innerHTML='<strong class="arena-mobile-gesture-title">👆 CONTROLES TÁCTILES</strong><span class="arena-mobile-gesture-side"><strong>IZQUIERDA</strong> Desliza · mover</span><span class="arena-mobile-gesture-side"><strong>DERECHA</strong> Toca · saltar <i>·</i> Desliza ↑↓←→ · golpear <i>·</i> Mantén + ↑↓ · especial</span>';
+    document.getElementById('viewport9x16')?.appendChild(gestureGuide);
     const unavailable=document.getElementById('arenaTikTokChatStatus');if(unavailable)unavailable.textContent='Sin conexión LIVE';
     selectArenaChatTab('local',false);
     // Offline labels only: keep the platform identity keys and all LIVE integrations unchanged.
@@ -553,13 +545,10 @@ function arenaPortableReady() {
             if(toolbar&&header)header.appendChild(toolbar);
             if(fullscreenBar){fullscreenBar.hidden=true;if(fullscreenBar.parentElement!==document.body)document.body.appendChild(fullscreenBar);}
         }
-        const frameGuide=document.getElementById('arenaMobileFrameGuide');
-        if(frameGuide){const guideHost=card||document.body;arenaPortableFrameGuideHost=guideHost;
-            if(frameGuide.parentElement!==guideHost)guideHost.appendChild(frameGuide);
-            arenaMobileSyncFrameGuide();
-        }
         if(menu)(fullscreen?card:document.body)?.appendChild(menu);
-        if(guide)card?.appendChild(guide);
+        const quickPanel=document.getElementById('arenaMobileQuickPanel');
+        if(quickPanel)(fullscreen?card:document.body)?.appendChild(quickPanel);
+        if(guide&&guide.parentElement!==view)view.appendChild(guide);
         const shelfHost=fullscreen?card:document.body;
         if(playerShelf&&shelfHost&&playerShelf.parentElement!==shelfHost)shelfHost.appendChild(playerShelf);
         // The compact tests panel is independent of the skill shelf. Mount it
@@ -599,7 +588,6 @@ function arenaPortableReady() {
     arenaPortableOpen();
 }
 window.addEventListener('load',arenaPortableReady,{once:true});
-window.ArenaMobileFrame=Object.freeze({set:arenaMobileSetFullscreenFormat,get:()=>arenaMobileFrameFormat});
 window.ArenaPortable=Object.freeze({build:ARENA_PORTABLE_BUILD,open:arenaPortableOpen,close:arenaPortableClose,start:arenaPortableStart,setMode:arenaPortableSetMode,setResolution:arenaPortableResolution,
     getProfile(){return Object.freeze({...arenaPortableProfile,fps:arenaRuntime.renderFps});}});
 
@@ -619,7 +607,7 @@ function arenaMobileText(span,lang=currentLanguage){
 }
 function arenaMobileLocalizeAll(){
     if(typeof document==='undefined')return;
-    const roots=document.querySelectorAll('#arenaPortableSetup,#arenaMobileFloating,#arenaMobileFullscreenBar,#arenaPortableTestDrawer,#arenaMobileControlSettings,#arenaMobileDisplaySettings,#arenaMobileGestureGuide,#arenaMobileControlShelf,#arenaMobileFrameGuide,#arenaOperatorPopover [data-operator-panel="mobile"],#arenaProtaClassLabel,#arenaTikTokChatStatus');
+    const roots=document.querySelectorAll('#arenaPortableSetup,#arenaMobileFloating,#arenaMobileFullscreenBar,#arenaPortableTestDrawer,#arenaMobileControlSettings,#arenaMobileDisplaySettings,#arenaMobileGestureGuide,#arenaMobileControlShelf,#arenaOperatorPopover [data-operator-panel="mobile"],#arenaProtaClassLabel,#arenaTikTokChatStatus');
     for(const root of roots){
         const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let node;
         while((node=walker.nextNode())){
