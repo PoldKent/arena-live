@@ -92,6 +92,12 @@ const replaceOnce=(source,from,to)=>{
     return source.replace(from,()=>to);
 };
 const inline=source=>source.replace(/<\/script/gi,'<\\/script');
+const omitDesktopView=(source,begin,end)=>{
+    const first=source.indexOf(begin),last=source.indexOf(end,first+begin.length);
+    if(first<0||last<0||source.indexOf(begin,first+begin.length)>=0||source.indexOf(end,last+end.length)>=0)
+        throw Error('Desktop-only packaging boundary changed: '+begin);
+    return source.slice(0,first)+source.slice(last+end.length);
+};
 
 export async function buildMobile(output) {
     const files=new Map(await Promise.all(assets.map(async path=>[path,(await readFile(resolve(root,path),'utf8')).replace(/\r\n?/g,'\n')])));
@@ -106,7 +112,8 @@ export async function buildMobile(output) {
     const build={version,edition:'mobile-offline',sourceBlobs};
     // Remove only non-license comments from the original inline CSS for distribution.
     // Keep all source CSS and the generated selectors unchanged.
-    let html=files.get('index.html').replace(/(<style\b[^>]*>)([\s\S]*?)(<\/style>)/gi,
+    let html=omitDesktopView(files.get('index.html'),'/* ARENA_DESKTOP_QUICK_CSS_BEGIN */','/* ARENA_DESKTOP_QUICK_CSS_END */')
+        .replace(/(<style\b[^>]*>)([\s\S]*?)(<\/style>)/gi,
         (_,start,css,end)=>start+css.replace(/\/\*(?!\!)[\s\S]*?\*\//g,'')+end);
     html=replaceOnce(html,'width=device-width, initial-scale=1.0','width=device-width, initial-scale=1.0, viewport-fit=cover');
     html=replaceOnce(html,/<title>[^<]+<\/title>/.exec(html)[0],`<title>Arena Live v${version} · Móvil</title>`);
@@ -122,7 +129,7 @@ export async function buildMobile(output) {
     // mobile HTML. The official PC page loads this source as a separate file.
     // Content remains identical; the portable-only adaptations are below.
     html=replaceOnce(html,`<script src="engine/arena-game.js?v=${version.split('.').slice(0,2).join('.')}"></script>`,
-        `<script data-bundled-source="engine/arena-game.js">\n${inline(files.get('engine/arena-game.js'))}\n</script>`);
+        `<script data-bundled-source="engine/arena-game.js">\n${inline(omitDesktopView(files.get('engine/arena-game.js'),'/* ARENA_DESKTOP_QUICK_BEGIN */','/* ARENA_DESKTOP_QUICK_END */'))}\n</script>`);
     // The mobile profile is packaging and rendering only; world coordinates,
     // physics, damage, class rules and commands are copied byte for byte.
     html=html.replaceAll('(max-width:767px)','(max-width:1023px)');
