@@ -34,14 +34,14 @@ jobs:
         run: npm ci
       - name: Build and verify device-aware preview
         run: npm run test:preview
-      - name: Use the custom GitHub Actions publishing source
+      - name: Verify GitHub Pages uses only the Actions publishing source
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           current=$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq '.build_type')
           if [ "$current" != "workflow" ]; then
-            echo "Changing GitHub Pages build type from $current to workflow (prevents Jekyll overwriting the preview)."
-            gh api --method PUT "repos/${GITHUB_REPOSITORY}/pages" -f build_type=workflow
+            echo "::error title=GitHub Pages source mismatch::Pages is set to '$current'. Open Settings > Pages > Build and deployment > Source and choose 'GitHub Actions', then rerun this workflow. Branch/Jekyll deployment overrides mobile.html and causes 404."
+            exit 1
           fi
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
