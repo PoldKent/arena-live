@@ -30,7 +30,7 @@ test('all 512 combat status combinations retain their symbols, order, shield con
 
 function effectsEngine() {
   const e = vm.createContext({WORLD_W:960, WORLD_H:540, isGamePaused:false, gamePace:1, slowMoFactor:1,
-    screenShake:0, skyFlashTimer:0, gameState:'COMBAT',arenaSimulationTick:0,koSequenceActive:false,drainArenaAudienceQueue(){},advanceArenaRoundClock(){},flushArenaTickChatBatch(){}, fighters:[], confetti:[],
+    screenShake:0, skyFlashTimer:0, gameState:'COMBAT',arenaSimulationTick:0,koSequenceActive:false,drainArenaAudienceQueue(){},advanceArenaRoundClock(){},flushArenaTickChatBatch(){},resolveMeleeAttacks(){}, fighters:[], confetti:[],
     particles:[], floatingTexts:[], activeEffects:[], updateSmartCamera9x16(){}});
   vm.runInContext(source('updatePhysicsAndAI'), e);
   return e;
