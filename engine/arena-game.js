@@ -7047,6 +7047,13 @@
             });
             const prota = document.getElementById('streamerJoinLabel');
             if (prota) prota.textContent = protagonistShortLabel();
+            const desktopProta=document.getElementById('arenaDesktopProtaBtn');
+            const desktopClass=document.getElementById('protagonistClassSelect');
+            if(desktopProta&&desktopClass){
+                const emoji=({kame:'⚔️',ninja:'🥷',trueno:'⚡',esmeralda:'🌿',titan:'🗿'})[desktopClass.value]||'🎭';
+                if(desktopProta.textContent!==emoji)desktopProta.textContent=emoji;
+                desktopProta.setAttribute('aria-label','Prota · '+(desktopClass.selectedOptions[0]?.textContent||'Clase'));
+            }
             const audio = document.getElementById('btnQuickSound');
             if (audio) audio.setAttribute('aria-pressed',String(soundEnabled));
             const icon = document.getElementById('quickSoundIcon');
