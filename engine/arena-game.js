@@ -1072,7 +1072,7 @@
         let rejoinRuleMode = 'free'; // Default: free-to-join; alternatives are '3_lives' and 'timed'.
         let MAX_OPPORTUNITIES = 1; // Smash-style lives are separate from HP; the default is one life.
         let totalParticipants = 0; // Actual number of registered fighter bodies, capped at 128.
-        let gamePace = 1.0;        // Standard-speed gameplay selected by the streamer.
+        let gamePace = 0.5;        // Default slow combat; operator can select a faster pace.
         let slowMoFactor = 1.0;    // Drops to 0.22 during final K.O. sequence
         let koSequenceActive = false;
 
@@ -1189,7 +1189,7 @@
         const MAX_INDIVIDUAL_FIGHTERS = 128;
         // MODULE BLOCK: operator rules. Every admission/attack path uses these shared rules.
         const ARENA_COMBAT_RULES_KEY = 'arenaLiveCombatRulesV04';
-        const ARENA_COMBAT_RULE_DEFAULTS = Object.freeze({maxPlayers:128,classRule:'any',powerMode:'full',maxHp:180,damage:1,knockback:1,movement:1,energyRegen:1});
+        const ARENA_COMBAT_RULE_DEFAULTS = Object.freeze({maxPlayers:128,classRule:'any',powerMode:'full',maxHp:360,damage:1,knockback:1,movement:0.5,energyRegen:1});
         const ARENA_COMBAT_PARAM_LIMITS = Object.freeze({maxPlayers:[2,128,1],maxHp:[50,1000,10],damage:[0.25,3,0.25],knockback:[0,2,0.25],movement:[0.5,2,0.25],energyRegen:[0,3,0.25]});
         let arenaCombatRules = {...ARENA_COMBAT_RULE_DEFAULTS};
         let arenaUnrestrictedProtaClass = 'kame';
@@ -1263,6 +1263,7 @@
         function resetArenaCombatRules(){
             const previous=arenaCombatRules;arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};
             try{localStorage.removeItem(ARENA_COMBAT_RULES_KEY);}catch(_){}
+            setGamePace(0.5);
             applyArenaCombatRuleEffects(previous);
         }
         const ARENA_COMBAT_RULE_COPY = Object.freeze({
@@ -1817,16 +1818,16 @@
         }
 
         function setGamePace(pace) {
-            if(![0.75,1,1.25].includes(Number(pace)))return;
-            gamePace = Number(pace);
-            [0.75, 1, 1.25].forEach(p => {
-                const btn = document.getElementById(`paceBtn-${p}`);
-                if (!btn) return;
-                if (Math.abs(p - pace) < 0.01) {
-                    btn.className = 'pace-btn px-2.5 py-2 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-slate-950 shadow text-center';
-                } else {
-                    btn.className = 'pace-btn px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-950 border border-slate-800 text-slate-300 hover:text-white transition-all text-center';
-                }
+            if(![0.5,0.75,1,1.25].includes(Number(pace)))return;
+            gamePace=Number(pace);
+            [0.5,0.75,1,1.25].forEach(p=>{
+                const btn=document.getElementById(`paceBtn-${p}`);
+                if(!btn)return;
+                const active=p===gamePace;
+                btn.setAttribute('aria-pressed',String(active));
+                btn.className=active
+                    ? 'pace-btn px-2.5 py-2 rounded-xl text-xs font-bold transition-all bg-amber-950/80 text-amber-200 border border-amber-400 text-center'
+                    : 'pace-btn px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-950 border border-slate-800 text-slate-300 hover:text-white transition-all text-center';
             });
         }
 
@@ -5175,7 +5176,8 @@
             document.body.classList.toggle('touch-controls-active', active);
             document.body.classList.toggle('touch-device', isTouchDevice());
             const canAct=streamerManualControl&&gameState==='COMBAT'&&aliveProtagonist&&!isGamePaused&&!isSettingsOpen;
-            for(const id of ['arenaMobileJump','arenaMobileAttack','arenaMobilePower']){const button=document.getElementById(id);if(button)button.disabled=!canAct||(id==='arenaMobilePower'&&!arenaClassPowersAllowed());}
+            const editing=document.documentElement.classList.contains('arena-mobile-edit-controls');
+            for(const id of ['arenaMobileJump','arenaMobileAttack','arenaMobilePower']){const button=document.getElementById(id);if(button)button.disabled=!editing&&(!canAct||(id==='arenaMobilePower'&&!arenaClassPowersAllowed()));}
             if (wasActive && !active) document.dispatchEvent(new Event('arena-touch-disable'));
         }
 
@@ -6422,6 +6424,7 @@
                 if (savedLanguage && Object.prototype.hasOwnProperty.call(LANGUAGE_LABELS, savedLanguage)) preferredLanguage = savedLanguage;
             } catch (_e) { /* Continue with Spanish when storage is unavailable. */ }
             loadArenaCombatRules();
+            setGamePace(gamePace);
             loadArenaCameraSettings();
             loadCombatDisplayOptions();
             setLanguage(preferredLanguage);
