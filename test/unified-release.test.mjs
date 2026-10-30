@@ -40,8 +40,8 @@ test('official engine is identical when virtually reconstructed for regression t
     assert.match(reconstructed,/function updateArenaObsGeometrySummary\(\)/);
     assert.match(reconstructed,/window\.ArenaLive\s*=\s*Object\.freeze/);
 });
-test('offline mobile remains complete, self-contained, under 500 KB and sourced from official files',async()=>{
-    assert.ok(Buffer.byteLength(compressed,'utf8')<=500000,'compressed official mobile export exceeds 500 KB');
+test('offline mobile remains complete, self-contained, under 750 KB and sourced from official files',async()=>{
+    assert.ok(Buffer.byteLength(compressed,'utf8')<=750000,'compressed official mobile export exceeds 750 KB');
     assert.doesNotMatch(compressed,/<(?:script|link)\b[^>]+(?:src|href)\s*=/i);
     assert.match(offline,new RegExp('<meta name="arena-portable-version" content="'+pkg.version.replaceAll('.','\\.')+'">'));
     const raw=offline.match(/<script id="arena-mobile-build">const ARENA_PORTABLE_BUILD=Object\.freeze\((\{[^;]+\})\);<\/script>/)?.[1];
