@@ -164,7 +164,7 @@ function arenaMobileActor(){
     return fighters.find(f=>f.isStreamer&&!f.eliminated)||null;
 }
 function arenaMobileCanControl(){
-    return arenaPortableProfile.mode===ARENA_MOBILE_MODES.PLAYER&&!arenaPortableSetupOpen&&!isGamePaused&&!isSettingsOpen&&gameState==='COMBAT'&&streamerManualControl&&!!arenaMobileActor();
+    return !arenaMobileEditing&&arenaPortableProfile.mode===ARENA_MOBILE_MODES.PLAYER&&!arenaPortableSetupOpen&&!isGamePaused&&!isSettingsOpen&&gameState==='COMBAT'&&streamerManualControl&&!!arenaMobileActor();
 }
 function arenaMobileClearDirections(){
     keys.a=false;keys.d=false;keys.w=false;keys.s=false;
