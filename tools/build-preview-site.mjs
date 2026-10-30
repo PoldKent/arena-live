@@ -71,5 +71,5 @@ await writeFile(resolve(out,'desktop/index.html'),desktop);
 await writeFile(resolve(out,'index.html'),routerHtml());
 await writeFile(resolve(out,'.nojekyll'),'');
 await writeFile(resolve(out,'robots.txt'),'User-agent: *\nDisallow: /\n');
-await writeFile(resolve(out,'PREVIEW-NOTES.txt'),`Arena Live web preview ${version}\nPublic browser demo only; no Node bridge.\nDesktop: official client UI; TikTok LIVE/OBS workflows require the locally hosted server.\nMobile: generated standalone offline build.\nNo API keys, bridge server, internal docs or repository history are included.\n`);
+await writeFile(resolve(out,'PREVIEW-NOTES.txt'),`Arena Live web preview ${version}\nPublic browser demo only; no Node bridge.\nDesktop: official client UI; TikTok LIVE/OBS workflows require the locally hosted server.\nMobile: generated standalone offline build.\nNo server files, internal docs or repository history are intentionally copied. Review bundled client code for sensitive data before publishing.\n`);
 console.log(JSON.stringify({output:out,version,mobileBytes:mobile.bytes,desktopAssets:desktopAssets.length-1,routes:['/','/mobile.html','/desktop/']},null,2));
