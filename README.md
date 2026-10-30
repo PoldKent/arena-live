@@ -39,7 +39,7 @@ npm.cmd run build:mobile
 
 Genera **`dist/Arena-Live-v0.40.8-movil.html`** desde el mismo `index.html`, los seis scripts de `engine/` y los adaptadores de `portable/`. Copia ese único archivo al teléfono y ábrelo en un navegador que permita ejecutar HTML local. Algunos visores de archivos o enlaces `content://` pueden limitar JavaScript, almacenamiento o pantalla completa; prueba «Abrir con» un navegador compatible.
 
-La exportación es **offline**: puedes probar luchadores, clases, reglas, habilidades y controles sin servidor. **No recibe eventos reales de TikTok.** El empaquetador comprueba que el HTML sea autónomo, se descomprima íntegramente y no supere 500.000 bytes. Esto no sustituye una prueba en Android físico.
+La exportación es **offline**: puedes probar luchadores, clases, reglas, habilidades y controles sin servidor. **No recibe eventos reales de TikTok.** El empaquetador comprueba que el HTML sea autónomo, se descomprima íntegramente y no supere 750.000 bytes. Esto no sustituye una prueba en Android físico.
 
 [Guía móvil y sus límites](docs/MOVIL-MONOLITICO.md) · [Controles táctiles actuales](docs/MOBILE-CONTROLES-V040.md).
 
