@@ -351,7 +351,7 @@ function arenaMobileHideQuickPanel(){
     if(!panel||panel.hidden)return;
     panel.hidden=true;
     for(const id of ['arenaMobileMatchShortcut','arenaMobileProtaShortcut'])document.getElementById(id)?.setAttribute('aria-expanded','false');
-    arenaMobileSyncOverlayNavigation();
+    requestAnimationFrame(arenaMobileSyncOverlayNavigation);
 }
 function arenaMobileToggleQuickPanel(which){
     const panel=document.getElementById('arenaMobileQuickPanel');
