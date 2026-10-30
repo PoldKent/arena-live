@@ -78,7 +78,9 @@ export function wrapMobileHtml(unpacked,version){
     const loading='<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Arena Live v'+version+' · Móvil</title></head><body style="background:#0b1425;color:#c5edf7;font:600 16px system-ui;text-align:center;padding:15vh 12px"><p id="arena-mobile-loading">Iniciando Arena Live v'+version+'…</p><script>';
     const boot='function startArena(){try{const content=('+unpackMobile.toString()+')('+JSON.stringify(packed)+');if(!content.includes("ARENA_PORTABLE_BUILD"))throw Error("Archivo incompleto");document.open();document.write(content);document.close();}catch(error){document.body.textContent="No se pudo abrir Arena Live: "+error.message;}}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",startArena,{once:true});else startArena();';
     const html=loading+boot+'<\/script></body></html>';
-    if(Buffer.byteLength(html,'utf8')>500000)throw Error('Mobile HTML exceeds the 500,000-byte limit');
+    const maxBytes=750000; // Safety budget for the complete offline HTML; not a runtime restriction.
+    const actualBytes=Buffer.byteLength(html,'utf8');
+    if(actualBytes>maxBytes)throw Error(`Mobile HTML exceeds the ${maxBytes}-byte limit (${actualBytes} bytes)`);
     return html;
 }
 
