@@ -71,3 +71,34 @@ Inventario directo del árbol de GitHub en `main`: **164 archivos** y **3.232.50
 Se comprobó con ejecución aislada de JavaScript la sintaxis del motor y las utilidades de render, la deduplicación de 128 IDs en el podio, el cooldown restablecido y seis casos representativos de normalización LIVE. También se comprobó la coherencia documental de versión y la ausencia del comando de ramas en el paquete. **No equivalen a ejecutar `npm test` ni Playwright**.
 
 La siguiente etapa debe abordar la modularización y rendimiento de `arena-game.js` **por subsistemas y con pruebas verificables**. No borrar ni reescribir cientos de líneas sobre la base de coincidencias textuales; comparar los resultados antes y después.
+
+
+---
+
+## Adenda 30/10/2026 — paridad de la aplicación de escritorio con Mobile v0.40.8
+
+**Alcance:** inventario del árbol de `main` (163 archivos) y revisión estática enfocada en el motor compartido, HTML, CSS, bridge local, adaptadores móviles, empaquetado y pruebas. No es una certificación ejecutada de todos los caminos de ~3,2 MB de repositorio. Se evaluaron directamente 20 archivos críticos y se compiló la sintaxis (sin ejecutar los scripts) de los 9 JavaScript clásicos principales.
+
+### Mejoras que ya son comunes
+
+- `engine/arena-game.js` determina las cuatro velocidades de pelea 0.5×, 0.75× (inicial), 1× y 1.25×; `resetArenaCombatRules()` restablece 0.75×. La regla de daño inicial permanece 1×, vida 360 HP y movimiento 0.5×.
+- `index.html` presenta el resaltado amarillo de Ajustes; los controles de ritmo usan `aria-pressed` y el estado de la audiencia automática usa ON verde/OFF gris mediante el mismo `autoChatEnabled`.
+- La sección de Combate usa columnas con `min-width:0` y límites de ancho en los cinco rangos. Guardar/Cargar JSON manuales fueron retirados antes de esta adenda; los ajustes de persistencia y Restablecer sesión siguen disponibles.
+
+### Integración nueva de escritorio
+
+- La barra del operador muestra **Partida** (🎲) y **Prota** (emoji de clase) como accesos compactos circulares; el control existente **Modo Stream** adopta el mismo lenguaje visual con información accesible por `aria-label`.
+- El panel de Partida reubica los botones originales `arenaDualLobbyBtn` y `arenaDualRematchBtn`, preservando sus eventos; **Nueva partida** prepara un lobby limpio y no conserva al campeón anterior. **Lobby** mantiene la semántica previa y la confirmación original del escritorio; **Revancha** conserva su plantilla de participantes.
+- Prota reubica el selector original `protagonistClassSelect`, sin duplicar un segundo selector ni perder su ruta de cooldown/clase. El menú se cierra al elegir o tocar fuera y admite Escape. Los paneles se montan dentro del elemento fullscreen cuando es necesario.
+- La nueva interfaz es exclusiva del escritorio principal y no se monta en el HTML portátil: el generador `tools/build-mobile.mjs` elimina **solo** el bloque CSS/DOM de escritorio, conservando los módulos y el motor físico compartidos. El archivo móvil versionado sigue bajo 500.000 bytes.
+- La calibración OBS del escritorio (`arenaObsVerticalFormat`, capturas 16:9 y 9:16) permanece. El antiguo selector móvil 9:21 era un marco de referencia sin redimensionamiento, y se había eliminado; no debe confundirse con la calibración OBS.
+
+### Verificaciones efectuadas y pendientes
+
+1. Verificados estáticamente 15 contratos críticos de paridad, referencias de UI originales, separación de ediciones, selección de velocidades y límites de puente local.
+2. El análisis sintáctico de los nueve JS clásicos principales se completó sin errores (`arena-game`, `arena-core`, `arena-audio`, `arena-render`, `arena-settings`, `arena-balance-evidence`, `mobile-runtime`, `mobile-touch`, `bridge-client`).
+3. El HTML móvil se reconstruyó con manifest de fuentes y se verificó la compresión LZW reversible y el límite de tamaño.
+4. **No comprobado aún:** ejecución completa de `npm test`, Playwright en escritorio (incluyendo fullscreen), captura OBS, pruebas táctiles en Android, estrés de 128 luchadores y sesión TikTok LIVE. Los últimos trabajos Actions observados figuran como fallidos con `steps: []` (sin ejecución de pasos), por lo que no son evidencia de fallo ni éxito del código.
+5. Riesgo técnico remanente: `engine/arena-game.js` supera 590 KB y concentra motor, HUD y operador. Una división masiva o cambios de físicas requerirían primero línea base ejecutada y mediciones en PC/OBS.
+
+**Criterio de paridad:** trasladar controles y opciones compartibles al escritorio sin copiar joystick, marcos de teléfono ni controles 9:21 falsos a la interfaz OBS; mantener una sola simulación de combate.
