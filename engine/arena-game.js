@@ -7053,6 +7053,7 @@
             if (icon) icon.textContent = soundEnabled ? '🔊' : '🔇';
             document.getElementById('arenaDualPauseBtn')?.setAttribute('aria-pressed',String(isGamePaused));
             document.getElementById('btnFullscreenDual')?.setAttribute('aria-pressed',String(dual));
+            document.getElementById('btnFullscreenDual')?.setAttribute('aria-label',arenaOperatorText(dual?'exitStream':'stream'));
             document.getElementById('arenaDualSettingsBtn')?.setAttribute('aria-expanded',String(isSettingsOpen));
             const streamSetting = document.querySelector('#btnViewDual [data-operator-label]');
             if(streamSetting)streamSetting.textContent=`🎥 ${arenaOperatorText(dual ? 'exitStream' : 'stream')}`;
@@ -7063,7 +7064,7 @@
             const exitScreen=document.getElementById('arenaExitFullscreenBtn');
             if(exitScreen)exitScreen.disabled=!document.fullscreenElement;
             for (const button of document.querySelectorAll('#arenaHeaderActions button')) {
-                if (button.id !== 'btnStreamerJoin' && button.id !== 'arenaDualTikTokConnectBtn') button.title = button.textContent.trim();
+                if (button.id !== 'btnStreamerJoin' && button.id !== 'arenaDualTikTokConnectBtn' && !button.classList.contains('arena-desktop-quick')) button.title = button.textContent.trim();
             }
             const hints={
                 btnFullscreenDual:`${arenaOperatorText(dual ? 'exitStream' : 'stream')} · 16:9 + 9:16 · OBS`,
@@ -7578,6 +7579,82 @@
         }
         function installArenaOperatorToolbar() {
             installArenaWorkspace();
+            // The desktop operator uses the same Lobby, Rematch and Prota DOM controls
+            // as the mobile release, with no duplicate game handlers or OBS overlay.
+            if(!document.querySelector('meta[name="arena-portable-version"]')){
+                const toolbar=document.getElementById('arenaHeaderActions');
+                const lobby=document.getElementById('arenaDualLobbyBtn');
+                const rematch=document.getElementById('arenaDualRematchBtn');
+                const prota=document.getElementById('arenaProtaClassToolbar');
+                const panel=document.createElement('section');
+                panel.id='arenaDesktopQuickPanel';panel.hidden=true;panel.setAttribute('aria-label','Accesos rápidos de Partida y Prota');
+                panel.innerHTML='<div id="arenaDesktopMatchActions" hidden></div><div id="arenaDesktopProtaActions" hidden></div>';
+                document.body.appendChild(panel);
+                const createShortcut=(id,emoji,label)=>{
+                    const button=document.createElement('button');
+                    button.type='button';button.id=id;button.className='arena-desktop-quick';
+                    button.textContent=emoji;button.title=label;button.setAttribute('aria-label',label);
+                    button.setAttribute('aria-controls',panel.id);button.setAttribute('aria-expanded','false');
+                    toolbar.appendChild(button);return button;
+                };
+                const matchShortcut=createShortcut('arenaDesktopMatchBtn','🎲','Partida');
+                const protaShortcut=createShortcut('arenaDesktopProtaBtn','🎭','Prota');
+                const matchActions=panel.querySelector('#arenaDesktopMatchActions');
+                const protaActions=panel.querySelector('#arenaDesktopProtaActions');
+                const newMatch=document.createElement('button');
+                newMatch.id='arenaDesktopNewMatch';newMatch.type='button';newMatch.textContent='＋ Nueva partida';
+                newMatch.title='Preparar un nuevo combate';newMatch.onclick=()=>openLobby(true);
+                matchActions.appendChild(newMatch);
+                const close=()=>{
+                    panel.hidden=true;matchActions.hidden=true;protaActions.hidden=true;
+                    matchShortcut.setAttribute('aria-expanded','false');
+                    protaShortcut.setAttribute('aria-expanded','false');
+                };
+                const format=window.matchMedia('(min-width:768px)');
+                const arrange=()=>{
+                    close();
+                    if(format.matches){
+                        if(lobby)matchActions.appendChild(lobby);
+                        if(rematch)matchActions.appendChild(rematch);
+                        if(prota)protaActions.appendChild(prota);
+                    }else{
+                        if(prota)toolbar.appendChild(prota);
+                        if(rematch)toolbar.appendChild(rematch);
+                        if(lobby)toolbar.appendChild(lobby);
+                    }
+                };
+                const toggle=(name,button)=>{
+                    if(!format.matches)return;
+                    const repeated=!panel.hidden&&panel.dataset.active===name;
+                    close();if(repeated)return;
+                    if(isSettingsOpen)toggleSettingsModal(false);
+                    closeArenaOperatorPopover(false);
+                    const host=document.fullscreenElement||document.body;
+                    if(panel.parentElement!==host)host.appendChild(panel);
+                    panel.dataset.active=name;
+                    matchActions.hidden=name!=='match';protaActions.hidden=name!=='prota';
+                    panel.hidden=false;
+                    button.setAttribute('aria-expanded','true');
+                    const rect=button.getBoundingClientRect();
+                    panel.style.left=Math.max(8,Math.min(window.innerWidth-288,rect.left))+'px';
+                    panel.style.top=Math.min(window.innerHeight-70,rect.bottom+6)+'px';
+                    panel.querySelector('button:not([hidden]),select:not(:disabled)')?.focus({preventScroll:true});
+                };
+                matchShortcut.onclick=()=>toggle('match',matchShortcut);
+                protaShortcut.onclick=()=>toggle('prota',protaShortcut);
+                panel.addEventListener('click',event=>{if(event.target.closest('button'))close();});
+                prota?.querySelector('select')?.addEventListener('change',close);
+                document.addEventListener('pointerdown',event=>{
+                    if(!panel.hidden&&!event.target.closest('#arenaDesktopQuickPanel,#arenaDesktopMatchBtn,#arenaDesktopProtaBtn'))close();
+                },true);
+                document.addEventListener('keydown',event=>{
+                    if(event.key==='Escape'&&!panel.hidden){event.preventDefault();event.stopImmediatePropagation();close();}
+                },true);
+                window.addEventListener('resize',close);
+                document.addEventListener('fullscreenchange',close);
+                format.addEventListener('change',arrange);
+                arrange();
+            }
             document.querySelectorAll('[data-operator-menu]').forEach(button=>button.addEventListener('click',()=>toggleArenaOperatorPopover(button.dataset.operatorMenu,button)));
             document.getElementById('arenaExitFullscreenBtn')?.addEventListener('click',()=>{if(document.fullscreenElement)void document.exitFullscreen();});
             document.getElementById('arenaDualTikTokConnectBtn')?.addEventListener('click',()=>{
