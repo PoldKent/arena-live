@@ -7,6 +7,8 @@ import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const site=resolve(root,'dist/arena-preview');
 const read=p=>readFile(resolve(site,p),'utf8');
+// Ensure the preview is available when invoked by the general npm test suite.
+try{await access(resolve(site,'index.html'));}catch{await import('../tools/build-preview-site.mjs');}
 
 test('device router exposes both editions with an explicit override',async()=>{
     const html=await read('index.html');
