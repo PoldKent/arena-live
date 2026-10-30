@@ -68,11 +68,31 @@ await check(`v${visibleVersion} starts with large game, left chat and only the s
  assert.equal(panels.find(n=>n.id==='arenaPanelChat').parent,'arenaDockLeft');
  assert.deepEqual(panels.filter(n=>n.open&&n.id!=='arenaPanelChat').map(n=>n.id),['arenaPanelSocial']);
  const order=await page.locator('#arenaHeaderActions>button').evaluateAll(ns=>ns.slice(0,4).map(n=>n.id));assert.deepEqual(order,['arenaViewMenuBtn','arenaFullscreenMenuBtn','arenaDualTestsToggle','arenaDualSettingsBtn']);
- for(const id of ['arenaDualPauseBtn','arenaDualLobbyBtn','arenaDualRematchBtn','btnStreamerJoin','btnQuickSound','arenaDualTikTokConnectBtn'])assert.equal(await page.locator('#arenaHeaderActions #'+id).count(),1);
+ for(const id of ['arenaDualPauseBtn','btnStreamerJoin','btnQuickSound','arenaDualTikTokConnectBtn'])assert.equal(await page.locator('#arenaHeaderActions #'+id).count(),1);
+ for(const id of ['arenaDualLobbyBtn','arenaDualRematchBtn','protagonistClassSelect'])assert.equal(await page.locator('#arenaDesktopQuickPanel #'+id).count(),1);
+ assert.equal(await page.locator('#arenaDesktopMatchBtn').isVisible(),true);
+ assert.equal(await page.locator('#arenaDesktopProtaBtn').isVisible(),true);
  assert.equal(await page.locator('#arenaMobileMoreBtn').isVisible(),false);
  const joins=await page.evaluate(()=>fighters.map(f=>({id:f.id,count:[...document.querySelectorAll('#chatFeed>[data-chat-event="join"]')].filter(n=>n.dataset.fighterId===String(f.id)&&n.dataset.command==='!jugar').length})));
  assert.ok(joins.length>0&&joins.every(f=>f.count===1),'initial automatic participants have one visible !jugar each');
  await shot('preparation');
+});
+await check('Desktop Partida and Prota shortcuts open and dismiss without replacing original actions',async()=>{
+ const opened=page.locator('#arenaDesktopQuickPanel');
+ await page.locator('#arenaDesktopMatchBtn').click();
+ assert.equal(await opened.isVisible(),true);
+ assert.equal(await page.locator('#arenaDesktopNewMatch').isVisible(),true);
+ assert.equal(await page.locator('#arenaDualLobbyBtn').isVisible(),true);
+ assert.equal(await page.locator('#arenaDualRematchBtn').isVisible(),true);
+ await page.keyboard.press('Escape');
+ assert.equal(await opened.isHidden(),true);
+ await page.locator('#arenaDesktopProtaBtn').click();
+ assert.equal(await page.locator('#protagonistClassSelect').isVisible(),true);
+ await page.locator('#arenaDesktopMatchBtn').click();
+ assert.equal(await page.locator('#arenaDesktopProtaActions').isHidden(),true);
+ assert.equal(await page.locator('#arenaDesktopMatchActions').isVisible(),true);
+ await page.locator('#arenaDesktopMatchBtn').click();
+ assert.equal(await opened.isHidden(),true);
 });
 await check('Player test actions stay open in preparation and still create participants',async()=>{
  await unfold('arenaPanelPlayers');const before=(await state()).activeFighters;
@@ -93,7 +113,7 @@ await check('The unified player/powers panel has one selector with live name, cl
  assert.equal(await page.locator('#arenaPanelSocial').evaluate(n=>n.open),true);
 });
 await check('Class selection and direct Prota entry reuse the original player flow',async()=>{
- await page.locator('#protagonistClassSelect').selectOption('ninja');assert.equal(await page.locator('#protagonistClassSelect').inputValue(),'ninja');assert.equal(await page.locator('#arenaOperatorPopover').isHidden(),true);
+ await page.locator('#arenaDesktopProtaBtn').click();await page.locator('#protagonistClassSelect').selectOption('ninja');assert.equal(await page.locator('#protagonistClassSelect').inputValue(),'ninja');assert.equal(await page.locator('#arenaDesktopQuickPanel').isHidden(),true);assert.equal(await page.locator('#arenaOperatorPopover').isHidden(),true);
  await page.locator('#btnStreamerJoin').click();assert.equal(await page.evaluate(()=>ArenaLive.getFighters().find(f=>f.isStreamer)?.classKey),'ninja');
 });
 await check('TikTok button delegates connect/disconnect to the bridge, with no real LIVE connection',async()=>{
@@ -931,22 +951,22 @@ await check('Radar axes and power names stay readable across eight languages, mo
  const before=await rects();await page.locator('[data-balance-class="esmeralda"]').click();assert.deepEqual(await rects(),before);assert.equal((await state()).settingsOpen,true);await shot('radar-stream-narrow');
  await page.evaluate(()=>document.getElementById('broadcastStageSection').style.removeProperty('--arena-stream-width'));
 });
-await check('Prota uses a direct five-class toolbar dropdown instead of a nested class menu',async()=>{
- const menu=page.locator('#btnProtaClassMenu'),select=page.locator('#arenaHeaderActions #protagonistClassSelect');
+await check('Desktop Prota uses the original five-class selector inside one compact quick menu',async()=>{
+ const menu=page.locator('#btnProtaClassMenu'),select=page.locator('#arenaDesktopQuickPanel #protagonistClassSelect');
  assert.equal(await menu.count(),0);
  assert.equal(await select.locator('option').count(),5);
  await page.evaluate(async()=>{if(document.fullscreenElement)await document.exitFullscreen();toggleSettingsModal(false);arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};openLobby(true);});
  await page.waitForFunction(()=>!document.fullscreenElement);
- await select.selectOption('ninja');
+ await page.locator('#arenaDesktopProtaBtn').click();await select.selectOption('ninja');
  await page.evaluate(()=>joinAsStreamer());
  const chosen=await page.evaluate(()=>fighters.find(f=>f.isStreamer)?.archetypeKey);
  assert.equal(chosen,'ninja');
- await select.selectOption('trueno');
+ await page.locator('#arenaDesktopProtaBtn').click();await select.selectOption('trueno');
  assert.equal(await page.evaluate(()=>fighters.find(f=>f.isStreamer)?.archetypeKey),'trueno');
  await page.evaluate(()=>{isGamePaused=false;startCombatFromLobby();});
- await select.selectOption('titan');
+ await page.locator('#arenaDesktopProtaBtn').click();await select.selectOption('titan');
  assert.equal(await page.evaluate(()=>fighters.find(f=>f.isStreamer)?.archetypeKey),'titan');
- await select.selectOption('kame'); // real 480-frame combat class cooldown
+ await page.locator('#arenaDesktopProtaBtn').click();await select.selectOption('kame'); // real 480-frame combat class cooldown
  assert.equal(await select.inputValue(),'titan');
  assert.equal(await page.evaluate(()=>fighters.find(f=>f.isStreamer)?.archetypeKey),'titan');
  await page.evaluate(()=>{isGamePaused=true;});
