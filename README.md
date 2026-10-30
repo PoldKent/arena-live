@@ -2,7 +2,7 @@
 
 **Juego de combate para PC, OBS y teléfono, con una única simulación y un motor compartido.** La aplicación de escritorio ofrece dos capturas sincronizadas (**16:9** y **9:16**) y un puente local para TikTok LIVE. El móvil autónomo es un HTML empaquetado desde ese mismo código, con controles táctiles y simulación local, **sin conexión LIVE directa**.
 
-> **Estado de la entrega (30/10/2026):** fuentes y exportación autónoma **v0.40.8**. La [versión móvil oficial](mobile-builds/Arena-Live-v0.40.8-movil.html) incorpora las ocho correcciones aprobadas para Android, sin cambiar el motor de combate. Pendiente validación física en Android. La rama de desarrollo es `main`; `gh-pages` se reserva exclusivamente para despliegues web si se habilitan.
+> **Estado de la entrega (30/10/2026):** fuentes y exportación autónoma **v0.40.8**. La [versión móvil oficial](mobile-builds/Arena-Live-v0.40.8-movil.html) incorpora las ocho correcciones aprobadas para Android, sin cambiar el motor de combate. Pendiente validación física en Android. La rama de desarrollo es `main`; la publicación web utiliza GitHub Actions, sin requerir rama `gh-pages`.
 
 ## Empezar en PC (Windows / PowerShell)
 
@@ -45,7 +45,7 @@ La exportación es **offline**: puedes probar luchadores, clases, reglas, habili
 
 ## Pre-release web para compartir por enlace
 
-La edición de prueba del navegador se genera con `npm.cmd run test:preview` y se prepara para GitHub Pages con `npm.cmd run publish:preview -- --confirm-public`. Un único enlace detecta el dispositivo: móvil → HTML offline; ordenador → cliente oficial de escritorio en **vista previa web** (sin servidor Node/TikTok LIVE). La URL no está publicada hasta habilitar Pages. Para repositorio privado, GitHub Pages requiere un plan compatible; hay una alternativa gratuita con repositorio público **solo para artefactos**. El JavaScript publicado puede inspeccionarse.
+La edición de prueba para navegador se construye con `npm.cmd run test:preview` y se despliega mediante `.github/workflows/pages-preview.yml` usando GitHub Actions. Un único enlace identifica el dispositivo: móvil → HTML offline; ordenador → cliente de escritorio en **vista previa web** (sin servidor Node/TikTok LIVE). **GitHub Pages debe habilitarse una vez en Settings → Pages → Source: GitHub Actions**; hasta que el trabajo `deploy` termine correctamente no se anuncia como publicado. En GitHub Free es compatible con el repositorio **público**; todos los archivos e historial del repositorio también son públicos. El JavaScript servido puede inspeccionarse.
 
 **Pasos completos, riesgos y controles:** [Publicación del pre-release web](docs/PREVIEW-WEB.md).
 
@@ -120,7 +120,7 @@ npm.cmd run verify:release
 
 ## Política de desarrollo y limpieza
 
-- **Una sola rama de desarrollo:** `main`. Solo al publicar la vista previa web se permite la rama `gh-pages`, destinada exclusivamente a artefactos estáticos generados; nunca mezclarla con el código del servidor.
+- **Una sola rama de desarrollo:** `main`. El sitio web de pruebas se publica mediante un artefacto GitHub Pages generado desde el código actual, sin una rama adicional de desarrollo.
 - Cambiar el código canónico en lugar de añadir parches superpuestos; retirar solo lo demostrado obsoleto y conservar pruebas antes de borrar.
 - Preservar las dos capturas OBS, interfaz táctil, clases, comandos, preferencias persistentes, balance, servidor local y simulación.
 - Versionar conjuntamente paquete, API, interfaz y exportación **cuando se publique una nueva versión**, sin etiquetar como vigente una exportación vieja.
