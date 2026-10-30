@@ -49,38 +49,36 @@ function arenaPortableSyncModeControls(){
 function arenaPortableSetMode(mode,{remember=true,updateGame=true}={}){
     if(![ARENA_MOBILE_MODES.PLAYER,ARENA_MOBILE_MODES.DIRECTOR].includes(mode))return false;
     const previous=arenaPortableProfile.mode;
+    const joining=mode===ARENA_MOBILE_MODES.PLAYER&&updateGame&&!arenaPortableSetupOpen;
+    if(joining&&!fighters.some(f=>f.isStreamer&&!f.eliminated)){
+        const reason=gameState==='VICTORY'||koSequenceActive?'Terminó la ronda. Abre un lobby nuevo para incorporar a Prota.'
+            :gameState==='COMBAT'&&activeMode==='1v1'?'Las entradas están cerradas durante el duelo 1v1.'
+            :gameState==='COMBAT'&&rejoinRuleMode==='timed'&&matchTimeSeconds<=0?'Se agotó el tiempo de entrada.'
+            :null;
+        if(reason){arenaPortableReport(reason);return false;}
+        if(gameState==='COMBAT'||gameState==='LOBBY'){
+            joinAsStreamer();
+            if(!fighters.some(f=>f.isStreamer&&!f.eliminated)){
+                arenaPortableReport('No hay una plaza disponible para Prota en esta ronda.');
+                return false;
+            }
+        }
+    }
     if(previous!==mode)document.dispatchEvent(new Event('arena-touch-disable'));
     arenaPortableProfile={...arenaPortableProfile,mode,join:mode===ARENA_MOBILE_MODES.PLAYER};
     if(remember)arenaPortableRemember();
     if(updateGame&&!arenaPortableSetupOpen){
         if(mode===ARENA_MOBILE_MODES.PLAYER){
             if(!streamerManualControl)toggleStreamerManualControl();
-            if((gameState==='COMBAT'||gameState==='LOBBY')&&!fighters.some(f=>f.isStreamer&&!f.eliminated)){
-                joinAsStreamer();
-                if(!fighters.some(f=>f.isStreamer&&!f.eliminated)){
-                    // Do not display Player controls without an actual controllable protagonist.
-                    arenaPortableProfile={...arenaPortableProfile,mode:ARENA_MOBILE_MODES.DIRECTOR,join:false};
-                    if(streamerManualControl)toggleStreamerManualControl();
-                    if(remember)arenaPortableRemember();
-                    if(typeof arenaMobileShowTestDrawer==='function')arenaMobileShowTestDrawer(false);
-                    arenaPortableReport('No se pudo incorporar al protagonista. Sigues en Modo Streamer.');
-                    arenaPortableSyncModeControls();refreshArenaPortableFloatingUI();
-                    return false;
-                }
-            }
-            if(typeof arenaMobileShowTestDrawer==='function')arenaMobileShowTestDrawer(false);
-        }else{
-            if(streamerManualControl)toggleStreamerManualControl();
-            // Streamer abilities live in the bottom strip; open the advanced panel only on request.
-            if(typeof arenaMobileShowTestDrawer==='function')arenaMobileShowTestDrawer(false);
-        }
+        }else if(streamerManualControl)toggleStreamerManualControl();
+        if(typeof arenaMobileShowTestDrawer==='function')arenaMobileShowTestDrawer(false);
         updateTouchControlsVisibility();
     }
+    arenaPortableClearReport();
     arenaPortableSyncModeControls();refreshArenaPortableFloatingUI();
     requestAnimationFrame(arenaPortableFitMobileStage);
     return true;
 }
-
 function arenaMobileSyncCaptures(draw16,draw9) {
     const short=arenaPortableProfile.resolution,long=short*16/9;
     for(const [canvas,ctx,w,h]of [[canvas16,ctx16,draw16?long:1,draw16?short:1],[canvas9,ctx9,draw9?short:1,draw9?long:1]]){
@@ -102,6 +100,7 @@ function arenaPortableClose() {
 function arenaPortableOpen() {
     const dialog=document.getElementById('arenaPortableSetup');if(!dialog)return;
     if(isSettingsOpen)toggleSettingsModal(false);
+    arenaPortableClearReport();
     closeArenaOperatorPopover(false);
     document.getElementById('arenaPortableCount').value=String(arenaPortableProfile.count);
     document.getElementById('arenaPortableClass').value=arenaPortableProfile.classKey;
@@ -128,6 +127,7 @@ function arenaPortableStart({count=32,classKey='kame',mode,join}={}) {
     if(![2,4,9,32,64,128].includes(Number(count))||!Object.hasOwn(CLASS_COMMANDS,classKey))return false;
     const requested=Number(count),actual=Math.min(requested,getArenaPlayerLimit());
     if(actual<2)return false;
+    arenaPortableClearReport();
     arenaPortableProfile={...arenaPortableProfile,count:requested,classKey,mode:selectedMode,join};arenaPortableRemember();
     if(isSettingsOpen)toggleSettingsModal(false);
     openLobby(true);applyPlayerCountPreset(actual-(join?1:0));
@@ -163,10 +163,20 @@ function refreshArenaPortableFloatingUI(){
     if(menuGuide){menuGuide.textContent=arenaPortableGuideVisible?'🙈 Ocultar instrucciones':'❔ Mostrar instrucciones';menuGuide.setAttribute('aria-pressed',String(arenaPortableGuideVisible));}
 
 }
+let arenaPortableReportTimer=null;
+function arenaPortableClearReport(){
+    if(arenaPortableReportTimer!==null)clearTimeout(arenaPortableReportTimer);
+    arenaPortableReportTimer=null;
+    const toast=document.getElementById('arenaPortableToast');
+    if(toast){toast.hidden=true;toast.textContent='';}
+}
 function arenaPortableReport(message){
+    arenaPortableClearReport();
     const toast=document.getElementById('arenaPortableToast');
     if(toast){toast.textContent=message;toast.hidden=false;}
-    const status=document.getElementById('arenaPortableFeedback');if(status)status.textContent=message;
+    const status=document.getElementById('arenaPortableFeedback');
+    if(status)status.textContent=message;
+    arenaPortableReportTimer=setTimeout(arenaPortableClearReport,4000);
 }
 /* Mobile fullscreen format is an outer presentation guide. Never resize or
    crop the true 9:16 world; OBS calibration remains independent. */
@@ -382,7 +392,7 @@ function installArenaPortableFloatingUI(){
     if(topMenu&&fullscreenControl)hud.insertBefore(topMenu,fullscreenControl);
     hud.querySelector('#arenaPortableToggleGuide').addEventListener('click',()=>setArenaPortableGuideVisible(!arenaPortableGuideVisible));
     hud.querySelector('#arenaPortableFullscreen').addEventListener('click',()=>{void arenaPortableToggleFullscreen();});
-    hud.querySelector('#arenaPortableToast').onclick=event=>{event.currentTarget.hidden=true;};
+    hud.querySelector('#arenaPortableToast').onclick=arenaPortableClearReport;
     const menu=document.querySelector('#arenaOperatorPopover [data-operator-panel="mobile"]');
     if(menu){
         const heading=document.createElement('div');
@@ -500,8 +510,12 @@ function arenaPortableReady() {
     document.getElementById('card-9x16')?.appendChild(gestureGuide);
     const unavailable=document.getElementById('arenaTikTokChatStatus');if(unavailable)unavailable.textContent='Sin conexión LIVE';
     selectArenaChatTab('local',false);
-    const footer=document.querySelector('#settingsPauseModal>div>div:last-child');
-    if(footer){const note=document.createElement('span');note.textContent=' · Archivo móvil sin conexión';note.setAttribute('data-no-translate','');footer.appendChild(note);}
+    // Offline labels only: keep the platform identity keys and all LIVE integrations unchanged.
+    for(const platform of Object.values(PLATFORMS))platform.name='Simulación';
+    const versionLabel=document.getElementById('arenaVersionInfo');
+    if(versionLabel)versionLabel.textContent='Arena Live v'+ARENA_PORTABLE_BUILD.version+' · Móvil sin conexión';
+    const shortcutLabel=document.querySelector('#settingsPauseModal>div>div:last-child>span:last-child');
+    if(shortcutLabel&&shortcutLabel.textContent.trim()==='Esc / P')shortcutLabel.textContent='Offline';
     function dockForView(){
         const fullscreen=document.fullscreenElement?.id || (arenaPortableTheater ? (monitorFocus==='16:9'?'card-16x9':'card-9x16') : null);
         const horizontal=fullscreen==='card-16x9'||(fullscreen!=='card-9x16'&&monitorFocus==='16:9');

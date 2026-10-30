@@ -5168,6 +5168,7 @@
         }
 
         function updateTouchControlsVisibility() {
+            if(document.documentElement.classList.contains('arena-mobile-offline'))document.documentElement.dataset.mobilePhase=gameState;
             const aliveProtagonist = fighters.some(f => f.isStreamer && !f.eliminated);
             const active = isTouchDevice() && streamerManualControl && gameState === 'COMBAT' && aliveProtagonist && !isGamePaused && !isSettingsOpen;
             const wasActive = document.body.classList.contains('touch-controls-active');
