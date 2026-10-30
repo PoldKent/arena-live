@@ -954,6 +954,24 @@ body>header {position:relative!important;flex:none;padding:7px 10px!important;ba
 #arenaHeaderActions button[aria-pressed="true"],#arenaHeaderActions button[aria-expanded="true"] {border-color:#7395b7;background:#273c4e}
 #arenaHeaderActions button:disabled,.arena-work-panel button:disabled,#arenaOperatorPopover button:disabled {opacity:.45;cursor:default}
 #arenaHeaderActions #btnFullscreenDual {border-color:#4c756b;color:#c1e4d6}
+/* Desktop and stream quick actions reparent the existing controls; mobile has its own rail. */
+#arenaDesktopQuickPanel[hidden],#arenaDesktopQuickPanel [hidden]{display:none!important}
+#arenaDesktopQuickPanel{position:fixed;z-index:140;width:min(280px,calc(100vw - 16px));max-height:calc(100dvh - 72px);overflow:auto;padding:10px;border:1px solid #55768b;border-radius:12px;background:#102438;color:#e9f8ff;box-shadow:0 15px 38px #000b;box-sizing:border-box}
+#arenaDesktopQuickPanel>div:not([hidden]){display:grid;gap:7px;min-width:0}
+#arenaDesktopQuickPanel button{width:100%;min-height:38px;padding:7px 10px;border:1px solid #46677e;border-radius:8px;background:#19374d;color:#e7f9ff;text-align:left;font:650 12px Inter,system-ui,sans-serif;cursor:pointer}
+#arenaDesktopQuickPanel button:hover,#arenaDesktopQuickPanel button:focus-visible{border-color:#e6b54e;background:#49371b;color:#fde68a}
+#arenaDesktopQuickPanel #arenaProtaClassToolbar{display:grid;gap:7px;padding:8px;min-width:0}
+#arenaDesktopQuickPanel #arenaProtaClassToolbar select{width:100%;min-width:0;min-height:40px;border:1px solid #46677e;border-radius:8px;background:#0e1e2e;color:#eaffff;padding:6px 9px}
+@media(min-width:768px){
+ #arenaHeaderActions .arena-desktop-quick,#arenaHeaderActions #btnFullscreenDual{display:grid!important;place-items:center!important;flex:0 0 35px!important;width:35px!important;height:35px!important;min-width:35px!important;min-height:35px!important;padding:0!important;border:1px solid #5c91ae!important;border-radius:50%!important;background:#163448!important;color:#eaffff!important;font:750 19px/1 system-ui,sans-serif!important}
+ #arenaHeaderActions .arena-desktop-quick[aria-expanded="true"],#arenaHeaderActions #btnFullscreenDual[aria-pressed="true"]{border-color:#fbbf24!important;background:#3b2b13!important;color:#fde68a!important}
+ #arenaHeaderActions #arenaDesktopMatchBtn{order:-5}
+ #arenaHeaderActions #arenaDesktopProtaBtn{order:-4}
+ #arenaHeaderActions #arenaDualFullscreenEntryLabel{font-size:0!important}
+ #arenaHeaderActions #arenaDualFullscreenEntryLabel::before{content:"🎛";font:750 19px/1 system-ui,sans-serif!important}
+}
+@media(max-width:767px){#arenaDesktopQuickPanel,#arenaHeaderActions .arena-desktop-quick{display:none!important}}
+html.arena-mobile-offline #arenaDesktopQuickPanel,html.arena-mobile-offline #arenaHeaderActions .arena-desktop-quick{display:none!important}
 .arena-toolbar-separator {height:16px;flex:0 0 1px;background:#394250;margin:0 3px}
 :where(.arena-work-panel,#arenaOperatorPopover,#settingsPauseModal) :focus-visible,#arenaHeaderActions :focus-visible,.arena-dock-resizer:focus-visible {outline:2px solid #8ebddd;outline-offset:2px}
 #streamerJoinLabel {max-width:none!important}
