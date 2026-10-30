@@ -7586,8 +7586,9 @@
         }
         function installArenaOperatorToolbar() {
             installArenaWorkspace();
-            // The desktop operator uses the same Lobby, Rematch and Prota DOM controls
-            // as the mobile release, with no duplicate game handlers or OBS overlay.
+            /* ARENA_DESKTOP_QUICK_BEGIN */
+            // Reuse original Lobby, Rematch and Prota DOM controls; mobile provides
+            // its own operator rail and does not bundle this desktop-only view.
             if(!document.querySelector('meta[name="arena-portable-version"]')){
                 const toolbar=document.getElementById('arenaHeaderActions');
                 const lobby=document.getElementById('arenaDualLobbyBtn');
@@ -7662,6 +7663,7 @@
                 format.addEventListener('change',arrange);
                 arrange();
             }
+            /* ARENA_DESKTOP_QUICK_END */
             document.querySelectorAll('[data-operator-menu]').forEach(button=>button.addEventListener('click',()=>toggleArenaOperatorPopover(button.dataset.operatorMenu,button)));
             document.getElementById('arenaExitFullscreenBtn')?.addEventListener('click',()=>{if(document.fullscreenElement)void document.exitFullscreen();});
             document.getElementById('arenaDualTikTokConnectBtn')?.addEventListener('click',()=>{
