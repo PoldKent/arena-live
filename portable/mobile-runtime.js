@@ -51,9 +51,11 @@ function arenaPortableSetMode(mode,{remember=true,updateGame=true}={}){
     const previous=arenaPortableProfile.mode;
     const joining=mode===ARENA_MOBILE_MODES.PLAYER&&updateGame&&!arenaPortableSetupOpen;
     if(joining&&!fighters.some(f=>f.isStreamer&&!f.eliminated)){
-        const reason=gameState==='VICTORY'||koSequenceActive?'Terminó la ronda. Abre un lobby nuevo para incorporar a Prota.'
-            :gameState==='COMBAT'&&activeMode==='1v1'?'Las entradas están cerradas durante el duelo 1v1.'
-            :gameState==='COMBAT'&&rejoinRuleMode==='timed'&&matchTimeSeconds<=0?'Se agotó el tiempo de entrada.'
+        // Admission rules belong to the shared combat engine, not a second mobile copy.
+        const reason=arenaEntryLocked(true)
+            ?gameState==='VICTORY'||koSequenceActive?'Terminó la ronda. Abre un lobby nuevo para incorporar a Prota.'
+                :activeMode==='1v1'?'Las entradas están cerradas durante el duelo 1v1.'
+                :'No se admiten nuevas entradas en esta ronda.'
             :null;
         if(reason){arenaPortableReport(reason);return false;}
         if(gameState==='COMBAT'||gameState==='LOBBY'){

@@ -127,3 +127,8 @@ test('player setup falls back to streamer mode if the protagonist could not join
     assert.match(runtime,/const effectiveMode=joined\?selectedMode:ARENA_MOBILE_MODES\.DIRECTOR/);
     assert.match(runtime,/arenaPortableSetMode\(effectiveMode,\{remember:false\}\)/);
 });
+
+test('mobile entry decisions delegate to the canonical shared rules',()=>{
+    assert.match(runtime,/const reason=arenaEntryLocked\(true\)/);
+    assert.doesNotMatch(runtime,/rejoinRuleMode==='timed'&&matchTimeSeconds<=0/);
+});
