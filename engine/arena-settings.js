@@ -19,15 +19,12 @@ function installArenaRuntimeSettings(){
       +select('quality',7,[['high',8],['balanced',9],['performance',10]])+select('renderFps',11,[['30','30 FPS'],['60','60 FPS']])
       +'<p class="text-[10px] text-slate-400" data-runtime-copy="18"></p>'+renderArenaClassPreferenceControls()
       +'<label class="flex flex-col gap-1 text-xs"><span><span data-runtime-copy="15"></span>: <output id="arenaRuntimeVolumeValue"></output></span><input id="arenaRuntime_masterVolume" data-runtime-option="masterVolume" type="range" min="0" max="100" step="5"></label>'
-      +'<div class="flex flex-wrap gap-2"><button type="button" id="arenaSaveConfiguration" data-runtime-copy="19"></button><button type="button" id="arenaLoadConfiguration" data-runtime-copy="20"></button><button type="button" id="arenaResetRuntime" data-runtime-copy="21"></button><button type="button" id="arenaExportDiagnostics" data-runtime-copy="22"></button></div><input type="file" id="arenaConfigurationFile" accept=".json,application/json" hidden><p class="text-[10px] text-slate-400" data-runtime-copy="25"></p><output id="arenaConfigurationStatus" role="status" class="text-xs"></output>';
+      +'<div class="flex flex-wrap gap-2"><button type="button" id="arenaResetRuntime" data-runtime-copy="21"></button><button type="button" id="arenaExportDiagnostics" data-runtime-copy="22"></button></div>';
     for(const select of card.querySelectorAll('select')){select.className='min-w-0 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-slate-200';select.style.colorScheme='dark';}
     for(const button of card.querySelectorAll('button'))button.className='rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-xs text-slate-200';
     card.querySelector('input[type=range]').className='w-full accent-cyan-400';
     document.getElementById('settingsGeneralPanel').appendChild(card);
     for(const control of card.querySelectorAll('[data-runtime-option]'))control.addEventListener(control.type==='range'?'input':'change',()=>setArenaRuntimeOption(control.dataset.runtimeOption,control.value));
-    card.querySelector('#arenaSaveConfiguration').onclick=()=>downloadArenaJSON(exportArenaConfiguration(),'arena-live-configuracion');
-    const file=card.querySelector('#arenaConfigurationFile');card.querySelector('#arenaLoadConfiguration').onclick=()=>file.click();
-    file.onchange=async()=>{let accepted=false;try{if(file.files[0]?.size<=262144)accepted=importArenaConfiguration(JSON.parse(await file.files[0].text()));}catch(_){}document.getElementById('arenaConfigurationStatus').textContent=(ARENA_RUNTIME_COPY[currentLanguage]||ARENA_RUNTIME_COPY.es)[accepted?23:24];file.value='';};
     card.querySelector('#arenaResetRuntime').onclick=()=>{for(const [key,value]of Object.entries(ARENA_RUNTIME_DEFAULTS))setArenaRuntimeOption(key,value);};
     card.querySelector('#arenaExportDiagnostics').onclick=()=>downloadArenaJSON(getArenaDiagnostics(),'arena-live-diagnostico');
     document.getElementById('arenaBalancePanel').insertBefore(document.getElementById('arenaClassPreferences'),document.getElementById('arenaBalanceEvidence'));
@@ -55,31 +52,6 @@ function refreshArenaRuntimeControls(){
 }
 function getArenaDiagnostics(){return {version:window.ArenaLive.version,...arenaDiagnostics.snapshot(),timing:'CPU: simulation and canvas command submission; not GPU execution time',gpu:'Managed by browser; hardware acceleration cannot be verified from Canvas 2D',captures:[[canvas16.width,canvas16.height],[canvas9.width,canvas9.height]],quality:arenaRuntime.quality,renderFps:arenaRuntime.renderFps,activeFighters:fighters.filter(f=>!f.eliminated).length,droppedTimeMs:arenaDroppedTimeMs,memory:performance.memory?{usedJSHeapSize:performance.memory.usedJSHeapSize,jsHeapSizeLimit:performance.memory.jsHeapSizeLimit}:null};}
 function downloadArenaJSON(value,name){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download=name+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-function exportArenaConfiguration(){
-    saveArenaWorkspace();return JSON.parse(JSON.stringify({format:'arena-live-configuration',schema:1,version:window.ArenaLive.version,rules:arenaCombatRules,runtime:arenaRuntime,camera:{shake:arenaScreenShake},obs:arenaObsCalibration,language:currentLanguage,display:{focus:monitorFocus},round:{mode:rejoinRuleMode,lives:MAX_OPPORTUNITIES,duration:matchDurationSeconds,pace:gamePace,countdowns:countdownsEnabled},layouts:arenaWorkspace.layouts}));
-}
-function importArenaConfiguration(value){
-    const object=v=>v&&typeof v==='object'&&!Array.isArray(v);
-    if(!object(value)||value.format!=='arena-live-configuration'||value.schema!==1||!object(value.rules)||!object(value.runtime))return false;
-    for(const key of ['camera','obs','display','round','layouts'])if(value[key]!==undefined&&!object(value[key]))return false;
-    const rules=normalizeArenaCombatRules(value.rules),runtime=ArenaCore.normalizeRuntime(value.runtime);
-    const layouts=Object.fromEntries(['preparation','stream'].map(mode=>[mode,readArenaWorkspace(mode,value.layouts?.[mode]||arenaWorkspace.layouts[mode])]));
-    for(const [key,v]of Object.entries(rules))setArenaCombatRule(key,v);
-    for(const [key,v]of Object.entries(runtime))setArenaRuntimeOption(key,v);
-    if(value.camera)setArenaScreenShake(value.camera.shake);
-    if(value.obs)for(const key of ['offset','footer'])if(Object.hasOwn(value.obs,key))setArenaObsCalibration(key,value.obs[key]);
-    if(value.language&&Object.hasOwn(LANGUAGE_LABELS,value.language))setLanguage(value.language);
-    const round=value.round||{};
-    if(['free','3_lives','timed'].includes(round.mode))setRejoinRuleMode(round.mode);
-    if(Number.isFinite(round.lives)){if(rejoinRuleMode==='3_lives')setPlayerLives(round.lives);else MAX_OPPORTUNITIES=Math.max(1,Math.min(9,Math.round(round.lives)));}
-    if(Number.isFinite(round.duration)){if(rejoinRuleMode==='timed')setMatchDuration(round.duration);else matchDurationSeconds=Math.max(30,Math.min(300,Math.round(round.duration)));}
-    if([.75,1,1.25].includes(round.pace))setGamePace(round.pace);
-    if(typeof round.countdowns==='boolean')setCountdownsEnabled(round.countdowns);
-    for(const mode of ['preparation','stream']){arenaWorkspace.layouts[mode]=layouts[mode];try{localStorage.setItem(ARENA_WORKSPACE_KEYS[mode],JSON.stringify(layouts[mode]));}catch(_){}}
-    applyArenaWorkspaceLayout();
-    if(['16:9','9:16','dual'].includes(value.display?.focus))setMonitorFocus(value.display.focus);
-    refreshArenaRuntimeControls();return true;
-}
 const ARENA_CLASS_PREFERENCE_COPY=Object.freeze({
  es:['Preferencias de ataque por clase','Más cercano','Mi clase cerca · +25 %','Otra clase cerca · +15 %','Siempre mi clase','Siempre otra clase','Ventaja cerca · +25 %','Otra clase cerca · +25 %','Restaurar preferencias','El margen es distancia extra frente al rival más cercano. La prioridad nunca da inmunidad ni amplía el alcance.','Preferencias personalizadas: la muestra de victorias usa los valores originales.'],
  en:['Attack preferences by class','Nearest rival','My class nearby · +25%','Other class nearby · +15%','Always my class','Always another class','Favorable rival nearby · +25%','Other class nearby · +25%','Reset preferences','The margin is extra distance over the nearest rival. Priority never grants immunity or increases attack range.','Custom preferences: measured wins use the original settings.'],
