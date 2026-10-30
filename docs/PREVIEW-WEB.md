@@ -1,19 +1,29 @@
-# Arena Live · Pre-release web para compartir con un enlace
+# Arena Live · Pre-release web de acceso público por enlace
 
-**Estado:** infraestructura preparada en `main`. La URL pública **no estará activa** hasta que publiques los archivos y habilites Pages. Es una **versión web de prueba**; no equivale a un GitHub Release público ni a la aplicación PC con servidor.
+**Estado de infraestructura (30/10/2026):** `main` incluye el generador estático, pruebas de distribución y flujo `.github/workflows/pages-preview.yml` para GitHub Pages. La publicación **solo queda confirmada** cuando GitHub Actions finaliza con éxito y la URL se abre sin autenticación.
 
-## Qué verá cada visitante
+## Un enlace para dos experiencias
 
-- `https://poldkent.github.io/arena-live/` detecta el dispositivo y redirige a `mobile.html` en teléfonos o `desktop/` en ordenadores.
-- En `/?mode=mobile` y `/?mode=desktop` se puede forzar la versión, sin perder la detección automática del enlace base.
-- **Móvil:** HTML offline con el mismo motor de combate y perfiles jugador/streamer, sin conexión TikTok LIVE.
-- **Escritorio:** interfaz del cliente oficial y motor de simulación para navegador. La integración TikTok LIVE, el puente Node y las capturas OBS operativas necesitan ejecutar la aplicación local con `npm.cmd start`. Una página de GitHub Pages **no sustituye ese servidor**.
+- **Entrada:** `https://poldkent.github.io/arena-live/`.
+- **Móviles:** redirección automática a `/mobile.html` (HTML autónomo sin conexión TikTok LIVE).
+- **Escritorios:** redirección a `/desktop/` (interfaz y motor oficial de navegador; el puente TikTok LIVE y la integración OBS necesitan el servidor Node local).
+- Para abrir manualmente una edición: `/?mode=mobile` y `/?mode=desktop`.
 
-## Requisitos y publicación desde el repositorio privado
+## Publicación gratuita recomendada: GitHub Actions
 
-GitHub Pages con repositorios privados requiere **GitHub Pro, Team o Enterprise**. Si tu cuenta GitHub es Free, utiliza la alternativa de repositorio público de distribución descrita más abajo. Tu plan de ChatGPT no determina tu plan de GitHub.
+En GitHub Free, el repositorio `PoldKent/arena-live` debe ser **público** para utilizar Pages. Se ha autorizado ese cambio, por lo que **todo el código y su historial son públicos**, no solo la web.
 
-En PowerShell, desde la copia local, con Git/Node instalados:
+1. Abre [GitHub → Settings → Pages](https://github.com/PoldKent/arena-live/settings/pages).
+2. En **Build and deployment → Source**, selecciona **GitHub Actions**. No selecciones `Deploy from a branch` para este flujo.
+3. En [Actions → Arena Live · Web prerelease](https://github.com/PoldKent/arena-live/actions/workflows/pages-preview.yml), elige **Run workflow** sobre `main` si no hay un despliegue exitoso. Los nuevos commits de `main` también lo activan.
+4. Comprueba el resultado del trabajo **build** (genera `dist/arena-preview/` y ejecuta pruebas) y **deploy** (sube exclusivamente ese directorio como artefacto Pages).
+5. Verifica la URL en una pestaña privada, primero en celular y después en ordenador.
+
+El flujo usa `actions/configure-pages@v5`, `actions/upload-pages-artifact@v4` y `actions/deploy-pages@v4`; permisos mínimos: lectura de contenido, escritura de Pages e ID token durante el despliegue.
+
+**Las URL de Pages no son privadas ni protegidas por contraseña.** Los archivos HTML/JS publicados pueden descargarse e inspeccionarse; `noindex` y `robots.txt` solo intentan reducir indexación.
+
+## Pruebas locales opcionales (Windows PowerShell)
 
 ```powershell
 git switch main
@@ -22,40 +32,15 @@ npm.cmd ci
 npm.cmd run test:preview
 ```
 
-`test:preview` genera y comprueba la salida `dist/arena-preview/`. Revisa los archivos antes de publicarlos. Si la compilación móvil falla por tamaño o una prueba falla, **no publiques**. Para enviar exclusivamente los archivos generados, ejecuta:
+El resultado está en `dist/arena-preview/`. Si la exportación móvil excede el límite o alguna prueba falla, corrige la causa antes de publicar; no incrementes arbitrariamente el límite.
 
-```powershell
-npm.cmd run publish:preview -- --confirm-public
-```
+## Publicación manual de respaldo
 
-El publicador crea/actualiza una rama **`gh-pages` destinada exclusivamente al sitio** mediante un directorio Git temporal, sin tocar tus archivos de trabajo ni forzar los commits de `main`. Solo envía el HTML móvil empaquetado, la interfaz/recursos web de escritorio, el selector de dispositivo y metadatos mínimos. Necesitarás credenciales GitHub y autoría Git configurada.
+También existe `npm.cmd run publish:preview -- --confirm-public`, que envía archivos generados a `gh-pages`. **Esta es una alternativa**, no la estrategia activa: requiere configurar **Settings → Pages → Deploy from a branch → gh-pages / (root)** y desactivar la fuente GitHub Actions, por lo que no se deben mezclar ambos métodos.
 
-Después, en [Settings → Pages](https://github.com/PoldKent/arena-live/settings/pages), configura:
+## Restricciones y retirada
 
-1. **Source:** Deploy from a branch.
-2. **Branch:** `gh-pages`.
-3. **Folder:** `/(root)`.
-4. **Save**. Cuando GitHub confirme la publicación, visita `https://poldkent.github.io/arena-live/` desde PC y móvil.
-
-El archivo `.nojekyll` evita la compilación Jekyll. GitHub Pages sigue teniendo un flujo interno de despliegue; comprueba el resultado en Settings → Pages y Actions. Históricamente el CI de este proyecto ha estado limitado por el presupuesto de GitHub Actions, por lo que la publicación **no se debe considerar exitosa hasta probar la URL anónimamente**.
-
-## Alternativa gratuita si GitHub Free no permite Pages desde un repositorio privado
-
-Crea manualmente un repositorio público **vacío** llamado, por ejemplo, `arena-live-preview`. Mantén `arena-live` privado. Tras ejecutar `npm.cmd run test:preview`, publica el paquete generado en ese repositorio:
-
-```powershell
-npm.cmd run publish:preview -- --confirm-public --remote=https://github.com/PoldKent/arena-live-preview.git
-```
-
-Configura GitHub Pages de ese repositorio desde `gh-pages` y `/(root)`. El enlace será `https://poldkent.github.io/arena-live-preview/`.
-
-**La alternativa pública expone el paquete web, no la historia ni los archivos del servidor del repositorio privado.** Los JS y HTML entregados al navegador son legibles por terceros en cualquiera de las opciones.
-
-## Privacidad, limitaciones y reversión
-
-- «Semipúblico» significa **acceso público por enlace**: no es un enlace secreto, no requiere cuenta ni es una autenticación. Los metadatos `noindex` y `robots.txt` son solicitudes voluntarias a buscadores, **no** control de acceso.
-- No incrustes claves, tokens de TikTok, credenciales ni lógica privada en el paquete web. El navegador puede inspeccionar y guardar todo el código servido.
-- El script no publica el servidor `bridge/`, los documentos internos, los archivos del repositorio, ni los datos de Git.
-- No hagas público el repositorio `arena-live`; no uses su `main` como fuente de Pages.
-- Para retirar el acceso, desactiva Pages en Settings → Pages (y elimina o invalida `gh-pages` si quieres quitar el artefacto publicado). Las copias que otros hayan descargado no pueden revocarse.
-- Si quieres registrar además el hito como **GitHub Pre-release**, crea un release marcado como pre-release en el repositorio privado. Esa página seguirá requiriendo acceso GitHub, por lo que **el enlace para visitantes debe ser Pages**, no la URL del Release.
+- La vista web para PC no aloja un servidor de TikTok ni transmite directamente a OBS; para el flujo LIVE completo usa `npm.cmd start` en un PC.
+- El empaquetador estático solo copia explícitamente el motor/interfaz web, HTML móvil y documentación mínima de la demo; no publica los archivos del servidor `bridge/` como parte del sitio Pages. **Sin embargo, al ser público el repositorio principal, cualquiera puede leer `bridge/` y todos los archivos versionados en GitHub.**
+- No se permiten secretos de producción en código cliente. Realizar una auditoría de credenciales y del historial antes de considerar la distribución como segura.
+- Para retirar la web: desactiva Pages desde Settings → Pages y cancela el despliegue automatizado. Para volver a ocultar el código, configura el repositorio como privado; los forks o copias ya realizadas no pueden recuperarse.
