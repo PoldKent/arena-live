@@ -169,6 +169,8 @@ function arenaPortableClearReport(){
     arenaPortableReportTimer=null;
     const toast=document.getElementById('arenaPortableToast');
     if(toast){toast.hidden=true;toast.textContent='';}
+    const status=document.getElementById('arenaPortableFeedback');
+    if(status)status.textContent='';
 }
 function arenaPortableReport(message){
     arenaPortableClearReport();

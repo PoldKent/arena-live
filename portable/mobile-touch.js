@@ -289,9 +289,7 @@ function arenaMobileKeepStreamerSkillsVisible(){
     if(!skills)return;
     // Move the same original five skill buttons to their independent physical-bottom layer.
     const fullscreen=document.fullscreenElement;
-    const host=fullscreen?.matches?.('#card-9x16,#card-16x9')?fullscreen:
-        document.documentElement.classList.contains('arena-mobile-theater')
-            ?document.getElementById(monitorFocus==='16:9'?'card-16x9':'card-9x16'):document.body;
+    const host=fullscreen?.matches?.('#card-9x16,#card-16x9')?fullscreen:document.body;
     if(host&&skills.parentElement!==host)host.appendChild(skills);
     skills.hidden=arenaPortableProfile.mode!==ARENA_MOBILE_MODES.DIRECTOR;
 }
