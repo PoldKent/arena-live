@@ -9,7 +9,7 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const out=resolve(root,'dist/arena-preview');
 const version=JSON.parse(await readFile(resolve(root,'package.json'),'utf8')).version;
 const desktopAssets=[
-    'index.html','styles/arena-ui.css',
+    'index.html','styles/arena-ui.css','styles/TAILWIND-LICENSE.txt',
     ...['core','render','audio','settings','balance-evidence','game'].map(name=>'engine/arena-'+name+'.js')
 ];
 const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
