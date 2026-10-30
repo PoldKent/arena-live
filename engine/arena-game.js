@@ -6272,11 +6272,11 @@
             }
             const settingsBtn = document.getElementById('btnAutoChatSettings');
             if (settingsBtn) {
-                settingsBtn.textContent = autoChatEnabled ? '🤖 Audiencia automática: ACTIVADA' : '🤖 Audiencia automática: DESACTIVADA';
+                settingsBtn.textContent = autoChatEnabled ? '🤖 Auto-Audiencia: ON' : '🤖 Auto-Audiencia: OFF';
                 settingsBtn.setAttribute('aria-pressed',String(autoChatEnabled));
                 settingsBtn.className = autoChatEnabled
-                    ? 'rounded-lg border border-amber-400 bg-amber-950/80 px-3 py-2 text-[11px] font-bold text-amber-200'
-                    : 'rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-[11px] font-bold text-slate-300';
+                    ? 'rounded-lg border border-emerald-500/40 bg-emerald-500/20 px-3 py-2 text-[11px] font-bold text-emerald-300'
+                    : 'rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-[11px] font-bold text-slate-300';
             }
             const quickBtn = document.getElementById('btnQuickAutoChat');
             if (quickBtn) {
