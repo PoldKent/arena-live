@@ -32,5 +32,5 @@ test('mobile non-shrinking viewport is still built from the same official source
     assert.match(expanded,/syncArenaSingleFullscreenPanels/);
     assert.match(expanded,/arenaMobileControlShelf/);
     assert.match(expanded,/arenaPortableTestDrawer/);
-    assert.match(expanded,/id="arenaMobileFullscreenFormat"/);
+    assert.doesNotMatch(expanded,/id="arenaMobileFullscreenFormat"/);
 });
