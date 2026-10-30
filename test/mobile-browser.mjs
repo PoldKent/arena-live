@@ -529,14 +529,15 @@ try{
         await page.locator('#arenaMobileMoreBtn').tap();
         await page.keyboard.press('Escape');
         assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),false);
-        await page.locator('#arenaMobileMoreBtn').tap();
-        await page.locator('.arena-mobile-match-menu summary').tap();
-        assert.equal(await page.locator('.arena-mobile-match-menu').evaluate(n=>n.open),true);
-        await page.keyboard.press('Escape');
-        assert.equal(await page.locator('.arena-mobile-match-menu').evaluate(n=>n.open),false);
-        assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),true);
-        await page.keyboard.press('Escape');
+        await page.locator('#arenaMobileMatchShortcut').tap();
+        assert.equal(await page.locator('#arenaMobileQuickPanel').isVisible(),true);
         assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),false);
+        await page.keyboard.press('Escape');
+        assert.equal(await page.locator('#arenaMobileQuickPanel').isVisible(),false);
+        await page.locator('#arenaMobileProtaShortcut').tap();
+        assert.equal(await page.locator('#protagonistClassSelect').isVisible(),true);
+        await page.keyboard.press('Escape');
+        assert.equal(await page.locator('#arenaMobileQuickPanel').isVisible(),false);
         assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('arena-mobile-theater')),true);
         await page.locator('#arenaMobileTestsShortcut').tap();
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
@@ -547,23 +548,16 @@ try{
         assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('arena-mobile-theater')),false);
         await page.evaluate(()=>delete document.fullscreenEnabled);
     });
-    await check('v0.40.6 mobile format selector changes guide without resizing 9:16 game',async()=>{
+    await check('mobile removes the fake 9:21 calibrator and keeps the 9:16 view intact',async()=>{
         await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(false);});
+        assert.equal(await page.locator('#arenaMobileFullscreenFormat').count(),0);
+        assert.equal(await page.locator('#arenaMobileFrameGuide').count(),0);
+        const before=await page.locator('#viewport9x16').boundingBox();
         await page.evaluate(()=>Object.defineProperty(document,'fullscreenEnabled',{value:false,configurable:true}));
         await page.locator('#arenaPortableFullscreen').tap();
         await page.waitForFunction(()=>document.documentElement.classList.contains('arena-mobile-theater'));
-        const initial=await page.locator('#viewport9x16').boundingBox();
-        const options=await page.locator('#arenaMobileFullscreenFormat').locator('option').evaluateAll(nodes=>nodes.map(n=>n.value));
-        assert.deepEqual(options,['auto','16','19.5','20','21']);
-        for(const ratio of ['16','19.5','20','21','auto']){
-            await page.locator('#arenaMobileFullscreenFormat').evaluate((select,v)=>{
-                select.value=v;select.dispatchEvent(new Event('change',{bubbles:true}));
-            },ratio);
-            const bounds=await page.locator('#viewport9x16').boundingBox();
-            assert.ok(Math.abs(bounds.width-initial.width)<1&&Math.abs(bounds.height-initial.height)<1,
-                JSON.stringify({ratio,initial,bounds}));
-            assert.equal(await page.locator('#arenaMobileFrameGuide').isVisible(),ratio!=='auto');
-        }
+        const after=await page.locator('#viewport9x16').boundingBox();
+        assert.ok(after.width>0&&after.height>0&&Math.abs(after.height/after.width-16/9)<0.1,JSON.stringify({before,after}));
         await page.locator('#arenaPortableFullscreen').tap();
         await page.evaluate(()=>delete document.fullscreenEnabled);
     });
@@ -744,7 +738,7 @@ try{
         assert.equal(await page.locator('#arenaPortableTestDrawer').evaluate(n=>n.parentElement===document.body),true);
         await page.evaluate(()=>ArenaMobileTouch.openTests(false));
         if(output)await page.screenshot({path:join(output,'mobile-landscape.png')});
-        await page.locator('#arenaMobileMoreBtn').tap();await page.locator('.arena-mobile-match-menu summary').tap();await page.locator('#arenaPortableQuick').tap();
+        await page.locator('#arenaMobileMatchShortcut').tap();await page.locator('#arenaPortableQuick').tap();
         assert.equal(await page.locator('#arenaPortableSetup').isVisible(),true);
         await page.locator('#arenaPortableClose').tap();assert.equal(await page.evaluate(()=>isGamePaused),false);
     });
