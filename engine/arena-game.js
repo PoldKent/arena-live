@@ -6956,7 +6956,7 @@
             document.getElementById('arenaDualRematchBtn')?.addEventListener('click',rematchSamePlayers);
             document.getElementById('arenaDualLobbyBtn')?.addEventListener('click',()=>{
                 const c=ARENA_DUAL_OPERATOR_COPY[currentLanguage]||ARENA_DUAL_OPERATOR_COPY.es;
-                if(window.confirm(c[12]))openLobby(true);
+                if(document.documentElement.classList.contains('arena-mobile-offline')||window.confirm(c[12]))openLobby(true);
             });
             document.addEventListener('fullscreenchange',()=>{
                 const stage=document.getElementById('broadcastStageSection');
