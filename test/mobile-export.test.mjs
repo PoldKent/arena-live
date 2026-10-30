@@ -29,6 +29,7 @@ test('current release is under 500 KB, fully offline and decompresses losslessly
         assert.match(html,/actionLayer\.id='arenaMobileActionLayer'/);
         assert.doesNotMatch(html,/arenaMobileFrameFormat|arenaMobileFrameGuide/);
         assert.match(html,/arenaMobileMatchShortcut/);
+        assert.doesNotMatch(html,/arenaDesktopQuickPanel|arenaDesktopMatchBtn|ARENA_DESKTOP_QUICK_BEGIN/,'desktop-only operator UI must not inflate mobile HTML');
         assert.match(html,/No mostrar de nuevo/);
         assert.match(html,/id="arenaPortableFullscreen"/);
         assert.match(html,/arenaMobileShowTestDrawer/);
