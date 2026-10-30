@@ -20,6 +20,8 @@
     "verify:release": "npm test && npm run build:mobile && npm run test:browser && npm run test:mobile && npm run test:performance",
     "build:styles": "node tools/build-styles.mjs",
     "build:mobile": "node tools/build-mobile.mjs",
+    "build:preview": "node tools/build-preview-site.mjs",
+    "publish:preview": "node tools/publish-preview-site.mjs",
     "analyze:balance": "node test/balance-simulation.mjs"
   },
   "dependencies": {
