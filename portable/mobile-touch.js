@@ -507,6 +507,7 @@ function arenaMobileEditButtons(on=true){
         document.dispatchEvent(new Event('arena-touch-disable'));
     }else arenaMobileSaveLayout();
     arenaMobileApplyLayout();
+    updateTouchControlsVisibility();
     requestAnimationFrame(arenaPortableFitMobileStage);
 }
 function arenaMobileSetButtonSize(size){
@@ -682,7 +683,7 @@ function installArenaMobileTouch(){
     }
     // Reuse the original analog, including its existing pointer handling and dead zone.
     // The same joystick moves between the 9:16 and 16:9 previews.
-    document.getElementById('arenaPortableSetup')?.querySelector('.arena-portable-help')?.replaceChildren(document.createTextNode('En Ajustes → Controles: Táctil total (desliza vertical para golpear o mantén para especiales) o Joystick (5 dedos, ↑↓ + Golpe/Poder).'));
+    document.getElementById('arenaPortableSetup')?.querySelector('.arena-portable-help')?.replaceChildren(document.createTextNode('En Modo jugador elige Controles táctiles o Joystick y botones. También puedes cambiarlos en Ajustes → Controles.'));
     const labels={arenaMobileJump:'↑',arenaMobileAttack:'⚔',arenaMobilePower:'⚡',arenaMobileMoreBtn:'☰'};
     for(const [id,label]of Object.entries(labels)){
         const node=document.getElementById(id);if(!node)continue;
