@@ -1,7 +1,7 @@
 {
   "name": "arena-live",
   "private": true,
-  "version": "0.40.7",
+  "version": "0.40.8",
   "description": "Shared Arena Live game engine, OBS broadcast views, offline mobile export and local TikTok LIVE bridge",
   "type": "module",
   "engines": {

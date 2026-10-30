@@ -37,5 +37,5 @@ test('active source has a single mainline policy and no retired cleanup command'
   assert.match(readme,/una sola rama/i);
   assert.doesNotMatch(readme,/clean:branches/);
   assert.equal(Object.hasOwn(pkg.scripts,'clean:branches'),false);
-  assert.equal(pkg.version,'0.40.7');
+  assert.equal(pkg.version,'0.40.8');
 });

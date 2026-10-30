@@ -1,12 +1,12 @@
-# Arena Live · móvil autónomo (fuente 0.40.7)
+# Arena Live · móvil autónomo (fuente 0.40.8)
 
 El **móvil offline** es un archivo HTML compilado desde `main`: no es una segunda rama, otro motor de combate, una APK ni un cliente TikTok LIVE autónomo. La exportación conserva el combate de la aplicación PC y añade únicamente adaptadores de interfaz y controles.
 
 ## Estado de la distribución
 
-- **Fuentes actuales:** `package.json` versión **0.40.7**.
-- **Exportación móvil oficial:** [v0.40.7](../mobile-builds/Arena-Live-v0.40.7-movil.html), generada desde `main` con el banner unificado.
-- **Para regenerar la versión 0.40.7:** ejecuta `npm.cmd run build:mobile` y comprueba `dist/Arena-Live-v0.40.7-movil.html`.
+- **Fuentes actuales:** `package.json` versión **0.40.8**.
+- **Exportación móvil oficial:** [v0.40.8](../mobile-builds/Arena-Live-v0.40.8-movil.html), generada desde `main` con el banner unificado.
+- **Para regenerar la versión 0.40.8:** ejecuta `npm.cmd run build:mobile` y comprueba `dist/Arena-Live-v0.40.8-movil.html`.
 - `npm.cmd start` o `npm.cmd run dev` también compilan el móvil durante el paso `prestart`/`predev` y lo muestran en http://127.0.0.1:4173/mobile.
 
 La generación utiliza `index.html`, `styles/arena-ui.css`, los seis scripts `engine/` y `portable/mobile-*`. Incluye los scripts y CSS completos; no descarga paquetes externos. Cada compilación añade información de los archivos fuente para identificarla. El exportador exige **500.000 bytes como máximo** y verifica la descompresión sin pérdida. **El límite es un contrato del generador, no una validación actual de todos los teléfonos.**

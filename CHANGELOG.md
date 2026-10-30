@@ -1,3 +1,14 @@
+## v0.40.8 — Android: arranque, controles y capas independientes (2026-10-30)
+
+- La exportación HTML autónoma espera que termine el análisis del documento de arranque antes de sustituirlo, evitando la pantalla de «Iniciando…» superpuesta al juego en navegadores `content://`.
+- El cambio entre Jugador y Streamer valida la incorporación de Prota antes de confirmar el modo; muestra el motivo de denegación y los avisos desaparecen a los cuatro segundos o al corregirse el estado.
+- Los radios y las opciones del editor táctil recuperan su tamaño natural y texto adaptable; el joystick original se oculta durante el lobby sin cambiar sus posiciones guardadas.
+- Las cinco habilidades originales se anclan al borde inferior físico mediante su contenedor existente, independiente del joystick; las pruebas conservan su posición y transparencia con desplazamiento efectivo.
+- El panel original de Ajustes se puede arrastrar por su encabezado, usando el mismo controlador básico de arrastre que las pruebas, con scroll interior y límites de pantalla.
+- La identidad de simulación y la versión móvil se muestran correctamente; se conservan las claves internas de plataforma, las capturas OBS y el motor común.
+- El empaquetador solo elimina comentarios no licenciados del CSS distribuido para conservar el límite de 500 KB, sin cambiar fuentes ni selectores.
+- GitHub Actions permanece bloqueado por el presupuesto de 0 USD; no se habilitó facturación. Pruebas de navegador y dispositivo Android físico pendientes.
+
 ## Ajustes de interfaz móvil v0.40.7 — 29/10/2026
 
 - Los botones superiores originales, incluida la pausa, se integran en el banner «ARENA LIVE»; eliminadas las antiguas reglas de posición y el marco visual adicional.

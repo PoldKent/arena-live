@@ -2,7 +2,7 @@
 
 ## Alcance y veracidad
 
-Inventario directo del árbol de GitHub en `main`: **164 archivos** y **3.232.504 bytes** de blobs rastreados (incluye documentación, artefactos de análisis y la exportación móvil de 0.40.6). La fuente actual usa `package.json` versión `0.40.7`. La inspección cubre estructura, rutas de carga, scripts, módulos de riesgo, contratos y resultados disponibles de CI. **No se ha podido ejecutar la suite Node/Playwright ni una sesión LIVE en esta revisión**: GitHub Actions no asigna ejecutores por la restricción del presupuesto de 0 USD.
+Inventario directo del árbol de GitHub en `main`: **164 archivos** y **3.232.504 bytes** de blobs rastreados (incluye documentación, artefactos de análisis y la exportación móvil de 0.40.6). La fuente actual usa `package.json` versión `0.40.8`. La inspección cubre estructura, rutas de carga, scripts, módulos de riesgo, contratos y resultados disponibles de CI. **No se ha podido ejecutar la suite Node/Playwright ni una sesión LIVE en esta revisión**: GitHub Actions no asigna ejecutores por la restricción del presupuesto de 0 USD.
 
 **Auditoría de código no significa certificación de cada camino de ejecución.** El motor principal mide ~591 KB y más de 7.700 líneas; requiere pruebas de regresión con 128 participantes y revisión incremental de zonas acopladas antes de fragmentarlo o alterar física.
 
@@ -31,7 +31,7 @@ Inventario directo del árbol de GitHub en `main`: **164 archivos** y **3.232.50
 | `test/*.test.mjs` | Contratos Node de UI, física, entradas y reglas | Ejecutar localmente cuando haya Node |
 | `test/*browser.mjs` | Navegador PC, móvil, rendimiento y 128 luchadores | No ejecutados en Actions por presupuesto |
 | `docs/` | Registro de decisiones, histórico de releases y métricas | Preservar como evidencia; identificar documentos obsoletos |
-| `mobile-builds/` | HTML móvil 0.40.7 publicado desde el motor compartido | Fuente y distribución alineadas; Android físico pendiente |
+| `mobile-builds/` | HTML móvil 0.40.8 publicado desde el motor compartido | Fuente y distribución alineadas; Android físico pendiente |
 
 ## Hallazgos y depuración aplicada
 
@@ -41,7 +41,7 @@ Inventario directo del árbol de GitHub en `main`: **164 archivos** y **3.232.50
 4. **Baja — clasificación de resultados.** `ArenaCore.result` buscaba duplicados mediante `order.some(...)` sobre el podio en construcción. Usar `Set` evita escaneo O(n²) con hasta 128 luchadores, sin cambiar el orden ni las estadísticas.
 5. **Alta — pruebas no ejecutadas.** Actions falló antes del primer paso; el presupuesto de Actions es 0 USD y figura como «Usage blocked». No significa que la suite haya pasado o fallado. No cambiar facturación sin autorización.
 6. **Media — monolito de combate y pruebas de rendimiento.** `arena-game.js` concentra física/IA, HUD, idiomas y sesión. Dividirlo sin línea base de navegador es riesgoso. Priorizar extracción gradual **solo** tras ejecutar suite local y medir 128 luchadores.
-7. **Media — entrega móvil desfasada.** La exportación móvil v0.40.7 está publicada con manifiesto de blobs y verificación de descompresión LZW sin pérdida. Queda pendiente probarla en Android físico.
+7. **Media — entrega móvil desfasada.** La exportación móvil v0.40.8 incluye las ocho correcciones Android aprobadas, con manifiesto de blobs y verificación de descompresión LZW sin pérdida. Queda pendiente probarla en Android físico.
 
 ## Invariantes antes de futuros cambios
 

@@ -1,8 +1,8 @@
-# Arena Live · v0.40.7
+# Arena Live · v0.40.8
 
 **Juego de combate para PC, OBS y teléfono, con una única simulación y un motor compartido.** La aplicación de escritorio ofrece dos capturas sincronizadas (**16:9** y **9:16**) y un puente local para TikTok LIVE. El móvil autónomo es un HTML empaquetado desde ese mismo código, con controles táctiles y simulación local, **sin conexión LIVE directa**.
 
-> **Estado de la entrega (29/10/2026):** fuentes y exportación autónoma **v0.40.7**. La [versión móvil oficial](mobile-builds/Arena-Live-v0.40.7-movil.html) se generó desde el mismo motor de PC/OBS, sin red. Pendiente validación en un Android físico. Solo existe la rama `main`.
+> **Estado de la entrega (30/10/2026):** fuentes y exportación autónoma **v0.40.8**. La [versión móvil oficial](mobile-builds/Arena-Live-v0.40.8-movil.html) incorpora las ocho correcciones aprobadas para Android, sin cambiar el motor de combate. Pendiente validación física en Android. Solo existe la rama `main`.
 
 ## Empezar en PC (Windows / PowerShell)
 
@@ -37,7 +37,7 @@ Si Git detecta modificaciones locales, consérvalas y resuelve el conflicto; **n
 npm.cmd run build:mobile
 ```
 
-Genera **`dist/Arena-Live-v0.40.7-movil.html`** desde el mismo `index.html`, los seis scripts de `engine/` y los adaptadores de `portable/`. Copia ese único archivo al teléfono y ábrelo en un navegador que permita ejecutar HTML local. Algunos visores de archivos o enlaces `content://` pueden limitar JavaScript, almacenamiento o pantalla completa; prueba «Abrir con» un navegador compatible.
+Genera **`dist/Arena-Live-v0.40.8-movil.html`** desde el mismo `index.html`, los seis scripts de `engine/` y los adaptadores de `portable/`. Copia ese único archivo al teléfono y ábrelo en un navegador que permita ejecutar HTML local. Algunos visores de archivos o enlaces `content://` pueden limitar JavaScript, almacenamiento o pantalla completa; prueba «Abrir con» un navegador compatible.
 
 La exportación es **offline**: puedes probar luchadores, clases, reglas, habilidades y controles sin servidor. **No recibe eventos reales de TikTok.** El empaquetador comprueba que el HTML sea autónomo, se descomprima íntegramente y no supere 500.000 bytes. Esto no sustituye una prueba en Android físico.
 
