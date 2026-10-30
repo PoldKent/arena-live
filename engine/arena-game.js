@@ -7646,7 +7646,7 @@
                     const rect=button.getBoundingClientRect();
                     panel.style.left=Math.max(8,Math.min(window.innerWidth-288,rect.left))+'px';
                     panel.style.top=Math.min(window.innerHeight-70,rect.bottom+6)+'px';
-                    panel.querySelector('button:not([hidden]),select:not(:disabled)')?.focus({preventScroll:true});
+                    panel.querySelector(name==='match'?'#arenaDesktopMatchActions button:not(:disabled)':'#arenaDesktopProtaActions select:not(:disabled)')?.focus({preventScroll:true});
                 };
                 matchShortcut.onclick=()=>toggle('match',matchShortcut);
                 protaShortcut.onclick=()=>toggle('prota',protaShortcut);
