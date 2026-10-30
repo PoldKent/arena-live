@@ -18,6 +18,9 @@ jobs:
     if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
     steps:
       - name: Checkout application sources
         uses: actions/checkout@v6
@@ -31,6 +34,15 @@ jobs:
         run: npm ci
       - name: Build and verify device-aware preview
         run: npm run test:preview
+      - name: Use the custom GitHub Actions publishing source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current=$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq '.build_type')
+          if [ "$current" != "workflow" ]; then
+            echo "Changing GitHub Pages build type from $current to workflow (prevents Jekyll overwriting the preview)."
+            gh api --method PUT "repos/${GITHUB_REPOSITORY}/pages" -f build_type=workflow
+          fi
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload static site only (no Node bridge)
