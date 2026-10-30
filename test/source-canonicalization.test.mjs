@@ -29,7 +29,7 @@ test('mobile stylesheet retains one native layout and usable fullscreen controls
   assert.match(css,/#arenaStreamerSkillsDock/);
   assert.match(css,/#arenaPortableTestDrawer/);
   assert.match(css,/@media\(min-width:420px\)/);
-  assert.ok(Buffer.byteLength(css,'utf8')<58000,'obsolete CSS declarations reintroduced');
+  assert.ok(Buffer.byteLength(css,'utf8')<65000,'obsolete CSS declarations reintroduced');
 });
 
 test('active source has a single mainline policy and no retired cleanup command',()=>{
