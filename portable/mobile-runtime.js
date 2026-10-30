@@ -549,7 +549,7 @@ function arenaPortableReady() {
         if(playerShelf&&shelfHost&&playerShelf.parentElement!==shelfHost)shelfHost.appendChild(playerShelf);
         // The compact tests panel is independent of the skill shelf. Mount it
         // on body in normal mode and inside the fullscreen card when necessary.
-        for(const id of ['arenaMobileActionLayer','touchControlDock','arenaStreamerSkillsDock']){const node=document.getElementById(id);if(node)playerShelf?.appendChild(node);}
+        for(const id of ['arenaMobileActionLayer','touchControlDock']){const node=document.getElementById(id);if(node)playerShelf?.appendChild(node);}
         if(typeof arenaMobileKeepStreamerSkillsVisible==='function')arenaMobileKeepStreamerSkillsVisible();
         if(typeof arenaMobileMountTestDrawer==='function')arenaMobileMountTestDrawer();
         if(typeof arenaMobileApplyLayout==='function')requestAnimationFrame(arenaMobileApplyLayout);

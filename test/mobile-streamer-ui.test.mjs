@@ -16,13 +16,16 @@ test('the legacy operator toolbar is not mounted in the mobile controls',()=>{
     assert.match(touch,/actionLayer\.id='arenaMobileActionLayer'/);
     assert.match(touch,/actionLayer\.appendChild\(button\)/);
     assert.doesNotMatch(touch,/shelf\.appendChild\(bar\)/);
-    assert.match(runtime,/\['arenaMobileActionLayer','touchControlDock','arenaStreamerSkillsDock'\]/);
+    assert.match(runtime,/\['arenaMobileActionLayer','touchControlDock'\]/);
     assert.match(css,/#arenaMobileActionLayer/);
 });
 test('old rectangular toolbar cannot render through player or streamer controls',()=>{
     assert.match(css,/#arenaMobileActionLayer\{[^}]*background:none!important/);
     assert.match(css,/#arenaMobileControlShelf\{[^}]*background:none!important/);
     assert.match(css,/#arenaStreamerSkillsDock\{display:none!important\}/);
+    assert.match(css,/#arenaStreamerSkillsDock\{position:fixed!important/);
+    assert.match(touch,/function arenaMobileBindPanelDrag/);
+    assert.match(touch,/function arenaMobileInstallSettingsDragging/);
     assert.doesNotMatch(css,/#arenaMobileControlShelf #arenaHeaderActions/);
 });
 test('portrait game maximizes independently from all overlays',()=>{
@@ -108,4 +111,13 @@ test('original header, no framed toolbar and independent touch surface',()=>{
     assert.match(css,/#arenaMobileControlShelf\{[^}]*position:fixed!important/);
     assert.match(runtime,/--arena-mobile-reserved-bottom','0px'/);
     assert.match(touch,/arenaLiveMobileButtonsV2/);
+});
+
+test('independent mobile layers, natural radios and bounded draggable panels',()=>{
+    assert.match(css,/data-mobile-phase="COMBAT"/);
+    assert.match(css,/#arenaMobileTouchModeOptions label\{display:grid;grid-template-columns:20px/);
+    assert.match(css,/#arenaMobileControlSettings input\[type=radio\]\{width:18px/);
+    assert.match(css,/#arenaStreamerSkillsDock\{position:fixed!important/);
+    assert.match(touch,/skills\.parentElement!==host\)host\.appendChild/);
+    assert.match(touch,/style\.setProperty\('top',Math\.round\(y\)\+'px','important'\)/);
 });

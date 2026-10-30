@@ -81,42 +81,48 @@ function arenaMobilePlaceTestPanel(){
     const {maxX,maxY}=arenaMobileTestLimits(drawer);
     const x=Math.round(6+Math.max(0,maxX-6)*position.x);
     const y=Math.round(6+Math.max(0,maxY-6)*position.y);
+    arenaMobileSetTestPosition(drawer,x,y);
+}
+function arenaMobileSetTestPosition(drawer,x,y){
     drawer.classList.add('is-positioned');
-    drawer.style.setProperty('--arena-tests-x',x+'px');
-    drawer.style.setProperty('--arena-tests-y',y+'px');
+    drawer.style.setProperty('left',Math.round(x)+'px','important');
+    drawer.style.setProperty('top',Math.round(y)+'px','important');
+    drawer.style.setProperty('bottom','auto','important');
+}
+function arenaMobileBindPanelDrag(handle,{start,move,end}){
+    let pointer=null;
+    handle.addEventListener('pointerdown',event=>{
+        if(event.button!==0||event.target.closest('button,input,label,select'))return;
+        pointer=event.pointerId;start(event);
+        try{handle.setPointerCapture(pointer);}catch(_){}
+        handle.classList.add('is-dragging');event.preventDefault();
+    });
+    handle.addEventListener('pointermove',event=>{
+        if(pointer!==event.pointerId)return;
+        move(event);event.preventDefault();
+    });
+    const release=event=>{
+        if(pointer!==event.pointerId)return;
+        pointer=null;handle.classList.remove('is-dragging');end?.(event);
+    };
+    for(const type of ['pointerup','pointercancel','lostpointercapture'])handle.addEventListener(type,release);
 }
 function arenaMobileInstallTestDragging(drawer){
     const head=drawer.querySelector('#arenaPortableTestHead');
-    head.addEventListener('pointerdown',event=>{
-        if(event.button!==0||event.target.closest('button,input,label,select'))return;
-        const surface=arenaMobileTestSurface(),rect=drawer.getBoundingClientRect();
-        arenaMobileTestState.drag={id:event.pointerId,startX:event.clientX,startY:event.clientY,
-            x:rect.left-surface.left,y:rect.top-surface.top};
-        event.preventDefault();
-        try{head.setPointerCapture(event.pointerId);}catch(_){}
-        head.classList.add('is-dragging');
+    arenaMobileBindPanelDrag(head,{
+        start(event){
+            const surface=arenaMobileTestSurface(),rect=drawer.getBoundingClientRect();
+            arenaMobileTestState.drag={startX:event.clientX,startY:event.clientY,x:rect.left-surface.left,y:rect.top-surface.top};
+        },
+        move(event){
+            const drag=arenaMobileTestState.drag,{maxX,maxY}=arenaMobileTestLimits(drawer);
+            const x=Math.min(maxX,Math.max(6,drag.x+event.clientX-drag.startX));
+            const y=Math.min(maxY,Math.max(6,drag.y+event.clientY-drag.startY));
+            arenaMobileSetTestPosition(drawer,x,y);
+            arenaMobileTestState.position={x:maxX>6?(x-6)/(maxX-6):0,y:maxY>6?(y-6)/(maxY-6):0};
+        },
+        end(){arenaMobileTestState.drag=null;arenaMobileSaveTestPrefs();}
     });
-    head.addEventListener('pointermove',event=>{
-        const drag=arenaMobileTestState.drag;
-        if(!drag||drag.id!==event.pointerId)return;
-        const {maxX,maxY}=arenaMobileTestLimits(drawer);
-        const x=Math.min(maxX,Math.max(6,drag.x+event.clientX-drag.startX));
-        const y=Math.min(maxY,Math.max(6,drag.y+event.clientY-drag.startY));
-        drawer.classList.add('is-positioned');
-        drawer.style.setProperty('--arena-tests-x',Math.round(x)+'px');
-        drawer.style.setProperty('--arena-tests-y',Math.round(y)+'px');
-        arenaMobileTestState.position={x:maxX>6?(x-6)/(maxX-6):0,y:maxY>6?(y-6)/(maxY-6):0};
-        event.preventDefault();
-    });
-    const finish=event=>{
-        if(!arenaMobileTestState.drag||arenaMobileTestState.drag.id!==event.pointerId)return;
-        arenaMobileTestState.drag=null;
-        head.classList.remove('is-dragging');
-        arenaMobileSaveTestPrefs();
-    };
-    head.addEventListener('pointerup',finish);
-    head.addEventListener('pointercancel',finish);
-    head.addEventListener('lostpointercapture',finish);
     drawer.querySelector('#arenaPortableTestTransparency').addEventListener('input',event=>{
         arenaMobileTestState.transparency=Math.min(100,Math.max(0,Number(event.target.value)||0));
         arenaMobileApplyTestOpacity();
@@ -279,13 +285,15 @@ function arenaMobileTestPanel(){
     return document.getElementById(arenaMobileTestState.active);
 }
 function arenaMobileKeepStreamerSkillsVisible(){
-    if(arenaPortableProfile.mode!==ARENA_MOBILE_MODES.DIRECTOR)return;
-    const shelf=document.getElementById('arenaMobileControlShelf');
     const skills=document.getElementById('arenaStreamerSkillsDock');
-    if(!shelf||!skills)return;
-    // Do not clone or rebuild the five buttons: move the original node only.
-    if(skills.parentElement!==shelf)shelf.appendChild(skills);
-    skills.hidden=false;
+    if(!skills)return;
+    // Move the same original five skill buttons to their independent physical-bottom layer.
+    const fullscreen=document.fullscreenElement;
+    const host=fullscreen?.matches?.('#card-9x16,#card-16x9')?fullscreen:
+        document.documentElement.classList.contains('arena-mobile-theater')
+            ?document.getElementById(monitorFocus==='16:9'?'card-16x9':'card-9x16'):document.body;
+    if(host&&skills.parentElement!==host)host.appendChild(skills);
+    skills.hidden=arenaPortableProfile.mode!==ARENA_MOBILE_MODES.DIRECTOR;
 }
 function arenaMobilePositionTestDrawer(){
     const drawer=document.getElementById('arenaPortableTestDrawer');
@@ -513,6 +521,32 @@ function arenaMobileResetButtons(){
     arenaMobileSaveLayout();arenaMobileApplyLayout();
     requestAnimationFrame(arenaPortableFitMobileStage);
 }
+function arenaMobileInstallSettingsDragging(){
+    const pane=document.querySelector('#settingsPauseModal>div'),head=pane?.firstElementChild;
+    if(!head)return;
+    let origin=null,position={x:0,y:0};
+    arenaMobileBindPanelDrag(head,{
+        start(event){origin={x:event.clientX,y:event.clientY,px:position.x,py:position.y};},
+        move(event){
+            const rect=pane.getBoundingClientRect(),surface=arenaMobileTestSurface();
+            const x=origin.px+event.clientX-origin.x,y=origin.py+event.clientY-origin.y;
+            const minX=position.x+surface.left+8-rect.left;
+            const maxX=position.x+surface.left+surface.width-8-rect.right;
+            const minY=position.y+surface.top+54-rect.top;
+            const maxY=position.y+surface.top+surface.height-8-rect.bottom;
+            position={x:Math.round(Math.max(minX,Math.min(maxX,x))),
+                y:Math.round(Math.max(minY,Math.min(maxY,y)))};
+            pane.style.setProperty('--arena-settings-x',position.x+'px');
+            pane.style.setProperty('--arena-settings-y',position.y+'px');
+        },
+        end(){origin=null;}
+    });
+    window.addEventListener('resize',()=>{
+        position={x:0,y:0};
+        pane.style.removeProperty('--arena-settings-x');
+        pane.style.removeProperty('--arena-settings-y');
+    });
+}
 function arenaMobileInstallLayoutSettings(){
     const sections=[...document.querySelectorAll('#settingsGeneralPanel>.arena-settings-section')];
     const section=sections.find(section=>section.dataset.settingsCategory==='controls');
@@ -539,6 +573,7 @@ function arenaMobileInstallLayoutSettings(){
     control.querySelector('#arenaMobileArrange').onclick=()=>arenaMobileEditButtons(true);
     control.querySelector('#arenaMobileSize').oninput=e=>arenaMobileSetButtonSize(e.target.value);
     control.querySelector('#arenaMobileReset').onclick=arenaMobileResetButtons;
+    arenaMobileInstallSettingsDragging();
 }
 function arenaMobileSetTouchMode(mode){
     if(!['joystick','touch'].includes(mode))return false;
