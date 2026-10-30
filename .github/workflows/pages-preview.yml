@@ -1,0 +1,56 @@
+name: Arena Live · Web prerelease (mobile + desktop)
+
+on:
+  push:
+    branches: [main]
+  public:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arena-live-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout application sources
+        uses: actions/checkout@v6
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: npm-shrinkwrap.json
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Build and verify device-aware preview
+        run: npm run test:preview
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload static site only (no Node bridge)
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist/arena-preview
+
+  deploy:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish prerelease to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
