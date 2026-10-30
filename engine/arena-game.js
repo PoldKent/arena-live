@@ -1072,7 +1072,7 @@
         let rejoinRuleMode = 'free'; // Default: free-to-join; alternatives are '3_lives' and 'timed'.
         let MAX_OPPORTUNITIES = 1; // Smash-style lives are separate from HP; the default is one life.
         let totalParticipants = 0; // Actual number of registered fighter bodies, capped at 128.
-        let gamePace = 0.5;        // Default slow combat; operator can select a faster pace.
+        let gamePace = 0.75;       // Tactical default; the 0.5x option remains available.
         let slowMoFactor = 1.0;    // Drops to 0.22 during final K.O. sequence
         let koSequenceActive = false;
 
@@ -1263,7 +1263,7 @@
         function resetArenaCombatRules(){
             const previous=arenaCombatRules;arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};
             try{localStorage.removeItem(ARENA_COMBAT_RULES_KEY);}catch(_){}
-            setGamePace(0.5);
+            setGamePace(0.75);
             applyArenaCombatRuleEffects(previous);
         }
         const ARENA_COMBAT_RULE_COPY = Object.freeze({
