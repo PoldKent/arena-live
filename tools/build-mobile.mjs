@@ -104,7 +104,10 @@ export async function buildMobile(output) {
         path,createHash('sha1').update('blob '+Buffer.byteLength(source)+'\0').update(source).digest('hex')
     ]));
     const build={version,edition:'mobile-offline',sourceBlobs};
-    let html=files.get('index.html');
+    // Remove only non-license comments from the original inline CSS for distribution.
+    // Keep all source CSS and the generated selectors unchanged.
+    let html=files.get('index.html').replace(/(<style\b[^>]*>)([\s\S]*?)(<\/style>)/gi,
+        (_,start,css,end)=>start+css.replace(/\/\*(?!\!)[\s\S]*?\*\//g,'')+end);
     html=replaceOnce(html,'width=device-width, initial-scale=1.0','width=device-width, initial-scale=1.0, viewport-fit=cover');
     html=replaceOnce(html,/<title>[^<]+<\/title>/.exec(html)[0],`<title>Arena Live v${version} · Móvil</title>`);
     html=replaceOnce(html,'<link rel="stylesheet" href="styles/arena-ui.css?v='+version.split('.').slice(0,2).join('.')+'">',

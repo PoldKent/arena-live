@@ -31,6 +31,10 @@ test('current release is under 500 KB, fully offline and decompresses losslessly
         assert.match(html,/No mostrar de nuevo/);
         assert.match(html,/id="arenaPortableFullscreen"/);
         assert.match(html,/arenaMobileShowTestDrawer/);
+        assert.match(wrapped,/DOMContentLoaded",startArena/,'standalone document replacement begins after the wrapper finishes parsing');
+        assert.match(html,/function arenaMobileInstallSettingsDragging/,'settings panel shares the existing drag controller');
+        assert.match(html,/data-mobile-phase="COMBAT"/,'lobby hides only the player touch controls');
+        assert.match(html,/#arenaStreamerSkillsDock\{position:fixed!important/,'skills are pinned to their own physical screen layer');
         assert.match(html,/button\.textContent='×'/,'menu must use the standard close icon');
         assert.match(html,/#arenaTopBarInner\{[^}]*flex-direction:row!important/,'all top controls must remain in one banner row');
         assert.match(html,/#arenaMobileFloating\{[^}]*background:transparent!important;border:0!important/,'the top toolbar frame must be removed');

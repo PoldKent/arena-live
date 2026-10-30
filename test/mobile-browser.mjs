@@ -179,6 +179,8 @@ try{
                 })};
         });
         assert.deepEqual(fit,{scrollFits:true,sheetFits:true,fieldsFit:true});
+        const radios=await page.locator('#arenaMobileTouchModeOptions input[type="radio"]').evaluateAll(nodes=>nodes.map(n=>n.getBoundingClientRect().width));
+        assert.ok(radios.length===2&&radios.every(w=>w>=15&&w<=24),JSON.stringify(radios));
 
         assert.equal(await page.locator('#arenaMaxPlayers').count(),1);
         assert.ok(await page.locator('#arenaBalanceRadar').count());
@@ -384,17 +386,17 @@ try{
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),false);
         assert.equal(await page.locator('#arenaStreamerSkillsDock').isVisible(),true);
         const bar=await page.locator('#arenaStreamerSkillsDock').boundingBox();
-        const view=await page.locator('#viewport9x16').boundingBox();
-        assert.ok(bar.y>=view.y+view.height-1&&bar.height<80);
+        assert.ok(bar.y>=page.viewportSize().height-95&&bar.y+bar.height<=page.viewportSize().height+1&&bar.height<80);
         assert.equal(await page.locator('#arenaStreamerSkillsDock .arena-skill-buttons>button').count(),5);
         assert.equal(await page.locator('#arenaMobileJump').isVisible(),false);
         assert.equal(await page.locator('#arenaMobilePause').isVisible(),true);
+        assert.equal(await page.locator('#arenaStreamerSkillsDock').evaluate(n=>n.parentElement===document.body),true);
         await page.evaluate(()=>ArenaPortable.setMode('player'));
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),false);
         assert.equal(await page.locator('#arenaMobilePower').isVisible(),true);
         assert.equal(await page.evaluate(()=>streamerManualControl),true);
     });
-    await check('compact Streamer tests sit below the 9:16 frame and retain the original commands',async()=>{
+    await check('movable Streamer tests stay above the fixed bottom abilities without shrinking 9:16',async()=>{
         await page.evaluate(()=>{ArenaPortable.setMode('director');ArenaMobileTouch.openTests(false);});
         assert.equal(await page.locator('#arenaMobileTestsShortcut').isVisible(),true);
         const before=await page.evaluate(()=>{
@@ -637,7 +639,7 @@ try{
         assert.equal(await page.locator('#arenaStreamerSkillsDock').isVisible(),true);
         assert.equal(await page.locator('#arenaStreamerSkillsDock .arena-skill-buttons>button').count(),5);
         assert.equal(await page.locator('#arenaStreamerSkillsDock .arena-skill-buttons>button').first().isVisible(),true);
-        assert.equal(await page.locator('#arenaMobileControlShelf').isVisible(),true);
+        assert.equal(await page.locator('#arenaStreamerSkillsDock').isVisible(),true);
         const geometry=await page.evaluate(()=>{
             const v=document.getElementById('viewport9x16').getBoundingClientRect();
             const skills=document.getElementById('arenaStreamerSkillsDock').getBoundingClientRect();
