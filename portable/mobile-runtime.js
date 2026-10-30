@@ -70,6 +70,7 @@ function arenaPortableSetMode(mode,{remember=true,updateGame=true}={}){
     }
     if(previous!==mode)document.dispatchEvent(new Event('arena-touch-disable'));
     arenaPortableProfile={...arenaPortableProfile,mode,join:mode===ARENA_MOBILE_MODES.PLAYER};
+    if(typeof arenaMobileSwitchLayout==='function')arenaMobileSwitchLayout();
     if(remember)arenaPortableRemember();
     if(updateGame&&!arenaPortableSetupOpen){
         if(mode===ARENA_MOBILE_MODES.PLAYER){
