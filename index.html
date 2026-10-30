@@ -1850,8 +1850,8 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
                     <div id="arenaPaceSettingsGroup" class="flex flex-col gap-1.5">
                         <span class="text-[11px] font-semibold text-slate-300">Velocidad de pelea (independiente de Prota):</span>
                         <div class="arena-pace-options grid grid-cols-2 sm:grid-cols-4 gap-2">
-                            <button type="button" id="paceBtn-0.5" aria-pressed="true" onclick="setGamePace(0.5)" class="pace-btn px-2.5 py-2 rounded-xl text-xs font-bold transition-all bg-amber-950/80 text-amber-200 border border-amber-400 text-center">🐌 0.5× Muy lento</button>
-                            <button id="paceBtn-0.75" type="button" aria-pressed="false" onclick="setGamePace(0.75)" class="pace-btn px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-950 border border-slate-800 text-slate-300 hover:text-white transition-all text-center">
+                            <button type="button" id="paceBtn-0.5" aria-pressed="false" onclick="setGamePace(0.5)" class="pace-btn px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-950 border border-slate-800 text-slate-300 text-center">🐌 0.5× Muy lento</button>
+                            <button id="paceBtn-0.75" type="button" aria-pressed="true" onclick="setGamePace(0.75)" class="pace-btn px-2.5 py-2 rounded-xl text-xs font-bold transition-all bg-amber-950/80 text-amber-200 border border-amber-400 text-center">
                                 🐢 0.75x Táctico
                             </button>
                             <button id="paceBtn-1" type="button" aria-pressed="false" onclick="setGamePace(1.0)" class="pace-btn px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-950 border border-slate-800 text-slate-300 text-center">
