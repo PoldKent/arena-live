@@ -179,6 +179,7 @@ try{
                 })};
         });
         assert.deepEqual(fit,{scrollFits:true,sheetFits:true,fieldsFit:true});
+        await page.locator('[data-settings-tab="controls"]').tap();
         const radios=await page.locator('#arenaMobileTouchModeOptions input[type="radio"]').evaluateAll(nodes=>nodes.map(n=>n.getBoundingClientRect().width));
         assert.ok(radios.length===2&&radios.every(w=>w>=15&&w<=24),JSON.stringify(radios));
 
