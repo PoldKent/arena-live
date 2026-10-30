@@ -1940,15 +1940,15 @@
                 updateCombatTimerDisplay();
             }
             const configs = [
-                ['3_lives', 'ruleBtn-3_lives', 'lobbyRuleBtn16_3lives', 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20', 'border-amber-400 bg-amber-500/20 text-amber-200'],
-                ['timed', 'ruleBtn-timed', 'lobbyRuleBtn16_timed', 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20', 'border-cyan-400 bg-cyan-500/20 text-cyan-200'],
-                ['free', 'ruleBtn-free', 'lobbyRuleBtn16_free', 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20', 'border-emerald-400 bg-emerald-500/20 text-emerald-200']
+                ['3_lives', 'ruleBtn-3_lives', 'lobbyRuleBtn16_3lives', 'bg-amber-950/80 text-amber-200 border border-amber-400 shadow-md shadow-amber-500/20', 'border-amber-400 bg-amber-500/20 text-amber-200'],
+                ['timed', 'ruleBtn-timed', 'lobbyRuleBtn16_timed', 'bg-amber-950/80 text-amber-200 border border-amber-400 shadow-md shadow-amber-500/20', 'border-cyan-400 bg-cyan-500/20 text-cyan-200'],
+                ['free', 'ruleBtn-free', 'lobbyRuleBtn16_free', 'bg-amber-950/80 text-amber-200 border border-amber-400 shadow-md shadow-amber-500/20', 'border-emerald-400 bg-emerald-500/20 text-emerald-200']
             ];
             configs.forEach(([key, settingsId, lobbyId, activeTone, lobbyActiveTone]) => {
                 const settingsBtn = document.getElementById(settingsId);
                 const lobbyBtn = document.getElementById(lobbyId);
                 const active = rejoinRuleMode === key;
-                if (settingsBtn) settingsBtn.className = `px-3 py-2.5 rounded-xl text-xs ${active ? 'font-extrabold' : 'font-semibold'} transition-all ${active ? activeTone : 'bg-slate-950 border border-slate-800 text-slate-300 hover:text-white'} flex flex-col items-start gap-0.5 text-left`;
+                if (settingsBtn) {settingsBtn.className = `px-3 py-2.5 rounded-xl text-xs ${active ? 'font-extrabold' : 'font-semibold'} transition-all ${active ? activeTone : 'bg-slate-950 border border-slate-800 text-slate-300 hover:text-white'} flex flex-col items-start gap-0.5 text-left`;settingsBtn.setAttribute('aria-pressed',String(active));}
                 if (lobbyBtn) lobbyBtn.className = `px-2.5 py-0.5 rounded-lg text-[10px] ${active ? 'font-extrabold' : 'font-bold'} border transition-all ${active ? lobbyActiveTone : 'border-slate-700 bg-slate-900/80 text-slate-400 hover:text-white'}`;
             });
 
@@ -6269,6 +6269,14 @@
                 btn.className = 'px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1.5 bg-slate-800 text-slate-400 border border-slate-700 transition-all';
                 dot.className = 'w-2 h-2 rounded-full bg-slate-500';
                 label.textContent = 'Auto-Audiencia: OFF';
+            }
+            const settingsBtn = document.getElementById('btnAutoChatSettings');
+            if (settingsBtn) {
+                settingsBtn.textContent = autoChatEnabled ? '🤖 Audiencia automática: ACTIVADA' : '🤖 Audiencia automática: DESACTIVADA';
+                settingsBtn.setAttribute('aria-pressed',String(autoChatEnabled));
+                settingsBtn.className = autoChatEnabled
+                    ? 'rounded-lg border border-amber-400 bg-amber-950/80 px-3 py-2 text-[11px] font-bold text-amber-200'
+                    : 'rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-[11px] font-bold text-slate-300';
             }
             const quickBtn = document.getElementById('btnQuickAutoChat');
             if (quickBtn) {
