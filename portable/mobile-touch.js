@@ -464,12 +464,12 @@ function arenaMobileSaveLayout(){
 }
 function arenaMobileSkillIcon(){
     const actor=arenaMobileActor();
-    const cls=String(actor?.classType??actor?.classId??actor?.className??actor?.class??'').toLowerCase();
+    const cls=String(actor?.archetypeKey??'').toLowerCase();
     if(/shinobi|ninja/.test(cls))return ['🌀','Rasen'];
     if(/titan|coloso/.test(cls))return ['🛡️','Coloso'];
     if(/rayo|trueno/.test(cls))return ['⚡','Trueno'];
     if(/espirit|spirit/.test(cls))return ['🌿','Enred'];
-    if(/guerrero|warrior/.test(cls))return ['🔥','Kame'];
+    if(/kame|guerrero|warrior/.test(cls))return ['🔥','Kame'];
     return ['✦','Habilidad especial'];
 }
 function arenaMobileRefreshSkillIcon(){
