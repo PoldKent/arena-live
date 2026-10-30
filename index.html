@@ -964,12 +964,20 @@ body>header {position:relative!important;flex:none;padding:7px 10px!important;ba
 #arenaDesktopQuickPanel #arenaProtaClassToolbar{display:grid;gap:7px;padding:8px;min-width:0}
 #arenaDesktopQuickPanel #arenaProtaClassToolbar select{width:100%;min-width:0;min-height:40px;border:1px solid #46677e;border-radius:8px;background:#0e1e2e;color:#eaffff;padding:6px 9px}
 @media(min-width:768px){
- #arenaHeaderActions .arena-desktop-quick,#arenaHeaderActions #btnFullscreenDual{display:grid!important;place-items:center!important;flex:0 0 35px!important;width:35px!important;height:35px!important;min-width:35px!important;min-height:35px!important;padding:0!important;border:1px solid #5c91ae!important;border-radius:50%!important;background:#163448!important;color:#eaffff!important;font:750 19px/1 system-ui,sans-serif!important}
- #arenaHeaderActions .arena-desktop-quick[aria-expanded="true"],#arenaHeaderActions #btnFullscreenDual[aria-pressed="true"]{border-color:#fbbf24!important;background:#3b2b13!important;color:#fde68a!important}
+ #arenaHeaderActions .arena-desktop-quick,#arenaHeaderActions #btnFullscreenDual,#arenaHeaderActions #arenaDualPauseBtn,#arenaHeaderActions #arenaDualSettingsBtn,#arenaHeaderActions #arenaDualTestsToggle,#arenaHeaderActions #arenaFullscreenMenuBtn,#arenaHeaderActions #arenaViewMenuBtn,#arenaHeaderActions #arenaDualChatToggleBtn{display:grid!important;place-items:center!important;flex:0 0 35px!important;width:35px!important;height:35px!important;min-width:35px!important;min-height:35px!important;padding:0!important;border:1px solid #5c91ae!important;border-radius:50%!important;background:#163448!important;color:#eaffff!important;font:750 19px/1 system-ui,sans-serif!important}
+ #arenaHeaderActions .arena-desktop-quick[aria-expanded="true"],#arenaHeaderActions #btnFullscreenDual[aria-pressed="true"],#arenaHeaderActions #arenaDualPauseBtn[aria-pressed="true"],#arenaHeaderActions #arenaDualSettingsBtn[aria-expanded="true"],#arenaHeaderActions #arenaDualTestsToggle[aria-expanded="true"],#arenaHeaderActions #arenaFullscreenMenuBtn[aria-expanded="true"],#arenaHeaderActions #arenaViewMenuBtn[aria-expanded="true"],#arenaHeaderActions #arenaDualChatToggleBtn[aria-expanded="true"]{border-color:#fbbf24!important;background:#3b2b13!important;color:#fde68a!important}
  #arenaHeaderActions #arenaDesktopMatchBtn{order:-5}
  #arenaHeaderActions #arenaDesktopProtaBtn{order:-4}
  #arenaHeaderActions #arenaDualFullscreenEntryLabel{font-size:0!important}
  #arenaHeaderActions #arenaDualFullscreenEntryLabel::before{content:"🎛";font:750 19px/1 system-ui,sans-serif!important}
+ #arenaHeaderActions #arenaDualPauseBtn,#arenaHeaderActions #arenaDualSettingsBtn,#arenaHeaderActions #arenaDualTestsToggle,#arenaHeaderActions #arenaFullscreenMenuBtn,#arenaHeaderActions #arenaViewMenuBtn,#arenaHeaderActions #arenaDualChatToggleBtn{font-size:0!important}
+ #arenaHeaderActions #arenaDualPauseBtn::before{content:"⏸";font:750 19px/1 system-ui,sans-serif}
+ #arenaHeaderActions #arenaDualPauseBtn[aria-pressed="true"]::before{content:"▶"}
+ #arenaHeaderActions #arenaDualSettingsBtn::before{content:"⚙️";font:750 19px/1 system-ui,sans-serif}
+ #arenaHeaderActions #arenaDualTestsToggle::before{content:"🧪";font:750 19px/1 system-ui,sans-serif}
+ #arenaHeaderActions #arenaFullscreenMenuBtn::before{content:"⛶";font:750 19px/1 system-ui,sans-serif}
+ #arenaHeaderActions #arenaViewMenuBtn::before{content:"🖥";font:750 19px/1 system-ui,sans-serif}
+ #arenaHeaderActions #arenaDualChatToggleBtn::before{content:"💬";font:750 19px/1 system-ui,sans-serif}
 }
 @media(max-width:767px){#arenaDesktopQuickPanel,#arenaHeaderActions .arena-desktop-quick{display:none!important}}
 html.arena-mobile-offline #arenaDesktopQuickPanel,html.arena-mobile-offline #arenaHeaderActions .arena-desktop-quick{display:none!important}
