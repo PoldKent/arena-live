@@ -31,7 +31,7 @@ Inventario directo del árbol de GitHub en `main`: **164 archivos** y **3.232.50
 | `test/*.test.mjs` | Contratos Node de UI, física, entradas y reglas | Ejecutar localmente cuando haya Node |
 | `test/*browser.mjs` | Navegador PC, móvil, rendimiento y 128 luchadores | No ejecutados en Actions por presupuesto |
 | `docs/` | Registro de decisiones, histórico de releases y métricas | Preservar como evidencia; identificar documentos obsoletos |
-| `mobile-builds/` | HTML móvil 0.40.6 previamente publicado | No confundir con la fuente 0.40.7 |
+| `mobile-builds/` | HTML móvil 0.40.7 publicado desde el motor compartido | Fuente y distribución alineadas; Android físico pendiente |
 
 ## Hallazgos y depuración aplicada
 
@@ -41,7 +41,7 @@ Inventario directo del árbol de GitHub en `main`: **164 archivos** y **3.232.50
 4. **Baja — clasificación de resultados.** `ArenaCore.result` buscaba duplicados mediante `order.some(...)` sobre el podio en construcción. Usar `Set` evita escaneo O(n²) con hasta 128 luchadores, sin cambiar el orden ni las estadísticas.
 5. **Alta — pruebas no ejecutadas.** Actions falló antes del primer paso; el presupuesto de Actions es 0 USD y figura como «Usage blocked». No significa que la suite haya pasado o fallado. No cambiar facturación sin autorización.
 6. **Media — monolito de combate y pruebas de rendimiento.** `arena-game.js` concentra física/IA, HUD, idiomas y sesión. Dividirlo sin línea base de navegador es riesgoso. Priorizar extracción gradual **solo** tras ejecutar suite local y medir 128 luchadores.
-7. **Media — entrega móvil desfasada.** Solo se rastrea `mobile-builds/Arena-Live-v0.40.6-movil.html`. La fuente 0.40.7 genera un archivo en `dist/` (ignorado por Git); no publicar una descarga nueva sin construir y probar.
+7. **Media — entrega móvil desfasada.** La exportación móvil v0.40.7 está publicada con manifiesto de blobs y verificación de descompresión LZW sin pérdida. Queda pendiente probarla en Android físico.
 
 ## Invariantes antes de futuros cambios
 

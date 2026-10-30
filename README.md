@@ -2,7 +2,7 @@
 
 **Juego de combate para PC, OBS y teléfono, con una única simulación y un motor compartido.** La aplicación de escritorio ofrece dos capturas sincronizadas (**16:9** y **9:16**) y un puente local para TikTok LIVE. El móvil autónomo es un HTML empaquetado desde ese mismo código, con controles táctiles y simulación local, **sin conexión LIVE directa**.
 
-> **Estado de la entrega (29/10/2026):** el código fuente y el paquete tienen versión **0.40.7**. El único archivo móvil autónomo rastreado actualmente es la [exportación anterior 0.40.6](mobile-builds/Arena-Live-v0.40.6-movil.html). Para obtener **0.40.7**, ejecuta el generador indicado abajo: no se ha publicado todavía una exportación comprobada para Android de esa versión. El repositorio utiliza únicamente la rama `main`.
+> **Estado de la entrega (29/10/2026):** fuentes y exportación autónoma **v0.40.7**. La [versión móvil oficial](mobile-builds/Arena-Live-v0.40.7-movil.html) se generó desde el mismo motor de PC/OBS, sin red. Pendiente validación en un Android físico. Solo existe la rama `main`.
 
 ## Empezar en PC (Windows / PowerShell)
 

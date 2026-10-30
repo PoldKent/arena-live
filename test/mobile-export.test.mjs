@@ -31,6 +31,10 @@ test('current release is under 500 KB, fully offline and decompresses losslessly
         assert.match(html,/No mostrar de nuevo/);
         assert.match(html,/id="arenaPortableFullscreen"/);
         assert.match(html,/arenaMobileShowTestDrawer/);
+        assert.match(html,/button\.textContent='×'/,'menu must use the standard close icon');
+        assert.match(html,/#arenaTopBarInner\{[^}]*flex-direction:row!important/,'all top controls must remain in one banner row');
+        assert.match(html,/#arenaMobileFloating\{[^}]*background:transparent!important;border:0!important/,'the top toolbar frame must be removed');
+        assert.match(html,/html:not\(\.arena-mobile-offline\) #card-9x16:fullscreen \.arena-fullscreen-exit-button/,'no duplicate mobile fullscreen exit icon');
         assert.match(html,/arenaPortableTestTransparency/);
         assert.match(html,/Modo Streamer/);
         assert.match(html,/Modo jugador/);

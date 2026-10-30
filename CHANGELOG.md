@@ -1,3 +1,11 @@
+## Ajustes de interfaz móvil v0.40.7 — 29/10/2026
+
+- Los botones superiores originales, incluida la pausa, se integran en el banner «ARENA LIVE»; eliminadas las antiguas reglas de posición y el marco visual adicional.
+- El botón X del menú usa el símbolo estándar `×` de los demás cierres, preservando su ID y sus eventos.
+- El botón de salir de pantalla completa situado sobre la arena se oculta únicamente en móvil; PC y OBS mantienen esa función.
+- La arena 9:16 conserva su tamaño máximo y el joystick, las tres acciones y el editor Ajustes → Controles mantienen su capa y posiciones.
+- El empaquetador elimina solo comentarios CSS de la versión distribuida sin alterar las reglas ni las fuentes. HTML autónomo v0.40.7 publicado y verificado mediante compresión/descompresión sin pérdida; prueba Android pendiente.
+
 ## Mantenimiento de v0.40.7 — auditoría de código y documentación (2026-10-29)
 
 - README principal reorganizado por producto, arranque, arquitectura, pruebas y riesgos. Corregida la confusión entre la fuente 0.40.7 y el único HTML móvil rastreado, que continúa siendo 0.40.6.
