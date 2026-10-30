@@ -58,6 +58,7 @@ test('simultaneous mutual basics clash with no mutual damage and both recoil',()
       applyDamage:(target,amount,attacker)=>damage.push([attacker.id,target.id,amount]),
       spawnFloatingText:()=>{},playSound:()=>{}});
     vm.runInContext(sourceFunction('resolveMeleeAttacks'),ctx);
+    ctx.resolveMeleeAttacks(); // Define then actually invoke the isolated combat function.
     assert.deepEqual(damage,[['c','a',12]]);
     assert.ok(a.vx<0&&b.vx>0);
     assert.equal(ctx.pendingMeleeAttacks.length,0);
