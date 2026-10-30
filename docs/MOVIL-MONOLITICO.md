@@ -9,7 +9,7 @@ El **móvil offline** es un archivo HTML compilado desde `main`: no es una segun
 - **Para regenerar la versión 0.40.8:** ejecuta `npm.cmd run build:mobile` y comprueba `dist/Arena-Live-v0.40.8-movil.html`.
 - `npm.cmd start` o `npm.cmd run dev` también compilan el móvil durante el paso `prestart`/`predev` y lo muestran en http://127.0.0.1:4173/mobile.
 
-La generación utiliza `index.html`, `styles/arena-ui.css`, los seis scripts `engine/` y `portable/mobile-*`. Incluye los scripts y CSS completos; no descarga paquetes externos. Cada compilación añade información de los archivos fuente para identificarla. El exportador exige **500.000 bytes como máximo** y verifica la descompresión sin pérdida. **El límite es un contrato del generador, no una validación actual de todos los teléfonos.**
+La generación utiliza `index.html`, `styles/arena-ui.css`, los seis scripts `engine/` y `portable/mobile-*`. Incluye los scripts y CSS completos; no descarga paquetes externos. Cada compilación añade información de los archivos fuente para identificarla. El exportador exige **750.000 bytes como máximo** y verifica la descompresión sin pérdida. **El límite es un contrato del generador, no una validación actual de todos los teléfonos.**
 
 ## Abrir en Android
 
