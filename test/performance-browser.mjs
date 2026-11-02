@@ -11,7 +11,7 @@ const sources = [['current', current]];
 if (process.env.ARENA_PERF_BASELINE) sources.unshift(['baseline', await readFile(process.env.ARENA_PERF_BASELINE, 'utf8')]);
 const css = process.env.ARENA_TEST_CSS ? await readFile(process.env.ARENA_TEST_CSS, 'utf8') : null;
 const localStyles = await readFile(new URL('../styles/arena-ui.css', import.meta.url));
-const engineAssets=new Map(await Promise.all(['core','render','audio','settings','balance-evidence'].map(async name=>['/engine/arena-'+name+'.js',await readFile(new URL('../engine/arena-'+name+'.js',import.meta.url))])));
+const engineAssets=new Map(await Promise.all(['core','render','audio','settings','balance-evidence','game'].map(async name=>['/engine/arena-'+name+'.js',await readFile(new URL('../engine/arena-'+name+'.js',import.meta.url))])));
 // A saved baseline must load its own referenced modules. Mixing an old HTML
 // with current settings/core can break startup or invalidate a combat comparison.
 const baselineAssets=new Map();
@@ -20,7 +20,7 @@ if(process.env.ARENA_PERF_BASELINE)for(const match of sources[0][1].matchAll(/sr
 }
 const server = createServer((req, res) => {
   const requestUrl=new URL(req.url,'http://localhost'),assetPath=requestUrl.pathname;
-  if(/^\/engine\/arena-(core|render|audio|settings|balance-evidence)\.js$/.test(assetPath)){res.writeHead(200,{'content-type':'text/javascript'});res.end((requestUrl.searchParams.get('arenaPerfSource')==='baseline'?baselineAssets:engineAssets).get(assetPath));return;}
+  if(/^\/engine\/arena-(core|render|audio|settings|balance-evidence|game)\.js$/.test(assetPath)){res.writeHead(200,{'content-type':'text/javascript'});res.end((requestUrl.searchParams.get('arenaPerfSource')==='baseline'?baselineAssets:engineAssets).get(assetPath));return;}
   if (new URL(req.url, 'http://localhost').pathname === '/styles/arena-ui.css') {
     res.writeHead(200, {'content-type':'text/css; charset=utf-8'}); res.end(localStyles); return;
   }
@@ -299,6 +299,9 @@ try {
       await page.evaluate(()=>setArenaCombatRule('knockback',1));
       await check('128-player scenario also loads during combat; mode transitions and capacity remain correct', async () => {
         const result = await page.evaluate(() => {
+          // Previous stress probes may finish a round. Begin a fresh valid round
+          // rather than asking a locked winner screen to accept new entrants.
+          openLobby(true);
           applyPlayerCountPreset(8); const smash = [fighters.length, activeMode];
           applyPlayerCountPreset(128); const arena = [fighters.length, activeMode];
           setArenaCombatRule('maxPlayers', 32); applyPlayerCountPreset(128);
@@ -481,8 +484,10 @@ try {
   assert.deepEqual(errors, []);
   const sourceHashes = sources.map(([source, content]) => {
     const bytes = Buffer.from(content);
-    return { source, version: content.match(/version: '([\d.]+)'/)?.[1],
-      gitBlob: createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex') };
+    const assets=source==='baseline'?baselineAssets:engineAssets;
+    return { source, version: content.match(/version: '([\d.]+)'/)?.[1]||assets.get('/engine/arena-game.js')?.toString().match(/version: '([\d.]+)'/)?.[1],
+      gitBlob: createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex'),
+      modules:Object.fromEntries([...assets].map(([path,data])=>[path,createHash('sha1').update('blob '+data.length+'\0').update(data).digest('hex')])) };
   });
   const report = { passed: checks.length, errors: errors.length, checks, measurements, burstMeasurements,qualityMeasurements, sourceHashes,
     environment: { node: process.version, browser: await browser.version(),

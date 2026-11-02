@@ -2336,6 +2336,10 @@
         function applyPlayerCountPreset(targetCount) {
             // Simulator presets use curated names and can never create a 129th body.
             targetCount = Math.max(0, Math.min(getArenaPlayerLimit(), Math.trunc(Number(targetCount) || 0)));
+            const resumeCombat=gameState==='COMBAT';
+            // Loading a scenario replaces the roster explicitly. Populate its lobby
+            // before restoring combat, independently of the old duel admission lock.
+            gameState='LOBBY';
             arenaRoundRevision++;
             arenaRoundClockTicks=0;arenaAudienceQueue.length=0;arenaNextQueueTick=arenaSimulationTick;
             koSequenceActive = false;
@@ -2357,6 +2361,7 @@
                 }
             });
 
+            if(resumeCombat)gameState='COMBAT';
             if (gameState === 'COMBAT') {
                 // Re-space fighters cleanly for the new automatic mode
                 const groundY = WORLD_H * 0.79;
@@ -5178,6 +5183,7 @@
             const canAct=streamerManualControl&&gameState==='COMBAT'&&aliveProtagonist&&!isGamePaused&&!isSettingsOpen;
             const editing=document.documentElement.classList.contains('arena-mobile-edit-controls');
             for(const id of ['arenaMobileJump','arenaMobileAttack','arenaMobilePower']){const button=document.getElementById(id);if(button)button.disabled=!editing&&(!canAct||(id==='arenaMobilePower'&&!arenaClassPowersAllowed()));}
+            if(typeof arenaMobileRefreshSkillIcon==='function')arenaMobileRefreshSkillIcon();
             if (wasActive && !active) document.dispatchEvent(new Event('arena-touch-disable'));
         }
 
@@ -6652,7 +6658,7 @@
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.40';
+        const ARENA_RELEASE_VERSION = '0.41';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:0, footer:76, format:'21'});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
@@ -7715,7 +7721,7 @@
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.40.8',
+            version: '0.41.0',
             edition: 'tiktok',
             renderSpriteMode: arenaGpuSpritesEnabled ? 'hardware-candidate' : 'software-safe-vectors',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,
@@ -7776,7 +7782,6 @@
             joinOnTap({ username = '', platformKey = 'tiktok' } = {}) {
                 if (!['LOBBY','COMBAT'].includes(gameState) || koSequenceActive || platformKey !== 'tiktok') return false;
                 if (typeof username !== 'string' || !/^@[a-zA-Z0-9_.-]{1,24}$/.test(username)) return false;
-                if (arenaEntryLocked(false)) return false;
                 const identity = viewerIdentityKey(username, platformKey);
                 const existing = fighters.find(f => viewerIdentityKey(f.name, f.platformKey) === identity);
                 if (existing && !existing.eliminated) {

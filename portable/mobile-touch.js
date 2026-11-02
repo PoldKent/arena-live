@@ -34,6 +34,7 @@ function arenaMobileLoadModeLayout(){
     arenaMobileLayouts.director??=arenaMobileCloneLayout(arenaMobileLayouts.player);
 }
 function arenaMobileSwitchLayout(){
+    if(arenaMobileEditing){arenaMobileEditing=false;document.dispatchEvent(new Event('arena-touch-disable'));}
     if(!arenaMobileLayouts.director)arenaMobileLoadModeLayout();
     arenaMobileLayout=arenaMobileLayouts[arenaMobileModeKey()];
     arenaMobileApplyLayout();
@@ -462,26 +463,49 @@ function arenaMobileSaveLayout(){
         localStorage.setItem(ARENA_MOBILE_LAYOUT_KEY,JSON.stringify(arenaMobileLayouts.player));
     }catch(_){}
 }
+function arenaMobileCopyLayout(){
+    const source=arenaMobileModeKey(),target=source==='player'?'director':'player';
+    const name=target==='player'?'Jugador':'Streamer';
+    if(!window.confirm(arenaMobileText('¿Reemplazar la distribución de '+name+' con la de '+(source==='player'?'Jugador':'Streamer')+'?')))return false;
+    arenaMobileLayouts[target]=arenaMobileCloneLayout();
+    arenaMobileSaveLayout();arenaPortableReport(arenaMobileText('Distribución copiada a '+name+'.'));
+    return true;
+}
 function arenaMobileSkillIcon(){
     const actor=arenaMobileActor();
     const cls=String(actor?.archetypeKey??'').toLowerCase();
     if(/shinobi|ninja/.test(cls))return ['🌀','Rasen'];
     if(/titan|coloso/.test(cls))return ['🛡️','Coloso'];
     if(/rayo|trueno/.test(cls))return ['⚡','Trueno'];
-    if(/espirit|spirit/.test(cls))return ['🌿','Enred'];
+    if(/esmeralda|espirit|spirit/.test(cls))return ['🌿','Enred'];
     if(/kame|guerrero|warrior/.test(cls))return ['🔥','Kame'];
     return ['✦','Habilidad especial'];
 }
 function arenaMobileRefreshSkillIcon(){
     const button=document.getElementById('arenaMobilePower');
     if(!button)return;
-    const [icon,name]=arenaMobileSkillIcon();
+    const [icon,fallbackName]=arenaMobileSkillIcon();
     if(button.dataset.skillIcon!==icon){
         button.textContent=icon;
         button.dataset.skillIcon=icon;
     }
-    button.title=name;
-    button.setAttribute('aria-label',name);
+    const actor=arenaMobileActor(),command=CLASS_COMMANDS[actor?.archetypeKey]?.powers?.[0];
+    const name=command?arenaPowerName(command):fallbackName;
+    const validation=validateArenaSpecialAction(actor,command,'operator');
+    const reason=actor?.castingSkill?'charging':validation.reason||'unavailable';
+    const ready=arenaMobileCanControl()&&validation.allowed;
+    const state=arenaMobileEditing?'editing':ready?'ready':reason;
+    const seconds=state==='cooldown'?Math.ceil(Math.max(0,actor.aiSpecialCooldown)/60):null;
+    const disabled=!arenaMobileEditing&&!ready;
+    if(button.disabled!==disabled)button.disabled=disabled;
+    if(button.dataset.skillState!==state)button.dataset.skillState=state;
+    if(seconds!==null){const remaining=String(seconds)+'s';if(button.dataset.skillRemaining!==remaining)button.dataset.skillRemaining=remaining;}
+    else if(button.dataset.skillRemaining!==undefined)delete button.dataset.skillRemaining;
+    const status=state==='ready'?'✓':state==='editing'?'✥':arenaActionText(['energy','cooldown','charging','paused'].includes(state)?state:'unavailable')+(seconds!==null?' · '+seconds+' s':'');
+    const label=name+' · '+status;
+    if(button.title!==label)button.title=label;
+    if(button.getAttribute('aria-label')!==label)button.setAttribute('aria-label',label);
+    if(button.getAttribute('aria-disabled')!==String(!ready))button.setAttribute('aria-disabled',String(!ready));
 }
 
 function arenaMobileApplyLayout(){
@@ -554,6 +578,8 @@ function arenaMobileApplyLayout(){
     document.documentElement.classList.toggle('arena-mobile-edit-controls',arenaMobileEditing);
     const edit=document.getElementById('arenaMobileEditDone');if(edit)edit.hidden=!arenaMobileEditing;
     const slider=document.getElementById('arenaMobileSize');if(slider)slider.value=String(desiredSize);
+    const copy=document.getElementById('arenaMobileCopyLayout');
+    if(copy)copy.textContent=arenaMobileText('Copiar a '+(arenaMobileModeKey()==='player'?'Streamer':'Jugador')+'…');
     const text=document.getElementById('arenaMobileSizeValue');
     if(text)text.textContent=size===desiredSize?size+' px':size+' px (adaptado; preferencia '+desiredSize+' px)';
 }
@@ -625,6 +651,10 @@ function arenaMobileInstallLayoutSettings(){
     control.querySelector('#arenaMobileArrange').onclick=()=>arenaMobileEditButtons(true);
     control.querySelector('#arenaMobileSize').oninput=e=>arenaMobileSetButtonSize(e.target.value);
     control.querySelector('#arenaMobileReset').onclick=arenaMobileResetButtons;
+    const copy=document.createElement('button');copy.type='button';copy.id='arenaMobileCopyLayout';
+    control.querySelector('#arenaMobileArrangeSettings').appendChild(copy);
+    copy.onclick=arenaMobileCopyLayout;
+    arenaMobileApplyLayout();
     arenaMobileInstallSettingsDragging();
 }
 function arenaMobileSetTouchMode(mode){
@@ -640,7 +670,7 @@ function arenaMobileSyncTouchMode(){
     const mode=arenaPortableProfile.touchMode;
     document.documentElement.dataset.mobileTouchMode=mode;
     document.querySelectorAll('input[name="arenaMobileTouchMode"]').forEach(input=>input.checked=input.value===mode);
-    const advanced=document.getElementById('arenaMobileArrangeSettings');if(advanced)advanced.hidden=mode!=='joystick';
+    const advanced=document.getElementById('arenaMobileArrangeSettings');if(advanced)advanced.hidden=mode!=='joystick'&&arenaMobileModeKey()==='player';
     const help=document.getElementById('arenaMobileTouchHelp');if(help)help.textContent=mode==='touch'?'Táctil total: izquierda para moverte. Derecha: toca para saltar, doble toque para doble salto; desliza en cualquier dirección para golpear, o mantén y apunta arriba/abajo para un especial vertical.':'Joystick: hasta 5 dedos simultáneos. Mueve y apunta con el analógico; pulsa ⚔ o ⚡ mientras apuntas arriba/abajo. Tres botones ajustables sin reducir el escenario.';
     if(typeof arenaMobileApplyLayout==='function')arenaMobileApplyLayout();
 }
@@ -768,6 +798,6 @@ window.ArenaMobileTouch=Object.freeze({
     openTests:arenaMobileShowTestDrawer,selectTest:arenaMobileSelectTestPanel,editButtons:arenaMobileEditButtons,setButtonSize:arenaMobileSetButtonSize,resetButtons:arenaMobileResetButtons,
     setTouchMode:arenaMobileSetTouchMode,getTouchMode(){return arenaPortableProfile.touchMode;},
     getLayout(){return JSON.parse(JSON.stringify(arenaMobileLayout));},
-    getLayouts(){return JSON.parse(JSON.stringify(arenaMobileLayouts));},switchLayout:arenaMobileSwitchLayout,
+    getLayouts(){return JSON.parse(JSON.stringify(arenaMobileLayouts));},switchLayout:arenaMobileSwitchLayout,copyLayout:arenaMobileCopyLayout,
     getState(){return {gestureActive:arenaMobileTouchState.pointerId!==null||arenaMobileActionState.pointerId!==null,tapCount:arenaMobileTouchState.tapCount,contacts:window.ArenaMobileContacts?.size||0,testOpen:arenaMobileTestState.open,testPanel:arenaMobileTestState.active};}
 });

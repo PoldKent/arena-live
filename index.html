@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Live v0.40 — TikTok LIVE</title>
+    <title>Arena Live v0.41 — TikTok LIVE</title>
     <!--
       ARENA LIVE · GAME RUNTIME
       The classic game script stays here; utility CSS is built locally and
@@ -13,7 +13,7 @@
       have been migrated to explicit event listeners.
     -->
     <!-- Styles are built once; no browser compiler runs during a stream. -->
-    <link rel="stylesheet" href="styles/arena-ui.css?v=0.40">
+    <link rel="stylesheet" href="styles/arena-ui.css?v=0.41">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Fonts: Inter & Orbitron for Arcade/Esports HUD -->
@@ -866,8 +866,8 @@ body.touch-controls-active #portraitChatOverlay {
 #card-16x9:fullscreen::backdrop, #card-9x16:fullscreen::backdrop { background: #000; }
 /* In the standalone mobile edition, original buttons and tests live in the
    fullscreen card; only the PC/OBS capture hides all non-video siblings. */
-html:not(.arena-mobile-offline) #card-16x9:fullscreen > :not(#viewport16x9):not(#settingsPauseModal),
-html:not(.arena-mobile-offline) #card-9x16:fullscreen > :not(#viewport9x16):not(#settingsPauseModal) { display: none !important; }
+html:not(.arena-mobile-offline) #card-16x9:fullscreen > :not(#viewport16x9):not(#settingsPauseModal):not(#arenaSingleFullscreenTools):not(#arenaSingleFullscreenDrawer),
+html:not(.arena-mobile-offline) #card-9x16:fullscreen > :not(#viewport9x16):not(#settingsPauseModal):not(#arenaSingleFullscreenTools):not(#arenaSingleFullscreenDrawer) { display: none !important; }
 #card-16x9:fullscreen #viewport16x9 {
     width: min(100vw, 177.777778dvh) !important;
     height: min(100dvh, 56.25vw) !important;
@@ -1007,12 +1007,12 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
 }
 /* The active capture is explicit: neither the offline mobile layout nor
    fullscreen flex rules may resurrect an inactive 16:9/9:16 card. */
-#dualMonitorsGrid[data-focus="16:9"] > #card-9x16,
-#dualMonitorsGrid[data-focus="9:16"] > #card-16x9 {
+#dualMonitorsGrid[data-focus="16:9"] > #card-9x16:not(:fullscreen),
+#dualMonitorsGrid[data-focus="9:16"] > #card-16x9:not(:fullscreen) {
   display:none!important;
 }
 #broadcastStageSection:not(:fullscreen) #card-16x9,#broadcastStageSection:not(:fullscreen) #card-9x16 {margin:0!important;padding:0!important;max-width:100%;min-width:0}
-#broadcastStageSection:not(:fullscreen) #card-16x9:not(:fullscreen)>:not(#viewport16x9):not(#settingsPauseModal),#broadcastStageSection:not(:fullscreen) #card-9x16:not(:fullscreen)>:not(#viewport9x16):not(#settingsPauseModal) {display:none!important}
+html:not(.arena-mobile-offline) #broadcastStageSection:not(:fullscreen) #card-16x9:not(:fullscreen)>:not(#viewport16x9):not(#settingsPauseModal),html:not(.arena-mobile-offline) #broadcastStageSection:not(:fullscreen) #card-9x16:not(:fullscreen)>:not(#viewport9x16):not(#settingsPauseModal) {display:none!important}
 #viewport16x9,#viewport9x16 {transition:none!important;flex:none!important}
 #arenaDockLeft:empty::after,#arenaDockRight:empty::after {content:'Arrastra un panel aquí';padding:15px 8px;text-align:center;color:#657388;font-size:11px;border:1px dashed #303c4b;border-radius:6px}
 .arena-dock.is-drop-target {background:#182b3b;outline:1px dashed #9bc5dc;outline-offset:-2px}
@@ -2063,18 +2063,18 @@ body.arena-panel-dragging #arenaDockBottom:empty {display:flex;min-height:64px;b
             </div> <!-- settingsPanelsScroll -->
 
             <div class="px-5 py-3 bg-slate-950 border-t border-slate-800/90 flex items-center justify-between text-xs text-slate-400">
-                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.40 · TikTok</div><span>Esc / P</span>
+                <div id="arenaVersionInfo" data-no-translate aria-label="Versión del juego">Arena Live v0.41 · TikTok</div><span>Esc / P</span>
             </div>
         </div>
     </div>
 
     <!-- ==================== COMPLETE GAME ENGINE, LOBBY & VICTORY SCRIPT ==================== -->
-    <script src="engine/arena-core.js?v=0.40"></script>
-    <script src="engine/arena-render.js?v=0.40"></script>
-    <script src="engine/arena-audio.js?v=0.40"></script>
-    <script src="engine/arena-settings.js?v=0.40"></script>
-    <script src="engine/arena-balance-evidence.js?v=0.40"></script>
-    <script src="engine/arena-game.js?v=0.40"></script>
+    <script src="engine/arena-core.js?v=0.41"></script>
+    <script src="engine/arena-render.js?v=0.41"></script>
+    <script src="engine/arena-audio.js?v=0.41"></script>
+    <script src="engine/arena-settings.js?v=0.41"></script>
+    <script src="engine/arena-balance-evidence.js?v=0.41"></script>
+    <script src="engine/arena-game.js?v=0.41"></script>
 </body>
 </html>
 

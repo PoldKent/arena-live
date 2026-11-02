@@ -1,5 +1,7 @@
 # Arena Live · auditoría técnica integral — 29/10/2026
 
+> Registro histórico del 29–30/10. El bloqueo de presupuesto ya no describe el estado actual: las pruebas se ejecutan. Véase la corrección y validación de [v0.41](RELEASE-0.41-ESTABILIDAD.md).
+
 ## Alcance y veracidad
 
 Inventario directo del árbol de GitHub en `main`: **164 archivos** y **3.232.504 bytes** de blobs rastreados (incluye documentación, artefactos de análisis y la exportación móvil de 0.40.6). La fuente actual usa `package.json` versión `0.40.8`. La inspección cubre estructura, rutas de carga, scripts, módulos de riesgo, contratos y resultados disponibles de CI. **No se ha podido ejecutar la suite Node/Playwright ni una sesión LIVE en esta revisión**: GitHub Actions no asigna ejecutores por la restricción del presupuesto de 0 USD.

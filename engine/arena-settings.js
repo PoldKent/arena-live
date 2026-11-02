@@ -52,6 +52,39 @@ function refreshArenaRuntimeControls(){
 }
 function getArenaDiagnostics(){return {version:window.ArenaLive.version,...arenaDiagnostics.snapshot(),timing:'CPU: simulation and canvas command submission; not GPU execution time',gpu:'Managed by browser; hardware acceleration cannot be verified from Canvas 2D',captures:[[canvas16.width,canvas16.height],[canvas9.width,canvas9.height]],quality:arenaRuntime.quality,renderFps:arenaRuntime.renderFps,activeFighters:fighters.filter(f=>!f.eliminated).length,droppedTimeMs:arenaDroppedTimeMs,memory:performance.memory?{usedJSHeapSize:performance.memory.usedJSHeapSize,jsHeapSizeLimit:performance.memory.jsHeapSizeLimit}:null};}
 function downloadArenaJSON(value,name){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download=name+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+// Configuration is an integration contract even when manual file buttons are hidden.
+// Keep schema 1 and existing storage keys so older layouts remain importable.
+function exportArenaConfiguration(){
+    saveArenaWorkspace();
+    return JSON.parse(JSON.stringify({format:'arena-live-configuration',schema:1,version:window.ArenaLive.version,
+        rules:arenaCombatRules,runtime:arenaRuntime,camera:{shake:arenaScreenShake},obs:arenaObsCalibration,
+        language:currentLanguage,display:{focus:monitorFocus},
+        round:{mode:rejoinRuleMode,lives:MAX_OPPORTUNITIES,duration:matchDurationSeconds,pace:gamePace,countdowns:countdownsEnabled},
+        layouts:arenaWorkspace.layouts}));
+}
+function importArenaConfiguration(value){
+    const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
+    if(!object(value)||value.format!=='arena-live-configuration'||value.schema!==1||!object(value.rules)||!object(value.runtime))return false;
+    for(const key of ['camera','obs','display','round','layouts'])if(value[key]!==undefined&&!object(value[key]))return false;
+    if(value.layouts)for(const mode of ['preparation','stream'])if(value.layouts[mode]!==undefined&&!object(value.layouts[mode]))return false;
+    const rules=normalizeArenaCombatRules(value.rules),runtime=ArenaCore.normalizeRuntime(value.runtime);
+    const layouts=Object.fromEntries(['preparation','stream'].map(mode=>[mode,readArenaWorkspace(mode,value.layouts?.[mode]||arenaWorkspace.layouts[mode])]));
+    for(const [key,v]of Object.entries(rules))setArenaCombatRule(key,v);
+    for(const [key,v]of Object.entries(runtime))setArenaRuntimeOption(key,v);
+    if(value.camera)setArenaScreenShake(value.camera.shake);
+    if(value.obs)for(const key of Object.keys(ARENA_OBS_DEFAULTS))if(Object.hasOwn(value.obs,key))setArenaObsCalibration(key,value.obs[key]);
+    if(value.language&&Object.hasOwn(LANGUAGE_LABELS,value.language))setLanguage(value.language);
+    const round=value.round||{};
+    if(['free','3_lives','timed'].includes(round.mode))setRejoinRuleMode(round.mode);
+    if(Number.isFinite(round.lives)){if(rejoinRuleMode==='3_lives')setPlayerLives(round.lives);else MAX_OPPORTUNITIES=Math.max(1,Math.min(9,Math.round(round.lives)));}
+    if(Number.isFinite(round.duration)){if(rejoinRuleMode==='timed')setMatchDuration(round.duration);else matchDurationSeconds=Math.max(30,Math.min(300,Math.round(round.duration)));}
+    if([.5,.75,1,1.25].includes(round.pace))setGamePace(round.pace);
+    if(typeof round.countdowns==='boolean')setCountdownsEnabled(round.countdowns);
+    for(const mode of ['preparation','stream']){arenaWorkspace.layouts[mode]=layouts[mode];try{localStorage.setItem(ARENA_WORKSPACE_KEYS[mode],JSON.stringify(layouts[mode]));}catch(_){}}
+    applyArenaWorkspaceLayout();
+    if(['16:9','9:16','dual'].includes(value.display?.focus))setMonitorFocus(value.display.focus);
+    refreshArenaRuntimeControls();return true;
+}
 const ARENA_CLASS_PREFERENCE_COPY=Object.freeze({
  es:['Preferencias de ataque por clase','Más cercano','Mi clase cerca · +25 %','Otra clase cerca · +15 %','Siempre mi clase','Siempre otra clase','Ventaja cerca · +25 %','Otra clase cerca · +25 %','Restaurar preferencias','El margen es distancia extra frente al rival más cercano. La prioridad nunca da inmunidad ni amplía el alcance.','Preferencias personalizadas: la muestra de victorias usa los valores originales.'],
  en:['Attack preferences by class','Nearest rival','My class nearby · +25%','Other class nearby · +15%','Always my class','Always another class','Favorable rival nearby · +25%','Other class nearby · +25%','Reset preferences','The margin is extra distance over the nearest rival. Priority never grants immunity or increases attack range.','Custom preferences: measured wins use the original settings.'],
@@ -139,7 +172,7 @@ function refreshArenaBalanceEvidence(){
  const host=document.getElementById('arenaBalanceEvidence');if(!host)return;const w=ARENA_EVIDENCE_COPY[currentLanguage]||ARENA_EVIDENCE_COPY.es;
  const restoreFocus=host.contains(document.activeElement);
  const key=host.querySelector('select')?.value||'125',group=ARENA_BALANCE_EVIDENCE.groups[key];
- host.innerHTML=`<h4 class="font-bold text-xs">${w[0]}</h4><label class="flex flex-col gap-1 text-xs">${w[1]}<select id="arenaBalanceEvidenceScenario" class="min-w-0 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-slate-200" style="color-scheme:dark">${['duel','5','10','25','125'].map(k=>`<option value="${k}"${k===key?' selected':''}>${k==='duel'?w[2]:w[3]+': '+k}</option>`).join('')}</select></label><p class="arena-balance-hint">${group.matches} ${w[7]} · ≤ ${ARENA_BALANCE_EVIDENCE.sample.maxSeconds} s</p><table><thead><tr><th>${arenaBalanceText('class')}</th><th>${w[4]}</th><th>${w[5]}</th></tr></thead><tbody>${group.classes.map(row=>`<tr><th scope="row">${escapeHTML(localizedClassName(row.classKey))}</th><td>${row.winPct} % <small>(n=${row.matches})</small></td><td>${row.ci95.low}–${row.ci95.high} %</td></tr>`).join('')}</tbody></table><p class="arena-balance-hint">${w[6]}</p><p class="arena-balance-hint">${w[9]}</p><a class="text-xs text-cyan-300" href="https://github.com/PoldKent/arena-live/blob/main/docs/RELEASE-0.15-CORRECCIONES.md" target="_blank" rel="noopener">${w[8]}</a>`;
+ host.innerHTML=`<h4 class="font-bold text-xs">${w[0]}</h4><label class="flex flex-col gap-1 text-xs">${w[1]}<select id="arenaBalanceEvidenceScenario" class="min-w-0 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-slate-200" style="color-scheme:dark">${['duel','5','10','25','125'].map(k=>`<option value="${k}"${k===key?' selected':''}>${k==='duel'?w[2]:w[3]+': '+k}</option>`).join('')}</select></label><p class="arena-balance-hint">${group.matches} ${w[7]} · ≤ ${ARENA_BALANCE_EVIDENCE.sample.maxSeconds} s</p><table><thead><tr><th>${arenaBalanceText('class')}</th><th>${w[4]}</th><th>${w[5]}</th></tr></thead><tbody>${group.classes.map(row=>`<tr><th scope="row">${escapeHTML(localizedClassName(row.classKey))}</th><td>${row.winPct} % <small>(n=${row.matches})</small></td><td>${row.ci95.low}–${row.ci95.high} %</td></tr>`).join('')}</tbody></table><p class="arena-balance-hint">${w[6]}</p><p class="arena-balance-hint">${w[9]}</p><a class="text-xs text-cyan-300" href="https://github.com/PoldKent/arena-live/blob/main/docs/RELEASE-0.41-ESTABILIDAD.md" target="_blank" rel="noopener">${w[8]}</a>`;
  const custom=Object.keys(ArenaCore.targetingKeys).some(key=>ArenaCore.targetingMode(key,arenaRuntime)!==ArenaCore.targetingOptions[key][0]);
  if(custom){const note=document.createElement('p');note.dataset.evidenceCustomPreferences='';note.className='arena-balance-hint';note.textContent=(ARENA_CLASS_PREFERENCE_COPY[currentLanguage]||ARENA_CLASS_PREFERENCE_COPY.es)[10];host.prepend(note);}
  host.querySelector('select').onchange=refreshArenaBalanceEvidence;if(restoreFocus)host.querySelector('select').focus({preventScroll:true});

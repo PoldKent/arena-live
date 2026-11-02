@@ -14,7 +14,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  validate:
+    uses: ./.github/workflows/checks.yml
   build:
+    needs: validate
     if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 15

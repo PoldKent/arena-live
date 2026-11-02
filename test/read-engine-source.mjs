@@ -8,7 +8,8 @@ export async function readEngineSource(){
         readFile(new URL('../index.html',import.meta.url),'utf8'),
         readFile(new URL('../engine/arena-game.js',import.meta.url),'utf8')
     ]);
-    const marker='<script src="engine/arena-game.js?v=0.40"></script>';
+    const version=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8')).version.split('.').slice(0,2).join('.');
+    const marker='<script src="engine/arena-game.js?v='+version+'"></script>';
     if(index.split(marker).length!==2)throw Error('Official classic-game entry changed');
     return index.replace(marker,()=>'<script>'+game+'</script>').replace(/\r\n?/g,'\n');
 }

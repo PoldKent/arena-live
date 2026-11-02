@@ -48,7 +48,8 @@ try{
         assert.equal(state.state.runtime.quality,'performance');assert.equal(state.state.runtime.renderFps,30);
         assert.equal(state.fighters.filter(f=>f.isStreamer).length,1);assert.equal(state.fighters.find(f=>f.isStreamer).classKey,'ninja');
         const size=await page.locator('#arenaMobilePower').boundingBox();assert.ok(size.height>=44&&size.width>=44);
-        assert.equal(await page.locator('#arenaMobilePower').isEnabled(),true);
+        assert.equal(await page.locator('#arenaMobilePower').isDisabled(),true);
+        assert.equal(await page.locator('#arenaMobilePower').getAttribute('data-skill-state'),'cooldown');
         assert.equal(await page.evaluate(()=>ArenaPortable.getProfile().mode),'player');
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),false);
         assert.equal(await page.locator('#arenaMobileTestFab').isVisible(),false);
@@ -77,6 +78,7 @@ try{
         for(const command of ['!guerrero','!kame','!shinobi','!rasen','!titan','!coloso','!rayo','!trueno','!espiritu','!enred'])assert.ok(layout.commands.includes(command),command);
     });
     await check('floating action dock and app menu fit without horizontal clipping',async()=>{
+        await page.locator('#arenaMobileJump').waitFor({state:'visible'});
         const result=await page.evaluate(()=>{
             const ids=['arenaMobileJump','arenaMobileAttack','arenaMobilePower','arenaMobileMoreBtn','arenaMobilePause','arenaPortableFullscreen'];
             const rects=ids.map(id=>{const r=document.getElementById(id).getBoundingClientRect();return [r.left,r.right,r.width,r.height];});
@@ -87,7 +89,7 @@ try{
             const bottom=[...document.querySelectorAll('#arenaMobileActionLayer>button')].filter(n=>getComputedStyle(n).display!=='none').map(n=>n.id);
             return {rects,screen:innerWidth,top,bottom,menuInTop:document.getElementById('arenaMobileMoreBtn').parentElement.id==='arenaMobileFloating',topOutside:document.getElementById('arenaMobileFloating').parentElement.id==='arenaTopBarInner',video:{top:video.top,bottom:video.bottom,width:video.width,height:video.height},shelf:{top:shelf.top,bottom:shelf.bottom},toolbar:{bottom:toolbar.bottom}};
         });
-        assert.deepEqual(result.top,['arenaMobilePause','arenaMobileModeShortcut','arenaMobileMoreBtn','arenaPortableFullscreen']);
+        assert.deepEqual(result.top,['arenaMobilePause','arenaMobileModeShortcut','arenaMobileMatchShortcut','arenaMobileProtaShortcut','arenaMobileMoreBtn','arenaPortableFullscreen']);
         assert.deepEqual(result.bottom,['arenaMobileJump','arenaMobileAttack','arenaMobilePower']);
         assert.equal(result.menuInTop,true);assert.equal(result.topOutside,true);
         assert.ok(result.toolbar.bottom<result.video.top,JSON.stringify(result));
@@ -130,7 +132,9 @@ try{
         if(output)await page.screenshot({path:join(output,'mobile-portrait.png')});
     });
     await check('touch actions and class powers reach the command history',async()=>{
-        await page.evaluate(()=>{const p=fighters.find(f=>f.isStreamer);p.energy=100;p.aiSpecialCooldown=0;});
+        await page.evaluate(()=>{const p=fighters.find(f=>f.isStreamer);p.energy=100;p.aiSpecialCooldown=0;
+            p.x=ISOMETRIC_ARENA.centerX;p.y=ISOMETRIC_ARENA.centerY-p.radius*.85;p.vx=p.vy=p.vz=p.z=p.fallDrop=0;
+            for(const f of fighters){f.attackCooldown=200;f.aiSpecialCooldown=f===p?0:200;}document.dispatchEvent(new Event('arena-touch-disable'));updateTouchControlsVisibility();});
         await page.locator('#arenaMobilePower').tap();
         const cast=await page.evaluate(()=>{const p=fighters.find(f=>f.isStreamer),queued=!!p.castingSkill;for(let i=0;i<80;i++)updatePhysicsAndAI();return {queued,text:document.getElementById('chatFeed').textContent};});
         assert.equal(cast.queued,true);assert.match(cast.text,/!rasen/);
@@ -210,7 +214,8 @@ try{
         await page.evaluate(()=>setArenaCombatRule('maxPlayers',128));
     });
     await check('Táctil total hides the analog and action buttons while preserving swipe combat',async()=>{
-        await page.evaluate(()=>ArenaMobileTouch.setTouchMode('touch'));
+        await page.evaluate(()=>ArenaPortable.start({count:4,mode:'player',touchMode:'touch'}));
+        await page.locator('#arenaMobileGestureGuide').waitFor({state:'visible'});
         assert.equal(await page.locator('#touchJoystick').count(),1);
         assert.equal(await page.locator('#touchJoystick').isVisible(),false);
         assert.equal(await page.locator('#arenaMobilePower').isVisible(),false);
@@ -318,10 +323,10 @@ try{
             actor.attackCooldown=0;actor.castingSkill=null;actor.x=460;actor.y=300;actor.facing=1;
             target.x=470;target.y=247;target.hp=target.maxHp;target.immunityTimer=0;
             target.shieldTimer=0;target.shieldHP=0;
-            const hpUp=target.hp;performMeleeAttack(actor,'up');
+            const hpUp=target.hp;performMeleeAttack(actor,'up');resolveMeleeAttacks();
             const up={damage:hpUp-target.hp,vy:target.vy,aim:actor.lastAttackAim};
             actor.attackCooldown=0;target.x=470;target.y=353;target.hp=target.maxHp;
-            const hpDown=target.hp;performMeleeAttack(actor,'down');
+            const hpDown=target.hp;performMeleeAttack(actor,'down');resolveMeleeAttacks();
             const down={damage:hpDown-target.hp,vy:target.vy,aim:actor.lastAttackAim};
             actor.energy=100;actor.aiSpecialCooldown=0;actor.castingSkill=null;
             const cast=triggerProtagonistSpecialAttack('down');
@@ -444,10 +449,10 @@ try{
     await check('v0.40.6 canonical UI removes the historical patch stack and retains five powers',async()=>{
         const result=await page.evaluate(()=>{
             const css=document.getElementById('arena-mobile-profile').textContent;
-            return {canonical:css.includes('CANONICAL MOBILE LAYOUT'),
+            return {canonical:document.querySelectorAll('#arena-mobile-profile').length===1&&css.includes('html.arena-mobile-offline'),
               legacyAbsent:!css.includes('RESTORE MOBILE v0.37 UI · RC1'),
               oldPatchStack:css.includes('MOBILE RESTORE RC3'),
-              fixFullscreenCSS:document.getElementById('arena-fullscreen-capture').textContent.includes('html:not(.arena-mobile-offline) #card-9x16:fullscreen'),
+              fixFullscreenCSS:document.getElementById('arena-app-styles').textContent.includes('html:not(.arena-mobile-offline) #card-9x16:fullscreen'),
               mode:document.documentElement.dataset.mobileMode};
         });
         assert.equal(result.canonical,true,JSON.stringify(result));
@@ -539,6 +544,8 @@ try{
         await page.keyboard.press('Escape');
         assert.equal(await page.locator('#arenaMobileQuickPanel').isVisible(),false);
         assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('arena-mobile-theater')),true);
+        await page.locator('#arenaMobileModeShortcut').tap();
+        assert.equal(await page.evaluate(()=>ArenaPortable.getProfile().mode),'director');
         await page.locator('#arenaMobileTestsShortcut').tap();
         assert.equal(await page.locator('#arenaPortableTestDrawer').isVisible(),true);
         await page.keyboard.press('Escape');
@@ -566,6 +573,7 @@ try{
         const baseline=await page.locator('#viewport9x16').boundingBox();
         await page.locator('#arenaMobileMoreBtn').tap();
         assert.equal(await page.locator('#arenaOperatorPopover').isVisible(),true);
+        await page.locator('#arenaMobileControlShelf').waitFor({state:'hidden'});
         assert.equal(await page.locator('#arenaMobileControlShelf').isVisible(),false);
         const x=await page.locator('#arenaMobileMenuClose').evaluate(n=>{
             const style=getComputedStyle(n);
@@ -743,8 +751,11 @@ try{
         await page.locator('#arenaPortableClose').tap();assert.equal(await page.evaluate(()=>isGamePaused),false);
     });
     await check('profile settings survive reopening the downloaded file',async()=>{
-        await page.evaluate(()=>{ArenaPortable.setResolution(540);setArenaRuntimeOption('renderFps',60);});await page.reload({waitUntil:'load'});
-        assert.equal(await page.locator('#arenaPortableResolution').inputValue(),'540');assert.equal(await page.locator('#arenaPortableFps').inputValue(),'60');
+        await page.waitForFunction(()=>!arenaMobileHistoryBackPending);
+        const stored=await page.evaluate(()=>{ArenaPortable.setResolution(540);setArenaRuntimeOption('renderFps',60);return JSON.parse(localStorage.getItem(ARENA_PORTABLE_KEY));});assert.equal(stored.resolution,540);
+        await page.reload({waitUntil:'load'});
+        await page.waitForFunction(()=>window.ArenaMobileTouch&&window.ArenaPortable&&document.getElementById('arenaPortableSetup')&&!document.getElementById('arenaPortableSetup').hidden);
+        assert.equal(await page.locator('#arenaPortableResolution').inputValue(),'540',JSON.stringify(await page.evaluate(()=>({profile:ArenaPortable.getProfile(),stored:JSON.parse(localStorage.getItem(ARENA_PORTABLE_KEY)),ready:document.readyState,origin:location.origin}))));assert.equal(await page.locator('#arenaPortableFps').inputValue(),'60');
         assert.equal(await page.locator('#arenaPortableNotice').isVisible(),false);
         assert.equal(await page.locator('input[name="arenaPortableMode"][value="player"]').isChecked(),true);
     });

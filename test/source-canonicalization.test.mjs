@@ -20,7 +20,7 @@ test('PC and OBS own one canonical application style block',()=>{
     'arena-visual-polish-v01','arena-workspace-v03','arena-training-panel']){
     assert.ok(html.includes('/* '+section+' */'),'Lost integrated CSS section '+section);
   }
-  assert.equal((html.match(/src="engine\/arena-game\.js\?v=0\.40"/g)||[]).length,1);
+  assert.equal(html.split('src="engine/arena-game.js?v='+pkg.version.split('.').slice(0,2).join('.')+'"').length-1,1);
 });
 
 test('mobile stylesheet retains one native layout and usable fullscreen controls',()=>{
@@ -37,5 +37,5 @@ test('active source has a single mainline policy and no retired cleanup command'
   assert.match(readme,/una sola rama/i);
   assert.doesNotMatch(readme,/clean:branches/);
   assert.equal(Object.hasOwn(pkg.scripts,'clean:branches'),false);
-  assert.equal(pkg.version,'0.40.8');
+  assert.match(pkg.version,/^\d+\.\d+\.\d+$/);
 });

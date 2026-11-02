@@ -301,14 +301,12 @@ await check('Eight languages remain selectable and new workspace labels follow t
  await page.locator('#arenaDualSettingsBtn').click();await settingsSection(3);assert.equal(await page.locator('#languageSelect option').count(),8);await page.locator('#languageSelect').selectOption('en');assert.equal((await state()).settingsOpen,true);assert.match(await page.locator('#arenaDualSettingsBtn').innerText(),/Settings/);assert.match(await page.locator('#arenaPanelScenarios .arena-panel-title').innerText(),/Test scenario/);assert.match(await page.locator('#arenaCombatRulesCard [data-combat-rule-copy="title"]').innerText(),/Rules and parameters/);
  await page.locator('#languageSelect').selectOption('es');await page.keyboard.press('Escape');
 });
-const openRuleSettings=async()=>{
+const openRuleSettings=async(id='arenaMaxPlayers')=>{
  if(!(await state()).settingsOpen)await page.locator('#arenaDualSettingsBtn').click();
- await page.evaluate(()=>selectArenaSettingsTab('combat',false));
- const section=page.locator('.arena-settings-section').filter({has:page.locator('#arenaMaxPlayers')});
- if(!await section.evaluate(n=>n.open))await section.locator('> summary').click();
+ await page.evaluate(id=>{const section=document.getElementById(id).closest('.arena-settings-section');selectArenaSettingsTab(section.dataset.settingsCategory,false);section.open=true;},id);
 };
 const ruleRange=async(key,value)=>page.locator(`[data-combat-rule="${key}"]`).evaluate((n,value)=>{n.value=String(value);n.dispatchEvent(new Event('input',{bubbles:true}));n.dispatchEvent(new Event('change',{bubbles:true}));},value);
-const capacityUI=async value=>{await page.locator('#arenaMaxPlayers').fill(String(value));await page.locator('#arenaMaxPlayers').press('Tab');};
+const capacityUI=async value=>{await openRuleSettings();await page.locator('#arenaMaxPlayers').fill(String(value));await page.locator('#arenaMaxPlayers').press('Tab');};
 await check('Capacity blocks real new viewers, reserves a bot slot for Prota and preserves legal re-entry',async()=>{
  await openRuleSettings();await capacityUI(4);
  await page.evaluate(()=>{setRejoinRuleMode('free');applyPlayerCountPreset(4);});
@@ -340,7 +338,7 @@ await check('Single-class rounds cover current fighters, new chat participants a
 });
 await check('Disabling class powers cancels windups and blocks chat, quick tests, AI, Prota and direct execution',async()=>{
  await page.evaluate(()=>{startCombatFromLobby();const f=fighters[0];f.energy=100;primeArenaSkill(f,CLASS_COMMANDS[f.archetypeKey].powers[0]);});assert.equal(await page.evaluate(()=>!!fighters[0].castingSkill),true);
- await page.locator('#arenaPowerMode').selectOption('noSpecials');
+ await openRuleSettings('arenaPowerMode');await page.locator('#arenaPowerMode').selectOption('noSpecials');
  const result=await page.evaluate(()=>{
   const f=fighters[0],target=fighters[1],command=CLASS_COMMANDS[f.archetypeKey].powers[0],energy=f.energy;
   f.aiSpecialCooldown=0;autoAttackEnabled=true;target.x=f.x+40;target.y=f.y;
@@ -391,13 +389,13 @@ await check('Rules persist across reload and reset independently from OBS, layou
  await capacityUI(6);await page.locator('#arenaClassRule').selectOption('kame');await page.reload({waitUntil:'load'});await page.waitForFunction(()=>arenaLiveInitialized);await page.evaluate(()=>countdownsEnabled=false);
  const saved=(await state()).combatRules;assert.equal(saved.maxPlayers,6);assert.equal(saved.classRule,'kame');assert.equal(saved.powerMode,'melee');assert.equal(saved.maxHp,300);assert.equal(await page.evaluate(()=>fighters.every(f=>f.archetypeKey==='kame')),true);assert.ok((await state()).fighterBodies<=6);
  await openRuleSettings();const profileCount=await page.evaluate(()=>viewerProfiles.size),calibration=await page.evaluate(()=>JSON.stringify(arenaObsCalibration)),layout=await page.evaluate(()=>localStorage.getItem(ARENA_WORKSPACE_KEYS.stream));
- await page.locator('#arenaResetCombatRules').click();assert.deepEqual((await state()).combatRules,{maxPlayers:128,classRule:'any',powerMode:'full',maxHp:180,damage:1,knockback:1,movement:1,energyRegen:1});assert.equal(await page.evaluate(()=>viewerProfiles.size),profileCount);assert.equal(await page.evaluate(()=>JSON.stringify(arenaObsCalibration)),calibration);assert.equal(await page.evaluate(()=>localStorage.getItem(ARENA_WORKSPACE_KEYS.stream)),layout);await page.keyboard.press('Escape');
+ await openRuleSettings('arenaResetCombatRules');await page.locator('#arenaResetCombatRules').click();assert.deepEqual((await state()).combatRules,{maxPlayers:128,classRule:'any',powerMode:'full',maxHp:360,damage:1,knockback:1,movement:.5,energyRegen:1});assert.equal(await page.evaluate(()=>viewerProfiles.size),profileCount);assert.equal(await page.evaluate(()=>JSON.stringify(arenaObsCalibration)),calibration);assert.equal(await page.evaluate(()=>localStorage.getItem(ARENA_WORKSPACE_KEYS.stream)),layout);await page.keyboard.press('Escape');
 });
 
 await check('Saved rule validation bounds capacity/parameters, rejects unknown classes/modes, and recovers from malformed data',async()=>{
  await page.evaluate(()=>localStorage.setItem(ARENA_COMBAT_RULES_KEY,JSON.stringify({maxPlayers:999,maxHp:-20,damage:900,knockback:-1,movement:0,energyRegen:100,classRule:'unknown',powerMode:'unknown'})));
  await page.reload({waitUntil:'load'});await page.waitForFunction(()=>arenaLiveInitialized);assert.deepEqual((await state()).combatRules,{maxPlayers:128,classRule:'any',powerMode:'full',maxHp:50,damage:3,knockback:0,movement:.5,energyRegen:3});
- await page.evaluate(()=>localStorage.setItem(ARENA_COMBAT_RULES_KEY,'{broken'));await page.reload({waitUntil:'load'});await page.waitForFunction(()=>arenaLiveInitialized);assert.equal((await state()).maxFighters,128);assert.equal((await state()).combatRules.maxHp,180);await page.evaluate(()=>{resetArenaCombatRules();countdownsEnabled=false;});
+ await page.evaluate(()=>localStorage.setItem(ARENA_COMBAT_RULES_KEY,'{broken'));await page.reload({waitUntil:'load'});await page.waitForFunction(()=>arenaLiveInitialized);assert.equal((await state()).maxFighters,128);assert.equal((await state()).combatRules.maxHp,360);await page.evaluate(()=>{resetArenaCombatRules();countdownsEnabled=false;});
 });
 await check('Resetting the current layout preserves OBS calibration and the other workspace',async()=>{
  await page.locator('#arenaDualSettingsBtn').click();await settingsSection(5);await page.locator('#arenaWorkspaceReset').click();
@@ -461,7 +459,7 @@ await check('Mobile special action follows the no-powers rule while movement and
     const command=CLASS_COMMANDS[key].powers[0];primeArenaSkill(actor,command);const windup=actor.castingSkill.timer;
     actor.castingSkill=null;actor.activeSpecialFactor=1;executeFighterSkill(actor,command);
     const event=document.querySelector('#chatFeed>[data-chat-event="special"]:last-child');
-    rows.push({mode,key,windup,damage:targets.map(f=>180-f.hp).filter(d=>d>0),logged:!!event&&event.dataset.command===command&&event.dataset.fighterId===actor.id});
+    rows.push({mode,key,windup,damage:targets.map(f=>f.maxHp-f.hp).filter(d=>d>0),logged:!!event&&event.dataset.command===command&&event.dataset.fighterId===actor.id});
    }return rows;
   });
   for(const p of probes){
@@ -738,7 +736,7 @@ await check('Settings shows the release only in its footer and retains UI/power 
 });
 await check('Display settings reveal real attack names and damage numbers immediately, persist, and preserve OBS/layout preferences',async()=>{
  await page.evaluate(()=>selectArenaSettingsTab('audience',false));
- const section=page.locator('.arena-settings-section').filter({has:page.locator('#showPowerTextToggle')});if(!await section.evaluate(n=>n.open))await section.locator('summary').click();
+ await openRuleSettings('showPowerTextToggle');
  const calibration=await page.evaluate(()=>localStorage.getItem(ARENA_OBS_CALIBRATION_KEY));
  const pauseBefore=await page.evaluate(()=>isGamePaused);
  await page.locator('#showPowerTextToggle').check();await page.locator('#showCombatNumbersToggle').check();assert.equal((await state()).paused,pauseBefore);
@@ -845,7 +843,7 @@ await check('Every rival and mode in the chart agrees with real basic and specia
    return CLASS_KEY_ORDER.map(key=>{
     const actor=new Fighter('@rival_'+key,'tiktok',false,key),target=new Fighter('@opponent','tiktok',false,rival);
     actor.x=300;actor.y=250;actor.facing=1;actor.critChance=0;actor.activeSpecialFactor=1;actor.attackCooldown=0;target.x=330;target.y=250;target.hp=target.maxHp=10000;
-    fighters=[actor,target];performMeleeAttack(actor);const base=10000-target.hp;
+    fighters=[actor,target];isGamePaused=false;performMeleeAttack(actor);resolveMeleeAttacks();isGamePaused=true;const base=10000-target.hp;
     target.hp=10000;executeFighterSkill(actor,CLASS_COMMANDS[key].powers[0]);
     return {base,special:10000-target.hp};
    });
@@ -873,10 +871,10 @@ await check('Shinobi prioritize outsiders but damage fellow Shinobi with melee a
   const actor=new Fighter('@shinobi_a','tiktok',false,'ninja'),ally=new Fighter('@shinobi_b','tiktok',false,'ninja'),outsider=new Fighter('@outsider','tiktok',false,'titan');
   actor.x=300;actor.y=250;actor.facing=1;actor.critChance=0;actor.activeSpecialFactor=1;actor.attackCooldown=0;ally.x=320;ally.y=250;outsider.x=322;outsider.y=250;
   fighters=[actor,ally,outsider];const preferred=findPreferredCombatTarget(actor).id===outsider.id;
-  executeFighterSkill(actor,'!rasen');const allySpared=ally.hp===180,outsiderHit=outsider.hp===130;
+  executeFighterSkill(actor,'!rasen');const allySpared=ally.hp===ally.maxHp,outsiderHit=outsider.hp===outsider.maxHp-50;
   outsider.eliminated=true;const finalTarget=findPreferredCombatTarget(actor).id===ally.id;
-  performMeleeAttack(actor);const basic=180-ally.hp;
-  executeFighterSkill(actor,'!rasen');const special=180-basic-ally.hp;
+  isGamePaused=false;performMeleeAttack(actor);resolveMeleeAttacks();isGamePaused=true;const basic=ally.maxHp-ally.hp;
+  executeFighterSkill(actor,'!rasen');const special=ally.maxHp-basic-ally.hp;
   ally.hp=1;executeFighterSkill(actor,'!rasen');
   return {preferred,allySpared,outsiderHit,finalTarget,basic,special,ended:ally.eliminated&&fighters.filter(f=>!f.eliminated).length===1};
  });assert.deepEqual(result,{preferred:true,allySpared:true,outsiderHit:true,finalTarget:true,basic:12,special:50,ended:true});
@@ -890,7 +888,7 @@ await check('Shinobi choose a nearby Shinobi over a far outsider, preferring oth
    actor.x=300;actor.y=250;actor.facing=1;actor.critChance=0;actor.activeSpecialFactor=1;actor.attackCooldown=0;
    ally.x=330;ally.y=250;ally.hp=ally.maxHp=10000;outsider.x=outsideX;outsider.y=250;outsider.hp=outsider.maxHp=10000;
    fighters=[actor,ally,outsider];const chosen=findPreferredCombatTarget(actor);
-   performMeleeAttack(actor);const basic=[10000-ally.hp,10000-outsider.hp];
+   isGamePaused=false;performMeleeAttack(actor);resolveMeleeAttacks();isGamePaused=true;const basic=[10000-ally.hp,10000-outsider.hp];
    ally.hp=outsider.hp=10000;executeFighterSkill(actor,'!rasen');
    return {mode,far:outsideX===450,chosen:chosen.id===ally.id?'shinobi':'titan',basic,special:[10000-ally.hp,10000-outsider.hp],native:ARENA_CLASS_BALANCE[mode].ninja.damage};
   }));
@@ -979,20 +977,20 @@ await check('TikTok tap can admit in lobby and in combat without duplicating or 
   const again=ArenaLive.joinOnTap({username:'@live_fan',platformKey:'tiktok'});
   const found=fighters.filter(f=>f.name.toLowerCase()==='@live_fan'&&f.platformKey==='tiktok').length;
   const rosterAfter=fighters.length;
-  const full=new Array(129).fill(null); // no effect on active roster
   applyPlayerCountPreset(128);
+  const fullCount=fighters.length;
   const blocked=ArenaLive.joinOnTap({username:'@overflow_fan',platformKey:'tiktok'});
   gameState='COMBAT';
   const fullCombat=ArenaLive.joinOnTap({username:'@combat_fan',platformKey:'tiktok'});
   arenaCombatRules.maxPlayers=128;
   gameState='LOBBY';applyPlayerCountPreset(2);startCombatFromLobby();
   const late=ArenaLive.joinOnTap({username:'@combat_fan',platformKey:'tiktok'});
-  return {first,again,found,rosterAfter,before,blocked,fullCombat,late,fullCount:128,actual:fighters.length};
+  return {first,again,found,rosterAfter,before,blocked,fullCombat,late,fullCount,actual:fighters.length};
  });
  assert.equal(admission.first,true);assert.equal(admission.again,false);
  assert.equal(admission.found,1);assert.equal(admission.rosterAfter,admission.before+1);
- assert.equal(admission.blocked,false);assert.equal(admission.fullCombat,false);assert.equal(admission.late,true);
- assert.equal(admission.fullCount,128);assert.equal(admission.actual,3);
+ assert.equal(admission.blocked,false);assert.equal(admission.fullCombat,false);assert.equal(admission.late,false);
+ assert.equal(admission.fullCount,128);assert.equal(admission.actual,2);
 });
 await check('Lobby opacity changes both welcome cards and both audience guides',async()=>{
  const values=await page.evaluate(()=>{
@@ -1034,9 +1032,9 @@ await check('Final winner card tracks the HUD transparency slider in 16:9 and 9:
  }
  assert.equal(result.restored,'0.85');
 });
-await check('A rapid !jugar rejoin in final duel remains available with remaining lives',async()=>{
+await check('A rapid !jugar rejoin in Smash obeys the remaining-life limit',async()=>{
  const r=await page.evaluate(()=>{
-  gameState='LOBBY';setRejoinRuleMode('free');applyPlayerCountPreset(2);startCombatFromLobby();
+  gameState='LOBBY';setRejoinRuleMode('free');applyPlayerCountPreset(4);startCombatFromLobby();
   isGamePaused=false; // real LIVE input is queued while paused, by design.
   const actor=fighters[0];chatRateLimits.clear();
   const first=processChatCommand(actor.name,actor.platformKey,'!jugar');
@@ -1048,7 +1046,7 @@ await check('A rapid !jugar rejoin in final duel remains available with remainin
   const refused=addOrBoostFighter(actor.name,actor.platformKey,false,null,true)===null;
   return {first,second,recovered,refused,players:fighters.length};
  });
- assert.deepEqual(r,{first:true,second:true,recovered:true,refused:true,players:2});
+ assert.deepEqual(r,{first:true,second:true,recovered:true,refused:true,players:4});
 });
 await check('Normal TikTok messages show one character speech bubble on both canvases',async()=>{
  const r=await page.evaluate(()=>{
@@ -1068,13 +1066,13 @@ await check('Normal TikTok messages show one character speech bubble on both can
 });
 await check('Sharing heals and gives 10s protection to the sharing viewer only',async()=>{
  const r=await page.evaluate(()=>{
-  gameState='LOBBY';applyPlayerCountPreset(2);startCombatFromLobby();
+  gameState='LOBBY';applyPlayerCountPreset(4);startCombatFromLobby();
   setArenaCombatRule('powerMode','full');socialBoostMultiplier=1;
   const unaffected=fighters[0];unaffected.hp=44;
   const id=ArenaLive.joinOnShare({username:'@share_viewer',platformKey:'tiktok'});
   const owner=fighters.find(f=>f.id===id);if(owner)owner.hp=50;
   const applied=id!=null?ArenaLive.support({eventType:'share',targetId:id}):false;
-  return {applied,heal:owner?owner.hp-50:-1,expected:owner?Math.round(owner.maxHp*.3):0,
+  return {applied,heal:owner?owner.hp-50:-1,expected:owner?Math.round(owner.maxHp*.32):0,
     timer:owner?.immunityTimer,unaffected:unaffected.hp};
  });
  assert.equal(r.applied,true);assert.equal(r.heal,r.expected);assert.equal(r.timer,600);assert.equal(r.unaffected,44);
@@ -1113,7 +1111,7 @@ await check('Taps keep the three entry rules independent throughout an active ma
   const begin=mode=>{
    gameState='LOBBY';isGamePaused=false;koSequenceActive=false;
    arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};
-   setRejoinRuleMode(mode);applyPlayerCountPreset(2);startCombatFromLobby();
+   setRejoinRuleMode(mode);applyPlayerCountPreset(4);startCombatFromLobby();
   };
   begin('free');
   const entry=ArenaLive.joinOnTap({username:'@free_tap',platformKey:'tiktok'});
@@ -1152,7 +1150,7 @@ await check('The LIVE bridge re-enters an eliminated fighter on tap, with boosts
  const result=await page.evaluate(()=>new Promise(resolve=>{
    gameState='LOBBY';koSequenceActive=false;isGamePaused=false;
    arenaCombatRules={...ARENA_COMBAT_RULE_DEFAULTS};setRejoinRuleMode('free');
-   applyPlayerCountPreset(2);startCombatFromLobby();
+   applyPlayerCountPreset(4);startCombatFromLobby();
    const name='@bridge_rejoin';const first=ArenaLive.joinOnTap({username:name,platformKey:'tiktok'});
    const fighter=fighters.find(f=>f.name===name);
    fighter.eliminated=true;fighter.hp=0;
@@ -1343,7 +1341,7 @@ await check('Settings categories keep match, combat, HUD, audience, controls and
 await check('Real TikTok follower gift subscriber support routes to the real sender rather than the selected actor',async()=>{
  const r=await page.evaluate(()=>{
   gameState='LOBBY';isGamePaused=false;koSequenceActive=false;
-  applyPlayerCountPreset(2);startCombatFromLobby();
+  applyPlayerCountPreset(4);startCombatFromLobby();
   setArenaCombatRule('powerMode','full');socialBoostMultiplier=1;
   const outsider=fighters[0];
   const ownerId=ArenaLive.joinOnShare({username:'@event_owner',platformKey:'tiktok'});
@@ -1375,12 +1373,13 @@ await check('single-monitor fullscreen keeps original PC panels accessible and r
   await page.locator('#arenaFullscreenMenuBtn').click();
   await page.locator('#btnFullscreen9').click();
   await page.waitForFunction(()=>document.fullscreenElement?.id==='card-9x16');
+  await page.locator('#arenaSingleFullscreenTools').waitFor({state:'visible'});
   assert.equal(await page.locator('#arenaSingleFullscreenTools').isVisible(),true);
   await page.locator('#arenaSingleFullscreenTools [data-single-action="tests"]').click();
   assert.equal(await page.locator('#arenaSingleFullscreenDrawer').isVisible(),true);
   assert.equal(await page.locator('#arenaSingleFullscreenDrawer #arenaPanelPowers').count(),1);
   assert.equal(await page.locator('#targetFighterSelect').count(),1);
-  await page.locator('#arenaSingleFullscreenDrawer select').selectOption('arenaPanelPlayers');
+  await page.locator('#arenaSingleFullscreenDrawer > select').selectOption('arenaPanelPlayers');
   assert.equal(await page.locator('#arenaSingleFullscreenDrawer #arenaPanelPlayers').count(),1);
   assert.equal(await page.locator('#arenaPanelPowers').count(),1);
   await page.locator('#arenaSingleFullscreenTools [data-single-action="chat"]').click();
@@ -1393,6 +1392,7 @@ await check('single-monitor fullscreen keeps original PC panels accessible and r
   await page.evaluate(()=>toggleSettingsModal(false));
   await page.locator('#arenaSingleFullscreenTools [data-single-action="exit"]').click();
   await page.waitForFunction(()=>!document.fullscreenElement);
+  await page.waitForFunction(()=>!document.getElementById('arenaSingleFullscreenTools')&&!document.getElementById('arenaSingleFullscreenDrawer'));
   assert.equal(await page.locator('#arenaSingleFullscreenTools').count(),0);
   assert.equal(await page.locator('#arenaSingleFullscreenDrawer').count(),0);
   assert.equal(await page.locator('#arenaPanelPowers').count(),1);

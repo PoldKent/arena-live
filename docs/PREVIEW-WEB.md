@@ -1,6 +1,6 @@
 # Arena Live · Pre-release web de acceso público por enlace
 
-**Estado de infraestructura (30/10/2026):** `main` incluye el generador estático, pruebas de distribución y flujo `.github/workflows/pages-preview.yml` para GitHub Pages. La publicación **solo queda confirmada** cuando GitHub Actions finaliza con éxito y la URL se abre sin autenticación.
+**Estado de infraestructura (01/11/2026):** Pages usa GitHub Actions y ya dispone de una publicación accesible. Cada cambio en `main` ejecuta primero el workflow reutilizable de comprobaciones: Node, navegador, móvil y carga en Windows/Linux. Solo después se construye y despliega la nueva web; una prueba fallida conserva el sitio anterior. Un despliegue no equivale a validar TikTok LIVE, OBS o un Android físico.
 
 ## Un enlace para dos experiencias
 
@@ -16,7 +16,7 @@ En GitHub Free, el repositorio `PoldKent/arena-live` debe ser **público** para 
 1. Abre [GitHub → Settings → Pages](https://github.com/PoldKent/arena-live/settings/pages).
 2. En **Build and deployment → Source**, selecciona **GitHub Actions**. No selecciones `Deploy from a branch` para este flujo.
 3. En [Actions → Arena Live · Web prerelease](https://github.com/PoldKent/arena-live/actions/workflows/pages-preview.yml), elige **Run workflow** sobre `main` si no hay un despliegue exitoso. Los nuevos commits de `main` también lo activan.
-4. Comprueba el resultado del trabajo **build** (genera `dist/arena-preview/` y ejecuta pruebas) y **deploy** (sube exclusivamente ese directorio como artefacto Pages).
+4. Comprueba primero el trabajo **validate** y después el resultado del trabajo **build** (genera `dist/arena-preview/` y ejecuta pruebas) y **deploy** (sube exclusivamente ese directorio como artefacto Pages).
 5. Verifica la URL en una pestaña privada, primero en celular y después en ordenador.
 
 El flujo usa `actions/configure-pages@v5`, `actions/upload-pages-artifact@v4` y `actions/deploy-pages@v4`; permisos mínimos: lectura de contenido, escritura de Pages e ID token durante el despliegue.

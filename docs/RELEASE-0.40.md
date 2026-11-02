@@ -1,5 +1,6 @@
 # Arena Live v0.40 — aplicación principal, PC y móvil unidos
 
+> Documento histórico. La entrega y los controles vigentes se describen en [v0.41](RELEASE-0.41-ESTABILIDAD.md) y en el [README](../README.md).
 ## Fuente única
 
 La versión principal del juego se encuentra en `main` y se ejecuta con el puente local TikTok LIVE en `http://127.0.0.1:4173/`. El paquete móvil no es otro juego ni una rama independiente: `tools/build-mobile.mjs` toma **el mismo `index.html`, `styles/arena-ui.css` y los cinco módulos `engine/` de la aplicación principal**, y solo añade los adaptadores `portable/` de interfaz, rendimiento y controles sin conexión. El motor no se copia a mano para mantener otra versión. El archivo oficial histórico v0.39 se conserva para poder retroceder.

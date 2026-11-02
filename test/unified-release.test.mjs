@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
-import {fileURLToPath} from 'node:url';
+import {readFile,mkdtemp,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {buildMobile,unpackMobile} from '../tools/build-mobile.mjs';
 import {readEngineSource} from './read-engine-source.mjs';
@@ -13,8 +14,6 @@ const index=await read('index.html');
 const game=await read('engine/arena-game.js');
 const server=await read('bridge/server.mjs');
 const officialPath='mobile-builds/Arena-Live-v'+pkg.version+'-movil.html';
-// Validate a fresh export from the canonical files rather than a stale historical build.
-await buildMobile(fileURLToPath(new URL(officialPath,root)));
 const compressed=await read(officialPath);
 const encoded=compressed.match(/"([A-Za-z0-9+/=]{10000,})"/)?.[1];
 if(!encoded)throw Error('Official mobile compressed payload missing');
@@ -24,7 +23,7 @@ test('official lightweight HTML keeps the original classic engine and LIVE/OBS c
     const short=pkg.version.split('.').slice(0,2).join('.');
     assert.ok(Buffer.byteLength(index,'utf8')<=500000,'official HTML must stay below 500 KB');
     assert.match(index,new RegExp('<title>Arena Live v'+short));
-    assert.match(index,/engine\/arena-game\.js\?v=0\.40/);
+    assert.ok(index.includes('engine/arena-game.js?v='+short));
     assert.match(server,/\/engine\/arena-game\.js/);
     assert.match(server,/pathname === '\/bridge-client\.js'/);
     assert.match(server,/pathname===[ ]*'\/mobile'/);
@@ -32,6 +31,14 @@ test('official lightweight HTML keeps the original classic engine and LIVE/OBS c
     assert.ok(game.includes("version: '"+pkg.version+"',"));
     assert.equal(pkg.scripts.prestart,'node tools/build-mobile.mjs');
     assert.equal(pkg.scripts.predev,'node tools/build-mobile.mjs');
+});
+test('the committed mobile download equals a fresh export without modifying the committed file',async()=>{
+    const dir=await mkdtemp(join(tmpdir(),'arena-release-parity-'));
+    try{
+        const generated=await buildMobile(join(dir,'mobile.html'));
+        assert.equal(await readFile(generated.path,'utf8'),compressed,'Regenerate the versioned mobile download from current sources');
+        assert.equal(await read(officialPath),compressed,'Validation must never replace its own input');
+    }finally{await rm(dir,{recursive:true,force:true});}
 });
 test('official engine is identical when virtually reconstructed for regression tests',async()=>{
     const reconstructed=await readEngineSource();

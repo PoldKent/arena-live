@@ -2,6 +2,7 @@
 // Physics, AI, RNG calls in particles, damage, powers and mode transitions stay intact.
 window.ArenaBalanceHarness = (() => {
   const STEP = 1000 / 60;
+  const defaultGamePace=gamePace;
   const classes = ['kame', 'ninja', 'titan', 'trueno', 'esmeralda'];
   const original = {
     damage: applyDamage, ko: handleFighterKO,
@@ -40,7 +41,9 @@ window.ArenaBalanceHarness = (() => {
     const attackType=legacyDamage?legacyType:extra;
     const hp = target.hp, shield = target.shieldHP || 0, charging = target.castingSkill;
     damageDepth++;
-    try { if(legacyDamage)original.damage(target,amount,attacker,critical,extra,attackType);else original.damage(target,amount,attacker,critical,attackType); }
+    // Forward every argument, including the current engine's directional aim.
+    // Dropping the sixth argument changes launches and invalidates win rates.
+    try { original.damage(...arguments); }
     finally { damageDepth--; }
     const effective = Math.max(0, Math.min(hp, hp - target.hp));
     const absorbed = Math.max(0, shield - (target.shieldHP || 0));
@@ -87,7 +90,7 @@ window.ArenaBalanceHarness = (() => {
     seed = config.seed >>> 0; now = 0; winner = null; timers.clear(); stats = new Map(); cast = null; damageDepth = 0;
     arenaRoundRevision++; fighters = []; particles = []; activeEffects = []; floatingTexts = []; confetti = [];
     eliminationOrder = []; currentWinner = null; gameState = 'LOBBY'; koSequenceActive = false;
-    isGamePaused = false; gamePace = 1; slowMoFactor = 1;
+    isGamePaused = false; gamePace = defaultGamePace; slowMoFactor = 1;
     autoAttackEnabled = true; autoChatEnabled = false; soundEnabled = false; countdownsEnabled = false;
     streamerManualControl = false; rejoinRuleMode = 'free'; MAX_OPPORTUNITIES = 1;
     arenaCombatRules = { ...ARENA_COMBAT_RULE_DEFAULTS, powerMode: config.powerMode || 'full' };
@@ -113,7 +116,7 @@ window.ArenaBalanceHarness = (() => {
       deathSeconds: null, deathCause: null
     });
     // Default counters and all five archetypes are checked on every match.
-    if (fighters.some(f => f.hp !== 180 || f.baseDamage !== 12 || f.energy !== 50 || f.coopCount !== 1)) throw Error('Unequal initial combat stats');
+    if (fighters.some(f => f.hp !== ARENA_COMBAT_RULE_DEFAULTS.maxHp || f.baseDamage !== 12 || f.energy !== 50 || f.coopCount !== 1)) throw Error('Unequal initial combat stats');
   }
 
   function run(config) {
@@ -162,7 +165,7 @@ window.ArenaBalanceHarness = (() => {
   }
   return { run, reference, probe, meta: () => ({ version: ArenaLive.version, defaults: { ...ARENA_COMBAT_RULE_DEFAULTS },
     ai: AI_SPECIAL_RULES, targeting: typeof COMBAT_TARGET_POLICY === 'undefined' ? 'nearest-counterfactual' : COMBAT_TARGET_POLICY,
-    targetingRules: typeof ARENA_COMBAT_TARGET_RULES === 'undefined' ? null : ARENA_COMBAT_TARGET_RULES,
+    targetingRules: typeof ARENA_COMBAT_TARGET_RULES === 'undefined' ? null : ARENA_COMBAT_TARGET_RULES,pace:defaultGamePace,
     balance: typeof ARENA_CLASS_BALANCE === 'undefined' ? null : ARENA_CLASS_BALANCE,
     rivalries: typeof ARENA_CLASS_RIVALRIES === 'undefined' ? null : ARENA_CLASS_RIVALRIES, hz: 60 }) };
 })();

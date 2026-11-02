@@ -1,0 +1,220 @@
+{
+  "passed": 21,
+  "errors": 0,
+  "checks": [
+    "32 fighters simulate and render both captures with finite state",
+    "64 fighters simulate and render both captures with finite state",
+    "128 fighters simulate and render both captures with finite state",
+    "128-player full-power burst retains finite state, bounded effects and baseline parity when provided",
+    "quality budgets preserve simulation and native Full HD at a captured particle peak",
+    "128 synchronous specials cast and render both unchanged Full HD captures",
+    "Full HD captures are opaque and remain eligible for automatic hardware rasterization",
+    "target options retain existing DOM nodes and selection while only eliminated options disappear",
+    "reevaluating an unchanged arena mode does not rebuild its HUD or badges",
+    "both captures share one animation clock and rendering consumes no combat randomness",
+    "active bonus symbols do not shift the name and class text baseline",
+    "128-player scenario also loads during combat; mode transitions and capacity remain correct",
+    "preparation skips its hidden capture and switching or dual view repaints fresh game state",
+    "label metric cache follows renamed fighters, life counters and loaded fonts",
+    "128 fighters reuse name and body textures on successive Full HD draws",
+    "unchanged duel HUD values do not recreate text or trigger localization each frame",
+    "128 autonomous fighters still charge/fire specials and keep transient effects bounded",
+    "128-player powers retain real text and damage labels while transient history remains bounded",
+    "expired KO notices release detached badges instead of accumulating through a stream",
+    "replacing a scenario clears old powers and a pending victory cannot overwrite the new match",
+    "500 received comments keep history and automatic follow without rebuilding toolbar state per message"
+  ],
+  "measurements": [
+    {
+      "source": "current",
+      "count": 32,
+      "setupMs": 64.59999999997672,
+      "bodies": 32,
+      "targeting": {
+        "mean": 0.08333333333333333,
+        "median": 0.09999999997671694,
+        "p95": 0.2000000000698492
+      },
+      "simulation": {
+        "mean": 0.3883333333341094,
+        "median": 0.19999999995343387,
+        "p95": 0.8000000000465661
+      },
+      "drawing": {
+        "mean": 25.016666666669252,
+        "median": 2.300000000046566,
+        "p95": 412
+      },
+      "alive": 32,
+      "finite": true,
+      "stateSHA256": "64dde4e31f240d7a4a24b3eee5492b203beed20b89fa3fab0dec5c4d78eb9d72"
+    },
+    {
+      "source": "current",
+      "count": 64,
+      "setupMs": 17.300000000046566,
+      "bodies": 64,
+      "targeting": {
+        "mean": 0.09666666666550251,
+        "median": 0.09999999997671694,
+        "p95": 0.2000000000698492
+      },
+      "simulation": {
+        "mean": 1.5683333333339153,
+        "median": 1.5,
+        "p95": 3.400000000023283
+      },
+      "drawing": {
+        "mean": 21.81666666666408,
+        "median": 3,
+        "p95": 339.69999999995343
+      },
+      "alive": 64,
+      "finite": true,
+      "stateSHA256": "187fea45386ee5f0fcb239ee4546fd89259f581fe9d16ad64bf29db34f4b59e5"
+    },
+    {
+      "source": "current",
+      "count": 128,
+      "setupMs": 19,
+      "bodies": 128,
+      "targeting": {
+        "mean": 0.3016666666662786,
+        "median": 0.2999999999301508,
+        "p95": 0.5
+      },
+      "simulation": {
+        "mean": 3.3133333333331394,
+        "median": 3.200000000069849,
+        "p95": 7.400000000023283
+      },
+      "drawing": {
+        "mean": 40.93333333332945,
+        "median": 4.900000000023283,
+        "p95": 336.0999999999767
+      },
+      "alive": 128,
+      "finite": true,
+      "stateSHA256": "bcbf2e4bba2407c0d1f44d729247775ee5ff54481b1765ea0ff691f9ca7b4c62"
+    }
+  ],
+  "burstMeasurements": [
+    {
+      "source": "current",
+      "count": 128,
+      "frames": 180,
+      "drawnFrames": 30,
+      "simulation": {
+        "mean": 2.5716666666661494,
+        "median": 2.200000000069849,
+        "p95": 5.299999999930151
+      },
+      "drawing": {
+        "mean": 42.34333333333877,
+        "median": 8.300000000046566,
+        "p95": 231.80000000004657
+      },
+      "maxParticles": 1800,
+      "maxEffects": 100,
+      "maxTexts": 120,
+      "caps": [
+        1800,
+        240,
+        120
+      ],
+      "alive": 110,
+      "finite": true,
+      "stateSHA256": "5d49b68b1449afea48f9c0422660c2a1b01c2439dc9fe1b512f6ff087fafc308"
+    }
+  ],
+  "qualityMeasurements": [
+    {
+      "particles": 1800,
+      "alive": 128,
+      "qualities": {
+        "high": {
+          "mean": 47.46249999999903,
+          "p95": 345.70000000006985,
+          "samples": 24
+        },
+        "balanced": {
+          "mean": 63.279166666669575,
+          "p95": 338,
+          "samples": 24
+        },
+        "performance": {
+          "mean": 33.720833333330425,
+          "p95": 328.39999999990687,
+          "samples": 24
+        }
+      },
+      "simulationUnchanged": true,
+      "captures": [
+        [
+          1920,
+          1080
+        ],
+        [
+          1080,
+          1920
+        ]
+      ]
+    }
+  ],
+  "sourceHashes": [
+    {
+      "source": "current",
+      "version": "0.41.0",
+      "gitBlob": "cb14c05eb43955ad8433da83f12a36c093ea128b",
+      "modules": {
+        "/engine/arena-core.js": "64d4a8ed8f4abaee4db3b794c3fa5751bdfd47f7",
+        "/engine/arena-render.js": "6c9603974d2c02d0f0fb52857992211c08cd6725",
+        "/engine/arena-audio.js": "319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934",
+        "/engine/arena-settings.js": "2b14e0bd073d39821cc8dd9b93d371be4e947f91",
+        "/engine/arena-balance-evidence.js": "e5d7e0a60ec124b15c288ab26c33d2cd3a734e0e",
+        "/engine/arena-game.js": "8c66e3d72891bc1dea1860240cd642067f1356d6"
+      }
+    }
+  ],
+  "environment": {
+    "node": "v24.22.1",
+    "browser": "153.0.8010.0",
+    "gpu": "browser default; consult graphics featureStatus for actual acceleration",
+    "drawTiming": "CPU command submission only; excludes GPU completion and presentation",
+    "graphics": {
+      "featureStatus": {
+        "2d_canvas": "unavailable_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "raw_draw": "disabled_off_ok",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "vulkan": "disabled_off",
+        "webgl": "unavailable_software",
+        "webgpu": "unavailable_software",
+        "webgpu_on_vk_via_gl_interop": "disabled_off",
+        "webnn": "unavailable_software"
+      },
+      "devices": [
+        {
+          "vendorId": 65535,
+          "deviceId": 65535,
+          "vendorString": "Google Inc. (Google)",
+          "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "driverVendor": "SwANGLE",
+          "driverVersion": "5.0.0"
+        }
+      ],
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+      "driverVendor": "Google Inc. (Google)"
+    },
+    "viewport": "1720x720",
+    "simulationHz": 60,
+    "workload": "Constant-population timings disable knockback and suppress automatic specials; paired 128-player bursts restore normal HP, full knockback and all automatic specials for 180 ticks, rendering every sixth tick. Clock/RNG initialization is identical. Quality timings alternate on the same frozen peak-particle scene; no FPS guarantee."
+  }
+}

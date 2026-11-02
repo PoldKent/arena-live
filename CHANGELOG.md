@@ -1,3 +1,14 @@
+## v0.41.0 — Correcciones de auditoría y entrega verificable (2026-11-01)
+
+- Restablecidos los contratos de configuración de la API sin volver a añadir botones manuales; importa esquema 1, formato OBS y velocidad 0.5×, conservando perfiles y claves guardadas.
+- Evita múltiples history.back pendientes al cerrar un menú móvil: ya no se sale o recarga el archivo al iniciar.
+- Editor móvil por modo, copia confirmada, acceso en Streamer tras Táctil total, controles visibles dentro de pantalla al girar y bloqueo de combate al editar.
+- Icono de las cinco clases (incluido Espíritu), energía y recarga del botón de poder mediante el validador común.
+- Cargar un escenario reconstruye su lobby antes de recuperar el combate, sin heredar el bloqueo del duelo anterior ni abrir entradas LIVE en 1v1.
+- La descarga rastreada se compara con una generación temporal; ninguna prueba sobrescribe el archivo que comprueba. Pages depende de la validación completa en ambos sistemas.
+- Herramientas de rendimiento cargan el motor extraído; la medición de equilibrio conserva también la dirección del daño y verifica paridad con el combate sin instrumentar. Nuevos datos de 2.400 partidas y mediciones 32/64/128; límites físicos documentados.
+- Documentos históricos conservados. Android, GPU física, TikTok LIVE y OBS reales requieren validación externa.
+
 ## v0.40.8 — Android: arranque, controles y capas independientes (2026-10-30)
 
 - La exportación HTML autónoma espera que termine el análisis del documento de arranque antes de sustituirlo, evitando la pantalla de «Iniciando…» superpuesta al juego en navegadores `content://`.

@@ -6,13 +6,14 @@ const [html,css,runtime,touch,builder,server]=await Promise.all([
   'index.html','portable/mobile.css','portable/mobile-runtime.js',
   'portable/mobile-touch.js','tools/build-mobile.mjs','bridge/server.mjs'
 ].map(read));
+const version=JSON.parse(await read('package.json')).version.split('.').slice(0,2).join('.');
 
 test('desktop markup has unique IDs and loads the six canonical engine scripts once',()=>{
   const ids=[...html.matchAll(/<[a-z][^>]*?\bid="([^"]+)"/gi)].map(m=>m[1]);
   assert.ok(ids.length>300,'Expected the complete Arena Live application');
   assert.equal(new Set(ids).size,ids.length,'Duplicate DOM ID in PC/OBS markup');
   for(const name of ['core','render','audio','settings','balance-evidence','game']){
-    const src='engine/arena-'+name+'.js?v=0.40';
+    const src='engine/arena-'+name+'.js?v='+version;
     assert.equal(html.split('src="'+src+'"').length-1,1,'Duplicated/missing engine module '+name);
   }
 });

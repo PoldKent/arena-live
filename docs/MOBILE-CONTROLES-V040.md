@@ -1,5 +1,6 @@
 # Arena Live · Rediseño ergonómico de controles móviles (vista previa)
 
+> Documento histórico. La entrega y los controles vigentes se describen en [v0.41](RELEASE-0.41-ESTABILIDAD.md) y en el [README](../README.md).
 Base: **0.39.0**. Rama `feat/mobile-touch-joystick-layout`. Este cambio afecta únicamente a `portable/mobile.css`, `portable/mobile-runtime.js`, `portable/mobile-touch.js` y sus pruebas; no cambia la simulación, el balance, las capturas OBS de escritorio ni los comandos originales.
 
 ## Contrato de diseño

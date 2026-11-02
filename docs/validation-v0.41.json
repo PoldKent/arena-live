@@ -1,0 +1,52 @@
+{
+  "version": "0.41.0",
+  "date": "2026-11-01",
+  "sourceBaseCommit": "3b2cc46a3a7d3a3f19123f314af20759c8115722",
+  "environment": {
+    "node": "v24.22.1",
+    "browser": "Chromium 153.0.8010.0",
+    "scope": "Local Linux, software rendering; touch emulation. No real Android, GPU hardware, OBS or TikTok LIVE certification."
+  },
+  "checks": {
+    "node": 176,
+    "operatorBrowser": 88,
+    "integrityBrowser": 24,
+    "trainingBrowser": 18,
+    "mobileBrowser": 34,
+    "mobileControlsBrowser": 6,
+    "previewPackage": 4,
+    "performance": 21,
+    "browserDefaultGpuMode": 21
+  },
+  "mobile": {
+    "bytes": 505246,
+    "sha256": "64ac9e8cb0c06865c804d121a242d1b0024f1dfa170b1cbd235822cf11196eaf",
+    "networkRequests": 0,
+    "errors": [],
+    "path": "mobile-builds/Arena-Live-v0.41.0-movil.html"
+  },
+  "balance": {
+    "matches": 2400,
+    "pace": 0.75,
+    "summary": "docs/balance-v0.41-summary.json",
+    "deterministic": true,
+    "telemetryParity": true,
+    "crossScenarioParity": true,
+    "notes": "Full rounds include phase transitions. AI only, no boosts or re-entry; no automatic damage retuning in this release."
+  },
+  "ci": {
+    "workflow": ".github/workflows/pages-preview.yml",
+    "requiredPlatforms": [
+      "ubuntu-latest",
+      "windows-latest"
+    ],
+    "liveStatusUrl": "https://github.com/PoldKent/arena-live/actions",
+    "notes": "Report records local checks. Consult the workflow for the matching commit; deploy depends on both validation jobs."
+  },
+  "externalValidation": [
+    "Physical Android including content:// viewers",
+    "Physical GPU",
+    "Actual TikTok LIVE session and reconnect",
+    "OBS on streaming PC"
+  ]
+}
