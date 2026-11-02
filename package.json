@@ -16,6 +16,7 @@
     "test:browser": "node test/operator-browser.mjs && node test/integrity-browser.mjs && node test/training-browser.mjs",
     "test:performance": "node test/performance-browser.mjs",
     "test:gpu": "node test/performance-browser.mjs --gpu",
+    "test:device": "node tools/diagnose-device.mjs",
     "test:mobile": "node test/mobile-browser.mjs && node test/mobile-controls-browser.mjs",
     "verify:release": "npm test && npm run build:mobile && npm run test:browser && npm run test:mobile && npm run test:performance",
     "build:styles": "node tools/build-styles.mjs",

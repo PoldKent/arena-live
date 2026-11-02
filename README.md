@@ -112,11 +112,12 @@ npm.cmd run verify:release
 - `test:browser`: interfaz principal, controles, idioma, capturas y pruebas de integración simulada.
 - `test:mobile`: archivo HTML sin conexión, controles y escenario.
 - `test:performance`: mediciones con cargas de luchadores; **no equivalen a FPS garantizados en el equipo del usuario**.
+- `npm.cmd run test:device -- --install-browser`: verifica la descarga móvil y genera un informe de tu equipo con la carga de 128 y el adaptador reportado. [Pasos para completar Android, GPU, TikTok y OBS](docs/VALIDACION-EN-EQUIPO.md).
 - `verify:release`: ejecuta el conjunto de pruebas y genera antes el móvil.
 - `npm.cmd run analyze:balance`: análisis de equilibrio.
 - `npm.cmd run build:styles`: regenera Tailwind solo si cambian clases CSS. Comprobar el resultado antes de publicarlo.
 
-**Estado CI:** GitHub Actions está bloqueado por un presupuesto de 0 USD; las últimas ejecuciones fallaron **antes de que arrancaran las pruebas**. No confundas esos checks rojos con pruebas funcionales fallidas. Hasta que esté disponible un ejecutor, valida localmente y conserva los resultados. **No habilitar facturación ni elevar presupuestos sin autorización.**
+**Estado CI:** la publicación web depende de las pruebas de Node, escritorio, móvil y carga en Windows y Linux. Consulta [Actions](https://github.com/PoldKent/arena-live/actions) para el commit que estás usando; las comprobaciones en dispositivos y sesiones reales se documentan por separado.
 
 ## Política de desarrollo y limpieza
 

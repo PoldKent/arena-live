@@ -85,10 +85,10 @@ export function wrapMobileHtml(unpacked,version){
 }
 
 const root=fileURLToPath(new URL('../',import.meta.url));
-const assets=['index.html','styles/arena-ui.css','styles/TAILWIND-LICENSE.txt',
+export const MOBILE_ASSETS=Object.freeze(['index.html','styles/arena-ui.css','styles/TAILWIND-LICENSE.txt',
     ...['core','render','audio','settings','balance-evidence'].map(name=>`engine/arena-${name}.js`),
     'engine/arena-game.js',
-    'portable/mobile.css','portable/mobile-runtime.js','portable/mobile-touch.js'];
+    'portable/mobile.css','portable/mobile-runtime.js','portable/mobile-touch.js']);
 const replaceOnce=(source,from,to)=>{
     if(source.split(from).length!==2)throw Error('Mobile export marker changed: '+from.slice(0,90));
     return source.replace(from,()=>to);
@@ -102,7 +102,7 @@ const omitDesktopView=(source,begin,end)=>{
 };
 
 export async function buildMobile(output) {
-    const files=new Map(await Promise.all(assets.map(async path=>[path,(await readFile(resolve(root,path),'utf8')).replace(/\r\n?/g,'\n')])));
+    const files=new Map(await Promise.all(MOBILE_ASSETS.map(async path=>[path,(await readFile(resolve(root,path),'utf8')).replace(/\r\n?/g,'\n')])));
     const {version}=JSON.parse(await readFile(resolve(root,'package.json'),'utf8'));
     // Content fingerprints identify the exact input without requiring a git executable.
     const inputs=Object.fromEntries([...files].map(([path,source])=>[path,createHash('sha256').update(source).digest('hex')]));
