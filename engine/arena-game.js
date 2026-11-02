@@ -4297,6 +4297,7 @@
         // At most one background per live context and one immutable isometric floor.
         // Never cache a whole gameplay frame: fighters, effects and flashes stay live.
         const arenaBackgroundCache = new WeakMap();
+        const arenaStaticViewportCache = new WeakMap();
         let arenaIsometricFloorCache = null;
         function paintArenaViewportBackground(targetCtx, viewW, viewH) {
             const theme = gameState === 'LOBBY' || gameState === 'VICTORY' ? gameState : (activeMode === '1v1' ? 'duel' : 'arena');
@@ -4350,11 +4351,27 @@
             }
             targetCtx.drawImage(arenaIsometricFloorCache, -margin, -margin, width, height);
         }
+        function paintArenaStaticViewport(targetCtx,viewW,viewH,camX,camY,camZoom,shake) {
+            // Only the fixed horizontal camera benefits. Reuse the static scene
+            // through quiet frames; shake and flashes keep their original order.
+            if(targetCtx!==ctx16||shake.x||shake.y||skyFlashTimer>0)return false;
+            const platforms=activeMode==='smash'&&gameState==='COMBAT'?JSON.stringify(smashPlatforms):'';
+            const key=[gameState,activeMode,fighters.length>=9,currentLanguage,arenaRenderFontRevision,camX,camY,camZoom,platforms].join(':');
+            ArenaRender.paintCachedViewport(arenaStaticViewportCache,targetCtx,viewW,viewH,key,painter=>{
+                paintArenaSkyGradient(painter,viewW,viewH);
+                painter.translate(viewW*.5,viewH*.56);
+                painter.scale(camZoom,camZoom);
+                painter.translate(-camX,-camY);
+                paintArenaCachedStage(painter);
+            });
+            return true;
+        }
         function renderWorldToViewport(targetCtx, viewW, viewH, camX, camY, camZoom, orderedFighters = null, shake = sampleArenaScreenShake(), animationTime = Date.now(), actorIndex = null) {
             targetCtx.save();
             // Rasterize vectors and text at the actual capture resolution, not a CSS upscale.
             targetCtx.setTransform(targetCtx.canvas.width / viewW, 0, 0, targetCtx.canvas.height / viewH, 0, 0);
-            paintArenaViewportBackground(targetCtx, viewW, viewH);
+            const staticScenery=paintArenaStaticViewport(targetCtx,viewW,viewH,camX,camY,camZoom,shake);
+            if(!staticScenery)paintArenaViewportBackground(targetCtx, viewW, viewH);
 
             if (skyFlashTimer > 0) {
                 targetCtx.fillStyle = skyFlashColor + '33';
@@ -4368,7 +4385,7 @@
             targetCtx.scale(camZoom, camZoom);
             targetCtx.translate(-camX, -camY);
 
-            paintArenaCachedStage(targetCtx);
+            if(!staticScenery)paintArenaCachedStage(targetCtx);
 
             // 4. Depth-Sort Living Fighters
             const visibleFighters=orderedFighters||(gameState==='VICTORY'?(arenaVictoryActor?[arenaVictoryActor]:[]):fighters.filter(f=>!f.eliminated).sort((a,b)=>a.y-b.y));
@@ -4774,108 +4791,7 @@
         }
 
         function drawSpecialEffectsOnCtx(targetCtx, bounds = {left:0, right:WORLD_W, top:0, bottom:WORLD_H},animationTime=Date.now(),actorIndex=null) {
-            activeEffects.forEach(ef => {
-                // Resolve mobile effects once and skip all Canvas2D state/path work
-                // for effects strictly outside this camera. Beams/pillars are
-                // handled separately by conservative effectVisible bounds.
-                const host = ef.type === 'rasengan'
-                    ? (actorIndex?.get(ef.fighterId) || fighters.find(f => f.id === ef.fighterId))
-                    : null;
-                const fx = host ? host.x + host.facing * 20 : ef.x;
-                const fy = host ? host.y - (host.z || 0) + (host.fallDrop || 0) : ef.y;
-                if (!ArenaRender.effectVisible(ef, bounds, fx, fy)) return;
-                targetCtx.save();
-                const progress = ef.timer / ef.maxTimer;
-
-                if (ef.type === 'kamehameha') {
-                    const endX=ef.dirY?ef.x:(ef.dir===1?Math.max(ef.x,bounds.right+40):Math.min(ef.x,bounds.left - 40));
-                    const endY=ef.dirY?(ef.dirY<0?Math.min(ef.y,bounds.top - 40):Math.max(ef.y,bounds.bottom+40)):ef.y;
-                    const beamHeight = 36 * progress;
-
-                    targetCtx.strokeStyle = 'rgba(0, 243, 255, 0.45)';
-                    targetCtx.lineWidth = beamHeight * 1.7;
-                    targetCtx.lineCap = 'round';
-                    targetCtx.beginPath();
-                    targetCtx.moveTo(ef.x, ef.y);
-                    targetCtx.lineTo(endX, endY);
-                    targetCtx.stroke();
-
-                    targetCtx.strokeStyle = '#ffffff';
-                    targetCtx.lineWidth = beamHeight * 0.65;
-                    targetCtx.beginPath();
-                    targetCtx.moveTo(ef.x, ef.y);
-                    targetCtx.lineTo(endX, endY);
-                    targetCtx.stroke();
-
-                } else if (ef.type === 'rasengan') {
-                    const rx = fx;
-                    const ry = fy;
-                    const rad = 38 * (1.2 - progress * 0.3);
-
-                    targetCtx.strokeStyle = '#00f3ff';
-                    targetCtx.lineWidth = 3;
-                    for (let s = 0; s < 3; s++) {
-                        targetCtx.beginPath();
-                        targetCtx.arc(rx, ry, rad * (0.4 + s * 0.32), animationTime * 0.02 + s, animationTime * 0.02 + s + 4);
-                        targetCtx.stroke();
-                    }
-
-                } else if (ef.type === 'lightning') {
-                    targetCtx.strokeStyle = '#facc15';
-                    targetCtx.lineWidth = 4 * progress;
-                    targetCtx.beginPath();
-                    const top = Math.floor(Math.min(ef.y, bounds.top) / 28) * 28 - 28;
-                    const bottom = Math.min(ef.y, bounds.bottom + 28);
-                    const phase = Math.floor((ef.maxTimer - ef.timer) / 3);
-                    targetCtx.moveTo(ef.x, top);
-                    // The same world-height noise is shared by both cameras. Rendering never
-                    // advances combat randomness, even when a taller crop needs more segments.
-                    for (let y = top + 28; y < bottom; y += 28) {
-                        targetCtx.lineTo(ef.x + Math.sin(y * 0.17 + ef.x * 0.13 + phase * 1.7) * 17, y);
-                    }
-                    targetCtx.lineTo(ef.x, bottom);
-                    targetCtx.stroke();
-
-                } else if (ef.type === 'titanQuake') {
-                    targetCtx.globalAlpha = progress;
-                    targetCtx.strokeStyle = ef.color || '#fb7185';
-                    targetCtx.lineWidth = 5 * progress + 1;
-                    targetCtx.beginPath();
-                    targetCtx.ellipse(ef.x, ef.y, 205 * (1 - progress * 0.25), 25 * (1 - progress * 0.25), 0, 0, Math.PI * 2);
-                    targetCtx.stroke();
-                    targetCtx.globalAlpha = 1;
-
-                } else if (ef.type === 'doubleJump') {
-                    const radiusX = 36 * (1.15 - progress * 0.65);
-                    const radiusY = 12 * (1.15 - progress * 0.65);
-                    targetCtx.strokeStyle = '#00f3ff';
-                    targetCtx.globalAlpha = progress;
-                    targetCtx.lineWidth = 3;
-                    targetCtx.beginPath();
-                    targetCtx.ellipse(ef.x, ef.y, radiusX, radiusY, 0, 0, Math.PI * 2);
-                    targetCtx.stroke();
-
-                    targetCtx.strokeStyle = '#ffffff';
-                    targetCtx.lineWidth = 1.5;
-                    targetCtx.beginPath();
-                    targetCtx.ellipse(ef.x, ef.y + 4, radiusX * 0.65, radiusY * 0.65, 0, 0, Math.PI * 2);
-                    targetCtx.stroke();
-                    targetCtx.globalAlpha = 1;
-
-                } else if (ef.type === 'ringOutPillar') {
-                    const pillarW = 68 * progress;
-                    const top = Math.min(ef.y, bounds.top - 16);
-                    const grad = targetCtx.createLinearGradient(ef.x, ef.y, ef.x, top);
-                    grad.addColorStop(0, ef.color || '#f43f5e');
-                    grad.addColorStop(1, 'rgba(244, 63, 94, 0)');
-                    targetCtx.fillStyle = grad;
-                    targetCtx.globalAlpha = progress * 0.85;
-                    targetCtx.fillRect(ef.x - pillarW / 2, top, pillarW, ef.y - top);
-                    targetCtx.globalAlpha = 1;
-                }
-
-                targetCtx.restore();
-            });
+            ArenaRender.drawSpecialEffects(targetCtx,activeEffects,bounds,animationTime,actorIndex,fighters);
         }
 
         function reserveParticleSlots(count) {
@@ -6658,7 +6574,7 @@
         let arenaDualUltrawideActive = false;
 
         // MODULE BLOCK: VERSION 0.1 / OBS CALIBRATION (shared across main and TikTok).
-        const ARENA_RELEASE_VERSION = '0.41';
+        const ARENA_RELEASE_VERSION = '0.42';
         const ARENA_OBS_CALIBRATION_KEY = 'arenaLiveObsCalibrationV01';
         const ARENA_OBS_DEFAULTS = Object.freeze({offset:0, footer:76, format:'21'});
         let arenaObsCalibration = {...ARENA_OBS_DEFAULTS};
@@ -7721,7 +7637,7 @@
         // It deliberately exposes snapshots rather than mutable Fighter instances.
         const ARENA_SOCIAL_EVENT_TYPES = Object.freeze(['taps', 'likes', 'share', 'follow', 'subscribe', 'bits', 'donation', 'superchat', 'star', 'stars', 'gift']);
         window.ArenaLive = Object.freeze({
-            version: '0.41.0',
+            version: '0.42.0',
             edition: 'tiktok',
             renderSpriteMode: arenaGpuSpritesEnabled ? 'hardware-candidate' : 'software-safe-vectors',
             setOption:setArenaRuntimeOption,exportConfiguration:exportArenaConfiguration,importConfiguration:importArenaConfiguration,getDiagnostics:getArenaDiagnostics,

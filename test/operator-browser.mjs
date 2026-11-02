@@ -709,13 +709,13 @@ await check('Static Full HD layers are bounded, refresh with scene changes and n
  const result=await page.evaluate(()=>{
   activeEffects=[];confetti=[];skyFlashTimer=0;particles=[];floatingTexts=[];activeMode='iso';gameState='COMBAT';
   const draw=()=>renderWorldToViewport(ctx16,960,540,480,302.4,1,[],{x:0,y:0});
-  draw();const first=arenaBackgroundCache.get(ctx16),floor=arenaIsometricFloorCache;
-  draw();const reused=first===arenaBackgroundCache.get(ctx16)&&floor===arenaIsometricFloorCache;
+  draw();const first=arenaStaticViewportCache.get(ctx16),floor=arenaIsometricFloorCache;
+  draw();const reused=first===arenaStaticViewportCache.get(ctx16)&&floor===arenaIsometricFloorCache;
   const clean=Array.from(ctx16.getImageData(10,10,1,1).data);skyFlashTimer=10;skyFlashColor='#ffffff';draw();skyFlashTimer=0;draw();
   const fresh=clean.every((v,i)=>v===ctx16.getImageData(10,10,1,1).data[i]);
-  gameState='VICTORY';draw();const victory=arenaBackgroundCache.get(ctx16)!==first;
-  const victoryLayer=arenaBackgroundCache.get(ctx16);gameState='LOBBY';draw();const lobby=arenaBackgroundCache.get(ctx16)!==victoryLayer;
-  return {reused,fresh,victory,lobby,floorSize:[floor.width,floor.height],nativeBackground:[arenaBackgroundCache.get(ctx16).layer.width,arenaBackgroundCache.get(ctx16).layer.height]};
+  gameState='VICTORY';draw();const victory=arenaStaticViewportCache.get(ctx16)!==first;
+  const victoryLayer=arenaStaticViewportCache.get(ctx16);gameState='LOBBY';draw();const lobby=arenaStaticViewportCache.get(ctx16)!==victoryLayer;
+  return {reused,fresh,victory,lobby,floorSize:[floor.width,floor.height],nativeBackground:[arenaStaticViewportCache.get(ctx16).layer.width,arenaStaticViewportCache.get(ctx16).layer.height]};
  });assert.deepEqual(result,{reused:true,fresh:true,victory:true,lobby:true,floorSize:[2176,1336],nativeBackground:[1920,1080]});
 });
 await check('Settings shows the release only in its footer and retains UI/power names through all eight languages',async()=>{

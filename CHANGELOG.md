@@ -1,3 +1,10 @@
+## v0.42.0 — Render y poderes verticales (2026-11-02)
+
+- Corregido el Kame vertical que cruza la cámara desde fuera de pantalla.
+- Extraído el dibujo de efectos al módulo de render compartido, con estado de combate idéntico a 0.41.
+- Reutilizado el cielo y escenario de la cámara horizontal en fotogramas sin vibración ni destellos; imagen Full HD idéntica en los tres modos y fases.
+- Validación de 128 participantes, memoria acotada y descarga móvil 0.42.0 sincronizada. Véase [la entrega y mediciones](docs/RELEASE-0.42-RENDER.md).
+
 ## v0.41.0 — Correcciones de auditoría y entrega verificable (2026-11-01)
 
 - Restablecidos los contratos de configuración de la API sin volver a añadir botones manuales; importa esquema 1, formato OBS y velocidad 0.5×, conservando perfiles y claves guardadas.

@@ -1,0 +1,64 @@
+{
+  "version": "0.42.0",
+  "date": "2026-11-02",
+  "sourceBaseCommit": "681a13da60518e5537f440305eb8a1e4fe9a21a3",
+  "environment": {
+    "node": "v24.22.1",
+    "browser": "Chromium 153.0.8010.0",
+    "scope": "Local Linux; software rendering and touch emulation. No physical Android, hardware GPU, OBS or TikTok LIVE certification."
+  },
+  "checks": {
+    "node": 180,
+    "operatorBrowser": 88,
+    "integrityBrowser": 24,
+    "trainingBrowser": 18,
+    "mobileBrowser": 34,
+    "mobileControlsBrowser": 6,
+    "performance": 24,
+    "browserDefaultGpuMode": 24,
+    "previewPackage": 4
+  },
+  "mobile": {
+    "path": "mobile-builds/Arena-Live-v0.42.0-movil.html",
+    "bytes": 506134,
+    "sha256": "c2e5b92a1d58e93d7da70faac3ba2b04acd2f306ce5c5bf3c88bc8cd275cfec2",
+    "networkRequests": 0,
+    "errors": []
+  },
+  "render": {
+    "staticSceneryPixelParityCases": 9,
+    "comparisonBaseVersion": "0.41.0",
+    "identicalCombatStates": [
+      32,
+      64,
+      128,
+      "full-power burst"
+    ],
+    "cachePixelBytesAtFullHD": 8294400,
+    "cacheScope": "Horizontal static scenery, bypassed during shake or sky flash; no cached fighters, effects or HUD.",
+    "rules": "Unchanged; 0.41 balance evidence retained."
+  },
+  "startSmoke": {
+    "status": 200,
+    "version": "0.42.0",
+    "phase": "disconnected",
+    "mobileStatus": 200,
+    "mobileBytes": 506134,
+    "mobileSha256": "c2e5b92a1d58e93d7da70faac3ba2b04acd2f306ce5c5bf3c88bc8cd275cfec2"
+  },
+  "ci": {
+    "workflow": ".github/workflows/pages-preview.yml",
+    "requiredPlatforms": [
+      "ubuntu-latest",
+      "windows-latest"
+    ],
+    "liveStatusUrl": "https://github.com/PoldKent/arena-live/actions",
+    "notes": "Records local checks. Consult the workflow for the matching commit; deployment requires Windows/Linux validation."
+  },
+  "externalValidation": [
+    "Physical Android including content:// viewers",
+    "Physical GPU",
+    "Actual TikTok LIVE session and reconnect",
+    "OBS on streaming PC"
+  ]
+}

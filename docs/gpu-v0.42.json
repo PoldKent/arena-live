@@ -1,0 +1,356 @@
+{
+  "passed": 24,
+  "errors": 0,
+  "checks": [
+    "32 fighters simulate and render both captures with finite state",
+    "64 fighters simulate and render both captures with finite state",
+    "128 fighters simulate and render both captures with finite state",
+    "128-player full-power burst retains finite state, bounded effects and baseline parity when provided",
+    "quality budgets preserve simulation and native Full HD at a captured particle peak",
+    "128 synchronous specials cast and render both unchanged Full HD captures",
+    "Full HD captures are opaque and remain eligible for automatic hardware rasterization",
+    "target options retain existing DOM nodes and selection while only eliminated options disappear",
+    "reevaluating an unchanged arena mode does not rebuild its HUD or badges",
+    "both captures share one animation clock and rendering consumes no combat randomness",
+    "active bonus symbols do not shift the name and class text baseline",
+    "128-player scenario also loads during combat; mode transitions and capacity remain correct",
+    "preparation skips its hidden capture and switching or dual view repaints fresh game state",
+    "cached static scenery matches direct Full HD pixels in every mode and phase",
+    "static scenery cache survives shake and flash and measures 128 fighters without advancing combat",
+    "offscreen vertical beams visibly cross both portrait edges",
+    "label metric cache follows renamed fighters, life counters and loaded fonts",
+    "128 fighters reuse name and body textures on successive Full HD draws",
+    "unchanged duel HUD values do not recreate text or trigger localization each frame",
+    "128 autonomous fighters still charge/fire specials and keep transient effects bounded",
+    "128-player powers retain real text and damage labels while transient history remains bounded",
+    "expired KO notices release detached badges instead of accumulating through a stream",
+    "replacing a scenario clears old powers and a pending victory cannot overwrite the new match",
+    "500 received comments keep history and automatic follow without rebuilding toolbar state per message"
+  ],
+  "measurements": [
+    {
+      "source": "baseline",
+      "count": 32,
+      "setupMs": 28.300000000046566,
+      "bodies": 32,
+      "targeting": {
+        "mean": 0.08833333333410943,
+        "median": 0,
+        "p95": 0.10000000009313226
+      },
+      "simulation": {
+        "mean": 0.32166666666744276,
+        "median": 0.2000000000698492,
+        "p95": 0.8000000000465661
+      },
+      "drawing": {
+        "mean": 26.533333333338508,
+        "median": 2.400000000023283,
+        "p95": 429.4000000000233
+      },
+      "alive": 32,
+      "finite": true,
+      "stateSHA256": "64dde4e31f240d7a4a24b3eee5492b203beed20b89fa3fab0dec5c4d78eb9d72"
+    },
+    {
+      "source": "baseline",
+      "count": 64,
+      "setupMs": 12.199999999953434,
+      "bodies": 64,
+      "targeting": {
+        "mean": 0.125,
+        "median": 0.09999999997671694,
+        "p95": 0.30000000004656613
+      },
+      "simulation": {
+        "mean": 1.542499999999806,
+        "median": 1.3000000000465661,
+        "p95": 3.199999999953434
+      },
+      "drawing": {
+        "mean": 25.522222222223515,
+        "median": 3.300000000046566,
+        "p95": 402.20000000006985
+      },
+      "alive": 64,
+      "finite": true,
+      "stateSHA256": "187fea45386ee5f0fcb239ee4546fd89259f581fe9d16ad64bf29db34f4b59e5"
+    },
+    {
+      "source": "baseline",
+      "count": 128,
+      "setupMs": 19.300000000046566,
+      "bodies": 128,
+      "targeting": {
+        "mean": 0.22499999999805975,
+        "median": 0.2000000000698492,
+        "p95": 0.30000000004656613
+      },
+      "simulation": {
+        "mean": 3.2208333333343035,
+        "median": 3.099999999976717,
+        "p95": 7.200000000069849
+      },
+      "drawing": {
+        "mean": 44.22777777777648,
+        "median": 5.299999999930151,
+        "p95": 385.70000000006985
+      },
+      "alive": 128,
+      "finite": true,
+      "stateSHA256": "bcbf2e4bba2407c0d1f44d729247775ee5ff54481b1765ea0ff691f9ca7b4c62"
+    },
+    {
+      "source": "current",
+      "count": 32,
+      "setupMs": 27,
+      "bodies": 32,
+      "targeting": {
+        "mean": 0.08333333333333333,
+        "median": 0,
+        "p95": 0.30000000004656613
+      },
+      "simulation": {
+        "mean": 0.27833333333352733,
+        "median": 0.19999999995343387,
+        "p95": 0.8999999999068677
+      },
+      "drawing": {
+        "mean": 26.522222222223515,
+        "median": 2.299999999930151,
+        "p95": 439.69999999995343
+      },
+      "alive": 32,
+      "finite": true,
+      "stateSHA256": "64dde4e31f240d7a4a24b3eee5492b203beed20b89fa3fab0dec5c4d78eb9d72"
+    },
+    {
+      "source": "current",
+      "count": 64,
+      "setupMs": 15.899999999906868,
+      "bodies": 64,
+      "targeting": {
+        "mean": 0.09166666666666666,
+        "median": 0.09999999997671694,
+        "p95": 0.2000000000698492
+      },
+      "simulation": {
+        "mean": 1.295000000000194,
+        "median": 1,
+        "p95": 2.700000000069849
+      },
+      "drawing": {
+        "mean": 27.766666666669252,
+        "median": 4,
+        "p95": 434
+      },
+      "alive": 64,
+      "finite": true,
+      "stateSHA256": "187fea45386ee5f0fcb239ee4546fd89259f581fe9d16ad64bf29db34f4b59e5"
+    },
+    {
+      "source": "current",
+      "count": 128,
+      "setupMs": 14.800000000046566,
+      "bodies": 128,
+      "targeting": {
+        "mean": 0.16833333333294528,
+        "median": 0.19999999995343387,
+        "p95": 0.2999999999301508
+      },
+      "simulation": {
+        "mean": 2.780000000000776,
+        "median": 1.900000000023283,
+        "p95": 6.400000000023283
+      },
+      "drawing": {
+        "mean": 49.911111111112405,
+        "median": 5.5,
+        "p95": 426.19999999995343
+      },
+      "alive": 128,
+      "finite": true,
+      "stateSHA256": "bcbf2e4bba2407c0d1f44d729247775ee5ff54481b1765ea0ff691f9ca7b4c62"
+    }
+  ],
+  "burstMeasurements": [
+    {
+      "source": "baseline",
+      "count": 128,
+      "frames": 180,
+      "drawnFrames": 30,
+      "simulation": {
+        "mean": 2.8288888888873367,
+        "median": 2.300000000046566,
+        "p95": 5.800000000046566
+      },
+      "drawing": {
+        "mean": 43.91333333333799,
+        "median": 8.599999999976717,
+        "p95": 231.90000000002328
+      },
+      "maxParticles": 1800,
+      "maxEffects": 100,
+      "maxTexts": 120,
+      "caps": [
+        1800,
+        240,
+        120
+      ],
+      "alive": 110,
+      "finite": true,
+      "stateSHA256": "5d49b68b1449afea48f9c0422660c2a1b01c2439dc9fe1b512f6ff087fafc308"
+    },
+    {
+      "source": "current",
+      "count": 128,
+      "frames": 180,
+      "drawnFrames": 30,
+      "simulation": {
+        "mean": 2.975555555555426,
+        "median": 2.400000000023283,
+        "p95": 6.199999999953434
+      },
+      "drawing": {
+        "mean": 36.306666666668995,
+        "median": 8.900000000023283,
+        "p95": 212.10000000009313
+      },
+      "maxParticles": 1800,
+      "maxEffects": 100,
+      "maxTexts": 120,
+      "caps": [
+        1800,
+        240,
+        120
+      ],
+      "alive": 110,
+      "finite": true,
+      "stateSHA256": "5d49b68b1449afea48f9c0422660c2a1b01c2439dc9fe1b512f6ff087fafc308"
+    }
+  ],
+  "qualityMeasurements": [
+    {
+      "particles": 1800,
+      "alive": 128,
+      "qualities": {
+        "high": {
+          "mean": 26.57500000000194,
+          "p95": 171.79999999993015,
+          "samples": 24
+        },
+        "balanced": {
+          "mean": 31.995833333329454,
+          "p95": 170.59999999997672,
+          "samples": 24
+        },
+        "performance": {
+          "mean": 18.708333333333332,
+          "p95": 145.90000000002328,
+          "samples": 24
+        }
+      },
+      "simulationUnchanged": true,
+      "captures": [
+        [
+          1920,
+          1080
+        ],
+        [
+          1080,
+          1920
+        ]
+      ]
+    }
+  ],
+  "sceneryMeasurements": [
+    {
+      "keptOnShake": true,
+      "keptOnFlash": true,
+      "reused": true,
+      "unchanged": true,
+      "layerBytes": 8294400,
+      "direct": {
+        "median": 4.400000000023283,
+        "mean": 18.27500000000388,
+        "p95": 112,
+        "samples": 24
+      },
+      "cached": {
+        "median": 5.099999999976717,
+        "mean": 19.208333333333332,
+        "p95": 121.20000000006985,
+        "samples": 24
+      }
+    }
+  ],
+  "sourceHashes": [
+    {
+      "source": "baseline",
+      "version": "0.41.0",
+      "gitBlob": "cb14c05eb43955ad8433da83f12a36c093ea128b",
+      "modules": {
+        "/engine/arena-core.js": "64d4a8ed8f4abaee4db3b794c3fa5751bdfd47f7",
+        "/engine/arena-render.js": "6c9603974d2c02d0f0fb52857992211c08cd6725",
+        "/engine/arena-audio.js": "319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934",
+        "/engine/arena-settings.js": "2b14e0bd073d39821cc8dd9b93d371be4e947f91",
+        "/engine/arena-balance-evidence.js": "e5d7e0a60ec124b15c288ab26c33d2cd3a734e0e",
+        "/engine/arena-game.js": "8c66e3d72891bc1dea1860240cd642067f1356d6"
+      }
+    },
+    {
+      "source": "current",
+      "version": "0.42.0",
+      "gitBlob": "bf85efc5a8487a455ef364d53ce123a112a1b39c",
+      "modules": {
+        "/engine/arena-core.js": "64d4a8ed8f4abaee4db3b794c3fa5751bdfd47f7",
+        "/engine/arena-render.js": "23ad1ada9d4e95acb295ed47a40eaecce7d339ce",
+        "/engine/arena-audio.js": "319f1c5fe8a4cf80f8a1ae7c852bd8fe11420934",
+        "/engine/arena-settings.js": "2b14e0bd073d39821cc8dd9b93d371be4e947f91",
+        "/engine/arena-balance-evidence.js": "e5d7e0a60ec124b15c288ab26c33d2cd3a734e0e",
+        "/engine/arena-game.js": "52f13e770330d7d37219b8fdde9758ce96e1dfdd"
+      }
+    }
+  ],
+  "environment": {
+    "node": "v24.22.1",
+    "browser": "153.0.8010.0",
+    "gpu": "browser default; consult graphics featureStatus for actual acceleration",
+    "drawTiming": "CPU command submission only; excludes GPU completion and presentation",
+    "graphics": {
+      "featureStatus": {
+        "2d_canvas": "unavailable_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "raw_draw": "disabled_off_ok",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "vulkan": "disabled_off",
+        "webgl": "unavailable_software",
+        "webgpu": "unavailable_software",
+        "webgpu_on_vk_via_gl_interop": "disabled_off",
+        "webnn": "unavailable_software"
+      },
+      "devices": [
+        {
+          "vendorId": 65535,
+          "deviceId": 65535,
+          "vendorString": "Google Inc. (Google)",
+          "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "driverVendor": "SwANGLE",
+          "driverVersion": "5.0.0"
+        }
+      ],
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+      "driverVendor": "Google Inc. (Google)"
+    },
+    "viewport": "1720x720",
+    "simulationHz": 60,
+    "workload": "Constant-population timings disable knockback and suppress automatic specials; paired 128-player bursts restore normal HP, full knockback and all automatic specials for 180 ticks, rendering every sixth tick. Clock/RNG initialization is identical. Quality timings alternate on the same frozen peak-particle scene. Static scenery compares alternating direct/cached quiet frames of the same 128-fighter snapshot; it is bypassed during shake/flash. No FPS guarantee."
+  }
+}

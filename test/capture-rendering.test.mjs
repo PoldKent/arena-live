@@ -57,6 +57,21 @@ test('beam endpoints and KO pillars reach viewport edges at different zooms and 
   }
 });
 
+test('vertical beams cast from offscreen reach the opposite portrait edge without changing the effect',()=>{
+ const e=engine(),bounds=e.getArenaViewportBounds(540,960,600,320,.64);
+ for(const dirY of [-1,1]){
+  const y=dirY<0?bounds.bottom+200:bounds.top-200;
+  const effect={type:'kamehameha',x:600,y,dirY,timer:36,maxTimer:36};
+  e.activeEffects=[effect];const ctx=recorder();
+  e.drawSpecialEffectsOnCtx(ctx,bounds,123);
+  assert.ok(ctx.paths.length>0);
+  const end=ctx.paths.at(-1);
+  assert.equal(end[1],600);
+  assert.ok(dirY<0?end[2]<bounds.top:end[2]>bounds.bottom);
+  assert.deepEqual(effect,{type:'kamehameha',x:600,y,dirY,timer:36,maxTimer:36});
+ }
+});
+
 test('reusable high-DPI label and body sprites preserve full-HD dual-capture architecture',()=>{
   assert.match(html,/const ARENA_LABEL_SPRITE_SCALE = 3;/);
   assert.match(html,/const ARENA_BODY_SPRITE_SCALE = 3;/);

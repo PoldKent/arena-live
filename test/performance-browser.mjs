@@ -36,7 +36,7 @@ const launch = { headless: true, args: gpuMode ? [] : ['--disable-gpu'] };
 if (process.env.ARENA_BROWSER_EXECUTABLE) launch.executablePath = process.env.ARENA_BROWSER_EXECUTABLE;
 if (process.env.ARENA_BROWSER_LIBRARY_PATH) launch.env = { ...process.env, LD_LIBRARY_PATH: process.env.ARENA_BROWSER_LIBRARY_PATH };
 let browser;
-const checks = [], errors = [], measurements = [], burstMeasurements = [], qualityMeasurements=[];
+const checks = [], errors = [], measurements = [], burstMeasurements = [], qualityMeasurements=[],sceneryMeasurements=[];
 const referenceStates = new Map();
 const check = async (name, fn) => { await fn(); checks.push(name); console.log('PASS', name); };
 try {
@@ -323,6 +323,65 @@ try {
         });
         assert.deepEqual(result, { hidden9: true, hidden16: true, fresh9: true, fresh16: true });
       });
+      await check('cached static scenery matches direct Full HD pixels in every mode and phase',async()=>{
+        await page.evaluate(()=>document.fonts.ready);
+        const rows=await page.evaluate(()=>{
+          const saved={fighters,particles,activeEffects,floatingTexts,gameState,activeMode,skyFlashTimer};
+          const original=paintArenaStaticViewport,rows=[];
+          try{
+            particles=[];activeEffects=[];floatingTexts=[];skyFlashTimer=0;
+            for(const mode of ['iso','smash','1v1'])for(const phase of ['LOBBY','COMBAT','VICTORY']){
+              activeMode=mode;gameState=phase;
+              const draw=()=>renderWorldToViewport(ctx16,960,540,480,291.6,mode==='1v1'?1.12:1,[],{x:0,y:0},123);
+              draw();const cached=ctx16.getImageData(0,0,1920,1080).data;
+              paintArenaStaticViewport=()=>false;draw();paintArenaStaticViewport=original;
+              const direct=ctx16.getImageData(0,0,1920,1080).data;let differences=0,maxDelta=0;
+              for(let i=0;i<cached.length;i++)if(cached[i]!==direct[i]){differences++;maxDelta=Math.max(maxDelta,Math.abs(cached[i]-direct[i]));}
+              rows.push({mode,phase,differences,maxDelta});
+            }
+            return rows;
+          }finally{paintArenaStaticViewport=original;fighters=saved.fighters;particles=saved.particles;activeEffects=saved.activeEffects;floatingTexts=saved.floatingTexts;gameState=saved.gameState;activeMode=saved.activeMode;skyFlashTimer=saved.skyFlashTimer;}
+        });
+        assert.equal(rows.length,9);assert.ok(rows.every(r=>r.differences===0),JSON.stringify(rows));
+      });
+      await check('static scenery cache survives shake and flash and measures 128 fighters without advancing combat',async()=>{
+        const result=await page.evaluate(gpuMode=>{
+          gameState='LOBBY';applyPlayerCountPreset(128);startCombatFromLobby();setMonitorFocus('dual');screenShake=0;skyFlashTimer=0;
+          const original=paintArenaStaticViewport;
+          const draw=()=>{renderBothScreensSimultaneously();if(!gpuMode){ctx16.getImageData(0,0,1,1);ctx9.getImageData(0,0,1,1);}};
+          const state=()=>JSON.stringify({fighters,particles,activeEffects,floatingTexts,combatSeed:arenaCombatRandom.state(),visualSeed:arenaVisualRandomSource.state()},(key,value)=>key==='lastAttacker'?value?.id||null:value);
+          const before=state();draw();const entry=arenaStaticViewportCache.get(ctx16);
+          renderWorldToViewport(ctx16,960,540,480,291.6,1,[],{x:2,y:-1},123);
+          const keptOnShake=arenaStaticViewportCache.get(ctx16)===entry;
+          skyFlashTimer=10;draw();const keptOnFlash=arenaStaticViewportCache.get(ctx16)===entry;skyFlashTimer=0;draw();
+          const samples={direct:[],cached:[]};
+          try{
+            for(const enabled of [false,true]){paintArenaStaticViewport=enabled?original:()=>false;for(let i=0;i<6;i++)draw();}
+            for(let i=0;i<24;i++)for(const key of i%2?['direct','cached']:['cached','direct']){
+              paintArenaStaticViewport=key==='cached'?original:()=>false;const t=performance.now();draw();samples[key].push(performance.now()-t);
+            }
+          }finally{paintArenaStaticViewport=original;}
+          const stats=values=>{values.sort((a,b)=>a-b);return{median:values[12],mean:values.reduce((a,b)=>a+b,0)/values.length,p95:values[Math.floor(values.length*.95)],samples:values.length};};
+          return{keptOnShake,keptOnFlash,reused:arenaStaticViewportCache.get(ctx16)===entry,unchanged:state()===before,layerBytes:entry.layer.width*entry.layer.height*4,direct:stats(samples.direct),cached:stats(samples.cached)};
+        },gpuMode);
+        assert.equal(result.keptOnShake,true);assert.equal(result.keptOnFlash,true);assert.equal(result.reused,true);assert.equal(result.unchanged,true);assert.equal(result.layerBytes,1920*1080*4);
+        sceneryMeasurements.push(result);console.log('STATIC_SCENERY',JSON.stringify(result));
+      });
+      await check('offscreen vertical beams visibly cross both portrait edges',async()=>{
+        const result=await page.evaluate(()=>{
+          const saved={particles,activeEffects,floatingTexts,gameState,skyFlashTimer};
+          try{
+            particles=[];floatingTexts=[];gameState='COMBAT';skyFlashTimer=0;const hits=[];
+            const bounds=getArenaViewportBounds(540,960,480,302.4,.64);
+            for(const dirY of [-1,1]){
+              activeEffects=[{type:'kamehameha',x:480,y:dirY<0?bounds.bottom+200:bounds.top-200,dirY,timer:36,maxTimer:36}];
+              renderWorldToViewport(ctx9,540,960,480,302.4,.64,[],{x:0,y:0},123);
+              hits.push([1,1918].every(y=>{const p=ctx9.getImageData(540,y,1,1).data;return p[0]>240&&p[1]>240&&p[2]>240;}));
+            }
+            return hits;
+          }finally{particles=saved.particles;activeEffects=saved.activeEffects;floatingTexts=saved.floatingTexts;gameState=saved.gameState;skyFlashTimer=saved.skyFlashTimer;}
+        });assert.deepEqual(result,[true,true]);
+      });
       await check('label metric cache follows renamed fighters, life counters and loaded fonts', async () => {
         const result = await page.evaluate(() => {
           renderBothScreensSimultaneously();
@@ -489,12 +548,12 @@ try {
       gitBlob: createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex'),
       modules:Object.fromEntries([...assets].map(([path,data])=>[path,createHash('sha1').update('blob '+data.length+'\0').update(data).digest('hex')])) };
   });
-  const report = { passed: checks.length, errors: errors.length, checks, measurements, burstMeasurements,qualityMeasurements, sourceHashes,
+  const report = { passed: checks.length, errors: errors.length, checks, measurements, burstMeasurements,qualityMeasurements,sceneryMeasurements, sourceHashes,
     environment: { node: process.version, browser: await browser.version(),
       gpu: gpuMode ? 'browser default; consult graphics featureStatus for actual acceleration' : 'disabled by test; software raster and readback included',
       drawTiming:gpuMode ? 'CPU command submission only; excludes GPU completion and presentation' : 'command submission and software raster readback',
       graphics, viewport: '1720x720', simulationHz: 60,
-      workload: 'Constant-population timings disable knockback and suppress automatic specials; paired 128-player bursts restore normal HP, full knockback and all automatic specials for 180 ticks, rendering every sixth tick. Clock/RNG initialization is identical. Quality timings alternate on the same frozen peak-particle scene; no FPS guarantee.' } };
+      workload: 'Constant-population timings disable knockback and suppress automatic specials; paired 128-player bursts restore normal HP, full knockback and all automatic specials for 180 ticks, rendering every sixth tick. Clock/RNG initialization is identical. Quality timings alternate on the same frozen peak-particle scene. Static scenery compares alternating direct/cached quiet frames of the same 128-fighter snapshot; it is bypassed during shake/flash. No FPS guarantee.' } };
   if (process.env.ARENA_PERF_REPORT) await writeFile(process.env.ARENA_PERF_REPORT, JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report));
 } finally {

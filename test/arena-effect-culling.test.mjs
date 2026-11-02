@@ -28,6 +28,16 @@ test('lightning and KO pillars may reach the screen from above or below',()=>{
  assert.equal(visible({type:'futureEffect',x:-9000,y:-9000},camera),true);
 });
 
+test('vertical beams cross the camera from either end and are culled only when pointing away',()=>{
+ for(const dir of [-1,1]){
+  const y=dir<0?camera.bottom+300:camera.top-300;
+  assert.equal(visible({type:'kamehameha',x:480,y,dirY:dir},camera),true);
+  assert.equal(visible({type:'kamehameha',x:480,y,dirY:-dir},camera),false);
+  assert.equal(visible({type:'kamehameha',x:camera.right+100,y,dirY:dir},camera),false);
+  assert.equal(visible({type:'kamehameha',x:camera.left-100,y,dirY:dir},camera),false);
+ }
+});
+
 test('batch reservation retains exactly the same particles and draw order as per-particle overflow',()=>{
  const max=1800;
  for(const existing of [0,1775,1799,1800]){

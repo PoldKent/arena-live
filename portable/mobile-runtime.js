@@ -89,7 +89,7 @@ function arenaPortableSetMode(mode,{remember=true,updateGame=true}={}){
 function arenaMobileSyncCaptures(draw16,draw9) {
     const short=arenaPortableProfile.resolution,long=short*16/9;
     for(const [canvas,ctx,w,h]of [[canvas16,ctx16,draw16?long:1,draw16?short:1],[canvas9,ctx9,draw9?short:1,draw9?long:1]]){
-        if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;arenaBackgroundCache.delete(ctx);}
+        if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;arenaBackgroundCache.delete(ctx);arenaStaticViewportCache.delete(ctx);}
     }
 }
 function arenaPortableResolution(value) {
