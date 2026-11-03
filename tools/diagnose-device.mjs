@@ -57,9 +57,9 @@ export function summarizeDeviceGpu(report,version){
         canvas2d:graphics?.featureStatus?.['2d_canvas']??null,
         compositing:graphics?.featureStatus?.gpu_compositing??null,
         rasterization:graphics?.featureStatus?.rasterization??null,
-        timing:report.environment?.drawTiming,
+        timing:report.environment?.drawTiming,launch:report.environment?.launch??null,
         workload128,
-        note:'Adaptador del navegador de prueba. No certifica la aceleración del navegador de la emisión, OBS ni un teléfono.'};
+        note:'Adaptador del navegador de prueba. Sin launch.gpuAutodetectionRequested, un informe antiguo puede reflejar el SwiftShader predeterminado de headless. No certifica la aceleración del navegador de la emisión, OBS ni un teléfono.'};
 }
 
 export function runDeviceNodeTask(args,{cwd=ROOT,env=process.env,logFile,timeout=180000}={}){

@@ -41,6 +41,9 @@ test('unavailable, redirected, malformed and HTTP-error local servers remain unv
 test('GPU summaries distinguish software from a reported adapter and reject failed, partial or wrong-version loads',()=>{
  const raw={passed:24,errors:0,checks:Array(24).fill('check'),sourceHashes:[{source:'current',version:'0.42.0'}],measurements:[{source:'current',count:128,alive:128,finite:true}],environment:{browser:'153',drawTiming:'command submission',graphics:{renderer:'ANGLE SwiftShader',featureStatus:{'2d_canvas':'unavailable_software'}}}};
  const summary=summarizeDeviceGpu(raw,'0.42.0');assert.equal(summary.rendererType,'software');assert.equal(summary.canvas2d,'unavailable_software');
+ assert.equal(summary.launch,null);
+ raw.environment.launch={headless:true,gpuAutodetectionRequested:true,gpuDisabledByTest:false,args:['--enable-gpu']};
+ assert.deepEqual(summarizeDeviceGpu(raw,'0.42.0').launch,raw.environment.launch);
  raw.environment.graphics.renderer='ANGLE NVIDIA';assert.equal(summarizeDeviceGpu(raw,'0.42.0').rendererType,'reported-adapter');
  delete raw.environment.graphics.renderer;assert.equal(summarizeDeviceGpu(raw,'0.42.0').rendererType,'unreported');
  assert.equal(summarizeDeviceGpu(raw,'0.43.0'),null);

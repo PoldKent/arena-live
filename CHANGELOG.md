@@ -1,5 +1,6 @@
 ## v0.42.0 — Render y poderes verticales (2026-11-02)
 
+- Corregida la prueba de GPU: solicita autodetección con `--enable-gpu` y registra el modo de arranque para distinguirlo del SwiftShader predeterminado de headless. El juego y su descarga permanecen iguales.
 - Añadido `test:device` para recoger evidencia del equipo con el mismo ensayo de carga, verificar la descarga móvil y guiar las comprobaciones físicas pendientes. Corregida la indicación obsoleta de CI bloqueado en el README.
 - Corregido el Kame vertical que cruza la cámara desde fuera de pantalla.
 - Extraído el dibujo de efectos al módulo de render compartido, con estado de combate idéntico a 0.41.

@@ -32,7 +32,10 @@ const server = createServer((req, res) => {
 });
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 const gpuMode = process.argv.includes('--gpu');
-const launch = { headless: true, args: gpuMode ? [] : ['--disable-gpu'] };
+// Headless shell forces SwiftShader unless GPU autodetection is requested.
+// --enable-gpu permits normal driver selection; it does not force hardware or
+// bypass the browser's driver blocklist. The software control stays unchanged.
+const launch = { headless: true, args: gpuMode ? ['--enable-gpu'] : ['--disable-gpu'] };
 if (process.env.ARENA_BROWSER_EXECUTABLE) launch.executablePath = process.env.ARENA_BROWSER_EXECUTABLE;
 if (process.env.ARENA_BROWSER_LIBRARY_PATH) launch.env = { ...process.env, LD_LIBRARY_PATH: process.env.ARENA_BROWSER_LIBRARY_PATH };
 let browser;
@@ -550,7 +553,8 @@ try {
   });
   const report = { passed: checks.length, errors: errors.length, checks, measurements, burstMeasurements,qualityMeasurements,sceneryMeasurements, sourceHashes,
     environment: { node: process.version, browser: await browser.version(),
-      gpu: gpuMode ? 'browser default; consult graphics featureStatus for actual acceleration' : 'disabled by test; software raster and readback included',
+      gpu: gpuMode ? 'GPU autodetection requested with --enable-gpu; consult graphics featureStatus for actual acceleration' : 'disabled by test; software raster and readback included',
+      launch:{headless:launch.headless,gpuAutodetectionRequested:gpuMode,gpuDisabledByTest:!gpuMode,args:launch.args},
       drawTiming:gpuMode ? 'CPU command submission only; excludes GPU completion and presentation' : 'command submission and software raster readback',
       graphics, viewport: '1720x720', simulationHz: 60,
       workload: 'Constant-population timings disable knockback and suppress automatic specials; paired 128-player bursts restore normal HP, full knockback and all automatic specials for 180 ticks, rendering every sixth tick. Clock/RNG initialization is identical. Quality timings alternate on the same frozen peak-particle scene. Static scenery compares alternating direct/cached quiet frames of the same 128-fighter snapshot; it is bypassed during shake/flash. No FPS guarantee.' } };

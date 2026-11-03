@@ -45,6 +45,12 @@ npm.cmd run test:device -- --output "P:\Informes Arena" --port 4173
 
 `load.status: passed` confirma la carga automatizada de esa ejecución. `rendererType: software` identifica un adaptador de software reportado; revisa también `canvas2d`, `compositing` y `rasterization`. Un adaptador reportado por este navegador de prueba no certifica la aceleración del navegador que usas para emitir.
 
+La prueba de GPU solicita la autodetección del navegador con `--enable-gpu`, conservando la selección normal de controlador. El informe lo registra en `load.launch.gpuAutodetectionRequested`. En informes anteriores sin ese campo, headless podía seleccionar SwiftShader por defecto; esos resultados no permiten concluir que la GPU del navegador habitual estuviera desactivada. Para repetir esa comprobación, actualiza `main` y vuelve a ejecutar `npm.cmd run test:device`. No requiere cambiar flags ni controladores de tu navegador habitual.
+
+La métrica `drawing` de esta prueba mide envío de comandos desde CPU, sin esperar la presentación. Una mediana baja o sus picos no equivalen directamente a los FPS de juego. Para comprobar la fluidez real, exporta también el diagnóstico desde la partida en tu navegador habitual y anota cuántos peleadores siguen activos.
+
+Referencias del método: [GPU en Headless Chrome](https://chromium.googlesource.com/chromium/src.git/+/main/docs/gpu/using-gpu-hardware-in-headless-chrome.md) y [Chromium headless shell de Playwright](https://playwright.dev/docs/browsers#chromium-headless-shell).
+
 `bridge.status: unavailable` indica que no pudo observar el servidor en ese puerto. `matchesSourceVersion: false` identifica un servidor de otra versión. `mobile.status: source-mismatch` identifica diferencias entre la descarga y las fuentes, incluso cuando el número de versión coincide; conserva los cambios locales para revisar el informe.
 
 ## 2. Navegador y Android físico
